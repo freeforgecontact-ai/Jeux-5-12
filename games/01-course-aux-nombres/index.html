@@ -79,6 +79,8 @@
 </style>
 </head>
 <body>
+<a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">🏠 Les jeux</a>
+
 <div class="app">
   <div class="topbar">
     <div class="brand">
@@ -107,7 +109,7 @@
     </svg>
     <h1 data-i18n="title">Course aux Nombres</h1>
     <p class="tagline" data-i18n="tagline">Additionne et avance avec Pip !</p>
-    <button class="btn" data-i18n="play" onclick="startGame()">Jouer</button>
+    <button class="btn" data-i18n="play" onclick="level=1;startGame()">Jouer</button>
     <button class="link" data-i18n="parents" onclick="openGate()">Pour les parents</button>
   </section>
 
@@ -135,7 +137,7 @@
     <div class="stars" id="winstars">★</div>
     <h1 data-i18n="win" style="font-size:clamp(1.6rem,7vw,2.4rem)">Bravo !</h1>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-      <button class="btn blue" data-i18n="replay" onclick="startGame()">Rejouer</button>
+      <button class="btn blue" data-i18n="replay" onclick="level=1;startGame()">Recommencer</button>
       <button class="btn" id="nextBtn" data-i18n="next" onclick="nextLevel()">Niveau suivant</button>
     </div>
     <button class="link" data-i18n="backTitle" onclick="show('s-title')">Accueil</button>
@@ -164,12 +166,12 @@
 const T={
  fr:{title:"Course aux Nombres",tagline:"Additionne et avance avec Pip !",play:"Jouer",parents:"Pour les parents",
    level:"Niveau",instr:"Touche la bonne réponse !",again:"Essaie encore, presque !",good:"Bravo !",
-   win:"Bravo ! Tu gagnes une étoile !",replay:"Rejouer",next:"Niveau suivant",backTitle:"Accueil",
+   win:"Bravo ! Tu gagnes une étoile !",replay:"Recommencer (niveau 1)",next:"Niveau suivant",backTitle:"Accueil",
    gateTitle:"Espace parents",gateQ:"Pour confirmer : combien font 6 × 3 ?",gateOk:"Valider",back:"Fermer",
    gateBad:"Pas tout à fait…",parentInfo:"Ce jeu entraîne l'addition et la soustraction (sens du nombre) pour les 5–7 ans. Difficulté progressive en 3 niveaux. Aucune donnée collectée, aucune publicité. La progression reste sur cet appareil."},
  en:{title:"Number Dash",tagline:"Add up and move with Pip!",play:"Play",parents:"For parents",
    level:"Level",instr:"Tap the correct answer!",again:"Try again, almost!",good:"Great!",
-   win:"Well done! You earned a star!",replay:"Replay",next:"Next level",backTitle:"Home",
+   win:"Well done! You earned a star!",replay:"Restart (level 1)",next:"Next level",backTitle:"Home",
    gateTitle:"Parents' area",gateQ:"To confirm: what is 6 × 3?",gateOk:"Confirm",back:"Close",
    gateBad:"Not quite…",parentInfo:"This game practises addition and subtraction (number sense) for ages 5–7, with 3 progressive levels. No data collected, no ads. Progress stays on this device."}
 };
@@ -267,7 +269,7 @@ function checkGate(){
 function closeGate(){ document.getElementById("gate").classList.remove("show"); }
 
 applyI18n();
-if(parseInt(localStorage.getItem(SAVE)||"1",10)>1){ level=parseInt(localStorage.getItem(SAVE),10); }
+/* depart toujours au niveau 1 */
 </script>
 </body>
 </html>
