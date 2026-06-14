@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Labyrinthe des Calculs / Math Maze — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#dbeeff 100%);min-height:100vh;color:var(--navy);}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--blue);color:#fff;box-shadow:0 2px 8px #0004;flex-wrap:wrap;}
+#topbar-brand{display:flex;align-items:center;gap:8px;flex:1;}
+#topbar-brand img{height:34px;}
+#topbar-brand span{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;}
+.lang-btn{background:#fff2;border:2px solid #fff5;color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.9rem;font-weight:700;transition:.15s;}
+.lang-btn.active,.lang-btn:hover{background:#fff;color:var(--blue);}
+#mute-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:2px 6px;border-radius:8px;transition:.15s;}
+#mute-btn:hover{background:#fff2;}
+.screen{display:none;flex-direction:column;align-items:center;padding:16px;min-height:calc(100vh - 56px);}
+.screen.active{display:flex;}
+#screen-title{justify-content:center;gap:16px;}
+.game-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.4rem;font-weight:700;color:var(--blue);text-align:center;line-height:1.1;}
+.game-subtitle{color:var(--slate);font-size:1.1rem;text-align:center;}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:16px 48px;font-size:1.3rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:.1s;min-height:56px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:.1s;min-height:48px;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.btn-grey{background:#94a3b8;color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #64748b;transition:.1s;min-height:48px;}
+.btn-grey:active{transform:translateY(2px);box-shadow:0 2px 0 #64748b;}
+#screen-parents{justify-content:center;gap:16px;}
+.card{background:#fff;border-radius:20px;padding:24px;max-width:440px;width:100%;box-shadow:0 4px 24px #0001;}
+.card h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);margin-bottom:12px;}
+#gate-question{font-size:1.4rem;font-weight:700;text-align:center;margin:12px 0;}
+#gate-input{display:block;width:100%;padding:10px;border:2px solid var(--sky);border-radius:10px;font-size:1.2rem;text-align:center;margin-bottom:8px;}
+#gate-error{color:#ef4444;text-align:center;min-height:20px;}
+#screen-game{padding:8px;gap:8px;}
+#game-header{display:flex;align-items:center;gap:12px;width:100%;max-width:600px;flex-wrap:wrap;}
+#level-label{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:var(--blue);background:#fff;border-radius:10px;padding:4px 14px;}
+#score-label{font-size:1rem;font-weight:700;color:var(--slate);background:#fff;border-radius:10px;padding:4px 14px;margin-left:auto;}
+#maze-wrap{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px #0002;background:var(--blue-dark);}
+#maze-canvas{display:block;}
+#math-popup{display:none;position:fixed;inset:0;background:#000a;z-index:100;align-items:center;justify-content:center;}
+#math-popup.open{display:flex;}
+#math-card{background:#fff;border-radius:24px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px #0004;}
+#math-question{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.2rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
+#math-label{color:var(--slate);font-size:1rem;margin-bottom:12px;}
+#math-choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.math-choice{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:14px 26px;font-size:1.3rem;font-weight:700;cursor:pointer;min-width:72px;min-height:56px;box-shadow:0 4px 0 var(--blue-dark);transition:.1s;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.math-choice:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.math-choice.correct{background:var(--success)!important;box-shadow:none;}
+.math-choice.wrong{background:#ef4444!important;box-shadow:none;}
+#math-feedback{min-height:28px;font-size:1.1rem;font-weight:700;margin-top:12px;color:var(--success);}
+#arrow-pad{display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(3,60px);gap:6px;margin-top:4px;}
+.arrow-btn{background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:60px;min-height:60px;box-shadow:0 4px 0 var(--blue-dark);transition:.1s;user-select:none;}
+.arrow-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.arrow-btn.empty{background:transparent;box-shadow:none;pointer-events:none;}
+#screen-success{justify-content:center;gap:20px;}
+#success-stars{font-size:3rem;text-align:center;}
+#success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;font-weight:700;color:var(--blue);text-align:center;}
+#success-info{color:var(--slate);font-size:1.1rem;text-align:center;}
+#success-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+[aria-live]{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+@media(max-width:440px){
+  .game-title{font-size:1.8rem;}
+  #arrow-pad{grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);}
+  .arrow-btn{min-width:54px;min-height:54px;font-size:1.3rem;}
+}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <div id="topbar-brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+<div aria-live="polite" id="aria-msg"></div>
+
+<div class="screen active" id="screen-title" role="main">
+  <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="45" y="90" width="70" height="55" rx="14" fill="#0f4c81"/>
+    <rect x="55" y="100" width="8" height="35" rx="4" fill="#7ec3ee" opacity=".5"/>
+    <rect x="70" y="100" width="8" height="35" rx="4" fill="#7ec3ee" opacity=".5"/>
+    <rect x="85" y="100" width="8" height="35" rx="4" fill="#7ec3ee" opacity=".5"/>
+    <rect x="50" y="52" width="60" height="48" rx="16" fill="#ffd23f"/>
+    <circle cx="68" cy="70" r="9" fill="#fff"/>
+    <circle cx="92" cy="70" r="9" fill="#fff"/>
+    <circle cx="70" cy="71" r="5" fill="#0f4c81"/>
+    <circle cx="94" cy="71" r="5" fill="#0f4c81"/>
+    <circle cx="71" cy="69" r="2" fill="#fff"/>
+    <circle cx="95" cy="69" r="2" fill="#fff"/>
+    <path d="M68 84 Q80 94 92 84" stroke="#0f4c81" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <polygon points="80,8 50,52 110,52" fill="#f97316"/>
+    <polygon points="80,8 62,52 98,52" fill="#ea580c"/>
+    <circle cx="80" cy="8" r="6" fill="#ffd23f"/>
+    <text x="62" y="42" font-size="12" fill="#fff">+</text>
+    <text x="86" y="42" font-size="10" fill="#fff">x</text>
+    <rect x="58" y="105" width="44" height="26" rx="8" fill="#f97316"/>
+    <text x="80" y="123" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">+x-</text>
+    <ellipse cx="62" cy="148" rx="12" ry="7" fill="#0a3559"/>
+    <ellipse cx="98" cy="148" rx="12" ry="7" fill="#0a3559"/>
+  </svg>
+  <div class="game-title" id="title-text">Labyrinthe des Calculs</div>
+  <div class="game-subtitle" id="subtitle-text">Resous les calculs pour traverser le labyrinthe !</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn-play" onclick="startGame()" id="btn-play-text">Jouer</button>
+    </div>
+    <button class="btn-grey" onclick="showParents()" id="btn-parents-text" style="font-size:.95rem;padding:8px 18px;min-height:44px;">Pour les parents</button>
+  </div>
+  <div id="best-display" style="color:var(--slate);font-size:.95rem;margin-top:4px;"></div>
+</div>
+
+<div class="screen" id="screen-parents">
+  <div class="card">
+    <h2 id="gate-title">Espace parents</h2>
+    <p id="gate-desc" style="color:var(--slate);margin-bottom:12px;">Prouvez que vous etes un adulte :</p>
+    <div id="gate-question">7 x 8 = ?</div>
+    <input id="gate-input" type="number" inputmode="numeric" placeholder="Reponse" aria-label="Reponse"/>
+    <div id="gate-error"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="checkGate()" id="gate-btn-ok">Valider</button>
+      <button class="btn-grey" onclick="showTitle()" id="gate-btn-back">Retour</button>
+    </div>
+  </div>
+  <div class="card" id="parents-info" style="display:none;margin-top:12px;">
+    <h2 id="pinfo-title">Informations</h2>
+    <p id="pinfo-text"></p>
+  </div>
+</div>
+
+<div class="screen" id="screen-game">
+  <div id="game-header">
+    <div id="level-label">N1</div>
+    <div id="score-label">0</div>
+    <button class="btn-grey" onclick="showTitle()" id="btn-home-text" style="font-size:.85rem;padding:6px 14px;min-height:40px;box-shadow:0 3px 0 #64748b;">Accueil</button>
+  </div>
+  <div id="maze-wrap">
+    <canvas id="maze-canvas" width="320" height="320"></canvas>
+  </div>
+  <div id="arrow-pad" role="group" aria-label="Controles">
+    <div class="arrow-btn empty"></div>
+    <button class="arrow-btn" onclick="tryMove(0,-1)" aria-label="Haut">&#9650;</button>
+    <div class="arrow-btn empty"></div>
+    <button class="arrow-btn" onclick="tryMove(-1,0)" aria-label="Gauche">&#9664;</button>
+    <div class="arrow-btn empty" style="background:#fff2;border-radius:50%;"></div>
+    <button class="arrow-btn" onclick="tryMove(1,0)" aria-label="Droite">&#9654;</button>
+    <div class="arrow-btn empty"></div>
+    <button class="arrow-btn" onclick="tryMove(0,1)" aria-label="Bas">&#9660;</button>
+    <div class="arrow-btn empty"></div>
+  </div>
+</div>
+
+<div id="math-popup" role="dialog" aria-modal="true" aria-labelledby="math-question">
+  <div id="math-card">
+    <div id="math-label"></div>
+    <div id="math-question">12 + 5 = ?</div>
+    <div id="math-choices"></div>
+    <div id="math-feedback" aria-live="assertive"></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-success">
+  <div id="success-stars">***</div>
+  <div id="success-title"></div>
+  <div id="success-info"></div>
+  <div id="success-btns">
+    <button class="btn-play" onclick="nextLevel()" id="btn-next-level">Niveau suivant</button>
+    <button class="btn-secondary" onclick="replayLevel()" id="btn-replay">Rejouer</button>
+    <button class="btn-grey" onclick="showTitle()" id="btn-home2">Accueil</button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    title:"Labyrinthe des Calculs",
+    subtitle:"Resous les calculs pour traverser le labyrinthe !",
+    play:"Jouer",
+    parents:"Pour les parents",
+    gate_title:"Espace parents",
+    gate_desc:"Prouvez que vous etes un adulte :",
+    gate_ok:"Valider",
+    gate_back:"Retour",
+    gate_wrong:"Mauvaise reponse, essaie encore !",
+    pinfo_title:"Informations",
+    pinfo_text:"Labyrinthe des Calculs entraine le calcul mental (addition, soustraction, multiplication) chez les enfants de 8 a 12 ans. Aucune donnee collectee, aucune publicite, 100% hors ligne. La progression est sauvegardee localement sur cet appareil.",
+    level:"Niveau",
+    question_label:"Pour passer, resous :",
+    correct:"Bravo !",
+    wrong:"Oups ! Essaie encore !",
+    win_title:"Labyrinthe termine !",
+    win_info:"Bien joue, continue comme ca !",
+    last_win_title:"Tu as tout termine !",
+    last_win_info:"Tu es un champion des calculs !",
+    next_level:"Niveau suivant",
+    replay:"Rejouer",
+    home:"Accueil",
+    score:"Score",
+    best:"Meilleur",
+    wall:"Mur ! Cherche un autre chemin.",
+    aria_move:"Deplacement",
+    aria_win:"Bravo, sortie atteinte !"
+  },
+  en:{
+    title:"Math Maze",
+    subtitle:"Solve the calculations to get through the maze!",
+    play:"Play",
+    parents:"For parents",
+    gate_title:"Parent zone",
+    gate_desc:"Prove you are an adult:",
+    gate_ok:"Confirm",
+    gate_back:"Back",
+    gate_wrong:"Wrong answer, try again!",
+    pinfo_title:"Information",
+    pinfo_text:"Math Maze trains mental arithmetic (addition, subtraction, multiplication) for children aged 8-12. No data collected, no ads, 100% offline. Progress is saved locally on this device.",
+    level:"Level",
+    question_label:"To pass, solve:",
+    correct:"Well done!",
+    wrong:"Oops! Try again!",
+    win_title:"Maze complete!",
+    win_info:"Great job, keep it up!",
+    last_win_title:"You finished everything!",
+    last_win_info:"You are a math champion!",
+    next_level:"Next level",
+    replay:"Replay",
+    home:"Home",
+    score:"Score",
+    best:"Best",
+    wall:"Wall! Find another path.",
+    aria_move:"Move",
+    aria_win:"Great, exit reached!"
+  }
+};
+
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var LS_KEY='pgrg_labyrinthe_calculs';
+var currentLevel=0;
+var score=0;
+var bestScore=0;
+var totalLevels=8;
+var maze=null;
+var pendingDir=null;
+var pendingGateKey=null;
+var gameActive=false;
+
+function t(k){return(T[lang]&&T[lang][k])||T['fr'][k]||k;}
+
+var audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function beep(freq,dur,type,vol){
+  type=type||'sine';vol=vol||0.18;
+  if(muted)return;
+  try{
+    var a=getAudio();
+    var o=a.createOscillator();
+    var g=a.createGain();
+    o.connect(g);g.connect(a.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+    o.start();o.stop(a.currentTime+dur);
+  }catch(e){}
+}
+function playMove(){beep(440,.08,'sine',.12);}
+function playWall(){beep(180,.12,'sawtooth',.1);}
+function playCorrect(){beep(523,.1);setTimeout(function(){beep(659,.1);},100);setTimeout(function(){beep(784,.2);},200);}
+function playWrong(){beep(220,.15,'sawtooth',.12);}
+function playWin(){var f=[523,587,659,784,880];for(var i=0;i<f.length;i++){(function(ff,ii){setTimeout(function(){beep(ff,.18);},ii*100);})(f[i],i);}}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'muted':'sound';}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderLang();
+}
+function renderLang(){
+  document.getElementById('title-text').textContent=t('title');
+  document.getElementById('subtitle-text').textContent=t('subtitle');
+  document.getElementById('btn-play-text').textContent=t('play');
+  document.getElementById('btn-parents-text').textContent=t('parents');
+  document.getElementById('gate-title').textContent=t('gate_title');
+  document.getElementById('gate-desc').textContent=t('gate_desc');
+  document.getElementById('gate-btn-ok').textContent=t('gate_ok');
+  document.getElementById('gate-btn-back').textContent=t('gate_back');
+  document.getElementById('pinfo-title').textContent=t('pinfo_title');
+  document.getElementById('pinfo-text').textContent=t('pinfo_text');
+  document.getElementById('btn-next-level').textContent=t('next_level');
+  document.getElementById('btn-replay').textContent=t('replay');
+  document.getElementById('btn-home2').textContent=t('home');
+  document.getElementById('btn-home-text').textContent=t('home');
+  document.getElementById('success-title').textContent=t('win_title');
+  document.getElementById('success-info').textContent=t('win_info');
+  updateScoreDisplay();
+  updateBestDisplay();
+}
+
+function loadStorage(){
+  try{var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');currentLevel=d.level||0;bestScore=d.best||0;}
+  catch(e){currentLevel=0;bestScore=0;}
+}
+function saveStorage(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({level:currentLevel,best:bestScore}));}catch(e){}
+}
+
+function showScreen(id){
+  var ss=document.querySelectorAll('.screen');
+  for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function showTitle(){gameActive=false;updateBestDisplay();showScreen('title');}
+function showParents(){
+  var a=Math.floor(Math.random()*9)+2;
+  var b=Math.floor(Math.random()*9)+2;
+  document.getElementById('gate-question').textContent=a+' x '+b+' = ?';
+  document.getElementById('gate-question').dataset.answer=a*b;
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-error').textContent='';
+  document.getElementById('parents-info').style.display='none';
+  showScreen('parents');
+}
+function checkGate(){
+  var ans=parseInt(document.getElementById('gate-input').value);
+  var correct=parseInt(document.getElementById('gate-question').dataset.answer);
+  if(ans===correct){
+    document.getElementById('gate-error').textContent='';
+    document.getElementById('pinfo-title').textContent=t('pinfo_title');
+    document.getElementById('pinfo-text').textContent=t('pinfo_text');
+    document.getElementById('parents-info').style.display='block';
+  }else{
+    document.getElementById('gate-error').textContent=t('gate_wrong');
+    beep(180,.15,'sawtooth',.1);
+  }
+}
+
+function levelConfig(lv){
+  var sizes=[[5,5],[7,7],[7,7],[9,9],[9,9],[11,11],[11,11],[13,13]];
+  var s=sizes[Math.min(lv,sizes.length-1)];
+  var cols=s[0],rows=s[1];
+  var opType,maxVal;
+  if(lv<=1){opType='add';maxVal=10+lv*5;}
+  else if(lv<=3){opType='addsub';maxVal=15+lv*3;}
+  else if(lv<=5){opType='mul';maxVal=lv<=4?5:9;}
+  else{opType='mixed';maxVal=9;}
+  return{cols:cols,rows:rows,opType:opType,maxVal:maxVal};
+}
+
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+
+function generateMaze(cols,rows){
+  var cells=[];
+  for(var r=0;r<rows;r++){
+    cells[r]=[];
+    for(var c=0;c<cols;c++){
+      cells[r][c]={top:true,right:true,bottom:true,left:true,visited:false};
+    }
+  }
+  function carve(r,c){
+    cells[r][c].visited=true;
+    var dirs=shuffle([[0,-1,'top','bottom'],[-1,0,'left','right'],[0,1,'bottom','top'],[1,0,'right','left']]);
+    for(var i=0;i<dirs.length;i++){
+      var d=dirs[i];var dr=d[0],dc=d[1],wA=d[2],wB=d[3];
+      var nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!cells[nr][nc].visited){
+        cells[r][c][wA]=false;
+        cells[nr][nc][wB]=false;
+        carve(nr,nc);
+      }
+    }
+  }
+  carve(0,0);
+  return cells;
+}
+
+function makeQuestion(opType,maxVal){
+  var a,b,op,answer;
+  var ops=opType==='mixed'?['add','sub','mul']:opType==='addsub'?['add','sub']:opType==='mul'?['mul']:['add'];
+  var chosen=ops[Math.floor(Math.random()*ops.length)];
+  if(chosen==='add'){
+    a=Math.floor(Math.random()*maxVal)+1;
+    b=Math.floor(Math.random()*maxVal)+1;
+    op='+';answer=a+b;
+  }else if(chosen==='sub'){
+    a=Math.floor(Math.random()*maxVal)+2;
+    b=Math.floor(Math.random()*(a-1))+1;
+    op='-';answer=a-b;
+  }else{
+    a=Math.floor(Math.random()*maxVal)+2;
+    b=Math.floor(Math.random()*maxVal)+2;
+    op='x';answer=a*b;
+  }
+  return{text:a+' '+op+' '+b+' = ?',answer:answer};
+}
+
+function makeChoices(answer){
+  var choices=[answer];
+  var offsets=shuffle([1,2,3,4,5,6,7,8,9,10]);
+  while(choices.length<3){
+    var delta=offsets.pop();
+    var v=Math.random()<.5?answer+delta:Math.max(0,answer-delta);
+    if(choices.indexOf(v)===-1)choices.push(v);
+  }
+  return shuffle(choices);
+}
+
+function startGame(){
+  loadStorage();
+  score=0;
+  setupLevel();
+  showScreen('game');
+}
+
+function setupLevel(){
+  var cfg=levelConfig(currentLevel);
+  var cols=cfg.cols,rows=cfg.rows,opType=cfg.opType,maxVal=cfg.maxVal;
+  var cells=generateMaze(cols,rows);
+  var gates={};
+  for(var r=0;r<rows;r++){
+    for(var c=0;c<cols;c++){
+      if(c<cols-1&&!cells[r][c].right&&Math.random()<0.32){
+        var k1=r+','+c+'-'+r+','+(c+1);
+        gates[k1]={q:makeQuestion(opType,maxVal),solved:false};
+      }
+      if(r<rows-1&&!cells[r][c].bottom&&Math.random()<0.32){
+        var k2=r+','+c+'-'+(r+1)+','+c;
+        gates[k2]={q:makeQuestion(opType,maxVal),solved:false};
+      }
+    }
+  }
+  maze={cols:cols,rows:rows,cells:cells,gates:gates,player:{r:0,c:0},exit:{r:rows-1,c:cols-1}};
+  updateScoreDisplay();
+  document.getElementById('level-label').textContent=t('level')+' '+(currentLevel+1);
+  resizeCanvas();
+  drawMaze();
+  gameActive=true;
+}
+
+function resizeCanvas(){
+  var cols=maze.cols,rows=maze.rows;
+  var maxW=Math.min(window.innerWidth-24,560);
+  var cs=Math.floor(Math.min(maxW/cols,(window.innerHeight-280)/rows));
+  cs=Math.max(28,Math.min(48,cs));
+  maze.cellSize=cs;
+  var canvas=document.getElementById('maze-canvas');
+  canvas.width=cols*cs;
+  canvas.height=rows*cs;
+  document.getElementById('maze-wrap').style.width=canvas.width+'px';
+}
+
+function drawMaze(){
+  if(!maze)return;
+  var canvas=document.getElementById('maze-canvas');
+  var ctx=canvas.getContext('2d');
+  var cols=maze.cols,rows=maze.rows,cells=maze.cells,player=maze.player,exit=maze.exit,gates=maze.gates,CS=maze.cellSize;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#1e3a5f';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(var r=0;r<rows;r++){
+    for(var c=0;c<cols;c++){
+      ctx.fillStyle='#eaf6ff';
+      ctx.fillRect(c*CS+1,r*CS+1,CS-2,CS-2);
+    }
+  }
+  var ex=exit.c*CS+1,ey=exit.r*CS+1,es=CS-2;
+  ctx.fillStyle='#34c77b';
+  ctx.fillRect(ex,ey,es,es);
+  ctx.fillStyle='#0a3559';
+  ctx.font='bold '+Math.floor(CS*.55)+'px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('EXIT',ex+es/2,ey+es/2);
+
+  ctx.strokeStyle='#0f4c81';
+  ctx.lineWidth=Math.max(2,Math.floor(CS/12));
+  ctx.lineCap='round';
+
+  for(var rr=0;rr<rows;rr++){
+    for(var cc=0;cc<cols;cc++){
+      var cell=cells[rr][cc];
+      var x=cc*CS,y=rr*CS;
+      var gR=gates[rr+','+cc+'-'+rr+','+(cc+1)];
+      var gD=gates[rr+','+cc+'-'+(rr+1)+','+cc];
+      if(cell.top){drawWall(ctx,x,y,x+CS,y);}
+      if(cell.left){drawWall(ctx,x,y,x,y+CS);}
+      if(cell.right){
+        if(cc===cols-1){drawWall(ctx,x+CS,y,x+CS,y+CS);}
+        else if(gR){drawGate(ctx,x+CS,y,x+CS,y+CS,gR,CS);}
+        else{drawWall(ctx,x+CS,y,x+CS,y+CS);}
+      }
+      if(cell.bottom){
+        if(rr===rows-1){drawWall(ctx,x,y+CS,x+CS,y+CS);}
+        else if(gD){drawGate(ctx,x,y+CS,x+CS,y+CS,gD,CS);}
+        else{drawWall(ctx,x,y+CS,x+CS,y+CS);}
+      }
+    }
+  }
+  drawPlayer(ctx,player.r,player.c,CS);
+}
+
+function drawWall(ctx,x1,y1,x2,y2){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+}
+function drawGate(ctx,x1,y1,x2,y2,gate,CS){
+  var midX=(x1+x2)/2,midY=(y1+y2)/2;
+  if(!gate.solved){
+    ctx.save();
+    ctx.strokeStyle='#f97316';
+    ctx.lineWidth=Math.max(2,Math.floor(CS/10));
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    var rad=Math.max(10,Math.floor(CS*0.28));
+    ctx.fillStyle='#f97316';
+    ctx.beginPath();ctx.arc(midX,midY,rad,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font='bold '+Math.floor(rad*1.2)+'px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('?',midX,midY);
+  }else{
+    ctx.save();
+    ctx.strokeStyle='#34c77b';
+    ctx.lineWidth=1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+function drawPlayer(ctx,r,c,CS){
+  var x=c*CS+CS/2,y=r*CS+CS/2;
+  var rad=Math.floor(CS*0.36);
+  ctx.fillStyle='#0003';
+  ctx.beginPath();ctx.ellipse(x,y+rad+2,rad*0.7,rad*0.3,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ffd23f';
+  ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#0f4c81';
+  ctx.beginPath();ctx.arc(x-rad*.3,y-rad*.1,rad*.18,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+rad*.3,y-rad*.1,rad*.18,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#0f4c81';
+  ctx.lineWidth=Math.max(1.5,rad*.1);
+  ctx.beginPath();ctx.arc(x,y+rad*.05,rad*.35,0.2,Math.PI-0.2);ctx.stroke();
+  ctx.fillStyle='#f97316';
+  ctx.beginPath();
+  ctx.moveTo(x,y-rad*1.35);
+  ctx.lineTo(x-rad*.5,y-rad*.7);
+  ctx.lineTo(x+rad*.5,y-rad*.7);
+  ctx.closePath();ctx.fill();
+}
+
+function buildGateKey(r1,c1,r2,c2){
+  if(r1<r2||(r1===r2&&c1<c2))return r1+','+c1+'-'+r2+','+c2;
+  return r2+','+c2+'-'+r1+','+c1;
+}
+
+function tryMove(dx,dy){
+  if(!gameActive||pendingGateKey!==null)return;
+  var cols=maze.cols,rows=maze.rows,cells=maze.cells,player=maze.player,exit=maze.exit,gates=maze.gates;
+  var nr=player.r+dy,nc=player.c+dx;
+  if(nr<0||nr>=rows||nc<0||nc>=cols){playWall();ariaMsg(t('wall'));return;}
+  var wallExists=false;
+  if(dy===-1)wallExists=cells[player.r][player.c].top;
+  else if(dy===1)wallExists=cells[player.r][player.c].bottom;
+  else if(dx===-1)wallExists=cells[player.r][player.c].left;
+  else if(dx===1)wallExists=cells[player.r][player.c].right;
+  if(wallExists){playWall();ariaMsg(t('wall'));return;}
+  var gateKey=buildGateKey(player.r,player.c,nr,nc);
+  var gate=gates[gateKey];
+  if(gate&&!gate.solved){
+    pendingDir={dx:dx,dy:dy};
+    pendingGateKey=gateKey;
+    openMathPopup(gate.q);
+    return;
+  }
+  player.r=nr;player.c=nc;
+  playMove();ariaMsg(t('aria_move'));drawMaze();
+  if(player.r===exit.r&&player.c===exit.c){
+    gameActive=false;
+    score+=10+currentLevel*5;
+    if(score>bestScore)bestScore=score;
+    saveStorage();
+    setTimeout(function(){showSuccess();},400);
+    ariaMsg(t('aria_win'));playWin();
+  }
+}
+
+function openMathPopup(q){
+  var choices=makeChoices(q.answer);
+  document.getElementById('math-label').textContent=t('question_label');
+  document.getElementById('math-question').textContent=q.text;
+  document.getElementById('math-feedback').textContent='';
+  var cc=document.getElementById('math-choices');
+  cc.innerHTML='';
+  for(var i=0;i<choices.length;i++){
+    (function(ch){
+      var btn=document.createElement('button');
+      btn.className='math-choice';
+      btn.textContent=ch;
+      btn.onclick=function(){answerMath(ch,q.answer,btn);};
+      cc.appendChild(btn);
+    })(choices[i]);
+  }
+  document.getElementById('math-popup').classList.add('open');
+  setTimeout(function(){var b=cc.querySelector('button');if(b)b.focus();},100);
+}
+
+function answerMath(chosen,answer,btn){
+  var btns=document.querySelectorAll('.math-choice');
+  for(var i=0;i<btns.length;i++)btns[i].disabled=true;
+  if(chosen===answer){
+    btn.classList.add('correct');
+    document.getElementById('math-feedback').textContent=t('correct');
+    document.getElementById('math-feedback').style.color='var(--success)';
+    playCorrect();
+    maze.gates[pendingGateKey].solved=true;
+    var dx=pendingDir.dx,dy=pendingDir.dy;
+    setTimeout(function(){
+      closeMathPopup();
+      maze.player.r+=dy;maze.player.c+=dx;
+      drawMaze();
+      var p=maze.player,ex=maze.exit;
+      if(p.r===ex.r&&p.c===ex.c){
+        gameActive=false;score+=10+currentLevel*5;
+        if(score>bestScore)bestScore=score;
+        saveStorage();
+        setTimeout(function(){showSuccess();},300);playWin();
+      }else{gameActive=true;}
+    },900);
+  }else{
+    btn.classList.add('wrong');
+    document.getElementById('math-feedback').textContent=t('wrong');
+    document.getElementById('math-feedback').style.color='#ef4444';
+    playWrong();
+    setTimeout(function(){
+      for(var i=0;i<btns.length;i++){btns[i].disabled=false;btns[i].classList.remove('wrong');}
+      document.getElementById('math-feedback').textContent='';
+    },900);
+  }
+}
+function closeMathPopup(){
+  document.getElementById('math-popup').classList.remove('open');
+  pendingDir=null;pendingGateKey=null;
+}
+
+function showSuccess(){
+  var isLast=currentLevel>=totalLevels-1;
+  document.getElementById('success-title').textContent=isLast?t('last_win_title'):t('win_title');
+  document.getElementById('success-info').textContent=isLast?t('last_win_info'):t('win_info');
+  var stars=currentLevel<=1?'* *':currentLevel<=4?'* * *':currentLevel<=6?'* * * *':'* * * * *';
+  document.getElementById('success-stars').textContent=stars;
+  document.getElementById('btn-next-level').style.display=isLast?'none':'';
+  updateScoreDisplay();showScreen('success');
+}
+function nextLevel(){if(currentLevel<totalLevels-1){currentLevel++;saveStorage();setupLevel();showScreen('game');}}
+function replayLevel(){setupLevel();showScreen('game');}
+
+function updateScoreDisplay(){document.getElementById('score-label').textContent=t('score')+': '+score;}
+function updateBestDisplay(){
+  loadStorage();
+  var el=document.getElementById('best-display');
+  if(el)el.textContent=bestScore>0?t('best')+': '+bestScore:'';
+}
+function ariaMsg(msg){
+  var el=document.getElementById('aria-msg');
+  el.textContent='';setTimeout(function(){el.textContent=msg;},50);
+}
+
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('math-popup').classList.contains('open')){
+    if(e.key==='Escape'){closeMathPopup();gameActive=true;}return;
+  }
+  if(!gameActive)return;
+  var map={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]};
+  var dir=map[e.key];
+  if(dir){e.preventDefault();tryMove(dir[0],dir[1]);}
+});
+document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+window.addEventListener('resize',function(){if(gameActive&&maze){resizeCanvas();drawMaze();}});
+
+loadStorage();renderLang();updateBestDisplay();
+</script>
+</body>
+</html>

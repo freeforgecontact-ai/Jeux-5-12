@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Stroop Junior / Focus Flash — PGRG IA</title>
+<style>
+:root {
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--sky-light) 0%,#d4eeff 100%);
+  min-height:100vh;
+  color:var(--navy);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+#topbar{
+  width:100%;max-width:640px;
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;
+  background:var(--blue);
+  border-radius:0 0 18px 18px;
+  box-shadow:0 4px 12px rgba(15,76,129,.3);
+  position:sticky;top:0;z-index:100;
+}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1}
+#topbar .brand img{height:34px}
+#topbar .brand span{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:#fff;font-size:1.1rem;font-weight:700;letter-spacing:.5px;
+}
+#topbar button{
+  background:rgba(255,255,255,.18);
+  border:2px solid rgba(255,255,255,.4);
+  color:#fff;border-radius:10px;
+  padding:6px 11px;font-size:.85rem;font-weight:700;cursor:pointer;
+  transition:background .15s;min-width:44px;min-height:44px;
+}
+#topbar button:hover,#topbar button.active{background:rgba(255,255,255,.35)}
+#topbar .lang-group{display:flex;gap:4px}
+.screen{display:none;flex-direction:column;align-items:center;
+  width:100%;max-width:640px;padding:20px 16px 32px;gap:16px;min-height:calc(100vh - 70px)}
+.screen.active{display:flex}
+#mascot-wrap{margin:8px 0}
+h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.4rem;color:var(--blue);text-align:center;line-height:1.1;
+}
+.subtitle{color:var(--slate);font-size:1.05rem;text-align:center;max-width:380px}
+.btn-main{
+  background:var(--orange);color:#fff;
+  border:none;border-radius:18px;
+  padding:16px 40px;font-size:1.25rem;font-weight:800;
+  box-shadow:0 5px 0 var(--orange-dark);
+  cursor:pointer;transition:transform .1s,box-shadow .1s;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  min-height:54px;
+}
+.btn-main:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{
+  background:var(--blue);color:#fff;
+  border:none;border-radius:14px;
+  padding:10px 24px;font-size:1rem;font-weight:700;
+  box-shadow:0 4px 0 var(--blue-dark);
+  cursor:pointer;transition:transform .1s,box-shadow .1s;
+  min-height:48px;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.link-btn{
+  background:none;border:none;color:var(--blue);
+  text-decoration:underline;cursor:pointer;
+  font-size:.95rem;padding:8px;min-height:44px;
+}
+#parental-gate{
+  background:#fff;border-radius:20px;padding:28px 24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.12);
+  width:100%;max-width:380px;text-align:center;display:flex;
+  flex-direction:column;align-items:center;gap:14px;
+}
+#parental-gate h2{font-size:1.3rem;color:var(--blue)}
+#parental-gate p{color:var(--slate);font-size:.95rem;line-height:1.5}
+#gate-question{font-size:1.4rem;font-weight:800;color:var(--navy);margin:6px 0}
+#gate-input{
+  border:2px solid var(--sky);border-radius:12px;
+  padding:10px 16px;font-size:1.2rem;text-align:center;
+  width:120px;outline:none;
+}
+#gate-input:focus{border-color:var(--blue)}
+#gate-error{color:#e11d48;font-size:.9rem;display:none}
+.info-parents{line-height:1.6;color:var(--slate);font-size:.95rem;text-align:left}
+.info-parents h3{color:var(--blue);margin-bottom:6px}
+#level-info{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border-radius:14px;padding:10px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);width:100%;
+}
+#level-badge{
+  background:var(--blue);color:#fff;
+  border-radius:10px;padding:4px 12px;
+  font-weight:800;font-size:.95rem;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+#score-display{font-size:1rem;font-weight:700;color:var(--slate);flex:1;text-align:right}
+#timer-bar-wrap{
+  width:100%;height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden;
+}
+#timer-bar{height:100%;background:var(--success);border-radius:999px;transition:width .1s linear}
+#stroop-area{
+  display:flex;flex-direction:column;align-items:center;
+  background:#fff;border-radius:24px;
+  padding:32px 24px;
+  box-shadow:0 6px 24px rgba(0,0,0,.1);
+  width:100%;min-height:160px;justify-content:center;gap:12px;
+}
+#instruction{font-size:1rem;color:var(--slate);text-align:center}
+#stroop-word{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:3.2rem;font-weight:800;
+  transition:transform .15s;
+  user-select:none;
+}
+#variant-label{font-size:.9rem;color:var(--slate);text-align:center;font-style:italic}
+#color-buttons{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:12px;width:100%;
+}
+.color-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:none;border-radius:18px;
+  padding:14px 10px;cursor:pointer;
+  min-height:80px;
+  font-weight:800;font-size:1rem;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  transition:transform .1s,box-shadow .1s;
+  gap:6px;
+}
+.color-btn:active{transform:scale(.94)}
+.color-btn .cb-swatch{
+  width:32px;height:32px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.7);
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  flex-shrink:0;
+}
+.color-btn .cb-label{
+  color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+  font-size:1rem;
+}
+.color-btn.correct-flash{animation:correctFlash .35s ease}
+.color-btn.wrong-flash{animation:wrongFlash .35s ease}
+@keyframes correctFlash{0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)}}
+@keyframes wrongFlash{0%{transform:scale(1)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} 100%{transform:scale(1)}}
+#feedback-msg{font-size:1.1rem;font-weight:700;text-align:center;min-height:28px;transition:opacity .2s}
+#win-stars{display:flex;gap:8px;font-size:2.8rem;justify-content:center}
+#win-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--blue);text-align:center}
+#win-score-display{font-size:1.1rem;color:var(--slate);text-align:center}
+#win-buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px}
+#modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;z-index:200;padding:16px;
+}
+#modal-overlay.open{display:flex}
+#modal-box{
+  background:#fff;border-radius:24px;padding:28px 24px;max-width:420px;width:100%;
+  box-shadow:0 8px 40px rgba(0,0,0,.25);
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+#aria-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+#streak-wrap{display:flex;align-items:center;gap:6px;font-size:.95rem;color:var(--orange);font-weight:700}
+@media(max-width:400px){h1{font-size:2rem}#stroop-word{font-size:2.4rem}.color-btn{min-height:70px;font-size:.9rem}}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="lang-group">
+    <button id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  </div>
+  <button id="btn-mute" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+
+<!-- TITLE SCREEN -->
+<div id="screen-title" class="screen active">
+  <div id="mascot-wrap">
+    <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mascotte cerveau Stroop">
+      <ellipse cx="80" cy="84" rx="52" ry="50" fill="#ffd23f" stroke="#f97316" stroke-width="3"/>
+      <path d="M48 64 Q56 54 66 62 Q70 50 82 56 Q88 46 100 54 Q110 50 112 62" stroke="#f97316" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M46 80 Q54 72 62 78 Q66 68 80 74 Q86 66 96 72 Q108 68 114 80" stroke="#f97316" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <rect x="50" y="88" width="24" height="16" rx="8" fill="none" stroke="#0f4c81" stroke-width="3"/>
+      <rect x="86" y="88" width="24" height="16" rx="8" fill="none" stroke="#0f4c81" stroke-width="3"/>
+      <line x1="74" y1="96" x2="86" y2="96" stroke="#0f4c81" stroke-width="3"/>
+      <line x1="36" y1="94" x2="50" y2="94" stroke="#0f4c81" stroke-width="2.5"/>
+      <line x1="110" y1="94" x2="124" y2="94" stroke="#0f4c81" stroke-width="2.5"/>
+      <circle cx="62" cy="96" r="4" fill="#0f172a"/>
+      <circle cx="98" cy="96" r="4" fill="#0f172a"/>
+      <circle cx="63.5" cy="94.5" r="1.5" fill="#fff"/>
+      <circle cx="99.5" cy="94.5" r="1.5" fill="#fff"/>
+      <path d="M66 112 Q80 122 94 112" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="54" cy="108" r="8" fill="#ffb3ba" opacity=".6"/>
+      <circle cx="106" cy="108" r="8" fill="#ffb3ba" opacity=".6"/>
+      <polygon points="78,18 70,38 80,35 72,55 90,28 79,31" fill="#f97316" stroke="#ea580c" stroke-width="1.5"/>
+      <circle cx="30" cy="72" r="7" fill="#e74c3c"/>
+      <circle cx="130" cy="72" r="7" fill="#3498db"/>
+      <circle cx="80" cy="28" r="7" fill="#2ecc71"/>
+      <circle cx="34" cy="100" r="7" fill="#9b59b6"/>
+      <circle cx="126" cy="100" r="7" fill="#f39c12"/>
+    </svg>
+  </div>
+  <h1 id="title-main">Stroop Junior</h1>
+  <p class="subtitle" id="title-sub">Lis la <strong>COULEUR</strong> du texte, pas le mot !</p>
+  <button class="btn-main" onclick="startGame()" id="btn-play">🎮 Jouer</button>
+  <button class="link-btn" onclick="openParentalGate()" id="btn-parents">👨‍👩‍👧 Pour les parents</button>
+</div>
+
+<!-- PARENTAL GATE -->
+<div id="screen-parental" class="screen">
+  <div id="parental-gate">
+    <h2 id="pg-title">Espace parents</h2>
+    <p id="pg-question-text">Pour accéder, réponds à cette question :</p>
+    <div id="gate-question"></div>
+    <input id="gate-input" type="number" inputmode="numeric" min="0" max="999" aria-label="Réponse">
+    <div id="gate-error"></div>
+    <button class="btn-main" onclick="checkGate()" id="btn-gate-ok" style="font-size:1rem;padding:12px 28px">OK</button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-gate-back">← Retour</button>
+  </div>
+</div>
+
+<!-- PARENTS INFO -->
+<div id="screen-parents-info" class="screen">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 4px 20px rgba(0,0,0,.1);width:100%;max-width:420px">
+    <div class="info-parents" id="parents-content"></div>
+  </div>
+  <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-info-back">← Retour</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div id="level-info">
+    <div id="level-badge">Niv. 1</div>
+    <div id="streak-wrap"><span>🔥</span><span id="streak-count">0</span> <span id="streak-label">série</span></div>
+    <div id="score-display">0 pts</div>
+  </div>
+  <div id="timer-bar-wrap" role="progressbar" aria-label="Temps restant" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+    <div id="timer-bar"></div>
+  </div>
+  <div id="stroop-area">
+    <p id="instruction"></p>
+    <div id="stroop-word" aria-hidden="true"></div>
+    <div id="variant-label"></div>
+  </div>
+  <div id="feedback-msg" aria-live="off"></div>
+  <div id="color-buttons" role="group" aria-label="Choix"></div>
+  <button class="btn-secondary" onclick="confirmQuit()" id="btn-quit" style="margin-top:4px;font-size:.9rem;padding:10px 20px">🏠 <span id="btn-quit-label">Accueil</span></button>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="screen-win" class="screen">
+  <div id="win-stars"></div>
+  <div id="win-title"></div>
+  <div id="win-score-display"></div>
+  <div id="win-buttons">
+    <button class="btn-main" onclick="replayLevel()" id="btn-replay">🔄 Rejouer</button>
+    <button class="btn-main" onclick="nextLevel()" id="btn-next" style="background:var(--success);box-shadow:0 5px 0 #22a060">⭐ Niveau suivant</button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-win-home">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true">
+  <div id="modal-box">
+    <div style="font-size:2rem">🏠</div>
+    <p id="modal-msg" style="text-align:center;font-size:1.05rem;font-weight:700"></p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <button class="btn-main" onclick="closeModal(true)" id="btn-modal-yes" style="font-size:1rem;padding:12px 24px">Oui</button>
+      <button class="btn-secondary" onclick="closeModal(false)" id="btn-modal-no" style="font-size:1rem;padding:12px 24px">Non</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    titleMain:'Stroop Junior',
+    titleSub:'Lis la <strong>COULEUR</strong> du texte, pas le mot !',
+    btnPlay:'🎮 Jouer',
+    btnParents:'👨‍👩‍👧 Pour les parents',
+    instruction:'Touche la <strong>couleur</strong> du texte',
+    instrCount:'Touche le <strong>chiffre</strong> représenté par les points',
+    instrShape:'Touche la <strong>forme</strong> illustrée',
+    levelLabel:'Niv.',
+    streakLabel:'série',
+    scorePts:'pts',
+    feedbackRight:['Super !','Bravo !','Excellent !','Parfait !','Ouiii !','Trop fort !'],
+    feedbackWrong:['Essaie encore !','Presque !','Continue !','Oups !'],
+    winTitle:'Niveau réussi !',
+    winScore:'Score :',
+    btnReplay:'🔄 Rejouer',
+    btnNext:'⭐ Niveau suivant',
+    btnHome:'🏠 Accueil',
+    btnQuit:'Accueil',
+    pgTitle:'Espace parents',
+    pgQuestion:'Pour accéder, réponds à cette question :',
+    gateError:'Réponse incorrecte, essaie encore.',
+    pgInfoBack:'← Retour',
+    modalMsg:'Quitter la partie en cours ?',
+    parentsInfo:'<h3>🧠 Stroop Junior / Focus Flash</h3><p><strong>Compétence :</strong> Inhibition cognitive et attention sélective (fonctions exécutives).</p><p style="margin-top:8px">Dans ce jeu, l\'enfant voit un mot de couleur écrit dans une couleur différente (ex. le mot ROUGE affiché en bleu). Il doit identifier la <em>couleur du texte</em> et ignorer le mot lu — c\'est exactement l\'effet Stroop, un exercice classique de contrôle de soi.</p><p style="margin-top:8px"><strong>Pourquoi c\'est utile ?</strong> Cet exercice renforce la capacité à ignorer une réponse automatique (lire le mot) pour effectuer une tâche moins naturelle (nommer la couleur). Cette compétence est fondamentale pour la maîtrise de soi, la concentration et la réussite scolaire.</p><p style="margin-top:8px"><strong>Progression :</strong> 5 niveaux — plus de couleurs, temps réduit, puis variantes (chiffres, formes).</p><p style="margin-top:8px"><strong>Confidentialité :</strong> Aucune donnée collectée. Aucune publicité. Fonctionne hors-ligne.</p>',
+    colors:{rouge:'ROUGE',bleu:'BLEU',vert:'VERT',jaune:'JAUNE',violet:'VIOLET',orange:'ORANGE',rose:'ROSE',noir:'NOIR'},
+    shapes:{cercle:'CERCLE',carre:'CARRÉ',etoile:'ÉTOILE',triangle:'TRIANGLE'},
+    starMsg:['Bien joué !','Très bien !','Excellent !','Parfait !','Maître Stroop !']
+  },
+  en:{
+    titleMain:'Focus Flash',
+    titleSub:'Tap the <strong>COLOR</strong> of the text, not the word!',
+    btnPlay:'🎮 Play',
+    btnParents:'👨‍👩‍👧 For parents',
+    instruction:'Tap the <strong>color</strong> of the text',
+    instrCount:'Tap the <strong>number</strong> shown by the dots',
+    instrShape:'Tap the <strong>shape</strong> illustrated',
+    levelLabel:'Lvl.',
+    streakLabel:'streak',
+    scorePts:'pts',
+    feedbackRight:['Great!','Bravo!','Excellent!','Perfect!','Yes!','Awesome!'],
+    feedbackWrong:['Try again!','Almost!','Keep going!','Oops!'],
+    winTitle:'Level complete!',
+    winScore:'Score:',
+    btnReplay:'🔄 Play again',
+    btnNext:'⭐ Next level',
+    btnHome:'🏠 Home',
+    btnQuit:'Home',
+    pgTitle:'Parents area',
+    pgQuestion:'To continue, answer this question:',
+    gateError:'Wrong answer, try again.',
+    pgInfoBack:'← Back',
+    modalMsg:'Quit the current game?',
+    parentsInfo:'<h3>🧠 Focus Flash / Stroop Junior</h3><p><strong>Skill:</strong> Cognitive inhibition and selective attention (executive functions).</p><p style="margin-top:8px">In this game, the child sees a color word written in a different color (e.g. the word RED displayed in blue). They must identify the <em>color of the text</em> and ignore the word — this is exactly the Stroop effect, a classic self-control exercise.</p><p style="margin-top:8px"><strong>Why it helps:</strong> This exercise builds the ability to suppress an automatic response (reading the word) to perform a less natural task (naming the color). Fundamental for self-control, focus, and school success.</p><p style="margin-top:8px"><strong>Progression:</strong> 5 levels — more colors, faster pace, then variants (numbers, shapes).</p><p style="margin-top:8px"><strong>Privacy:</strong> No data collected. No ads. Works offline.</p>',
+    colors:{rouge:'RED',bleu:'BLUE',vert:'GREEN',jaune:'YELLOW',violet:'PURPLE',orange:'ORANGE',rose:'PINK',noir:'BLACK'},
+    shapes:{cercle:'CIRCLE',carre:'SQUARE',etoile:'STAR',triangle:'TRIANGLE'},
+    starMsg:['Good job!','Very good!','Excellent!','Perfect!','Stroop Master!']
+  }
+};
+
+const ALL_COLORS=[
+  {key:'rouge',hex:'#e74c3c',txt:'#fff'},
+  {key:'bleu', hex:'#2980b9',txt:'#fff'},
+  {key:'vert', hex:'#27ae60',txt:'#fff'},
+  {key:'jaune',hex:'#e6bc00',txt:'#333'},
+  {key:'violet',hex:'#8e44ad',txt:'#fff'},
+  {key:'orange',hex:'#e67e22',txt:'#fff'},
+  {key:'rose', hex:'#e91e8c',txt:'#fff'},
+  {key:'noir', hex:'#222831',txt:'#fff'},
+];
+const COUNT_WORDS=[
+  {key:'un',   count:1,en:'one'},
+  {key:'deux', count:2,en:'two'},
+  {key:'trois',count:3,en:'three'},
+  {key:'quatre',count:4,en:'four'},
+];
+const SHAPES=[
+  {key:'cercle',   svgPath:'<circle cx="24" cy="24" r="20" fill="currentColor"/>'},
+  {key:'carre',    svgPath:'<rect x="4" y="4" width="40" height="40" rx="6" fill="currentColor"/>'},
+  {key:'etoile',   svgPath:'<polygon points="24,3 29,17 44,17 32,26 36,40 24,31 12,40 16,26 4,17 19,17" fill="currentColor"/>'},
+  {key:'triangle', svgPath:'<polygon points="24,4 46,44 2,44" fill="currentColor"/>'},
+];
+const LEVELS=[
+  {id:1,colors:4,time:5000,variant:'color'},
+  {id:2,colors:5,time:4000,variant:'color'},
+  {id:3,colors:6,time:3200,variant:'color'},
+  {id:4,colors:6,time:3000,variant:'count'},
+  {id:5,colors:6,time:2800,variant:'shape'},
+];
+const LS_KEY='pgrg_stroop_junior';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false,score=0,streak=0,level=1;
+let timerHandle=null,timerStart=null,timerDuration=4000;
+let currentAnswer=null,currentVariant='color';
+let roundActive=false,answeredCount=0,correctCount=0;
+const ROUNDS=10;
+let audioCtx=null;
+
+function saveP(){try{localStorage.setItem(LS_KEY,JSON.stringify({level,lang,muted}));}catch(e){}}
+function loadP(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.level)level=Math.min(Math.max(parseInt(d.level)||1,1),LEVELS.length);
+    if(d.lang)lang=d.lang;
+    if(typeof d.muted==='boolean')muted=d.muted;
+  }catch(e){}
+}
+function cfg(){return LEVELS[Math.min(level,LEVELS.length)-1]}
+function t(k){return T[lang][k]||T.fr[k]||k}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(arr){return arr[randInt(0,arr.length-1)]}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=randInt(0,i);[a[i],a[j]]=[a[j],a[i]];}return a}
+function darken(hex){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return '#'+[Math.max(0,r-45),Math.max(0,g-45),Math.max(0,b-45)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function setLang(l){lang=l;saveP();renderLang();}
+function renderLang(){
+  document.documentElement.lang=lang;
+  document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  document.getElementById('title-main').textContent=t('titleMain');
+  document.getElementById('title-sub').innerHTML=t('titleSub');
+  document.getElementById('btn-play').innerHTML=t('btnPlay');
+  document.getElementById('btn-parents').innerHTML=t('btnParents');
+  document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';
+  document.getElementById('btn-mute').title=muted?t('unmute')||'Son':t('mute')||'Muet';
+  document.getElementById('streak-label').textContent=t('streakLabel');
+  document.getElementById('btn-quit-label').textContent=t('btnQuit');
+  document.getElementById('pg-title').textContent=t('pgTitle');
+  document.getElementById('pg-question-text').textContent=t('pgQuestion');
+  document.getElementById('btn-gate-back').textContent='← '+(lang==='fr'?'Retour':'Back');
+  document.getElementById('btn-info-back').textContent=t('pgInfoBack');
+  document.getElementById('btn-replay').innerHTML=t('btnReplay');
+  document.getElementById('btn-next').innerHTML=t('btnNext');
+  document.getElementById('btn-win-home').innerHTML=t('btnHome');
+  document.getElementById('btn-modal-yes').textContent=lang==='fr'?'Oui':'Yes';
+  document.getElementById('btn-modal-no').textContent=lang==='fr'?'Non':'No';
+  document.getElementById('modal-msg').textContent=t('modalMsg');
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+let gateA=0;
+function openParentalGate(){
+  const a=randInt(2,9),b=randInt(2,9);gateA=a*b;
+  document.getElementById('gate-question').textContent=a+' × '+b+' = ?';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-error').style.display='none';
+  showScreen('screen-parental');
+}
+function checkGate(){
+  if(parseInt(document.getElementById('gate-input').value)===gateA){
+    document.getElementById('parents-content').innerHTML=t('parentsInfo');
+    showScreen('screen-parents-info');
+  } else {
+    document.getElementById('gate-error').textContent=t('gateError');
+    document.getElementById('gate-error').style.display='block';
+  }
+}
+document.getElementById('gate-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkGate();});
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,type,dur,vol){
+  if(muted)return;
+  try{
+    const ctx=getAudioCtx();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type||'sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol||0.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function soundRight(){playTone(660,'sine',.12,.2);setTimeout(()=>playTone(880,'sine',.18,.18),90);setTimeout(()=>playTone(1100,'sine',.22,.15),180);}
+function soundWrong(){playTone(280,'sawtooth',.18,.15);setTimeout(()=>playTone(230,'sawtooth',.22,.12),120);}
+function soundWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.25,.17),i*110));}
+function toggleMute(){muted=!muted;saveP();renderLang();}
+function startGame(){
+  score=0;streak=0;answeredCount=0;correctCount=0;
+  currentVariant=cfg().variant;
+  updateUI();showScreen('screen-game');renderLang();newRound();
+}
+function newRound(){
+  if(answeredCount>=ROUNDS){endLevel();return;}
+  roundActive=true;clearTimer();
+  document.getElementById('level-badge').textContent=t('levelLabel')+' '+level;
+  const c=cfg();
+  if(c.variant==='color')doColorRound(c);
+  else if(c.variant==='count')doCountRound();
+  else doShapeRound();
+  startTimer(c.time);
+}
+function doColorRound(c){
+  const colors=shuffle(ALL_COLORS).slice(0,c.colors);
+  let wi=randInt(0,colors.length-1),ii=randInt(0,colors.length-1);
+  while(ii===wi)ii=randInt(0,colors.length-1);
+  const wc=colors[wi],ic=colors[ii];
+  currentAnswer=ic.key;
+  const el=document.getElementById('stroop-word');
+  el.style.color=ic.hex;
+  el.textContent=T[lang].colors[wc.key]||wc.key.toUpperCase();
+  document.getElementById('instruction').innerHTML=t('instruction');
+  document.getElementById('variant-label').textContent='';
+  buildColorBtns(colors,ic.key);
+}
+function doCountRound(){
+  const pool=shuffle(COUNT_WORDS).slice(0,4);
+  let ai=randInt(0,pool.length-1),wi=randInt(0,pool.length-1);
+  while(wi===ai)wi=randInt(0,pool.length-1);
+  const actual=pool[ai],word=pool[wi];
+  currentAnswer=''+actual.count;
+  const el=document.getElementById('stroop-word');
+  el.style.color=ALL_COLORS[randInt(0,ALL_COLORS.length-1)].hex;
+  el.textContent=(lang==='fr'?word.key:word.en).toUpperCase();
+  document.getElementById('instruction').innerHTML=t('instrCount');
+  document.getElementById('variant-label').textContent='●'.repeat(actual.count);
+  buildCountBtns(pool.map(x=>x.count),actual.count);
+}
+function doShapeRound(){
+  const pool=shuffle(SHAPES).slice(0,4);
+  let ai=randInt(0,pool.length-1),wi=randInt(0,pool.length-1);
+  while(wi===ai)wi=randInt(0,pool.length-1);
+  const actual=pool[ai],word=pool[wi];
+  currentAnswer=actual.key;
+  const col=ALL_COLORS[randInt(0,ALL_COLORS.length-1)];
+  const el=document.getElementById('stroop-word');
+  el.style.color=col.hex;
+  el.textContent=T[lang].shapes[word.key]||word.key.toUpperCase();
+  document.getElementById('instruction').innerHTML=t('instrShape');
+  document.getElementById('variant-label').innerHTML=
+    '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" style="color:'+col.hex+'">'+actual.svgPath+'</svg>';
+  buildShapeBtns(pool,actual.key);
+}
+function buildColorBtns(colors,ansKey){
+  const wrap=document.getElementById('color-buttons');
+  wrap.innerHTML='';
+  wrap.style.gridTemplateColumns=colors.length<=4?'repeat(2,1fr)':'repeat(3,1fr)';
+  colors.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='color-btn';
+    btn.setAttribute('aria-label',T[lang].colors[c.key]||c.key);
+    btn.style.background=c.hex;
+    btn.style.boxShadow='0 5px 0 '+darken(c.hex);
+    const sw=document.createElement('div');sw.className='cb-swatch';sw.style.background=c.hex;
+    const lb=document.createElement('span');lb.className='cb-label';lb.textContent=T[lang].colors[c.key]||c.key.toUpperCase();
+    btn.appendChild(sw);btn.appendChild(lb);
+    btn.addEventListener('click',()=>handleAnswer(c.key,btn));
+    btn.addEventListener('touchstart',e=>{e.preventDefault();handleAnswer(c.key,btn);},{passive:false});
+    wrap.appendChild(btn);
+  });
+}
+function buildCountBtns(counts,ansCount){
+  const wrap=document.getElementById('color-buttons');
+  wrap.innerHTML='';wrap.style.gridTemplateColumns='repeat(2,1fr)';
+  const bgs=['#e74c3c','#2980b9','#27ae60','#8e44ad'];
+  shuffle([...counts]).forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='color-btn';
+    btn.style.background=bgs[i%bgs.length];
+    btn.style.boxShadow='0 5px 0 '+darken(bgs[i%bgs.length]);
+    btn.setAttribute('aria-label',''+c);
+    const sw=document.createElement('div');sw.className='cb-swatch';
+    sw.style.cssText='background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:#fff';
+    sw.textContent=c;
+    const lb=document.createElement('span');lb.className='cb-label';lb.textContent=''+c;
+    btn.appendChild(sw);btn.appendChild(lb);
+    btn.addEventListener('click',()=>handleAnswer(''+c,btn));
+    btn.addEventListener('touchstart',e=>{e.preventDefault();handleAnswer(''+c,btn);},{passive:false});
+    wrap.appendChild(btn);
+  });
+}
+function buildShapeBtns(shapes,ansKey){
+  const wrap=document.getElementById('color-buttons');
+  wrap.innerHTML='';wrap.style.gridTemplateColumns='repeat(2,1fr)';
+  const bgs=['#e74c3c','#2980b9','#27ae60','#8e44ad'];
+  shapes.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='color-btn';
+    btn.style.background=bgs[i%bgs.length];
+    btn.style.boxShadow='0 5px 0 '+darken(bgs[i%bgs.length]);
+    btn.setAttribute('aria-label',T[lang].shapes[s.key]||s.key);
+    const svgWrap=document.createElement('div');
+    svgWrap.style.cssText='width:38px;height:38px;display:flex;align-items:center;justify-content:center';
+    svgWrap.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48" style="color:#fff">'+s.svgPath+'</svg>';
+    const lb=document.createElement('span');lb.className='cb-label';lb.textContent=T[lang].shapes[s.key]||s.key.toUpperCase();
+    btn.appendChild(svgWrap);btn.appendChild(lb);
+    btn.addEventListener('click',()=>handleAnswer(s.key,btn));
+    btn.addEventListener('touchstart',e=>{e.preventDefault();handleAnswer(s.key,btn);},{passive:false});
+    wrap.appendChild(btn);
+  });
+}
+function handleAnswer(key,btn){
+  if(!roundActive)return;
+  roundActive=false;clearTimer();answeredCount++;
+  if(key===currentAnswer){
+    correctCount++;streak++;
+    const tb=Math.max(0,Math.floor((cfg().time-(Date.now()-timerStart))/200));
+    score+=10+tb+(streak>=3?5:0);
+    btn.classList.add('correct-flash');
+    showFeedback(pick(t('feedbackRight')),'#27ae60');soundRight();
+    announce(pick(t('feedbackRight')));
+  } else {
+    streak=0;
+    btn.classList.add('wrong-flash');
+    showFeedback(pick(t('feedbackWrong')),'#e11d48');soundWrong();
+    announce(pick(t('feedbackWrong')));
+  }
+  updateUI();saveP();
+  setTimeout(()=>{btn.classList.remove('correct-flash','wrong-flash');newRound();},700);
+}
+function startTimer(dur){
+  timerStart=Date.now();timerDuration=dur;
+  const bar=document.getElementById('timer-bar'),bw=document.getElementById('timer-bar-wrap');
+  bar.style.transition='none';bar.style.width='100%';bar.style.background='var(--success)';
+  function tick(){
+    const el=Date.now()-timerStart;
+    const pct=Math.max(0,100-el/dur*100);
+    bar.style.transition='width .1s linear';bar.style.width=pct+'%';
+    bw.setAttribute('aria-valuenow',Math.round(pct));
+    if(pct<30)bar.style.background='#f97316';
+    if(pct<10)bar.style.background='#e11d48';
+    if(el>=dur)timeUp(); else timerHandle=requestAnimationFrame(tick);
+  }
+  timerHandle=requestAnimationFrame(tick);
+}
+function clearTimer(){if(timerHandle){cancelAnimationFrame(timerHandle);timerHandle=null;}
+  const bar=document.getElementById('timer-bar');bar.style.width='100%';bar.style.background='var(--success)';
+}
+function timeUp(){if(!roundActive)return;roundActive=false;streak=0;answeredCount++;showFeedback(pick(t('feedbackWrong')),'#e11d48');soundWrong();updateUI();setTimeout(()=>newRound(),700);}
+function updateUI(){
+  document.getElementById('score-display').textContent=score+' '+t('scorePts');
+  document.getElementById('streak-count').textContent=streak;
+}
+function showFeedback(msg,color){const el=document.getElementById('feedback-msg');el.textContent=msg;el.style.color=color||'var(--navy)';}
+function announce(msg){const el=document.getElementById('aria-live');el.textContent='';setTimeout(()=>{el.textContent=msg;},50);}
+function endLevel(){
+  clearTimer();roundActive=false;soundWin();
+  const stars=correctCount>=9?3:correctCount>=7?2:1;
+  document.getElementById('win-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  const sm=T[lang].starMsg||T.fr.starMsg;
+  document.getElementById('win-title').textContent=t('winTitle')+' '+sm[Math.min(level,sm.length)-1];
+  document.getElementById('win-score-display').textContent=t('winScore')+' '+score+' '+t('scorePts')+' | '+correctCount+'/'+ROUNDS+' ✓';
+  document.getElementById('btn-next').style.display=level>=LEVELS.length?'none':'';
+  showScreen('screen-win');saveP();
+}
+function replayLevel(){score=0;streak=0;answeredCount=0;correctCount=0;startGame();}
+function nextLevel(){
+  if(level<LEVELS.length)level++;
+  saveP();score=0;streak=0;answeredCount=0;correctCount=0;
+  currentVariant=cfg().variant;showScreen('screen-game');updateUI();newRound();
+}
+function confirmQuit(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(doQuit){
+  document.getElementById('modal-overlay').classList.remove('open');
+  if(doQuit){clearTimer();roundActive=false;showScreen('screen-title');}
+}
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('modal-overlay'))closeModal(false);});
+loadP();renderLang();
+</script>
+</body>
+</html>

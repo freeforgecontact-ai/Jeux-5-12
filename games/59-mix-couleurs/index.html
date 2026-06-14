@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Mix Couleurs / Color Mixer — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#eaf6ff 0%,#dbeeff 100%);min-height:100vh;color:var(--navy);overflow-x:hidden}
+h1,h2,h3,.title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+#topbar img{height:34px}
+#brand{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;flex:1}
+.lang-btn{background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-weight:700;font-size:.85rem;transition:.15s}
+.lang-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+#mute-btn{background:transparent;border:none;font-size:1.5rem;cursor:pointer;padding:2px 6px;border-radius:8px;transition:.15s}
+#mute-btn:hover{background:rgba(255,255,255,.2)}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px 30px;min-height:calc(100vh - 52px)}
+.screen.active{display:flex}
+#title-screen{justify-content:center;gap:16px;text-align:center}
+#game-title{font-size:clamp(2rem,6vw,3rem);color:var(--blue);line-height:1.1}
+#game-subtitle{font-size:1.1rem;color:var(--slate);max-width:380px}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:16px 40px;font-size:1.3rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Nunito',system-ui,sans-serif;transition:.1s;margin-top:8px}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--blue-dark);font-family:'Nunito',system-ui,sans-serif;transition:.1s}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--blue-dark)}
+.btn-parents{background:transparent;border:2px solid var(--slate);color:var(--slate);border-radius:10px;padding:8px 18px;font-size:.85rem;cursor:pointer;margin-top:4px}
+.btn-parents:hover{background:var(--slate);color:#fff}
+#mascot-wrap{margin:0 auto}
+#game-screen{gap:12px;max-width:640px;width:100%;margin:0 auto}
+#level-info{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:700;color:var(--blue)}
+#progress-bar-wrap{width:100%;height:10px;background:#c5dff5;border-radius:10px;overflow:hidden}
+#progress-bar{height:100%;background:var(--orange);border-radius:10px;transition:.4s}
+#target-section{background:#fff;border-radius:20px;padding:16px;width:100%;text-align:center;box-shadow:0 2px 12px rgba(15,76,129,.12)}
+#target-label{font-size:.85rem;color:var(--slate);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+#target-display{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
+#target-swatch{width:80px;height:80px;border-radius:50%;border:4px solid #e2eaf4;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-shrink:0}
+#target-name{font-size:1.3rem;font-weight:700;color:var(--navy);font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#target-hint{font-size:.8rem;color:var(--slate);margin-top:2px}
+#mixer-section{background:#fff;border-radius:20px;padding:16px;width:100%;box-shadow:0 2px 12px rgba(15,76,129,.12)}
+#mixer-label{font-size:.85rem;color:var(--slate);font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:10px}
+#mixer-display{display:flex;align-items:center;justify-content:center;gap:14px}
+#mixer-pot{width:80px;height:80px;border-radius:50%;border:4px solid #e2eaf4;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-shrink:0;transition:background .3s}
+#mixer-info{flex:1}
+#mixer-name{font-size:1.2rem;font-weight:700;color:var(--navy);font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#mixer-recipe{font-size:.8rem;color:var(--slate);margin-top:2px}
+#drop-counts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.drop-chip{display:flex;align-items:center;gap:3px;background:#f0f7ff;border-radius:20px;padding:3px 9px;font-size:.8rem;font-weight:700}
+.drop-dot{width:12px;height:12px;border-radius:50%}
+#primaries{display:flex;gap:10px;justify-content:center;width:100%;flex-wrap:wrap}
+.primary-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:none;border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.12);transition:.15s;min-width:80px;min-height:80px;flex:1;max-width:130px}
+.primary-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.16)}
+.primary-circle{width:54px;height:54px;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:.15s}
+.primary-btn:active .primary-circle{transform:scale(.9)}
+.primary-name{font-size:.8rem;font-weight:700;color:var(--navy)}
+#reset-btn{background:#f1f5f9;border:2px solid #cbd5e1;color:var(--slate);border-radius:12px;padding:8px 20px;font-size:.9rem;cursor:pointer;font-weight:700;transition:.15s;font-family:'Nunito',system-ui,sans-serif}
+#reset-btn:hover{background:#e2e8f0}
+#feedback-zone{min-height:40px;text-align:center;font-size:1rem;font-weight:700;color:var(--success)}
+#match-meter-wrap{width:100%;text-align:center}
+#match-label{font-size:.8rem;color:var(--slate);font-weight:700}
+#match-bar-bg{width:100%;height:14px;background:#e2eaf4;border-radius:10px;overflow:hidden;margin-top:4px}
+#match-bar{height:100%;border-radius:10px;transition:.4s;background:var(--slate)}
+#success-screen{justify-content:center;gap:16px;text-align:center}
+#success-stars{font-size:3rem;letter-spacing:4px}
+#success-title{font-size:2rem;color:var(--blue);font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#success-color-show{display:flex;align-items:center;justify-content:center;gap:14px;background:#fff;border-radius:20px;padding:16px 28px;box-shadow:0 2px 12px rgba(15,76,129,.12)}
+#success-swatch{width:70px;height:70px;border-radius:50%;border:4px solid #e2eaf4}
+#success-color-name{font-size:1.4rem;font-weight:700;font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#success-fact{font-size:.95rem;color:var(--slate);max-width:320px}
+.success-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+#levelcomplete-screen{justify-content:center;gap:18px;text-align:center}
+#lc-stars{font-size:3.5rem}
+#lc-title{font-size:2rem;color:var(--blue);font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#lc-msg{font-size:1rem;color:var(--slate);max-width:340px}
+#parents-gate{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+#parents-gate.open{display:flex}
+#parents-box{background:#fff;border-radius:20px;padding:28px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+#parents-box h2{color:var(--blue);margin-bottom:10px;font-family:'Fredoka','Nunito',system-ui,sans-serif}
+#gate-question{font-size:1.2rem;margin:12px 0;font-weight:700}
+#gate-input{width:100%;padding:10px;font-size:1.1rem;border:2px solid #cbd5e1;border-radius:10px;text-align:center;margin-bottom:10px}
+#gate-error{color:#ef4444;font-size:.85rem;min-height:20px}
+#parents-info{display:none;text-align:left;font-size:.9rem;line-height:1.6;color:var(--slate)}
+#parents-info h3{color:var(--blue);margin-bottom:6px}
+.btn-close{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:10px 28px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--orange-dark);margin-top:12px;font-family:'Nunito',system-ui,sans-serif}
+@keyframes dropfall{from{opacity:1;transform:translateY(-20px) scale(1.2)}to{opacity:0;transform:translateY(30px) scale(.5)}}
+.drop-anim{position:fixed;width:20px;height:20px;border-radius:50%;pointer-events:none;animation:dropfall .5s ease forwards;z-index:200}
+@keyframes splat{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.splat{animation:splat .3s ease}
+@media(max-width:400px){
+  .primary-btn{min-width:70px;padding:10px 10px}
+  .primary-circle{width:44px;height:44px}
+  #target-swatch,#mixer-pot{width:64px;height:64px}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span id="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" title="Mute">🔊</button>
+</div>
+
+<div id="title-screen" class="screen active">
+  <div id="mascot-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="70" cy="110" rx="38" ry="12" fill="#c084fc" opacity=".3"/>
+      <rect x="38" y="70" width="64" height="50" rx="18" fill="#e9d5ff"/>
+      <rect x="42" y="74" width="56" height="42" rx="14" fill="#f3f0ff"/>
+      <ellipse cx="70" cy="116" rx="26" ry="8" fill="#c084fc" opacity=".7"/>
+      <ellipse cx="70" cy="55" rx="32" ry="30" fill="#fde68a"/>
+      <ellipse cx="70" cy="55" rx="30" ry="28" fill="#fef3c7"/>
+      <circle cx="60" cy="50" r="5" fill="#1e3a5f"/>
+      <circle cx="80" cy="50" r="5" fill="#1e3a5f"/>
+      <circle cx="62" cy="48" r="2" fill="#fff"/>
+      <circle cx="82" cy="48" r="2" fill="#fff"/>
+      <path d="M60 63 Q70 72 80 63" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="53" cy="60" rx="7" ry="4" fill="#fca5a5" opacity=".6"/>
+      <ellipse cx="87" cy="60" rx="7" ry="4" fill="#fca5a5" opacity=".6"/>
+      <circle cx="30" cy="45" r="8" fill="#ef4444" opacity=".85"/>
+      <circle cx="110" cy="45" r="8" fill="#3b82f6" opacity=".85"/>
+      <circle cx="20" cy="72" r="6" fill="#eab308" opacity=".85"/>
+      <circle cx="120" cy="72" r="6" fill="#34c77b" opacity=".85"/>
+      <rect x="52" y="118" width="36" height="8" rx="4" fill="#a78bfa"/>
+      <text x="14" y="28" font-size="14" fill="#ffd23f">&#x2605;</text>
+      <text x="112" y="22" font-size="12" fill="#ffd23f">&#x2605;</text>
+    </svg>
+  </div>
+  <h1 class="title" id="game-title"></h1>
+  <p id="game-subtitle"></p>
+  <button class="btn-play" onclick="startGame()" id="btn-play"></button>
+  <button class="btn-parents" onclick="openParents()" id="btn-parents"></button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div id="level-info">
+    <span id="level-text"></span>
+    <span id="score-text"></span>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="target-section">
+    <div id="target-label"></div>
+    <div id="target-display">
+      <div id="target-swatch"></div>
+      <div>
+        <div id="target-name"></div>
+        <div id="target-hint"></div>
+      </div>
+    </div>
+  </div>
+  <div id="mixer-section">
+    <div id="mixer-label"></div>
+    <div id="mixer-display">
+      <div id="mixer-pot"></div>
+      <div id="mixer-info">
+        <div id="mixer-name"></div>
+        <div id="mixer-recipe"></div>
+        <div id="drop-counts"></div>
+      </div>
+    </div>
+  </div>
+  <div id="match-meter-wrap">
+    <div id="match-label"></div>
+    <div id="match-bar-bg"><div id="match-bar" style="width:0%"></div></div>
+  </div>
+  <div id="primaries"></div>
+  <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap">
+    <button id="reset-btn" onclick="resetMix()"></button>
+  </div>
+  <div id="feedback-zone" aria-live="polite"></div>
+</div>
+
+<div id="success-screen" class="screen">
+  <div id="success-stars"></div>
+  <div id="success-title"></div>
+  <div id="success-color-show">
+    <div id="success-swatch"></div>
+    <div id="success-color-name"></div>
+  </div>
+  <p id="success-fact"></p>
+  <div class="success-btns">
+    <button class="btn-secondary" onclick="goHome()" id="btn-home-s"></button>
+    <button class="btn-play" onclick="nextChallenge()" id="btn-next-s"></button>
+  </div>
+</div>
+
+<div id="levelcomplete-screen" class="screen">
+  <div id="lc-stars"></div>
+  <div id="lc-title"></div>
+  <div id="lc-msg"></div>
+  <div class="success-btns">
+    <button class="btn-secondary" onclick="goHome()" id="btn-home-lc"></button>
+    <button class="btn-play" onclick="nextLevel()" id="btn-next-lc" style="display:none"></button>
+    <button class="btn-play" onclick="replayLevel()" id="btn-replay-lc"></button>
+  </div>
+</div>
+
+<div id="parents-gate">
+  <div id="parents-box">
+    <h2 id="gate-title"></h2>
+    <div id="gate-quiz">
+      <div id="gate-question"></div>
+      <input id="gate-input" type="number" inputmode="numeric">
+      <div id="gate-error"></div>
+      <button class="btn-close" onclick="checkGate()" id="btn-gate-ok"></button>
+    </div>
+    <div id="parents-info">
+      <h3 id="pinfo-title"></h3>
+      <p id="pinfo-body"></p>
+      <button class="btn-close" onclick="closeParents()" id="btn-pclose"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const T = {
+  fr: {
+    gameTitle: 'Mix Couleurs',
+    gameSubtitle: 'Melange les couleurs primaires pour creer toutes les couleurs !',
+    btnPlay: 'Jouer !',
+    btnParents: 'Pour les parents',
+    level: 'Niveau',
+    score: 'Score',
+    targetLabel: 'Couleur Cible',
+    mixerLabel: 'Ton Melange',
+    emptyMix: 'Aucune goutte',
+    matchLabel: 'Ressemblance',
+    resetBtn: 'Recommencer',
+    btnHome: 'Accueil',
+    btnNext: 'Suivant',
+    btnReplay: 'Rejouer',
+    btnNextLevel: 'Niveau suivant',
+    successTitle: 'Bravo !',
+    successStars: '★★★',
+    lcTitle: 'Niveau termine !',
+    lcMsg: 'Tu maitrises le melange des couleurs !',
+    lcMsgFinal: 'Tu es un vrai artiste ! Tous les niveaux completes !',
+    gateTitle: 'Pour les parents',
+    gateQ: 'Pour continuer, resous : ',
+    gateOk: 'Valider',
+    gateErr: 'Mauvaise reponse. Reessaie !',
+    pinfoTitle: 'A propos du jeu',
+    pinfoBody: 'Mix Couleurs apprend a l\'enfant (5-9 ans) la theorie des couleurs primaires et secondaires : rouge + bleu = violet, bleu + jaune = vert, rouge + jaune = orange. En mode avance, l\'enfant decouvre les nuances. Aucune donnee collectee, aucune publicite, 100% hors-ligne.',
+    pClose: 'Fermer',
+    feedbackClose: 'Presque ! Continue !',
+    feedbackVeryClose: 'Tres proche ! Affine encore !',
+    feedbackPerfect: 'Parfait !',
+    hintDrop: 'Clique sur une couleur pour ajouter une goutte !',
+    dropsRed: 'Rouge', dropsBlue: 'Bleu', dropsYellow: 'Jaune',
+    colorNames: {
+      red:'Rouge', blue:'Bleu', yellow:'Jaune',
+      purple:'Violet', green:'Vert', orange:'Orange',
+      'light-purple':'Violet clair', 'dark-purple':'Violet fonce',
+      'light-green':'Vert clair', 'dark-green':'Vert fonce',
+      'light-orange':'Orange clair', 'dark-orange':'Roux fonce',
+      brown:'Marron', gray:'Gris lavande'
+    }
+  },
+  en: {
+    gameTitle: 'Color Mixer',
+    gameSubtitle: 'Mix primary colors to create any color!',
+    btnPlay: 'Play!',
+    btnParents: 'For parents',
+    level: 'Level',
+    score: 'Score',
+    targetLabel: 'Target Color',
+    mixerLabel: 'Your Mix',
+    emptyMix: 'No drops yet',
+    matchLabel: 'Match',
+    resetBtn: 'Reset',
+    btnHome: 'Home',
+    btnNext: 'Next',
+    btnReplay: 'Replay',
+    btnNextLevel: 'Next Level',
+    successTitle: 'Amazing!',
+    successStars: '★★★',
+    lcTitle: 'Level complete!',
+    lcMsg: 'You mastered color mixing!',
+    lcMsgFinal: 'You are a true artist! All levels completed!',
+    gateTitle: 'For parents',
+    gateQ: 'To continue, solve: ',
+    gateOk: 'Confirm',
+    gateErr: 'Wrong answer. Try again!',
+    pinfoTitle: 'About the game',
+    pinfoBody: 'Color Mixer teaches children (5-9 yrs) primary and secondary color theory: red + blue = purple, blue + yellow = green, red + yellow = orange. Advanced mode explores shades. No data collected, no ads, 100% offline.',
+    pClose: 'Close',
+    feedbackClose: 'Getting close! Keep going!',
+    feedbackVeryClose: 'Very close! Fine-tune it!',
+    feedbackPerfect: 'Perfect!',
+    hintDrop: 'Click a color to add a drop!',
+    dropsRed: 'Red', dropsBlue: 'Blue', dropsYellow: 'Yellow',
+    colorNames: {
+      red:'Red', blue:'Blue', yellow:'Yellow',
+      purple:'Purple', green:'Green', orange:'Orange',
+      'light-purple':'Light Purple', 'dark-purple':'Dark Purple',
+      'light-green':'Light Green', 'dark-green':'Dark Green',
+      'light-orange':'Light Orange', 'dark-orange':'Burnt Orange',
+      brown:'Brown', gray:'Lavender Gray'
+    }
+  }
+};
+
+const LEVELS = [
+  {
+    nameFr:'Couleurs Secondaires', nameEn:'Secondary Colors',
+    tolerance:0.35, maxDrops:12,
+    challenges:[
+      {r:1,b:1,y:0,key:'purple',   factFr:'Rouge + Bleu = Violet',   factEn:'Red + Blue = Purple'},
+      {r:0,b:1,y:1,key:'green',    factFr:'Bleu + Jaune = Vert',     factEn:'Blue + Yellow = Green'},
+      {r:1,b:0,y:1,key:'orange',   factFr:'Rouge + Jaune = Orange',  factEn:'Red + Yellow = Orange'},
+      {r:1,b:1,y:0,key:'purple',   factFr:'Rouge + Bleu = Violet',   factEn:'Red + Blue = Purple'},
+      {r:0,b:1,y:1,key:'green',    factFr:'Bleu + Jaune = Vert',     factEn:'Blue + Yellow = Green'},
+    ]
+  },
+  {
+    nameFr:'Nuances', nameEn:'Shades',
+    tolerance:0.28, maxDrops:16,
+    challenges:[
+      {r:2,b:1,y:0,key:'dark-purple',  factFr:'Plus de rouge = Violet fonce !',  factEn:'More red = Darker purple!'},
+      {r:1,b:2,y:0,key:'light-purple', factFr:'Plus de bleu = Violet clair !',   factEn:'More blue = Lighter purple!'},
+      {r:0,b:1,y:2,key:'light-green',  factFr:'Plus de jaune = Vert clair !',    factEn:'More yellow = Lighter green!'},
+      {r:0,b:2,y:1,key:'dark-green',   factFr:'Plus de bleu = Vert fonce !',     factEn:'More blue = Darker green!'},
+      {r:1,b:0,y:2,key:'light-orange', factFr:'Plus de jaune = Orange clair !',  factEn:'More yellow = Light orange!'},
+      {r:2,b:0,y:1,key:'dark-orange',  factFr:'Plus de rouge = Roux fonce !',    factEn:'More red = Burnt orange!'},
+    ]
+  },
+  {
+    nameFr:'Defis', nameEn:'Challenges',
+    tolerance:0.22, maxDrops:20,
+    challenges:[
+      {r:1,b:1,y:1,key:'brown',         factFr:'Rouge + Bleu + Jaune = Marron !',   factEn:'Red + Blue + Yellow = Brown!'},
+      {r:1,b:2,y:1,key:'gray',          factFr:'Un peu de tout = Gris lavande !',   factEn:'A bit of everything = Lavender gray!'},
+      {r:3,b:1,y:0,key:'dark-purple',   factFr:'Encore plus de rouge = Prune !',    factEn:'Even more red = Dark plum!'},
+      {r:0,b:1,y:3,key:'light-green',   factFr:'Beaucoup de jaune = Vert lime !',   factEn:'Lots of yellow = Lime green!'},
+      {r:3,b:0,y:1,key:'dark-orange',   factFr:'Beaucoup de rouge = Roux vif !',    factEn:'Lots of red = Vivid rust!'},
+      {r:1,b:3,y:0,key:'light-purple',  factFr:'Beaucoup de bleu = Bleuet !',       factEn:'Lots of blue = Cornflower!'},
+    ]
+  }
+];
+
+function computeColor(r,b,y){
+  const total=r+b+y;
+  if(total===0) return '#e2eaf4';
+  const nr=r/total,nb=b/total,ny=y/total;
+  const red  =Math.round(255*(nr+ny*0.9+nb*0.05));
+  const green =Math.round(255*(ny*0.75+nb*0.3));
+  const blue  =Math.round(255*(nb*0.85+nr*0.1));
+  const clamp=v=>Math.max(0,Math.min(255,v));
+  const avg=(clamp(red)+clamp(green)+clamp(blue))/3;
+  const sat=0.82;
+  const cr=Math.round(avg+(clamp(red)-avg)*sat);
+  const cg=Math.round(avg+(clamp(green)-avg)*sat);
+  const cb=Math.round(avg+(clamp(blue)-avg)*sat);
+  return 'rgb('+clamp(cr)+','+clamp(cg)+','+clamp(cb)+')';
+}
+
+function matchScore(drops,target){
+  const td=drops.r+drops.b+drops.y;
+  const tt=target.r+target.b+target.y;
+  if(td===0||tt===0) return 0;
+  const nrd=drops.r/td,nbd=drops.b/td,nyd=drops.y/td;
+  const nrt=target.r/tt,nbt=target.b/tt,nyt=target.y/tt;
+  const dr=Math.abs(nrd-nrt),db=Math.abs(nbd-nbt),dy=Math.abs(nyd-nyt);
+  const dist=(dr+db+dy)/2;
+  return Math.max(0,1-dist*2.5);
+}
+
+const LS_KEY='pgrg_mix_couleurs';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let currentLevel=0,currentChallenge=0;
+let drops={r:0,b:0,y:0};
+let score=0;
+let gateA=0,gateB=0;
+
+function loadSave(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    currentLevel=Math.min(d.level||0,LEVELS.length-1);
+    score=d.score||0;
+  }catch(e){}
+}
+function saveProg(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({level:currentLevel,score}));}catch(e){}
+}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI();
+  if(isScreen('game-screen')) refreshGameUI();
+}
+function t(k){return T[lang][k]||T.fr[k]||k;}
+function colorName(key){return (T[lang].colorNames||T.fr.colorNames)[key]||key;}
+function levelName(lv){return lang==='en'?LEVELS[lv].nameEn:LEVELS[lv].nameFr;}
+function chFact(ch){return lang==='en'?ch.factEn:ch.factFr;}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function isScreen(id){return document.getElementById(id).classList.contains('active');}
+
+function renderUI(){
+  document.getElementById('game-title').textContent=t('gameTitle');
+  document.getElementById('game-subtitle').textContent=t('gameSubtitle');
+  document.getElementById('btn-play').textContent=t('btnPlay');
+  document.getElementById('btn-parents').textContent=t('btnParents');
+  document.getElementById('target-label').textContent=t('targetLabel');
+  document.getElementById('mixer-label').textContent=t('mixerLabel');
+  document.getElementById('match-label').textContent=t('matchLabel');
+  document.getElementById('reset-btn').textContent=t('resetBtn');
+  document.getElementById('success-title').textContent=t('successTitle');
+  document.getElementById('success-stars').textContent=t('successStars');
+  document.getElementById('btn-home-s').textContent=t('btnHome');
+  document.getElementById('btn-next-s').textContent=t('btnNext');
+  document.getElementById('lc-title').textContent=t('lcTitle');
+  document.getElementById('btn-home-lc').textContent=t('btnHome');
+  document.getElementById('btn-next-lc').textContent=t('btnNextLevel');
+  document.getElementById('btn-replay-lc').textContent=t('btnReplay');
+  document.getElementById('gate-title').textContent=t('gateTitle');
+  document.getElementById('btn-gate-ok').textContent=t('gateOk');
+  document.getElementById('pinfo-title').textContent=t('pinfoTitle');
+  document.getElementById('pinfo-body').textContent=t('pinfoBody');
+  document.getElementById('btn-pclose').textContent=t('pClose');
+  document.getElementById('level-text').textContent=t('level')+' '+(currentLevel+1)+' — '+levelName(currentLevel);
+  document.getElementById('score-text').textContent=t('score')+': '+score;
+}
+
+function startGame(){
+  loadSave();
+  currentChallenge=0;
+  drops={r:0,b:0,y:0};
+  showScreen('game-screen');
+  renderUI();
+  buildPrimaries();
+  loadChallenge();
+}
+
+function buildPrimaries(){
+  const container=document.getElementById('primaries');
+  container.innerHTML='';
+  const colors=[
+    {key:'r',hex:'#ef4444',nameFr:'Rouge',nameEn:'Red'},
+    {key:'b',hex:'#3b82f6',nameFr:'Bleu',nameEn:'Blue'},
+    {key:'y',hex:'#eab308',nameFr:'Jaune',nameEn:'Yellow'},
+  ];
+  colors.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='primary-btn';
+    const label=lang==='en'?('Add '+c.nameEn+' drop'):('Ajouter goutte '+c.nameFr);
+    btn.setAttribute('aria-label',label);
+    btn.dataset.key=c.key;
+    const nm=lang==='en'?c.nameEn:c.nameFr;
+    btn.innerHTML='<div class="primary-circle" style="background:'+c.hex+'">&#128167;</div><div class="primary-name">'+nm+'</div>';
+    btn.addEventListener('click',(e)=>addDrop(c.key,c.hex,e));
+    container.appendChild(btn);
+  });
+}
+
+function loadChallenge(){
+  const lv=LEVELS[currentLevel];
+  const ch=lv.challenges[currentChallenge];
+  drops={r:0,b:0,y:0};
+  const tc=computeColor(ch.r,ch.b,ch.y);
+  document.getElementById('target-swatch').style.background=tc;
+  document.getElementById('target-name').textContent=colorName(ch.key);
+  document.getElementById('target-hint').textContent='';
+  updateMixDisplay();
+  const total=lv.challenges.length;
+  const pct=(currentChallenge/total)*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('feedback-zone').textContent=t('hintDrop');
+  buildPrimaries();
+  document.getElementById('level-text').textContent=t('level')+' '+(currentLevel+1)+' — '+levelName(currentLevel);
+  document.getElementById('score-text').textContent=t('score')+': '+score;
+  document.getElementById('match-bar').style.width='0%';
+  document.getElementById('match-bar').style.background='var(--slate)';
+}
+
+function addDrop(key,hex,evt){
+  const lv=LEVELS[currentLevel];
+  const totalDrops=drops.r+drops.b+drops.y;
+  if(totalDrops>=lv.maxDrops){
+    document.getElementById('feedback-zone').textContent=lang==='fr'?'Le pot est plein ! Recommence.':'Pot is full! Reset first.';
+    playTone(200,'square',0.1,0.2);
+    return;
+  }
+  drops[key]++;
+  if(evt){
+    const el=document.createElement('div');
+    el.className='drop-anim';
+    el.style.background=hex;
+    el.style.left=(evt.clientX-10)+'px';
+    el.style.top=(evt.clientY-10)+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),600);
+  }
+  playDropSound(key);
+  updateMixDisplay();
+  checkMatch();
+}
+
+function updateMixDisplay(){
+  const total=drops.r+drops.b+drops.y;
+  const col=computeColor(drops.r,drops.b,drops.y);
+  const pot=document.getElementById('mixer-pot');
+  pot.style.background=col;
+  pot.classList.remove('splat');
+  void pot.offsetWidth;
+  pot.classList.add('splat');
+  const name=getMixName();
+  document.getElementById('mixer-name').textContent=total===0?t('emptyMix'):name;
+  document.getElementById('mixer-recipe').textContent=total>0?getMixRecipe():'';
+  const dc=document.getElementById('drop-counts');
+  dc.innerHTML='';
+  const items=[
+    {key:'r',hex:'#ef4444',label:t('dropsRed')},
+    {key:'b',hex:'#3b82f6',label:t('dropsBlue')},
+    {key:'y',hex:'#eab308',label:t('dropsYellow')}
+  ];
+  items.forEach(it=>{
+    if(drops[it.key]>0){
+      const chip=document.createElement('div');
+      chip.className='drop-chip';
+      chip.innerHTML='<div class="drop-dot" style="background:'+it.hex+'"></div>'+it.label+': '+drops[it.key];
+      dc.appendChild(chip);
+    }
+  });
+}
+
+function getMixName(){
+  const total=drops.r+drops.b+drops.y;
+  if(total===0) return t('emptyMix');
+  let best=null,bestScore=-1;
+  LEVELS.forEach(lv=>lv.challenges.forEach(ch=>{
+    const s=matchScore(drops,ch);
+    if(s>bestScore){bestScore=s;best=ch;}
+  }));
+  if(bestScore>0.65&&best) return colorName(best.key);
+  const nr=drops.r/total,nb=drops.b/total,ny=drops.y/total;
+  if(nr>.65) return lang==='fr'?'Rouge':'Red';
+  if(nb>.65) return lang==='fr'?'Bleu':'Blue';
+  if(ny>.65) return lang==='fr'?'Jaune':'Yellow';
+  if(nr>.0&&nb>.0&&ny>.0) return lang==='fr'?'Marron / Gris':'Brown / Gray';
+  if(nr>.0&&nb>.0) return lang==='fr'?'Violet':'Purple';
+  if(nb>.0&&ny>.0) return lang==='fr'?'Vert':'Green';
+  if(nr>.0&&ny>.0) return lang==='fr'?'Orange':'Orange';
+  return lang==='fr'?'Melange':'Mix';
+}
+
+function getMixRecipe(){
+  const parts=[];
+  if(drops.r>0) parts.push(drops.r+' '+(lang==='fr'?'rouge':'red'));
+  if(drops.b>0) parts.push(drops.b+' '+(lang==='fr'?'bleu':'blue'));
+  if(drops.y>0) parts.push(drops.y+' '+(lang==='fr'?'jaune':'yellow'));
+  return parts.join(' + ');
+}
+
+function checkMatch(){
+  const lv=LEVELS[currentLevel];
+  const ch=lv.challenges[currentChallenge];
+  const ms=matchScore(drops,ch);
+  const pct=Math.round(ms*100);
+  const bar=document.getElementById('match-bar');
+  bar.style.width=pct+'%';
+  bar.style.background=ms>0.8?'#34c77b':ms>0.55?'#ffd23f':'#f97316';
+  if(ms>=(1-lv.tolerance)){
+    setTimeout(()=>showSuccess(ch),200);
+  } else {
+    const total=drops.r+drops.b+drops.y;
+    if(total>0){
+      if(ms>0.7) document.getElementById('feedback-zone').textContent=t('feedbackVeryClose');
+      else if(ms>0.4) document.getElementById('feedback-zone').textContent=t('feedbackClose');
+      else document.getElementById('feedback-zone').textContent='';
+    }
+  }
+}
+
+function showSuccess(ch){
+  playSuccessSound();
+  score+=10;
+  saveProg();
+  document.getElementById('success-stars').textContent=t('successStars');
+  document.getElementById('success-title').textContent=t('successTitle');
+  const tc=computeColor(ch.r,ch.b,ch.y);
+  document.getElementById('success-swatch').style.background=tc;
+  document.getElementById('success-color-name').textContent=colorName(ch.key);
+  document.getElementById('success-fact').textContent=chFact(ch);
+  document.getElementById('btn-home-s').textContent=t('btnHome');
+  document.getElementById('btn-next-s').textContent=t('btnNext');
+  showScreen('success-screen');
+}
+
+function nextChallenge(){
+  currentChallenge++;
+  const lv=LEVELS[currentLevel];
+  if(currentChallenge>=lv.challenges.length){
+    showLevelComplete();
+  } else {
+    showScreen('game-screen');
+    drops={r:0,b:0,y:0};
+    loadChallenge();
+  }
+}
+
+function showLevelComplete(){
+  document.getElementById('lc-title').textContent=t('lcTitle');
+  const isLast=currentLevel>=LEVELS.length-1;
+  document.getElementById('lc-msg').textContent=isLast?t('lcMsgFinal'):t('lcMsg');
+  document.getElementById('lc-stars').textContent='🏆';
+  document.getElementById('btn-next-lc').style.display=isLast?'none':'inline-block';
+  document.getElementById('btn-next-lc').textContent=t('btnNextLevel');
+  document.getElementById('btn-replay-lc').textContent=t('btnReplay');
+  document.getElementById('btn-home-lc').textContent=t('btnHome');
+  playLevelSound();
+  showScreen('levelcomplete-screen');
+}
+
+function nextLevel(){
+  if(currentLevel<LEVELS.length-1){currentLevel++;saveProg();}
+  currentChallenge=0;drops={r:0,b:0,y:0};
+  showScreen('game-screen');renderUI();loadChallenge();
+}
+function replayLevel(){
+  currentChallenge=0;drops={r:0,b:0,y:0};
+  showScreen('game-screen');renderUI();loadChallenge();
+}
+function goHome(){showScreen('title-screen');renderUI();}
+function resetMix(){
+  drops={r:0,b:0,y:0};
+  updateMixDisplay();
+  document.getElementById('match-bar').style.width='0%';
+  document.getElementById('feedback-zone').textContent=t('hintDrop');
+  playTone(300,'sine',0.08,0.15);
+}
+function refreshGameUI(){buildPrimaries();renderUI();updateMixDisplay();
+  const lv=LEVELS[currentLevel];const ch=lv.challenges[currentChallenge];
+  if(ch){document.getElementById('target-swatch').style.background=computeColor(ch.r,ch.b,ch.y);
+    document.getElementById('target-name').textContent=colorName(ch.key);}
+}
+
+function openParents(){
+  gateA=Math.floor(Math.random()*9)+2;
+  gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('gate-question').textContent=t('gateQ')+gateA+' x '+gateB+' = ?';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-error').textContent='';
+  document.getElementById('gate-quiz').style.display='block';
+  document.getElementById('parents-info').style.display='none';
+  document.getElementById('parents-gate').classList.add('open');
+}
+function checkGate(){
+  const val=parseInt(document.getElementById('gate-input').value,10);
+  if(val===gateA*gateB){
+    document.getElementById('gate-quiz').style.display='none';
+    document.getElementById('parents-info').style.display='block';
+  } else {
+    document.getElementById('gate-error').textContent=t('gateErr');
+    document.getElementById('gate-input').value='';
+    playTone(200,'square',0.1,0.2);
+  }
+}
+function closeParents(){document.getElementById('parents-gate').classList.remove('open');}
+document.getElementById('parents-gate').addEventListener('click',function(e){if(e.target===this)closeParents();});
+document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,type,gain,dur){
+  if(muted)return;
+  try{
+    const ctx=getCtx();const osc=ctx.createOscillator();const g=ctx.createGain();
+    osc.type=type||'sine';osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(gain,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.connect(g);g.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playDropSound(key){
+  if(muted)return;
+  const freqs={r:440,b:330,y:550};
+  playTone(freqs[key]||400,'sine',0.12,0.18);
+}
+function playSuccessSound(){
+  if(muted)return;
+  [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.13,0.25),i*120));
+}
+function playLevelSound(){
+  if(muted)return;
+  [523,659,784,880,1046].forEach((f,i)=>setTimeout(()=>playTone(f,'triangle',0.13,0.3),i*100));
+}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';}
+
+loadSave();renderUI();
+</script>
+</body>
+</html>

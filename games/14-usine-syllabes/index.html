@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f4c81">
+<title>L'Usine à Syllabes / Syllable Factory — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,var(--sky-light) 0%,#d4eeff 100%);
+  min-height:100vh;
+  overflow-x:hidden;
+  color:var(--navy);
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--blue);
+  padding:8px 14px;
+  box-shadow:0 3px 10px rgba(0,0,0,.25);
+  min-height:54px;
+}
+#topbar .brand{display:flex;align-items:center;gap:8px;color:#fff;font-family:'Fredoka','Nunito',system-ui;font-size:1.15rem;font-weight:700;}
+#topbar .brand img{height:34px;}
+#topbar .controls{display:flex;gap:8px;align-items:center;}
+.top-btn{
+  background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);
+  color:#fff;border-radius:10px;padding:6px 12px;font-size:.9rem;font-weight:700;
+  cursor:pointer;transition:background .2s;min-width:44px;min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+}
+.top-btn:hover{background:rgba(255,255,255,.3);}
+.screen{display:none;padding-top:62px;min-height:100vh;}
+.screen.active{display:block;}
+#screen-home{
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:70px 20px 40px;
+  min-height:100vh;
+}
+#screen-home.active{display:flex;}
+.home-mascot{margin-bottom:16px;}
+.home-title{
+  font-family:'Fredoka','Nunito',system-ui;
+  font-size:clamp(1.8rem,7vw,3rem);
+  color:var(--blue);line-height:1.1;
+  text-shadow:0 2px 0 rgba(255,255,255,.8);
+}
+.home-subtitle{font-size:clamp(.95rem,3vw,1.25rem);color:var(--slate);margin:10px 0 28px;max-width:380px;}
+.btn-play{
+  background:var(--orange);color:#fff;
+  border:none;border-radius:16px;
+  padding:18px 44px;font-size:1.4rem;font-weight:800;
+  font-family:'Fredoka','Nunito',system-ui;
+  cursor:pointer;box-shadow:0 6px 0 var(--orange-dark);
+  transition:transform .1s,box-shadow .1s;
+  letter-spacing:.5px;min-width:200px;
+}
+.btn-play:active{transform:translateY(4px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-play:hover{background:#fb8231;}
+.home-parents{
+  margin-top:22px;font-size:.9rem;color:var(--slate);
+  text-decoration:underline;cursor:pointer;
+  background:none;border:none;
+  min-height:44px;display:flex;align-items:center;
+}
+.home-parents:hover{color:var(--blue);}
+#modal-parental{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(15,23,42,.65);
+  align-items:center;justify-content:center;
+}
+#modal-parental.open{display:flex;}
+.modal-box{
+  background:#fff;border-radius:24px;padding:32px 28px;
+  max-width:360px;width:90%;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-box h2{color:var(--blue);font-size:1.4rem;margin-bottom:12px;}
+.modal-box p{color:var(--slate);font-size:.95rem;margin-bottom:20px;line-height:1.5;}
+.parental-question{
+  font-size:1.5rem;font-weight:700;color:var(--blue);
+  background:var(--sky-light);border-radius:12px;padding:14px;margin-bottom:16px;
+}
+.parental-input{
+  width:100%;padding:12px;font-size:1.2rem;text-align:center;
+  border:3px solid var(--blue);border-radius:12px;margin-bottom:14px;
+  font-family:'Nunito',system-ui;
+}
+.parental-input:focus{outline:none;border-color:var(--orange);}
+.btn-parental{
+  background:var(--blue);color:#fff;border:none;border-radius:12px;
+  padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);min-width:120px;margin:4px;
+}
+.btn-parental:hover{background:var(--blue-dark);}
+.btn-cancel{background:var(--slate);}
+.btn-cancel:hover{background:#334155;}
+.parental-error{color:#e11d48;font-size:.9rem;margin-top:8px;min-height:20px;}
+#screen-parents{display:none;padding:70px 20px 40px;max-width:620px;margin:0 auto;}
+#screen-parents.active{display:block;}
+.parents-card{background:#fff;border-radius:20px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.1);}
+.parents-card h2{color:var(--blue);font-size:1.5rem;margin-bottom:14px;}
+.parents-card p,.parents-card li{color:var(--slate);line-height:1.7;font-size:.97rem;}
+.parents-card ul{padding-left:20px;margin:10px 0;}
+.btn-back{
+  background:var(--blue);color:#fff;border:none;border-radius:12px;
+  padding:12px 24px;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);margin-bottom:18px;min-height:48px;
+}
+.btn-back:hover{background:var(--blue-dark);}
+#screen-game{
+  display:none;
+  flex-direction:column;align-items:center;
+  padding:66px 16px 30px;min-height:100vh;
+}
+#screen-game.active{display:flex;}
+.progress-bar-wrap{
+  width:100%;max-width:520px;
+  background:rgba(255,255,255,.5);border-radius:12px;
+  height:14px;overflow:hidden;margin-bottom:14px;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.1);
+}
+.progress-bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--success),#22d97a);
+  border-radius:12px;transition:width .5s ease;
+}
+.level-info{font-size:.9rem;color:var(--slate);margin-bottom:10px;font-weight:700;}
+.factory-wrap{
+  width:100%;max-width:520px;
+  background:linear-gradient(180deg,#e0eaf5 0%,#c8dff5 100%);
+  border-radius:20px;border:3px solid var(--blue);
+  padding:16px 16px 10px;
+  box-shadow:0 8px 24px rgba(15,76,129,.18);
+  margin-bottom:18px;position:relative;overflow:hidden;
+}
+.belt{
+  width:100%;height:18px;
+  background:repeating-linear-gradient(
+    90deg,#555 0px,#555 18px,#888 18px,#888 20px,#555 20px,#555 38px
+  );
+  border-radius:6px;border:2px solid #333;
+  margin:10px 0 0;position:relative;overflow:hidden;
+}
+.belt-inner{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    90deg,transparent 0,transparent 16px,
+    rgba(255,255,255,.15) 16px,rgba(255,255,255,.15) 18px
+  );
+  background-size:36px 100%;
+  animation:beltmove 1.2s linear infinite paused;
+}
+.belt.moving .belt-inner{animation-play-state:running;}
+@keyframes beltmove{from{background-position:0 0;}to{background-position:36px 0;}}
+.word-emoji{font-size:clamp(3.5rem,15vw,6rem);display:block;text-align:center;line-height:1;}
+.word-slots{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  margin:14px 0 8px;min-height:56px;align-items:center;
+}
+.slot{
+  min-width:54px;min-height:54px;
+  border:3px dashed var(--sky);border-radius:12px;
+  background:rgba(255,255,255,.6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:800;font-family:'Fredoka','Nunito',system-ui;
+  color:var(--blue);transition:all .2s;padding:4px 10px;
+}
+.slot.filled{border-color:var(--blue);background:rgba(255,255,255,.95);box-shadow:0 3px 8px rgba(15,76,129,.15);}
+.slot.correct{border-color:var(--success);background:#e8fff4;animation:pop .3s ease;}
+.slot.glow{border-color:var(--gold);background:#fffde7;animation:glow-pulse .6s ease infinite alternate;}
+@keyframes pop{0%{transform:scale(1.15);}100%{transform:scale(1);}}
+@keyframes glow-pulse{from{box-shadow:0 0 8px var(--gold);}to{box-shadow:0 0 22px var(--gold);}}
+.bricks-area{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  width:100%;max-width:520px;
+  margin-bottom:18px;min-height:70px;align-items:center;
+}
+.brick{
+  background:var(--orange);color:#fff;
+  border:none;border-radius:14px;
+  padding:12px 20px;
+  font-size:1.4rem;font-weight:800;
+  font-family:'Fredoka','Nunito',system-ui;
+  cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform .1s,box-shadow .1s,opacity .2s;
+  min-width:64px;min-height:56px;touch-action:manipulation;letter-spacing:.5px;
+}
+.brick:not(:disabled):hover{background:#fb8231;transform:translateY(-2px);}
+.brick:not(:disabled):active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.brick:disabled,.brick.used{opacity:.3;cursor:default;transform:none;pointer-events:none;}
+.feedback-area{
+  min-height:52px;text-align:center;
+  font-size:1.1rem;font-weight:700;color:var(--slate);
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;max-width:500px;line-height:1.4;
+}
+.feedback-area.error{color:#e11d48;}
+.feedback-area.success{color:var(--success);}
+.game-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.btn-game{
+  background:var(--blue);color:#fff;border:none;border-radius:14px;
+  padding:13px 26px;font-size:1.05rem;font-weight:700;
+  cursor:pointer;box-shadow:0 5px 0 var(--blue-dark);
+  transition:transform .1s,box-shadow .1s;
+  min-height:52px;min-width:130px;font-family:'Fredoka','Nunito',system-ui;
+}
+.btn-game:active{transform:translateY(3px);box-shadow:0 2px 0 var(--blue-dark);}
+.btn-game:hover{background:var(--blue-dark);}
+.btn-game.orange{background:var(--orange);box-shadow:0 5px 0 var(--orange-dark);}
+.btn-game.orange:hover{background:#fb8231;}
+.btn-game.orange:active{box-shadow:0 2px 0 var(--orange-dark);}
+#screen-victory{
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:70px 20px 40px;min-height:100vh;
+}
+#screen-victory.active{display:flex;}
+.stars-row{font-size:2.8rem;margin:10px 0;letter-spacing:4px;}
+.victory-title{font-family:'Fredoka','Nunito',system-ui;font-size:clamp(1.8rem,7vw,2.8rem);color:var(--blue);margin-bottom:10px;}
+.victory-sub{color:var(--slate);font-size:1.05rem;margin-bottom:28px;max-width:380px;}
+.victory-score{font-size:1.3rem;font-weight:800;color:var(--orange);margin-bottom:22px;}
+.victory-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:50;}
+#aria-live{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;}
+@keyframes shake{
+  0%{transform:translateX(0);}20%{transform:translateX(-8px);}
+  40%{transform:translateX(8px);}60%{transform:translateX(-6px);}
+  80%{transform:translateX(6px);}100%{transform:translateX(0);}
+}
+@media(max-width:400px){
+  .brick{font-size:1.2rem;padding:10px 14px;min-width:54px;}
+  .slot{font-size:1.2rem;min-width:46px;}
+  .word-emoji{font-size:3rem;}
+}
+</style>
+</head>
+<body>
+<div id="aria-live" role="status" aria-live="polite" aria-atomic="true"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="controls">
+    <button class="top-btn" id="btn-lang" onclick="toggleLang()" aria-label="Changer langue"></button>
+    <button class="top-btn" id="btn-sound" onclick="toggleSound()" aria-label="Muet">🔊</button>
+  </div>
+</div>
+
+<div id="modal-parental" role="dialog" aria-modal="true" aria-labelledby="parental-title">
+  <div class="modal-box">
+    <h2 id="parental-title">🔒 <span data-i18n="parental_title"></span></h2>
+    <p data-i18n="parental_desc"></p>
+    <div class="parental-question" id="parental-question"></div>
+    <input class="parental-input" type="number" id="parental-answer" placeholder="?">
+    <br>
+    <button class="btn-parental" onclick="checkParental()">OK</button>
+    <button class="btn-parental btn-cancel" onclick="closeParental()">✕</button>
+    <div class="parental-error" id="parental-error" role="alert"></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-home" role="main">
+  <div class="home-mascot">
+    <svg width="110" height="130" viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="25" y="62" width="60" height="52" rx="14" fill="#0f4c81"/>
+      <rect x="36" y="74" width="38" height="26" rx="8" fill="#7ec3ee"/>
+      <rect x="38" y="86" width="34" height="8" rx="4" fill="#555"/>
+      <circle cx="46" cy="90" r="4" fill="#aaa"/>
+      <circle cx="66" cy="90" r="4" fill="#aaa"/>
+      <rect x="46" y="88" width="20" height="4" fill="#888"/>
+      <rect x="6" y="66" width="22" height="12" rx="6" fill="#0a3559"/>
+      <rect x="82" y="66" width="22" height="12" rx="6" fill="#0a3559"/>
+      <circle cx="6" cy="72" r="7" fill="#ffd23f"/>
+      <circle cx="104" cy="72" r="7" fill="#ffd23f"/>
+      <rect x="32" y="110" width="18" height="18" rx="7" fill="#0a3559"/>
+      <rect x="60" y="110" width="18" height="18" rx="7" fill="#0a3559"/>
+      <rect x="28" y="122" width="24" height="8" rx="4" fill="#0f172a"/>
+      <rect x="58" y="122" width="24" height="8" rx="4" fill="#0f172a"/>
+      <rect x="22" y="16" width="66" height="52" rx="18" fill="#0f4c81"/>
+      <ellipse cx="41" cy="38" rx="10" ry="11" fill="#fff"/>
+      <ellipse cx="69" cy="38" rx="10" ry="11" fill="#fff"/>
+      <circle cx="43" cy="39" r="6" fill="#7ec3ee"/>
+      <circle cx="71" cy="39" r="6" fill="#7ec3ee"/>
+      <circle cx="44" cy="38" r="3" fill="#0f172a"/>
+      <circle cx="72" cy="38" r="3" fill="#0f172a"/>
+      <circle cx="45" cy="37" r="1" fill="#fff"/>
+      <circle cx="73" cy="37" r="1" fill="#fff"/>
+      <path d="M39 52 Q55 63 71 52" stroke="#ffd23f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <line x1="55" y1="16" x2="55" y2="4" stroke="#0a3559" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="55" cy="4" r="5" fill="#f97316"/>
+      <rect x="22" y="28" width="66" height="6" rx="3" fill="#0a3559" opacity=".4"/>
+      <ellipse cx="55" cy="17" rx="36" ry="8" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <h1 class="home-title title-font" data-i18n="game_title"></h1>
+  <p class="home-subtitle" data-i18n="game_subtitle"></p>
+  <button class="btn-play" onclick="startGame()" data-i18n="btn_play"></button>
+  <button class="home-parents" onclick="openParental()" data-i18n="link_parents"></button>
+</div>
+
+<div class="screen" id="screen-game" role="main">
+  <div class="level-info" id="level-info"></div>
+  <div class="progress-bar-wrap" role="progressbar" id="progress-wrap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="factory-wrap">
+    <span class="word-emoji" id="word-emoji" aria-hidden="true"></span>
+    <div class="word-slots" id="word-slots" aria-label="Syllabes assemblées"></div>
+    <div class="belt" id="belt"><div class="belt-inner"></div></div>
+  </div>
+  <div class="bricks-area" id="bricks-area" role="group" aria-label="Syllabes disponibles"></div>
+  <div class="feedback-area" id="feedback" aria-live="polite"></div>
+  <div class="game-btns">
+    <button class="btn-game" onclick="resetWord()" data-i18n="btn_retry"></button>
+    <button class="btn-game orange" onclick="goHome()" data-i18n="btn_home"></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-victory" role="main">
+  <div class="stars-row" id="victory-stars" aria-hidden="true"></div>
+  <h2 class="victory-title title-font" data-i18n="victory_title"></h2>
+  <p class="victory-sub" data-i18n="victory_sub"></p>
+  <div class="victory-score" id="victory-score"></div>
+  <div class="victory-btns">
+    <button class="btn-play" onclick="playAgain()" data-i18n="btn_play_again"></button>
+    <button class="btn-game orange" onclick="goHome()" data-i18n="btn_home"></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-parents">
+  <button class="btn-back" onclick="goHome()" data-i18n="btn_back"></button>
+  <div class="parents-card">
+    <h2 data-i18n="parents_title"></h2>
+    <p data-i18n="parents_intro"></p>
+    <ul>
+      <li data-i18n="parents_li1"></li>
+      <li data-i18n="parents_li2"></li>
+      <li data-i18n="parents_li3"></li>
+      <li data-i18n="parents_li4"></li>
+    </ul>
+    <br>
+    <p data-i18n="parents_privacy"></p>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    game_title: "L'Usine à Syllabes",
+    game_subtitle: "Assemble les syllabes pour former des mots !",
+    btn_play: "▶ Jouer",
+    btn_play_again: "↺ Rejouer",
+    btn_retry: "🔄 Recommencer",
+    btn_home: "🏠 Accueil",
+    btn_back: "← Retour",
+    link_parents: "Pour les parents →",
+    parental_title: "Zone parents",
+    parental_desc: "Réponds à cette question pour continuer.",
+    parental_err: "Oups, ce n'est pas la bonne réponse !",
+    victory_title: "Bravo, champion(ne) ! 🎉",
+    victory_sub: "Tu as assemblé tous les mots de l'usine !",
+    victory_score: "Score : ",
+    parents_title: "Pour les parents",
+    parents_intro: "L'Usine à Syllabes entraîne les enfants de 5 à 7 ans à :",
+    parents_li1: "Reconnaître et isoler les syllabes d'un mot",
+    parents_li2: "Ordonner les syllabes pour former des mots entiers",
+    parents_li3: "Associer un mot à son image (emoji)",
+    parents_li4: "Progresser par niveaux (2, 3, puis 4 syllabes)",
+    parents_privacy: "🔒 Ce jeu ne collecte aucune donnée personnelle, ne contient aucune publicité et fonctionne entièrement hors-ligne.",
+    level_label: "Mot",
+    of_label: "sur",
+    feedback_correct: "Super ! Bonne syllabe ! 🌟",
+    feedback_try: "Essaie encore ! Tu vas y arriver ! 💪",
+    feedback_congrats: "Bravo ! Mot complet ! 🎉",
+    feedback_order: "Pas dans le bon ordre… essaie encore !"
+  },
+  en: {
+    game_title: "Syllable Factory",
+    game_subtitle: "Build words by clicking syllables in order!",
+    btn_play: "▶ Play",
+    btn_play_again: "↺ Play Again",
+    btn_retry: "🔄 Try Again",
+    btn_home: "🏠 Home",
+    btn_back: "← Back",
+    link_parents: "For parents →",
+    parental_title: "Parent zone",
+    parental_desc: "Answer this question to continue.",
+    parental_err: "Oops, that's not right!",
+    victory_title: "Amazing job! 🎉",
+    victory_sub: "You built all the words in the factory!",
+    victory_score: "Score: ",
+    parents_title: "For Parents",
+    parents_intro: "Syllable Factory trains children aged 5–7 to:",
+    parents_li1: "Recognise and isolate syllables in a word",
+    parents_li2: "Order syllables to form complete words",
+    parents_li3: "Match a word to its picture (emoji)",
+    parents_li4: "Progress through levels (2, 3, then 4 syllables)",
+    parents_privacy: "🔒 This game collects no personal data, contains no ads, and works fully offline.",
+    level_label: "Word",
+    of_label: "of",
+    feedback_correct: "Great! Right syllable! 🌟",
+    feedback_try: "Try again! You can do it! 💪",
+    feedback_congrats: "Awesome! Word complete! 🎉",
+    feedback_order: "Not quite right… try again!"
+  }
+};
+
+var WORDS = {
+  fr: [
+    {emoji:'🐱', syllables:['MI','NOU'], level:2},
+    {emoji:'🏠', syllables:['MAI','SON'], level:2},
+    {emoji:'🐰', syllables:['LA','PIN'], level:2},
+    {emoji:'⛵', syllables:['BA','TEAU'], level:2},
+    {emoji:'🍅', syllables:['TO','MATE'], level:2},
+    {emoji:'🎠', syllables:['CHE','VAL'], level:2},
+    {emoji:'🌙', syllables:['LU','NE'], level:2},
+    {emoji:'🦆', syllables:['CA','NARD'], level:2},
+    {emoji:'🍊', syllables:['O','RANGE'], level:2},
+    {emoji:'🐝', syllables:['A','BEILLE'], level:2},
+    {emoji:'☀️', syllables:['SO','LEIL'], level:2},
+    {emoji:'🦁', syllables:['LI','ON'], level:2},
+    {emoji:'⭐', syllables:['É','TOI','LE'], level:3},
+    {emoji:'🎩', syllables:['CHA','PE','AU'], level:3},
+    {emoji:'🐘', syllables:['É','LÉ','PHANT'], level:3},
+    {emoji:'🌈', syllables:['ARC','EN','CIEL'], level:3},
+    {emoji:'🦜', syllables:['PER','RO','QUET'], level:3},
+    {emoji:'🍉', syllables:['PAS','TÈ','QUE'], level:3},
+    {emoji:'🎎', syllables:['BAL','LON','NET'], level:3},
+    {emoji:'🍓', syllables:['FRA','I','SIER'], level:3},
+    {emoji:'🍌', syllables:['BA','NA','NA'], level:3},
+    {emoji:'🌺', syllables:['TU','LI','PE'], level:3},
+    {emoji:'🦋', syllables:['PA','PI','LLON'], level:3},
+    {emoji:'🐊', syllables:['CRO','CO','DI','LE'], level:4},
+    {emoji:'🦊', syllables:['RE','NAR','DE','AU'], level:4},
+    {emoji:'🐙', syllables:['PIE','U','VAR','MANT'], level:4},
+    {emoji:'🦒', syllables:['GI','RA','FI','NE'], level:4}
+  ],
+  en: [
+    {emoji:'🏠', syllables:['HOU','SE'], level:2},
+    {emoji:'🌸', syllables:['FLO','WER'], level:2},
+    {emoji:'🐰', syllables:['RAB','BIT'], level:2},
+    {emoji:'🎠', syllables:['PO','NY'], level:2},
+    {emoji:'🌙', syllables:['MO','ON'], level:2},
+    {emoji:'🍎', syllables:['AP','PLE'], level:2},
+    {emoji:'🐱', syllables:['KIT','TY'], level:2},
+    {emoji:'🦆', syllables:['DUC','KLING'], level:2},
+    {emoji:'🌺', syllables:['TU','LIP'], level:2},
+    {emoji:'⭐', syllables:['STAR','FISH'], level:2},
+    {emoji:'🦁', syllables:['LI','ON'], level:2},
+    {emoji:'🐢', syllables:['TUR','TLE'], level:2},
+    {emoji:'🍌', syllables:['BA','NA','NA'], level:3},
+    {emoji:'🍅', syllables:['TO','MA','TO'], level:3},
+    {emoji:'🐘', syllables:['EL','E','PHANT'], level:3},
+    {emoji:'🦜', syllables:['PAR','A','KEET'], level:3},
+    {emoji:'🎎', syllables:['BAL','LOO','N'], level:3},
+    {emoji:'🍓', syllables:['STRAW','BER','RY'], level:3},
+    {emoji:'🎠', syllables:['CAR','OU','SEL'], level:3},
+    {emoji:'🐙', syllables:['OC','TO','PUS'], level:3},
+    {emoji:'🍉', syllables:['WA','TER','MELON'], level:3},
+    {emoji:'🦒', syllables:['GI','RAF','FE'], level:3},
+    {emoji:'🦋', syllables:['BUT','TER','FLY','S'], level:4},
+    {emoji:'🌻', syllables:['SUN','FLOW','ER','S'], level:4},
+    {emoji:'🐊', syllables:['CRO','CO','DI','LE'], level:4},
+    {emoji:'🐙', syllables:['OC','TO','PU','S'], level:4},
+    {emoji:'🌍', syllables:['COM','PU','TER','IZE'], level:4}
+  ]
+};
+
+var lang = (navigator.language||'fr').startsWith('fr') ? 'fr' : 'en';
+var soundOn = true;
+var audioCtx = null;
+var gameState = { words:[], wordIndex:0, currentWord:null, filled:[], score:0, totalWords:0, wrongAttempts:0 };
+var parentalA = 0, parentalB = 0;
+var confettiAnim = null;
+var STORAGE_KEY = 'pgrg_usine_syllabes';
+var CONF_COLORS = ['#f97316','#0f4c81','#ffd23f','#34c77b','#7ec3ee','#e11d48','#a855f7'];
+
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({score:gameState.score, lang:lang})); }catch(e){}
+}
+function loadProgress(){
+  try{
+    var d = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+    if(d.lang && (d.lang==='fr'||d.lang==='en')) lang = d.lang;
+  }catch(e){}
+}
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type, vol, delay){
+  if(!soundOn) return;
+  type = type||'sine'; vol = vol||0.15; delay = delay||0;
+  try{
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    var t = ctx.currentTime + delay;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t+dur);
+    osc.start(t); osc.stop(t+dur+0.05);
+  }catch(e){}
+}
+function playClick(){ playTone(600,0.08,'sine',0.12,0); }
+function playSyllableOk(){ playTone(660,0.1,'sine',0.15,0); playTone(880,0.1,'sine',0.12,0.1); }
+function playWordComplete(){
+  var notes=[523,659,784,1047];
+  for(var i=0;i<notes.length;i++) playTone(notes[i],0.18,'sine',0.18,i*0.12);
+}
+function playError(){ playTone(220,0.15,'sawtooth',0.08,0); playTone(180,0.15,'sawtooth',0.06,0.12); }
+function playVictory(){
+  var seq=[523,659,784,1047,1047,1047];
+  for(var i=0;i<seq.length;i++) playTone(seq[i], i===seq.length-1?0.4:0.18, 'sine', 0.2, i*0.13);
+}
+
+function t(key){ return (T[lang]||T.fr)[key]||key; }
+function renderLang(){
+  var els = document.querySelectorAll('[data-i18n]');
+  for(var i=0;i<els.length;i++){
+    var key = els[i].getAttribute('data-i18n');
+    els[i].textContent = t(key);
+  }
+  document.documentElement.lang = lang;
+  document.title = lang==='fr' ? "L'Usine à Syllabes — PGRG IA" : "Syllable Factory — PGRG IA";
+  document.getElementById('btn-lang').textContent = lang==='fr' ? 'EN' : 'FR';
+}
+function toggleLang(){
+  lang = lang==='fr' ? 'en' : 'fr';
+  saveProgress();
+  renderLang();
+  if(document.getElementById('screen-game').classList.contains('active')) startGame();
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('btn-sound').textContent = soundOn ? '🔊' : '🔇';
+  if(soundOn) playClick();
+}
+function announce(msg){
+  var el = document.getElementById('aria-live');
+  el.textContent = '';
+  setTimeout(function(){ el.textContent = msg; }, 50);
+}
+
+function showScreen(id){
+  var screens = document.querySelectorAll('.screen');
+  for(var i=0;i<screens.length;i++){
+    screens[i].classList.remove('active');
+    screens[i].style.display = 'none';
+  }
+  var sc = document.getElementById('screen-'+id);
+  if(sc){
+    if(id==='home'||id==='victory'||id==='game') sc.style.display='flex';
+    else sc.style.display='block';
+    sc.classList.add('active');
+  }
+}
+function goHome(){
+  stopBelt();
+  showScreen('home');
+  renderLang();
+}
+
+function openParental(){
+  parentalA = Math.floor(Math.random()*9)+2;
+  parentalB = Math.floor(Math.random()*9)+2;
+  document.getElementById('parental-question').textContent = parentalA + ' × ' + parentalB + ' = ?';
+  document.getElementById('parental-answer').value = '';
+  document.getElementById('parental-error').textContent = '';
+  document.getElementById('modal-parental').classList.add('open');
+  setTimeout(function(){ document.getElementById('parental-answer').focus(); }, 100);
+}
+function closeParental(){
+  document.getElementById('modal-parental').classList.remove('open');
+}
+function checkParental(){
+  var ans = parseInt(document.getElementById('parental-answer').value, 10);
+  if(ans === parentalA * parentalB){
+    closeParental();
+    showParents();
+  } else {
+    document.getElementById('parental-error').textContent = t('parental_err');
+    playError();
+  }
+}
+document.getElementById('parental-answer').addEventListener('keydown', function(e){
+  if(e.key==='Enter') checkParental();
+});
+function showParents(){
+  renderLang();
+  showScreen('parents');
+}
+
+function shuffleArr(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
+  }
+  return a;
+}
+function pickN(arr, n){
+  return shuffleArr(arr).slice(0, Math.min(n, arr.length));
+}
+function buildWordList(){
+  var src = WORDS[lang];
+  var lvl2 = pickN(src.filter(function(w){return w.level===2;}), 5);
+  var lvl3 = pickN(src.filter(function(w){return w.level===3;}), 5);
+  var lvl4 = pickN(src.filter(function(w){return w.level===4;}), 3);
+  return lvl2.concat(lvl3).concat(lvl4);
+}
+
+function startGame(){
+  playClick();
+  gameState.words = buildWordList();
+  gameState.wordIndex = 0;
+  gameState.score = 0;
+  gameState.totalWords = gameState.words.length;
+  gameState.wrongAttempts = 0;
+  showScreen('game');
+  renderLang();
+  loadWord();
+}
+
+function loadWord(){
+  var w = gameState.words[gameState.wordIndex];
+  if(!w){ showVictory(); return; }
+  gameState.currentWord = w;
+  gameState.filled = [];
+  gameState.wrongAttempts = 0;
+
+  var pct = Math.round((gameState.wordIndex / gameState.totalWords)*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-wrap').setAttribute('aria-valuenow', pct);
+
+  var star = w.level===2 ? '⭐' : w.level===3 ? '⭐⭐' : '⭐⭐⭐';
+  document.getElementById('level-info').textContent =
+    t('level_label')+' '+(gameState.wordIndex+1)+' '+t('of_label')+' '+gameState.totalWords+' '+star;
+
+  document.getElementById('word-emoji').textContent = w.emoji;
+
+  var slotsEl = document.getElementById('word-slots');
+  slotsEl.innerHTML = '';
+  for(var i=0;i<w.syllables.length;i++){
+    var d = document.createElement('div');
+    d.className = 'slot';
+    d.id = 'slot-'+i;
+    d.setAttribute('aria-label', 'syllabe '+(i+1));
+    slotsEl.appendChild(d);
+  }
+
+  var shuffled = shuffleArr(w.syllables);
+  var bricksEl = document.getElementById('bricks-area');
+  bricksEl.innerHTML = '';
+  for(var j=0;j<shuffled.length;j++){
+    (function(syl, idx){
+      var btn = document.createElement('button');
+      btn.className = 'brick';
+      btn.textContent = syl;
+      btn.id = 'brick-'+idx;
+      btn.setAttribute('data-syl', syl);
+      btn.setAttribute('aria-label', 'syllabe '+syl);
+      btn.addEventListener('click', function(){ onBrickClick(btn, syl); });
+      bricksEl.appendChild(btn);
+    })(shuffled[j], j);
+  }
+
+  setFeedback('','');
+  stopBelt();
+  announce(w.emoji+' — '+t('level_label')+' '+(gameState.wordIndex+1));
+}
+
+function onBrickClick(btn, syl){
+  if(btn.classList.contains('used') || btn.disabled) return;
+  var w = gameState.currentWord;
+  var expected = w.syllables[gameState.filled.length];
+  if(syl === expected){
+    btn.classList.add('used');
+    btn.disabled = true;
+    gameState.filled.push(syl);
+    var slotIdx = gameState.filled.length - 1;
+    var slot = document.getElementById('slot-'+slotIdx);
+    if(slot){
+      slot.textContent = syl;
+      slot.classList.add('filled','correct');
+      var s = slot;
+      setTimeout(function(){ s.classList.remove('correct'); }, 400);
+    }
+    playSyllableOk();
+    if(gameState.filled.length === w.syllables.length){
+      wordComplete();
+    } else {
+      setFeedback(t('feedback_correct'),'success');
+      announce(t('feedback_correct'));
+    }
+  } else {
+    gameState.wrongAttempts++;
+    playError();
+    btn.style.animation = 'shake .4s ease';
+    var b2 = btn;
+    setTimeout(function(){ b2.style.animation=''; }, 450);
+    setFeedback(t('feedback_order'),'error');
+    announce(t('feedback_order'));
+  }
+}
+
+function wordComplete(){
+  var w = gameState.currentWord;
+  for(var i=0;i<w.syllables.length;i++){
+    var s = document.getElementById('slot-'+i);
+    if(s) s.classList.add('glow');
+  }
+  var bricks = document.querySelectorAll('.brick');
+  for(var j=0;j<bricks.length;j++) bricks[j].disabled = true;
+  setFeedback(t('feedback_congrats'),'success');
+  announce(t('feedback_congrats'));
+  playWordComplete();
+  startBelt();
+  var pts = Math.max(1, 3 - gameState.wrongAttempts);
+  gameState.score += pts;
+  saveProgress();
+  setTimeout(function(){
+    stopBelt();
+    gameState.wordIndex++;
+    loadWord();
+  }, 1800);
+}
+
+function resetWord(){
+  playClick();
+  loadWord();
+}
+
+function startBelt(){
+  document.getElementById('belt').classList.add('moving');
+}
+function stopBelt(){
+  document.getElementById('belt').classList.remove('moving');
+}
+
+function setFeedback(msg, cls){
+  var el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback-area' + (cls ? ' '+cls : '');
+}
+
+function showVictory(){
+  playVictory();
+  var max = gameState.totalWords * 3;
+  var ratio = gameState.score / max;
+  var stars = '⭐';
+  if(ratio>=0.5) stars='⭐⭐';
+  if(ratio>=0.8) stars='⭐⭐⭐';
+  document.getElementById('victory-stars').textContent = stars;
+  document.getElementById('victory-score').textContent =
+    t('victory_score') + gameState.score + ' / ' + (gameState.totalWords*3);
+  renderLang();
+  showScreen('victory');
+  launchConfetti();
+  announce(t('victory_title'));
+}
+function playAgain(){
+  playClick();
+  stopConfetti();
+  startGame();
+}
+
+function launchConfetti(){
+  var canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var particles = [];
+  for(var i=0;i<120;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height - canvas.height,
+      r: Math.random()*6+4,
+      color: CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)],
+      vx: (Math.random()-.5)*3,
+      vy: Math.random()*3+1.5,
+      angle: Math.random()*360,
+      va: (Math.random()-.5)*8,
+      shape: Math.random()>.5?'rect':'circle'
+    });
+  }
+  var start = null;
+  function frame(ts){
+    if(!start) start=ts;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      p.x+=p.vx; p.y+=p.vy; p.angle+=p.va;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.angle*Math.PI/180);
+      ctx.fillStyle=p.color;
+      ctx.globalAlpha=Math.max(0,1-(ts-start)/3500);
+      if(p.shape==='rect') ctx.fillRect(-p.r/2,-p.r*1.5,p.r,p.r*2.5);
+      else{ ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); }
+      ctx.restore();
+      if(p.y>canvas.height) p.y=-20;
+    }
+    if(ts-start<3500) confettiAnim=requestAnimationFrame(frame);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  if(confettiAnim) cancelAnimationFrame(confettiAnim);
+  confettiAnim = requestAnimationFrame(frame);
+}
+function stopConfetti(){
+  if(confettiAnim) cancelAnimationFrame(confettiAnim);
+  var canvas = document.getElementById('confetti-canvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+
+loadProgress();
+renderLang();
+showScreen('home');
+</script>
+</body>
+</html>

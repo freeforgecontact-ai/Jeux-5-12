@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Drapeaux du Monde / Flags of the World — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,var(--sky-light) 0%,#d6eeff 100%);min-height:100vh;color:var(--navy);}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;gap:10px;padding:8px 16px;flex-wrap:wrap;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+#topbar .brand img{height:34px}
+#topbar .brand span{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;white-space:nowrap}
+.top-btn{background:var(--blue-dark);color:#fff;border:none;cursor:pointer;border-radius:20px;padding:6px 14px;font-size:.85rem;font-weight:700;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+.top-btn:hover{background:#1a5fa0}
+.top-btn.active{background:var(--orange);box-shadow:0 3px 0 var(--orange-dark)}
+.screen{display:none;padding:20px 16px;max-width:700px;margin:0 auto}
+.screen.active{display:block}
+#mascot-wrap{text-align:center;margin:10px 0}
+#main-title{font-size:2.2rem;color:var(--blue);text-align:center;line-height:1.2}
+#main-subtitle{text-align:center;color:var(--slate);margin:8px 0 20px;font-size:1.05rem}
+.big-btn{display:block;width:100%;max-width:280px;margin:12px auto;background:var(--orange);color:#fff;border:none;cursor:pointer;border-radius:16px;padding:16px;font-size:1.3rem;font-weight:700;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Nunito',system-ui,sans-serif;min-height:56px;}
+.big-btn:hover{transform:translateY(-2px)}
+.big-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-dark)}
+.blue-btn{background:var(--blue);box-shadow:0 5px 0 var(--blue-dark)}
+.blue-btn:hover{background:#1a5fa0}
+#parents-link{display:block;text-align:center;margin:10px auto;color:var(--blue);cursor:pointer;font-size:.9rem;text-decoration:underline;background:none;border:none;font-family:inherit;}
+#level-bar{background:var(--blue);color:#fff;border-radius:12px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px;}
+#score-display{font-weight:700;font-size:1rem}
+#progress-bar-wrap{background:rgba(255,255,255,.25);border-radius:99px;height:10px;width:120px}
+#progress-bar{background:var(--gold);height:10px;border-radius:99px;transition:width .4s}
+#question-zone{text-align:center;margin-bottom:16px}
+#question-label{font-size:1.1rem;color:var(--slate);margin-bottom:8px;font-weight:700}
+#flag-display{display:flex;justify-content:center;margin-bottom:4px}
+#country-name-display{font-size:1.6rem;font-weight:700;color:var(--blue);margin:4px 0;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.choice-btn{background:#fff;border:3px solid var(--sky);border-radius:14px;cursor:pointer;padding:12px 8px;font-size:1rem;font-weight:700;min-height:60px;display:flex;align-items:center;justify-content:center;text-align:center;transition:border-color .15s,background .15s;font-family:'Nunito',system-ui,sans-serif;}
+.choice-btn:hover{border-color:var(--blue);background:var(--sky-light)}
+.choice-btn.correct{background:#d4f7e6;border-color:var(--success)}
+.choice-btn.wrong{background:#ffe0e0;border-color:#e05555}
+#feedback{min-height:36px;text-align:center;font-size:1.1rem;font-weight:700;margin:10px 0;padding:8px;border-radius:10px}
+#feedback.pos{background:#d4f7e6;color:#1a7a4a}
+#feedback.neg{background:#ffe0e0;color:#a33030}
+#next-btn{display:none}
+#next-btn.visible{display:block}
+#win-stars{font-size:3rem;text-align:center;margin:16px 0}
+#win-title{font-size:1.8rem;color:var(--blue);text-align:center;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#win-score{text-align:center;font-size:1.1rem;color:var(--slate);margin:8px 0 16px}
+#win-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#win-btns .big-btn{max-width:200px;font-size:1rem;padding:14px 10px}
+#gate-wrap{text-align:center}
+#gate-question{font-size:1.3rem;color:var(--blue);margin:16px 0;font-weight:700;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#gate-input{width:80px;text-align:center;font-size:1.5rem;border:3px solid var(--sky);border-radius:10px;padding:8px;font-family:'Nunito',system-ui,sans-serif;display:block;margin:12px auto;}
+#gate-error{color:#a33030;font-size:.9rem;min-height:20px;margin-top:4px}
+#parents-info p{margin:10px 0;color:var(--slate);line-height:1.6;font-size:.95rem}
+.mode-badge{display:inline-block;background:var(--gold);color:var(--navy);border-radius:20px;padding:4px 14px;font-size:.8rem;font-weight:700;margin-bottom:8px;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+@media(max-width:480px){#main-title{font-size:1.6rem}.big-btn{font-size:1.1rem}}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="top-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="top-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button class="top-btn" id="btn-mute" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+<div class="screen active" id="screen-title">
+  <div id="mascot-wrap">
+    <svg viewBox="0 0 140 130" width="140" height="130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mascotte globe terrestre">
+      <circle cx="70" cy="72" r="50" fill="#7ec3ee" stroke="#0f4c81" stroke-width="3"/>
+      <ellipse cx="58" cy="57" rx="18" ry="14" fill="#34c77b" opacity=".9"/>
+      <ellipse cx="85" cy="67" rx="14" ry="10" fill="#34c77b" opacity=".85"/>
+      <ellipse cx="60" cy="84" rx="12" ry="9" fill="#34c77b" opacity=".8"/>
+      <ellipse cx="90" cy="50" rx="8" ry="6" fill="#34c77b" opacity=".75"/>
+      <ellipse cx="70" cy="72" rx="50" ry="15" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+      <ellipse cx="70" cy="72" rx="50" ry="32" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+      <ellipse cx="50" cy="47" rx="12" ry="8" fill="rgba(255,255,255,.28)"/>
+      <circle cx="58" cy="66" r="3.5" fill="#0a3559"/>
+      <circle cx="80" cy="66" r="3.5" fill="#0a3559"/>
+      <path d="M56 78 Q69 88 83 78" stroke="#0a3559" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <rect x="54" y="16" width="32" height="5" rx="3" fill="#0f4c81"/>
+      <rect x="63" y="6" width="14" height="12" rx="4" fill="#0f4c81"/>
+      <line x1="95" y1="22" x2="95" y2="52" stroke="#888" stroke-width="2"/>
+      <rect x="95" y="22" width="24" height="16" rx="2" fill="#f97316"/>
+      <rect x="95" y="22" width="24" height="5" rx="1" fill="#ea580c"/>
+      <text x="107" y="33" font-size="7" fill="#fff" text-anchor="middle" font-family="sans-serif">★</text>
+    </svg>
+  </div>
+  <h1 class="title-font" id="main-title">Drapeaux du Monde</h1>
+  <p id="main-subtitle">Reconnais les drapeaux de la Terre !</p>
+  <button class="big-btn" onclick="startGame()" id="btn-play">🚩 Jouer !</button>
+  <button id="parents-link" onclick="showGate()">🔒 <span id="parents-link-text">Pour les parents</span></button>
+</div>
+<div class="screen" id="screen-gate">
+  <h2 class="title-font" style="color:var(--blue);text-align:center;margin-bottom:12px" id="gate-title">Espace parents</h2>
+  <div id="gate-wrap">
+    <p id="gate-instruction" style="text-align:center;color:var(--slate)">Résous ce calcul pour continuer :</p>
+    <p id="gate-question" class="title-font"></p>
+    <input id="gate-input" type="number" inputmode="numeric" aria-label="Réponse">
+    <p id="gate-error"></p>
+    <button class="big-btn" onclick="checkGate()">OK</button>
+    <button class="big-btn blue-btn" onclick="showScreen('screen-title')" style="margin-top:8px" id="btn-back-gate">← Retour</button>
+  </div>
+</div>
+<div class="screen" id="screen-parents">
+  <h2 class="title-font" style="color:var(--blue);text-align:center;margin-bottom:16px" id="parents-info-title">Informations parents</h2>
+  <div id="parents-info">
+    <p id="p-info-1"></p>
+    <p id="p-info-2"></p>
+    <p id="p-info-3"></p>
+    <p id="p-info-4"></p>
+  </div>
+  <button class="big-btn blue-btn" onclick="showScreen('screen-title')" style="margin-top:20px" id="btn-back-parents">← Retour</button>
+</div>
+<div class="screen" id="screen-game">
+  <div id="level-bar">
+    <div id="level-label" class="title-font" style="font-size:.95rem">Niveau 1</div>
+    <div id="score-display">0 / 0</div>
+    <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  </div>
+  <div style="text-align:center;margin-bottom:10px">
+    <span class="mode-badge" id="mode-badge">Drapeau → Pays</span>
+  </div>
+  <div id="question-zone">
+    <p id="question-label"></p>
+    <div id="flag-display"></div>
+    <div id="country-name-display"></div>
+  </div>
+  <div id="choices" role="group" aria-label="Choix"></div>
+  <div id="feedback" aria-live="assertive"></div>
+  <button class="big-btn" id="next-btn" onclick="nextQuestion()"></button>
+  <button class="big-btn blue-btn" onclick="showScreen('screen-title')" style="margin-top:8px;font-size:.95rem" id="btn-quit">🏠</button>
+</div>
+<div class="screen" id="screen-win">
+  <div id="win-stars"></div>
+  <h2 id="win-title" class="title-font"></h2>
+  <p id="win-score"></p>
+  <div id="win-btns">
+    <button class="big-btn blue-btn" id="btn-replay">🔄</button>
+    <button class="big-btn" id="btn-next-level">⭐</button>
+    <button class="big-btn blue-btn" onclick="showScreen('screen-title')" id="btn-home-win">🏠</button>
+  </div>
+</div>
+<script>
+const T={
+  fr:{
+    title:"Drapeaux du Monde",subtitle:"Reconnais les drapeaux de la Terre !",
+    play:"🚩 Jouer !",parents:"Pour les parents",
+    gate_title:"Espace parents",gate_instr:"Résous ce calcul pour continuer :",
+    gate_err:"Mauvaise réponse, essaie encore !",back:"← Retour",
+    parents_title:"Informations parents",
+    p1:"🎯 Compétence visée : reconnaissance des drapeaux du monde, géographie visuelle, mémoire.",
+    p2:"🌍 Contenu : 28 drapeaux dessinés en SVG (Europe, Amériques, Asie, Afrique). 3 modes : drapeau→pays, pays→drapeau, trouve l'intrus.",
+    p3:"🔒 Confidentialité : aucune donnée collectée, aucun serveur, aucun compte. Progression sauvegardée uniquement sur cet appareil.",
+    p4:"🚫 Sans publicité, sans lien externe. 100 % hors-ligne.",
+    level:"Niveau",mode_flag_country:"Drapeau → Pays",mode_country_flag:"Pays → Drapeau",mode_intruder:"Trouve l'intrus !",
+    q_flag_country:"Quel pays a ce drapeau ?",q_country_flag:"Quel est le drapeau de",q_intruder:"Quel drapeau n'est PAS en",
+    correct_msgs:["Bravo ! 🎉","Super ! ✨","Excellent ! 🌟","Parfait ! 🏆","Ouais ! 🎊"],
+    wrong_msg:"Pas tout à fait… C'était",next:"Question suivante →",
+    win_title:"Niveau réussi ! 🎉",win_score:"Score :",replay:"🔄 Rejouer",next_level:"⭐ Niveau suivant",home:"🏠 Accueil",quit:"🏠",
+    great:"★★★ Excellent !",good:"★★☆ Bien joué !",ok:"★☆☆ Continue !",
+    all_done:"Tu as tout terminé ! Bravo champion ! 🏆"
+  },
+  en:{
+    title:"Flags of the World",subtitle:"Recognize flags from around the Earth!",
+    play:"🚩 Play!",parents:"For parents",
+    gate_title:"Parent area",gate_instr:"Solve this sum to continue:",
+    gate_err:"Wrong answer, try again!",back:"← Back",
+    parents_title:"Parent information",
+    p1:"🎯 Skill: world flag recognition, visual geography, memory.",
+    p2:"🌍 Content: 28 flags drawn in SVG (Europe, Americas, Asia, Africa). 3 modes: flag→country, country→flag, find the intruder.",
+    p3:"🔒 Privacy: no data collected, no server, no account. Progress saved only on this device.",
+    p4:"🚫 No ads, no external links. 100% offline.",
+    level:"Level",mode_flag_country:"Flag → Country",mode_country_flag:"Country → Flag",mode_intruder:"Find the intruder!",
+    q_flag_country:"Which country has this flag?",q_country_flag:"What is the flag of",q_intruder:"Which flag does NOT belong to",
+    correct_msgs:["Well done! 🎉","Great! ✨","Excellent! 🌟","Perfect! 🏆","Yes! 🎊"],
+    wrong_msg:"Not quite… It was",next:"Next question →",
+    win_title:"Level complete! 🎉",win_score:"Score:",replay:"🔄 Play again",next_level:"⭐ Next level",home:"🏠 Home",quit:"🏠",
+    great:"★★★ Excellent!",good:"★★☆ Well done!",ok:"★☆☆ Keep going!",
+    all_done:"You finished everything! Champion! 🏆"
+  }
+};
+
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+const SK='pgrg_drapeaux';
+
+function loadP(){try{return JSON.parse(localStorage.getItem(SK))||{level:0,hs:{}};}catch(e){return{level:0,hs:{}};}}
+function saveP(p){try{localStorage.setItem(SK,JSON.stringify(p));}catch(e){}}
+
+let actx;
+function ga(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;}
+function playTone(f,d,t='sine',v=0.15){
+  if(muted)return;
+  try{const ac=ga(),o=ac.createOscillator(),g=ac.createGain();
+  o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);
+  o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}
+}
+function playOk(){playTone(523,.1);setTimeout(()=>playTone(659,.1),110);setTimeout(()=>playTone(784,.2),220);}
+function playNo(){playTone(220,.15,'sawtooth',.08);setTimeout(()=>playTone(196,.2,'sawtooth',.07),160);}
+function playWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.18),i*130));}
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';}
+
+/* FLAGS */
+function fb(w,h,c,big){const sc=big?90:70;const sh=Math.round(sc*h/w);return `<svg viewBox="0 0 ${w} ${h}" width="${sc}" height="${sh}" xmlns="http://www.w3.org/2000/svg" style="border:1.5px solid #ccc;border-radius:3px;display:block">${c}</svg>`;}
+
+const SVGS={
+  france:b=>fb(90,60,`<rect width="30" height="60" fill="#002395"/><rect x="30" width="30" height="60" fill="#fff"/><rect x="60" width="30" height="60" fill="#ED2939"/>`,b),
+  germany:b=>fb(90,60,`<rect width="90" height="20" fill="#000"/><rect y="20" width="90" height="20" fill="#DD0000"/><rect y="40" width="90" height="20" fill="#FFCE00"/>`,b),
+  italy:b=>fb(90,60,`<rect width="30" height="60" fill="#009246"/><rect x="30" width="30" height="60" fill="#fff"/><rect x="60" width="30" height="60" fill="#CE2B37"/>`,b),
+  uk:b=>fb(90,60,`<rect width="90" height="60" fill="#012169"/><line x1="0" y1="0" x2="90" y2="60" stroke="#fff" stroke-width="12"/><line x1="90" y1="0" x2="0" y2="60" stroke="#fff" stroke-width="12"/><line x1="0" y1="0" x2="90" y2="60" stroke="#C8102E" stroke-width="6"/><line x1="90" y1="0" x2="0" y2="60" stroke="#C8102E" stroke-width="6"/><rect x="36" width="18" height="60" fill="#fff"/><rect y="22" width="90" height="16" fill="#fff"/><rect x="39" width="12" height="60" fill="#C8102E"/><rect y="25" width="90" height="10" fill="#C8102E"/>`,b),
+  usa:b=>fb(90,60,`${[...Array(13)].map((_,i)=>`<rect y="${i*4.6}" width="90" height="4.6" fill="${i%2===0?'#B22234':'#fff'}"/>`).join('')}<rect width="36" height="26" fill="#3C3B6E"/>${[...Array(5)].map((_,r)=>[...Array(r%2===0?6:5)].map((_,c)=>`<text x="${r%2===0?3+c*6:6+c*6}" y="${4.5+r*5}" font-size="4" fill="#fff" text-anchor="middle">★</text>`).join('')).join('')}`,b),
+  japan:b=>fb(90,60,`<rect width="90" height="60" fill="#fff"/><circle cx="45" cy="30" r="18" fill="#BC002D"/>`,b),
+  canada:b=>fb(90,60,`<rect width="22" height="60" fill="#FF0000"/><rect x="22" width="46" height="60" fill="#fff"/><rect x="68" width="22" height="60" fill="#FF0000"/><path d="M45 12 L47 22 L52 18 L50 26 L57 24 L53 30 L57 32 L45 35 L33 32 L37 30 L33 24 L40 26 L38 18 L43 22 Z" fill="#FF0000"/><rect x="42" y="35" width="6" height="12" fill="#FF0000"/>`,b),
+  brazil:b=>fb(90,60,`<rect width="90" height="60" fill="#009C3B"/><polygon points="45,6 84,30 45,54 6,30" fill="#FFDF00"/><circle cx="45" cy="30" r="13" fill="#002776"/><path d="M33 27 Q45 22 57 27" stroke="#fff" stroke-width="2" fill="none"/><text x="45" y="34" font-size="4.5" fill="#fff" text-anchor="middle" font-family="sans-serif">ORDEM E PROGRESSO</text>`,b),
+  spain:b=>fb(90,60,`<rect width="90" height="60" fill="#c60b1e"/><rect y="15" width="90" height="30" fill="#ffc400"/><rect x="28" y="21" width="10" height="18" fill="#fff" stroke="#888" stroke-width=".5"/><rect x="28" y="21" width="10" height="9" fill="#c60b1e"/>`,b),
+  china:b=>fb(90,60,`<rect width="90" height="60" fill="#DE2910"/><text x="14" y="20" font-size="14" fill="#FFDE00">★</text><text x="28" y="13" font-size="7" fill="#FFDE00">★</text><text x="35" y="19" font-size="7" fill="#FFDE00">★</text><text x="35" y="28" font-size="7" fill="#FFDE00">★</text><text x="28" y="34" font-size="7" fill="#FFDE00">★</text>`,b),
+  australia:b=>fb(90,60,`<rect width="90" height="60" fill="#00008B"/><rect width="40" height="28" fill="#012169"/><line x1="0" y1="0" x2="40" y2="28" stroke="#fff" stroke-width="5"/><line x1="40" y1="0" x2="0" y2="28" stroke="#fff" stroke-width="5"/><line x1="0" y1="0" x2="40" y2="28" stroke="#C8102E" stroke-width="2.5"/><line x1="40" y1="0" x2="0" y2="28" stroke="#C8102E" stroke-width="2.5"/><rect x="16" width="8" height="28" fill="#fff"/><rect y="10" width="40" height="8" fill="#fff"/><rect x="18" width="4" height="28" fill="#C8102E"/><rect y="12" width="40" height="4" fill="#C8102E"/><text x="62" y="18" font-size="7" fill="#fff" text-anchor="middle">★</text><text x="74" y="28" font-size="5" fill="#fff" text-anchor="middle">★</text><text x="55" y="32" font-size="5" fill="#fff" text-anchor="middle">★</text><text x="68" y="38" font-size="5" fill="#fff" text-anchor="middle">★</text><text x="48" y="22" font-size="10" fill="#fff" text-anchor="middle">★</text>`,b),
+  mexico:b=>fb(90,60,`<rect width="30" height="60" fill="#006847"/><rect x="30" width="30" height="60" fill="#fff"/><rect x="60" width="30" height="60" fill="#CE1126"/><circle cx="45" cy="30" r="6" fill="#8B4513"/><ellipse cx="45" cy="27" rx="3.5" ry="2.5" fill="#5C3317"/><circle cx="43" cy="34" r="1.5" fill="#006847"/><circle cx="47" cy="34" r="1.5" fill="#CE1126"/>`,b),
+  switzerland:b=>fb(60,60,`<rect width="60" height="60" fill="#FF0000"/><rect x="22" y="10" width="16" height="40" fill="#fff"/><rect x="10" y="22" width="40" height="16" fill="#fff"/>`,b),
+  netherlands:b=>fb(90,60,`<rect width="90" height="20" fill="#AE1C28"/><rect y="20" width="90" height="20" fill="#fff"/><rect y="40" width="90" height="20" fill="#21468B"/>`,b),
+  sweden:b=>fb(90,60,`<rect width="90" height="60" fill="#006AA7"/><rect x="25" width="12" height="60" fill="#FECC02"/><rect y="24" width="90" height="12" fill="#FECC02"/>`,b),
+  norway:b=>fb(90,60,`<rect width="90" height="60" fill="#EF2B2D"/><rect x="22" width="14" height="60" fill="#fff"/><rect y="23" width="90" height="14" fill="#fff"/><rect x="25" width="8" height="60" fill="#002868"/><rect y="26" width="90" height="8" fill="#002868"/>`,b),
+  greece:b=>fb(90,60,`${[...Array(9)].map((_,i)=>`<rect y="${i*6.7}" width="90" height="6.7" fill="${i%2===0?'#0D5EAF':'#fff'}"/>`).join('')}<rect width="36" height="30" fill="#0D5EAF"/><rect x="13" y="0" width="10" height="30" fill="#fff"/><rect x="0" y="10" width="36" height="10" fill="#fff"/>`,b),
+  portugal:b=>fb(90,60,`<rect width="36" height="60" fill="#006600"/><rect x="36" width="54" height="60" fill="#FF0000"/><circle cx="36" cy="30" r="13" fill="#FFFF00" stroke="#00008B" stroke-width="1.5"/><circle cx="36" cy="30" r="8" fill="#fff" stroke="#00008B" stroke-width="1"/><rect x="32" y="26" width="8" height="8" fill="none" stroke="#00008B" stroke-width="1.2"/>`,b),
+  southkorea:b=>fb(90,60,`<rect width="90" height="60" fill="#fff"/><circle cx="45" cy="30" r="14" fill="#CD2E3A"/><path d="M45 16 A14 14 0 0 1 45 44 A7 7 0 0 1 45 30 A7 7 0 0 0 45 16" fill="#003478"/><g stroke="#000" stroke-width="2.5"><line x1="14" y1="10" x2="24" y2="4"/><line x1="16" y1="14" x2="26" y2="8"/><line x1="18" y1="18" x2="28" y2="12"/><line x1="64" y1="4" x2="74" y2="10"/><line x1="63" y1="8" x2="69" y2="11.5"/><line x1="69.5" y1="8" x2="75.5" y2="11.5"/><line x1="62" y1="12" x2="72" y2="18"/><line x1="14" y1="50" x2="24" y2="56"/><line x1="16" y1="46" x2="21" y2="42.5"/><line x1="21.5" y1="46.5" x2="27.5" y2="42.5"/><line x1="18" y1="42" x2="28" y2="48"/></g>`,b),
+  india:b=>fb(90,60,`<rect width="90" height="20" fill="#FF9933"/><rect y="20" width="90" height="20" fill="#fff"/><rect y="40" width="90" height="20" fill="#138808"/><circle cx="45" cy="30" r="8" fill="none" stroke="#000080" stroke-width="1.5"/><circle cx="45" cy="30" r="1.5" fill="#000080"/>${[...Array(24)].map((_,i)=>{const a=i*15*Math.PI/180;return `<line x1="45" y1="30" x2="${(45+7.5*Math.cos(a)).toFixed(1)}" y2="${(30+7.5*Math.sin(a)).toFixed(1)}" stroke="#000080" stroke-width=".8"/>`;}).join('')}`,b),
+  argentina:b=>fb(90,60,`<rect width="90" height="20" fill="#74ACDF"/><rect y="20" width="90" height="20" fill="#fff"/><rect y="40" width="90" height="20" fill="#74ACDF"/><circle cx="45" cy="30" r="7" fill="#F6B40E"/>${[...Array(16)].map((_,i)=>{const a=i*22.5*Math.PI/180;const r1=8,r2=i%2===0?13:10.5;return `<line x1="${(45+r1*Math.cos(a)).toFixed(1)}" y1="${(30+r1*Math.sin(a)).toFixed(1)}" x2="${(45+r2*Math.cos(a)).toFixed(1)}" y2="${(30+r2*Math.sin(a)).toFixed(1)}" stroke="#F6B40E" stroke-width="${i%2===0?2:1.2}"/>`;}).join('')}<circle cx="45" cy="30" r="5" fill="#F6B40E"/><circle cx="43" cy="29" r="1" fill="#843511"/><circle cx="47" cy="29" r="1" fill="#843511"/><path d="M43 32 Q45 34 47 32" stroke="#843511" stroke-width=".8" fill="none"/>`,b),
+  southafrica:b=>fb(90,60,`<rect width="90" height="20" fill="#007A4D"/><rect y="20" width="90" height="20" fill="#fff"/><rect y="40" width="90" height="20" fill="#D52B1E"/><polygon points="0,0 40,30 0,60" fill="#000"/><polygon points="0,6 33,30 0,54" fill="#FFB81C"/><polygon points="0,12 26,30 0,48" fill="#007A4D"/><rect y="27" width="90" height="6" fill="#000"/><rect y="28.5" width="90" height="3" fill="#FFB81C"/>`,b),
+  nigeria:b=>fb(90,60,`<rect width="30" height="60" fill="#008751"/><rect x="30" width="30" height="60" fill="#fff"/><rect x="60" width="30" height="60" fill="#008751"/>`,b),
+  kenya:b=>fb(90,60,`<rect width="90" height="19" fill="#006600"/><rect y="19" width="90" height="22" fill="#BB0000"/><rect y="41" width="90" height="19" fill="#000"/><rect y="17" width="90" height="4" fill="#fff"/><rect y="39" width="90" height="4" fill="#fff"/><ellipse cx="45" cy="30" rx="8" ry="13" fill="#fff" stroke="#000" stroke-width="1"/><rect x="42" y="20" width="6" height="20" fill="#BB0000"/><line x1="45" y1="17" x2="45" y2="43" stroke="#000" stroke-width="1.5"/>`,b),
+  turkey:b=>fb(90,60,`<rect width="90" height="60" fill="#E30A17"/><circle cx="38" cy="30" r="12" fill="#fff"/><circle cx="42" cy="30" r="9.5" fill="#E30A17"/><polygon points="54,30 60.5,26.5 59,30 60.5,33.5" fill="#fff"/><polygon points="54,30 62,27.5 62,32.5" fill="#fff"/>`,b),
+  ukraine:b=>fb(90,60,`<rect width="90" height="30" fill="#005BBB"/><rect y="30" width="90" height="30" fill="#FFD500"/>`,b),
+  denmark:b=>fb(90,60,`<rect width="90" height="60" fill="#C60C30"/><rect x="28" width="12" height="60" fill="#fff"/><rect y="24" width="90" height="12" fill="#fff"/>`,b),
+  jamaica:b=>fb(90,60,`<rect width="90" height="60" fill="#000"/><polygon points="0,0 90,0 45,30" fill="#00A651"/><polygon points="0,60 90,60 45,30" fill="#00A651"/><line x1="0" y1="0" x2="90" y2="60" stroke="#FED100" stroke-width="9"/><line x1="90" y1="0" x2="0" y2="60" stroke="#FED100" stroke-width="9"/>`,b),
+};
+
+const FLAGS=[
+  {id:'france',fr:'France',en:'France',cont:'eu'},
+  {id:'germany',fr:'Allemagne',en:'Germany',cont:'eu'},
+  {id:'italy',fr:'Italie',en:'Italy',cont:'eu'},
+  {id:'uk',fr:'Royaume-Uni',en:'United Kingdom',cont:'eu'},
+  {id:'usa',fr:'États-Unis',en:'United States',cont:'am'},
+  {id:'japan',fr:'Japon',en:'Japan',cont:'as'},
+  {id:'canada',fr:'Canada',en:'Canada',cont:'am'},
+  {id:'brazil',fr:'Brésil',en:'Brazil',cont:'am'},
+  {id:'spain',fr:'Espagne',en:'Spain',cont:'eu'},
+  {id:'china',fr:'Chine',en:'China',cont:'as'},
+  {id:'australia',fr:'Australie',en:'Australia',cont:'oc'},
+  {id:'mexico',fr:'Mexique',en:'Mexico',cont:'am'},
+  {id:'switzerland',fr:'Suisse',en:'Switzerland',cont:'eu'},
+  {id:'netherlands',fr:'Pays-Bas',en:'Netherlands',cont:'eu'},
+  {id:'sweden',fr:'Suède',en:'Sweden',cont:'eu'},
+  {id:'norway',fr:'Norvège',en:'Norway',cont:'eu'},
+  {id:'greece',fr:'Grèce',en:'Greece',cont:'eu'},
+  {id:'portugal',fr:'Portugal',en:'Portugal',cont:'eu'},
+  {id:'southkorea',fr:'Corée du Sud',en:'South Korea',cont:'as'},
+  {id:'india',fr:'Inde',en:'India',cont:'as'},
+  {id:'argentina',fr:'Argentine',en:'Argentina',cont:'am'},
+  {id:'southafrica',fr:'Afrique du Sud',en:'South Africa',cont:'af'},
+  {id:'nigeria',fr:'Nigéria',en:'Nigeria',cont:'af'},
+  {id:'kenya',fr:'Kenya',en:'Kenya',cont:'af'},
+  {id:'turkey',fr:'Turquie',en:'Turkey',cont:'eu'},
+  {id:'ukraine',fr:'Ukraine',en:'Ukraine',cont:'eu'},
+  {id:'denmark',fr:'Danemark',en:'Denmark',cont:'eu'},
+  {id:'jamaica',fr:'Jamaïque',en:'Jamaica',cont:'am'},
+];
+
+const LEVELS=[
+  {name:{fr:'Niveau 1 — Les célebres',en:'Level 1 — Famous flags'},ids:['france','germany','italy','uk','usa','japan','canada','brazil'],modes:['flag_country'],n:3,q:10},
+  {name:{fr:'Niveau 2 — Découverte',en:'Level 2 — Discovery'},ids:['france','germany','italy','uk','usa','japan','canada','brazil','spain','china','australia','mexico','switzerland','netherlands'],modes:['flag_country','country_flag'],n:4,q:12},
+  {name:{fr:'Niveau 3 — Expert',en:'Level 3 — Expert'},ids:['france','germany','italy','uk','usa','japan','canada','brazil','spain','china','australia','mexico','switzerland','netherlands','sweden','norway','greece','portugal','southkorea','india'],modes:['flag_country','country_flag'],n:4,q:14},
+  {name:{fr:'Niveau 4 — Champion !',en:'Level 4 — Champion!'},ids:FLAGS.map(f=>f.id),modes:['flag_country','country_flag','intruder'],n:4,q:16},
+];
+
+function getF(id){return FLAGS.find(f=>f.id===id);}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+
+let st={};
+function startGame(lv){
+  const p=loadP();
+  st.lv=lv!==undefined?lv:Math.min(p.level||0,LEVELS.length-1);
+  st.score=0;st.total=0;st.qi=0;st.maxq=LEVELS[st.lv].q;
+  showScreen('screen-game');
+  updateLevelBar();
+  nextQuestion();
+}
+function nextLv(){
+  const p=loadP();
+  const nxt=Math.min((st.lv||0)+1,LEVELS.length-1);
+  p.level=Math.max(p.level||0,nxt);saveP(p);
+  startGame(nxt);
+}
+function updateLevelBar(){
+  document.getElementById('level-label').textContent=LEVELS[st.lv].name[lang];
+  updateBar();
+}
+function updateBar(){
+  document.getElementById('score-display').textContent=st.score+' / '+st.total;
+  document.getElementById('progress-bar').style.width=(st.maxq>0?Math.round(st.qi/st.maxq*100):0)+'%';
+}
+
+let cq=null,answered=false;
+function nextQuestion(){
+  document.getElementById('next-btn').classList.remove('visible');
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='';
+  if(st.qi>=st.maxq){showWin();return;}
+  st.qi++;
+  cq=buildQ(st.lv);answered=false;
+  renderQ();updateBar();
+}
+function buildQ(lvIdx){
+  const lv=LEVELS[lvIdx];
+  const mode=rnd(lv.modes);
+  const pool=lv.ids;
+  const correct=getF(rnd(pool));
+  if(mode==='intruder'){
+    const same=pool.filter(id=>getF(id).cont===correct.cont&&id!==correct.id);
+    if(same.length<lv.n-1)return buildQ(lvIdx);
+    const companions=shuffle(same).slice(0,lv.n-1).map(id=>getF(id));
+    return{mode,correct,allFlags:shuffle([correct,...companions]),cont:correct.cont};
+  }
+  const dist=shuffle(pool.filter(id=>id!==correct.id)).slice(0,lv.n-1).map(id=>getF(id));
+  return{mode,correct,opts:shuffle([correct,...dist])};
+}
+function contName(c){
+  const n={fr:{eu:'Europe',am:'Amériques',as:'Asie',af:'Afrique',oc:'Océanie'},en:{eu:'Europe',am:'Americas',as:'Asia',af:'Africa',oc:'Oceania'}};
+  return(n[lang]||n.fr)[c]||c;
+}
+function renderQ(){
+  const q=cq,t=T[lang];
+  const fd=document.getElementById('flag-display');
+  const cn=document.getElementById('country-name-display');
+  const ql=document.getElementById('question-label');
+  const mb=document.getElementById('mode-badge');
+  const ch=document.getElementById('choices');
+  fd.innerHTML='';cn.textContent='';ch.innerHTML='';
+  if(q.mode==='flag_country'){
+    mb.textContent=t.mode_flag_country;
+    ql.textContent=t.q_flag_country;
+    fd.innerHTML=SVGS[q.correct.id](true);
+    ch.style.gridTemplateColumns=q.opts.length<=3?'1fr 1fr 1fr':'1fr 1fr';
+    q.opts.forEach(f=>{
+      const b=mkBtn(f[lang],()=>answer(b,f.id===q.correct.id,q.correct[lang]));
+      b.setAttribute('aria-label',f[lang]);
+      ch.appendChild(b);
+    });
+  }else if(q.mode==='country_flag'){
+    mb.textContent=t.mode_country_flag;
+    ql.textContent=t.q_country_flag+' :';
+    cn.textContent=q.correct[lang];
+    ch.style.gridTemplateColumns='1fr 1fr';
+    q.opts.forEach(f=>{
+      const b=document.createElement('button');
+      b.className='choice-btn';
+      b.innerHTML=SVGS[f.id]?SVGS[f.id](false):'?';
+      b.setAttribute('aria-label',f[lang]);
+      b.onclick=()=>answer(b,f.id===q.correct.id,q.correct[lang]);
+      ch.appendChild(b);
+    });
+  }else{
+    mb.textContent=t.mode_intruder;
+    ql.textContent=t.q_intruder+' '+contName(q.cont)+' ?';
+    ch.style.gridTemplateColumns='1fr 1fr';
+    q.allFlags.forEach(f=>{
+      const b=document.createElement('button');
+      b.className='choice-btn';
+      b.setAttribute('aria-label',f[lang]);
+      b.innerHTML=`<div>${SVGS[f.id]?SVGS[f.id](false):''}</div><div style="font-size:.72rem;margin-top:3px">${f[lang]}</div>`;
+      b.onclick=()=>answer(b,f.id===q.correct.id,q.correct[lang]);
+      ch.appendChild(b);
+    });
+  }
+}
+function mkBtn(txt,cb){
+  const b=document.createElement('button');
+  b.className='choice-btn';b.textContent=txt;b.onclick=cb;return b;
+}
+function answer(btn,ok,correctLabel){
+  if(answered)return;answered=true;st.total++;
+  const t=T[lang];
+  const ch=document.getElementById('choices');
+  const fb=document.getElementById('feedback');
+  Array.from(ch.children).forEach(b=>{
+    const isC=cq.mode==='intruder'?b.getAttribute('aria-label')===cq.correct[lang]:b.getAttribute('aria-label')===cq.correct[lang];
+    b.classList.add(isC?'correct':'wrong');b.disabled=true;
+  });
+  if(ok){
+    st.score++;
+    const msg=rnd(t.correct_msgs);
+    fb.textContent=msg;fb.className='pos';playOk();announce(msg);
+  }else{
+    fb.textContent=t.wrong_msg+' : '+correctLabel;fb.className='neg';playNo();announce(t.wrong_msg+' : '+correctLabel);
+  }
+  updateBar();
+  const nb=document.getElementById('next-btn');nb.textContent=t.next;nb.classList.add('visible');
+}
+function announce(msg){const e=document.getElementById('aria-live');e.textContent='';setTimeout(()=>{e.textContent=msg;},60);}
+
+function showWin(){
+  const t=T[lang];
+  const pct=st.total>0?st.score/st.total:0;
+  const stars=pct>=0.75?'★★★':pct>=0.5?'★★☆':'★☆☆';
+  const rating=pct>=0.75?t.great:pct>=0.5?t.good:t.ok;
+  document.getElementById('win-stars').textContent=stars;
+  document.getElementById('win-title').textContent=t.win_title;
+  document.getElementById('win-score').textContent=t.win_score+' '+st.score+'/'+st.total+' — '+rating;
+  const p=loadP();const hs=p.hs||{};
+  if(!hs[st.lv]||st.score>hs[st.lv])hs[st.lv]=st.score;
+  p.hs=hs;p.level=Math.max(p.level||0,st.lv);saveP(p);
+  const r=document.getElementById('btn-replay'),nl=document.getElementById('btn-next-level');
+  r.textContent=t.replay;r.onclick=()=>startGame(st.lv);
+  if(st.lv>=LEVELS.length-1){nl.textContent='🏆';nl.onclick=()=>showScreen('screen-title');}
+  else{nl.textContent=t.next_level;nl.onclick=nextLv;}
+  document.getElementById('btn-home-win').textContent=t.home;
+  playWin();showScreen('screen-win');
+}
+
+let gA=0,gB=0;
+function showGate(){gA=Math.floor(Math.random()*9)+2;gB=Math.floor(Math.random()*9)+2;document.getElementById('gate-question').textContent=gA+' × '+gB+' = ?';document.getElementById('gate-input').value='';document.getElementById('gate-error').textContent='';showScreen('screen-gate');}
+function checkGate(){const v=parseInt(document.getElementById('gate-input').value,10);if(v===gA*gB){showParInfo();}else{document.getElementById('gate-error').textContent=T[lang].gate_err;playNo();}}
+document.getElementById('gate-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkGate();});
+function showParInfo(){
+  const t=T[lang];
+  document.getElementById('parents-info-title').textContent=t.parents_title;
+  ['p1','p2','p3','p4'].forEach(k=>{document.getElementById('p-info-'+k.slice(1)).textContent=t[k];});
+  showScreen('screen-parents');
+}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderStatic();
+  if(document.getElementById('screen-game').classList.contains('active')&&cq){updateLevelBar();renderQ();document.getElementById('next-btn').textContent=T[l].next;}
+}
+function renderStatic(){
+  const t=T[lang];
+  document.getElementById('main-title').textContent=t.title;
+  document.getElementById('main-subtitle').textContent=t.subtitle;
+  document.getElementById('btn-play').textContent=t.play;
+  document.getElementById('parents-link-text').textContent=t.parents;
+  document.getElementById('gate-title').textContent=t.gate_title;
+  document.getElementById('gate-instruction').textContent=t.gate_instr;
+  document.getElementById('btn-back-gate').textContent=t.back;
+  document.getElementById('btn-back-parents').textContent=t.back;
+  document.getElementById('btn-quit').textContent=t.quit;
+}
+setLang(lang);
+</script>
+</body>
+</html>

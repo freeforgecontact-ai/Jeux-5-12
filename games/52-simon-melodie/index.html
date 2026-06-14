@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Simon Mélodie / Melody Simon — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+  --pad1:#e53e3e;
+  --pad1-dark:#9b2c2c;
+  --pad2:#3182ce;
+  --pad2-dark:#1a4d7c;
+  --pad3:#38a169;
+  --pad3-dark:#1e6b3e;
+  --pad4:#d69e2e;
+  --pad4-dark:#8b6914;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--sky-light) 0%,#d4ebff 100%);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+#topbar{
+  width:100%;
+  background:var(--blue);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 16px;
+  gap:8px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+#topbar-left{display:flex;align-items:center;gap:10px;}
+#topbar-left img{height:34px;}
+#brand-text{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.02em;}
+#topbar-right{display:flex;align-items:center;gap:8px;}
+.lang-btn,.mute-btn{
+  background:var(--blue-dark);
+  color:#fff;
+  border:2px solid rgba(255,255,255,.3);
+  border-radius:8px;
+  padding:6px 12px;
+  font-size:.95rem;
+  font-weight:700;
+  cursor:pointer;
+  min-width:44px;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .15s;
+}
+.lang-btn.active{background:var(--orange);border-color:var(--orange-dark);}
+.lang-btn:hover{background:var(--orange);}
+.mute-btn{font-size:1.25rem;}
+.screen{
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+  max-width:540px;
+  padding:20px 16px 40px;
+  gap:18px;
+}
+.screen.active{display:flex;}
+#mascot-wrap{margin:8px 0;}
+#title-name{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.2rem;
+  font-weight:700;
+  color:var(--blue);
+  text-align:center;
+  line-height:1.1;
+}
+#title-sub{
+  font-size:1.05rem;
+  color:var(--slate);
+  text-align:center;
+  margin-top:2px;
+}
+#best-score-display{
+  background:#fff;
+  border-radius:16px;
+  padding:10px 22px;
+  color:var(--blue);
+  font-weight:700;
+  font-size:1rem;
+  border:2px solid var(--sky);
+  text-align:center;
+}
+.btn-play{
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:16px;
+  padding:16px 48px;
+  font-size:1.3rem;
+  font-weight:800;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform .1s,box-shadow .1s;
+  min-height:56px;
+}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:10px 24px;
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);
+  transition:transform .1s,box-shadow .1s;
+  min-height:48px;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#parents-link{
+  background:none;
+  border:none;
+  color:var(--slate);
+  font-size:.9rem;
+  cursor:pointer;
+  text-decoration:underline;
+  margin-top:4px;
+}
+#gate-question{font-size:1.2rem;color:var(--navy);font-weight:700;text-align:center;}
+#gate-input{
+  width:100px;
+  padding:10px;
+  font-size:1.3rem;
+  border:2px solid var(--sky);
+  border-radius:10px;
+  text-align:center;
+}
+#gate-err{color:#c00;font-size:.9rem;min-height:20px;text-align:center;}
+#parents-info{
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  color:var(--navy);
+  font-size:.97rem;
+  line-height:1.6;
+  border:2px solid var(--sky);
+  width:100%;
+}
+#parents-info h2{color:var(--blue);margin-bottom:10px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#level-display{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.1rem;
+  color:var(--blue);
+  font-weight:700;
+  text-align:center;
+}
+#score-bar{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  justify-content:center;
+  font-size:1rem;
+  color:var(--slate);
+  font-weight:700;
+}
+#score-bar span{color:var(--blue);}
+#status-msg{
+  font-size:1.1rem;
+  font-weight:700;
+  color:var(--navy);
+  text-align:center;
+  min-height:28px;
+  padding:4px 12px;
+  border-radius:10px;
+  transition:background .2s;
+}
+#status-msg.good{background:#d1fadf;color:#166534;}
+#status-msg.bad{background:#fee2e2;color:#991b1b;}
+#status-msg.info{background:#e0f2fe;color:var(--blue);}
+#pads-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  width:100%;
+  max-width:380px;
+}
+.pad{
+  aspect-ratio:1;
+  border-radius:24px;
+  border:4px solid rgba(0,0,0,.18);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:2.4rem;
+  font-weight:700;
+  color:#fff;
+  text-shadow:0 2px 6px rgba(0,0,0,.25);
+  transition:filter .1s, transform .1s, box-shadow .1s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:0 6px 0 rgba(0,0,0,.18);
+  position:relative;
+  overflow:hidden;
+  min-height:100px;
+}
+.pad:active,.pad.pressed{
+  transform:scale(.94);
+  filter:brightness(1.3);
+}
+.pad.lit{
+  filter:brightness(1.45) saturate(1.3);
+  transform:scale(1.04);
+  box-shadow:0 0 30px 8px rgba(255,255,255,.5);
+}
+.pad[data-pad="0"]{background:var(--pad1);box-shadow:0 6px 0 var(--pad1-dark);}
+.pad[data-pad="1"]{background:var(--pad2);box-shadow:0 6px 0 var(--pad2-dark);}
+.pad[data-pad="2"]{background:var(--pad3);box-shadow:0 6px 0 var(--pad3-dark);}
+.pad[data-pad="3"]{background:var(--pad4);box-shadow:0 6px 0 var(--pad4-dark);}
+.pad.lit[data-pad="0"]{box-shadow:0 0 30px 8px rgba(229,62,62,.6);}
+.pad.lit[data-pad="1"]{box-shadow:0 0 30px 8px rgba(49,130,206,.6);}
+.pad.lit[data-pad="2"]{box-shadow:0 0 30px 8px rgba(56,161,105,.6);}
+.pad.lit[data-pad="3"]{box-shadow:0 0 30px 8px rgba(214,158,46,.6);}
+.pad-symbol{font-size:2rem;line-height:1;}
+.pad-label{font-size:.75rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;opacity:.9;}
+#seq-progress{width:100%;max-width:380px;}
+#seq-bar-outer{
+  width:100%;
+  height:10px;
+  background:rgba(0,0,0,.12);
+  border-radius:8px;
+  overflow:hidden;
+}
+#seq-bar-inner{
+  height:100%;
+  background:var(--success);
+  border-radius:8px;
+  transition:width .2s;
+}
+#seq-label{font-size:.8rem;color:var(--slate);text-align:center;margin-top:3px;}
+#win-stars{font-size:3rem;text-align:center;letter-spacing:8px;}
+#win-title{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.8rem;
+  font-weight:700;
+  color:var(--orange);
+  text-align:center;
+}
+#win-detail{font-size:1rem;color:var(--slate);text-align:center;}
+#win-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+#aria-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+@media(max-width:400px){
+  #pads-grid{gap:10px;max-width:300px;}
+  #title-name{font-size:1.7rem;}
+  .pad{font-size:1.8rem;border-radius:18px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span id="brand-text">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button class="mute-btn" id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE SCREEN -->
+<div class="screen active" id="screen-title">
+  <div id="mascot-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="70" cy="108" rx="36" ry="24" fill="#0f4c81"/>
+      <rect x="42" y="82" width="56" height="34" rx="14" fill="#7ec3ee"/>
+      <ellipse cx="30" cy="95" rx="10" ry="6" fill="#7ec3ee" transform="rotate(-20 30 95)"/>
+      <ellipse cx="110" cy="95" rx="10" ry="6" fill="#7ec3ee" transform="rotate(20 110 95)"/>
+      <text x="18" y="90" font-size="14" fill="#ffd23f">♪</text>
+      <text x="104" y="90" font-size="14" fill="#ffd23f">♫</text>
+      <ellipse cx="70" cy="58" rx="33" ry="31" fill="#7ec3ee"/>
+      <line x1="70" y1="27" x2="70" y2="14" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="70" cy="11" r="5" fill="#f97316"/>
+      <ellipse cx="58" cy="54" rx="10" ry="11" fill="#fff"/>
+      <ellipse cx="82" cy="54" rx="10" ry="11" fill="#fff"/>
+      <circle cx="60" cy="55" r="5" fill="#0f4c81"/>
+      <circle cx="84" cy="55" r="5" fill="#0f4c81"/>
+      <circle cx="62" cy="53" r="2" fill="#fff"/>
+      <circle cx="86" cy="53" r="2" fill="#fff"/>
+      <path d="M57 70 Q70 80 83 70" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="45" cy="63" rx="8" ry="5" fill="#f97316" opacity=".4"/>
+      <ellipse cx="95" cy="63" rx="8" ry="5" fill="#f97316" opacity=".4"/>
+      <rect x="50" y="86" width="14" height="14" rx="4" fill="#e53e3e"/>
+      <text x="53" y="97" font-size="10" fill="#fff">★</text>
+      <rect x="76" y="86" width="14" height="14" rx="4" fill="#3182ce"/>
+      <text x="79" y="97" font-size="10" fill="#fff">●</text>
+      <rect x="50" y="102" width="14" height="10" rx="3" fill="#38a169"/>
+      <text x="53" y="110" font-size="8" fill="#fff">▲</text>
+      <rect x="76" y="102" width="14" height="10" rx="3" fill="#d69e2e"/>
+      <text x="79" y="110" font-size="8" fill="#fff">◆</text>
+    </svg>
+  </div>
+  <div id="title-name">Simon Mélodie<br><span style="font-size:1.3rem;color:var(--orange)">Melody Simon</span></div>
+  <div id="title-sub"></div>
+  <div id="best-score-display"></div>
+  <button class="btn-play" id="btn-play" onclick="startGame()"></button>
+  <button id="parents-link" onclick="showGate()"></button>
+</div>
+
+<!-- PARENTAL GATE -->
+<div class="screen" id="screen-gate">
+  <div style="font-size:2rem;">🔐</div>
+  <div id="gate-question"></div>
+  <input id="gate-input" type="number" inputmode="numeric" min="0" max="200" placeholder="?">
+  <div id="gate-err"></div>
+  <div style="display:flex;gap:12px;">
+    <button class="btn-secondary" id="btn-validate" onclick="checkGate()"></button>
+    <button class="btn-secondary" id="btn-back-gate" onclick="showScreen('screen-title')"></button>
+  </div>
+</div>
+
+<!-- PARENTS INFO -->
+<div class="screen" id="screen-parents">
+  <div id="parents-info"></div>
+  <button class="btn-secondary" id="btn-back-parents" onclick="showScreen('screen-title')"></button>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="screen-game">
+  <div id="level-display"></div>
+  <div id="score-bar">
+    <span id="score-label-el"></span>&nbsp;<span id="score-val">0</span>
+    &nbsp;|&nbsp;
+    <span id="best-label-el"></span>&nbsp;<span id="best-val">0</span>
+  </div>
+  <div id="status-msg" class="info"></div>
+  <div id="pads-grid" role="group" aria-label="Simon pads">
+    <button class="pad" data-pad="0" onclick="padClick(0)">
+      <span class="pad-symbol">★</span>
+      <span class="pad-label" id="pad0-lbl"></span>
+    </button>
+    <button class="pad" data-pad="1" onclick="padClick(1)">
+      <span class="pad-symbol">●</span>
+      <span class="pad-label" id="pad1-lbl"></span>
+    </button>
+    <button class="pad" data-pad="2" onclick="padClick(2)">
+      <span class="pad-symbol">▲</span>
+      <span class="pad-label" id="pad2-lbl"></span>
+    </button>
+    <button class="pad" data-pad="3" onclick="padClick(3)">
+      <span class="pad-symbol">◆</span>
+      <span class="pad-label" id="pad3-lbl"></span>
+    </button>
+  </div>
+  <div id="seq-progress">
+    <div id="seq-bar-outer"><div id="seq-bar-inner" style="width:0%"></div></div>
+    <div id="seq-label"></div>
+  </div>
+</div>
+
+<!-- WIN SCREEN -->
+<div class="screen" id="screen-win">
+  <div id="win-stars">⭐⭐⭐</div>
+  <div id="win-title"></div>
+  <div id="win-detail"></div>
+  <div id="win-btns">
+    <button class="btn-play" id="btn-next" onclick="nextLevel()"></button>
+    <button class="btn-secondary" id="btn-replay" onclick="startGame()"></button>
+    <button class="btn-secondary" id="btn-home" onclick="showScreen('screen-title')"></button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    subtitle: "Mémorise la mélodie et rejoue-la !",
+    best: "Meilleur score : {n}",
+    play: "Jouer",
+    parents_link: "Pour les parents",
+    validate: "Valider",
+    back: "Retour",
+    gate_q: "Combien font {a} × {b} ?",
+    gate_err: "Mauvaise réponse, réessaie !",
+    parents_text: "<h2>ℹ️ Pour les parents<\/h2><p><strong>Compétence visée :<\/strong> Mémoire de travail, écoute active, concentration et séquençage.<\/p><p><strong>Comment jouer :<\/strong> Le robot joue une séquence de notes colorées. L'enfant reproduit la séquence dans le bon ordre en cliquant sur les pads. La séquence s'allonge à chaque bonne réponse.<\/p><p><strong>En cas d'erreur :<\/strong> La séquence est rejouée sans pénalité. Aucun game-over brutal.<\/p><p><strong>Progression :<\/strong> 5 niveaux — vitesse et longueur des séquences augmentent.<\/p><p style=\"margin-top:12px;font-size:.85rem;color:var(--slate)\">🔒 Aucune donnée collectée. Aucune publicité. 100% hors-ligne. Open source — PGRG IA.<\/p>",
+    watching: "👀 Regarde bien…",
+    your_turn: "🎵 À toi ! Reproduis la mélodie !",
+    good: "🎉 Bravo ! Séquence réussie !",
+    error: "😊 Oups ! On réessaie ensemble !",
+    win_title: "Niveau réussi !",
+    win_detail: "Séquence de {n} notes ! Score : {s}",
+    next_level: "Niveau suivant →",
+    replay: "Rejouer",
+    home: "Accueil",
+    score_label: "Score",
+    best_label: "Meilleur",
+    level_display: "Niveau {n}",
+    seq_label: "{n}\/{t} notes",
+    pad0: "Rouge", pad1: "Bleu", pad2: "Vert", pad3: "Jaune"
+  },
+  en: {
+    subtitle: "Remember the melody and play it back!",
+    best: "Best score: {n}",
+    play: "Play",
+    parents_link: "For parents",
+    validate: "Validate",
+    back: "Back",
+    gate_q: "What is {a} × {b}?",
+    gate_err: "Wrong answer, try again!",
+    parents_text: "<h2>ℹ️ For parents<\/h2><p><strong>Skill targeted:<\/strong> Working memory, active listening, concentration and sequencing.<\/p><p><strong>How to play:<\/strong> The robot plays a sequence of coloured notes. The child repeats the sequence in the correct order by clicking the pads. The sequence grows with each correct answer.<\/p><p><strong>On error:<\/strong> The sequence is replayed without penalty. No brutal game-over.<\/p><p><strong>Progression:<\/strong> 5 levels — speed and sequence length increase.<\/p><p style=\"margin-top:12px;font-size:.85rem;color:var(--slate)\">🔒 No data collected. No ads. 100% offline. Open source — PGRG IA.<\/p>",
+    watching: "👀 Watch carefully…",
+    your_turn: "🎵 Your turn! Repeat the melody!",
+    good: "🎉 Great! Sequence complete!",
+    error: "😊 Oops! Let's try together again!",
+    win_title: "Level complete!",
+    win_detail: "Sequence of {n} notes! Score: {s}",
+    next_level: "Next level →",
+    replay: "Play again",
+    home: "Home",
+    score_label: "Score",
+    best_label: "Best",
+    level_display: "Level {n}",
+    seq_label: "{n}\/{t} notes",
+    pad0: "Red", pad1: "Blue", pad2: "Green", pad3: "Yellow"
+  }
+};
+
+var lang = (navigator.language||'fr').startsWith('en') ? 'en' : 'fr';
+var muted = false;
+var audioCtx = null;
+var level = 1;
+var sequence = [];
+var playerIndex = 0;
+var score = 0;
+var bestScore = 0;
+var isPlaying = false;
+var gameActive = false;
+var LS_KEY = 'pgrg_simon_melodie';
+
+var LEVELS = [
+  {seqLen:3, speed:650},
+  {seqLen:5, speed:550},
+  {seqLen:7, speed:450},
+  {seqLen:9, speed:380},
+  {seqLen:12, speed:300}
+];
+
+var PAD_FREQ = [329.63, 261.63, 392.00, 220.00];
+
+function t(key, vars) {
+  var s = (T[lang][key] || T['fr'][key] || key);
+  if (vars) {
+    Object.keys(vars).forEach(function(k) {
+      s = s.split('{'+k+'}').join(vars[k]);
+    });
+  }
+  return s;
+}
+
+function init() {
+  loadStorage();
+  applyLang();
+}
+
+function loadStorage() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      var d = JSON.parse(raw);
+      bestScore = d.bestScore || 0;
+    }
+  } catch(e) {}
+}
+
+function saveStorage() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({bestScore: bestScore}));
+  } catch(e) {}
+}
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btn-fr').className = 'lang-btn' + (l==='fr'?' active':'');
+  document.getElementById('btn-en').className = 'lang-btn' + (l==='en'?' active':'');
+  applyLang();
+}
+
+function applyLang() {
+  document.getElementById('title-sub').textContent = t('subtitle');
+  document.getElementById('best-score-display').textContent = t('best', {n: bestScore});
+  document.getElementById('btn-play').textContent = t('play');
+  document.getElementById('parents-link').textContent = t('parents_link');
+  document.getElementById('btn-validate').textContent = t('validate');
+  document.getElementById('btn-back-gate').textContent = t('back');
+  document.getElementById('btn-back-parents').textContent = t('back');
+  document.getElementById('score-label-el').textContent = t('score_label');
+  document.getElementById('best-label-el').textContent = t('best_label');
+  document.getElementById('pad0-lbl').textContent = t('pad0');
+  document.getElementById('pad1-lbl').textContent = t('pad1');
+  document.getElementById('pad2-lbl').textContent = t('pad2');
+  document.getElementById('pad3-lbl').textContent = t('pad3');
+  var pad0 = document.querySelector('.pad[data-pad="0"]');
+  var pad1 = document.querySelector('.pad[data-pad="1"]');
+  var pad2 = document.querySelector('.pad[data-pad="2"]');
+  var pad3 = document.querySelector('.pad[data-pad="3"]');
+  if (pad0) pad0.setAttribute('aria-label', t('pad0') + ' — étoile / star');
+  if (pad1) pad1.setAttribute('aria-label', t('pad1') + ' — cercle / circle');
+  if (pad2) pad2.setAttribute('aria-label', t('pad2') + ' — triangle');
+  if (pad3) pad3.setAttribute('aria-label', t('pad3') + ' — losange / diamond');
+  if (document.getElementById('btn-next')) document.getElementById('btn-next').textContent = t('next_level');
+  if (document.getElementById('btn-replay')) document.getElementById('btn-replay').textContent = t('replay');
+  if (document.getElementById('btn-home')) document.getElementById('btn-home').textContent = t('home');
+  updateLevelDisplay();
+  updateSeqLabel();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+var gateA = 0, gateB = 0;
+function showGate() {
+  gateA = 2 + Math.floor(Math.random() * 8);
+  gateB = 2 + Math.floor(Math.random() * 8);
+  document.getElementById('gate-question').textContent = t('gate_q', {a: gateA, b: gateB});
+  document.getElementById('gate-input').value = '';
+  document.getElementById('gate-err').textContent = '';
+  showScreen('screen-gate');
+}
+
+function checkGate() {
+  var val = parseInt(document.getElementById('gate-input').value);
+  if (val === gateA * gateB) {
+    document.getElementById('parents-info').innerHTML = t('parents_text');
+    showScreen('screen-parents');
+  } else {
+    document.getElementById('gate-err').textContent = t('gate_err');
+  }
+}
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playNote(freq, duration, type, vol) {
+  duration = duration || 0.35;
+  type = type || 'triangle';
+  vol = vol || 0.3;
+  if (muted) return;
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration + 0.05);
+  } catch(e) {}
+}
+
+function playSuccess() {
+  if (muted) return;
+  [523.25, 659.25, 783.99].forEach(function(f, i) {
+    setTimeout(function(){ playNote(f, 0.22, 'sine', 0.28); }, i * 130);
+  });
+}
+
+function playLevelWin() {
+  if (muted) return;
+  [261.63, 329.63, 392, 523.25, 659.25].forEach(function(f, i) {
+    setTimeout(function(){ playNote(f, 0.28, 'triangle', 0.26); }, i * 110);
+  });
+}
+
+function playError() {
+  if (muted) return;
+  playNote(110, 0.45, 'sawtooth', 0.12);
+}
+
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+  document.getElementById('mute-btn').setAttribute('aria-label', muted ? 'Son coupé' : 'Son actif');
+}
+
+function startGame() {
+  level = 1;
+  score = 0;
+  updateScoreDisplay();
+  startLevel();
+  showScreen('screen-game');
+}
+
+function startLevel() {
+  var cfg = LEVELS[Math.min(level - 1, LEVELS.length - 1)];
+  sequence = [];
+  for (var i = 0; i < cfg.seqLen; i++) {
+    sequence.push(Math.floor(Math.random() * 4));
+  }
+  playerIndex = 0;
+  gameActive = false;
+  updateLevelDisplay();
+  updateSeqLabel();
+  setStatus(t('watching'), 'info');
+  disablePads(true);
+  setTimeout(function(){ playSequence(); }, 700);
+}
+
+function playSequence() {
+  isPlaying = true;
+  var cfg = LEVELS[Math.min(level - 1, LEVELS.length - 1)];
+  var stepDuration = cfg.speed;
+  var litDuration = Math.min(stepDuration * 0.55, 280);
+  sequence.forEach(function(padIdx, i) {
+    setTimeout(function() {
+      lightPad(padIdx, litDuration);
+      playNote(PAD_FREQ[padIdx], litDuration / 1000, 'triangle', 0.3);
+    }, i * stepDuration);
+  });
+  var totalTime = sequence.length * stepDuration + 450;
+  setTimeout(function() {
+    isPlaying = false;
+    playerIndex = 0;
+    gameActive = true;
+    disablePads(false);
+    setStatus(t('your_turn'), 'info');
+    updateSeqLabel();
+  }, totalTime);
+}
+
+function lightPad(idx, duration) {
+  var pad = document.querySelector('.pad[data-pad="' + idx + '"]');
+  if (!pad) return;
+  pad.classList.add('lit');
+  setTimeout(function(){ pad.classList.remove('lit'); }, duration || 300);
+}
+
+function padClick(idx) {
+  if (!gameActive || isPlaying) return;
+  lightPad(idx, 200);
+  playNote(PAD_FREQ[idx], 0.22, 'triangle', 0.3);
+  if (idx === sequence[playerIndex]) {
+    playerIndex++;
+    updateSeqLabel();
+    if (playerIndex === sequence.length) {
+      gameActive = false;
+      disablePads(true);
+      score += sequence.length * level;
+      if (score > bestScore) { bestScore = score; saveStorage(); }
+      updateScoreDisplay();
+      setStatus(t('good'), 'good');
+      announce(t('good'));
+      playSuccess();
+      setTimeout(function() {
+        if (level >= LEVELS.length) {
+          showWinScreen(true);
+        } else {
+          showWinScreen(false);
+        }
+      }, 1200);
+    }
+  } else {
+    gameActive = false;
+    disablePads(true);
+    setStatus(t('error'), 'bad');
+    announce(t('error'));
+    playError();
+    playerIndex = 0;
+    setTimeout(function() {
+      setStatus(t('watching'), 'info');
+      disablePads(true);
+      setTimeout(function(){ playSequence(); }, 400);
+    }, 1500);
+  }
+}
+
+function showWinScreen(isFinal) {
+  document.getElementById('win-detail').textContent = t('win_detail', {n: sequence.length, s: score});
+  document.getElementById('win-title').textContent = t('win_title');
+  document.getElementById('win-stars').textContent = level >= 4 ? '⭐⭐⭐' : level >= 2 ? '⭐⭐' : '⭐';
+  document.getElementById('btn-next').textContent = t('next_level');
+  document.getElementById('btn-replay').textContent = t('replay');
+  document.getElementById('btn-home').textContent = t('home');
+  document.getElementById('btn-next').style.display = isFinal ? 'none' : '';
+  playLevelWin();
+  showScreen('screen-win');
+  document.getElementById('best-score-display').textContent = t('best', {n: bestScore});
+}
+
+function nextLevel() {
+  if (level < LEVELS.length) level++;
+  updateScoreDisplay();
+  startLevel();
+  showScreen('screen-game');
+}
+
+function updateLevelDisplay() {
+  var el = document.getElementById('level-display');
+  if (el) el.textContent = t('level_display', {n: level});
+}
+
+function updateSeqLabel() {
+  var done = Math.min(playerIndex, sequence.length);
+  var total = sequence.length;
+  var pct = total > 0 ? (done / total) * 100 : 0;
+  var bar = document.getElementById('seq-bar-inner');
+  var lbl = document.getElementById('seq-label');
+  if (bar) bar.style.width = pct + '%';
+  if (lbl) lbl.textContent = gameActive ? t('seq_label', {n: done, t: total}) : '';
+}
+
+function updateScoreDisplay() {
+  var sv = document.getElementById('score-val');
+  var bv = document.getElementById('best-val');
+  if (sv) sv.textContent = score;
+  if (bv) bv.textContent = bestScore;
+  var bsd = document.getElementById('best-score-display');
+  if (bsd) bsd.textContent = t('best', {n: bestScore});
+}
+
+function setStatus(msg, cls) {
+  var el = document.getElementById('status-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = cls || 'info';
+}
+
+function announce(msg) {
+  var el = document.getElementById('aria-live');
+  if (el) { el.textContent = ''; setTimeout(function(){ el.textContent = msg; }, 50); }
+}
+
+function disablePads(disabled) {
+  document.querySelectorAll('.pad').forEach(function(pad) {
+    pad.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    pad.style.pointerEvents = disabled ? 'none' : '';
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('screen-gate').classList.contains('active')) {
+    checkGate();
+  }
+});
+
+init();
+</script>
+</body>
+</html>

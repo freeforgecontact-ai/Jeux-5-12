@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Pêche aux Mots / Word Fishing – PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(180deg,#b8e4f9 0%,#7ec3ee 40%,#4a9fcc 100%);
+  min-height:100vh;overflow-x:hidden;
+}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+#topbar{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:var(--blue);color:#fff;flex-wrap:wrap;min-height:50px;
+  position:relative;z-index:100;
+}
+#topbar .logo-area{display:flex;align-items:center;gap:8px;flex:1}
+#topbar img{height:34px}
+#topbar .brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff}
+.lang-btn{
+  padding:4px 10px;border-radius:20px;font-size:0.85rem;font-weight:700;
+  background:transparent;color:#fff;border:2px solid rgba(255,255,255,0.5);
+  transition:background 0.2s;
+}
+.lang-btn.active{background:var(--orange);border-color:var(--orange)}
+.lang-btn:hover{background:rgba(255,255,255,0.2)}
+#muteBtn{
+  width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);
+  color:#fff;font-size:1.3rem;display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(255,255,255,0.3);transition:background 0.2s;
+}
+#muteBtn:hover{background:rgba(255,255,255,0.3)}
+/* Screen visibility system — ID rules must NOT set display */
+.screen{display:none;min-height:calc(100vh - 50px)}
+.screen.active{display:flex}
+#titleScreen{
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;text-align:center;
+}
+#titleScreen h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:clamp(2rem,6vw,3.5rem);color:var(--blue-dark);
+  text-shadow:0 2px 4px rgba(255,255,255,0.6);margin:12px 0 4px;
+}
+#titleScreen h2{font-size:clamp(1rem,3vw,1.5rem);color:var(--slate);margin-bottom:20px}
+.play-btn{
+  padding:16px 48px;font-size:1.4rem;font-weight:700;border-radius:50px;
+  background:var(--orange);color:#fff;box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform 0.1s,box-shadow 0.1s;margin:8px;min-width:200px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+.play-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.parents-link{
+  margin-top:16px;color:var(--blue);font-size:0.9rem;
+  background:rgba(255,255,255,0.7);border:none;border-radius:20px;
+  padding:8px 18px;text-decoration:underline;cursor:pointer;
+}
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);
+  z-index:200;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:#fff;border-radius:20px;padding:24px;max-width:420px;width:90%;
+  text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+.modal-box h3{color:var(--blue-dark);font-size:1.4rem;margin-bottom:12px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.modal-box p{color:var(--slate);margin-bottom:12px;line-height:1.5}
+.modal-box input{
+  width:80px;text-align:center;font-size:1.4rem;padding:8px;
+  border:2px solid var(--blue);border-radius:10px;margin:8px;
+}
+.modal-close{
+  padding:10px 24px;border-radius:20px;background:var(--blue);color:#fff;
+  font-weight:700;margin-top:8px;
+}
+#gameScreen{
+  flex-direction:column;align-items:center;
+  padding:10px;
+}
+#levelInfo{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1rem;color:var(--blue-dark);font-weight:700;
+  background:rgba(255,255,255,0.7);border-radius:20px;padding:4px 14px;
+  margin-bottom:8px;
+}
+#targetBox{
+  background:rgba(255,255,255,0.9);border-radius:20px;padding:10px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);margin-bottom:8px;min-width:180px;
+}
+#targetEmoji{font-size:3.5rem;line-height:1}
+#targetLabel{font-size:0.85rem;color:var(--slate);font-weight:700}
+#scoreBar{
+  display:flex;gap:16px;align-items:center;margin-bottom:6px;
+  background:rgba(255,255,255,0.7);border-radius:20px;padding:4px 16px;
+}
+#scoreBar span{font-weight:700;color:var(--blue-dark);font-size:0.95rem}
+#pond{
+  position:relative;width:100%;max-width:600px;
+  height:clamp(280px,55vw,400px);
+  background:linear-gradient(180deg,#5bb8e8 0%,#1a7abf 50%,#0a4d80 100%);
+  border-radius:24px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.3);
+  touch-action:none;
+}
+.bubble{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  animation:rise linear infinite;pointer-events:none;
+}
+@keyframes rise{from{transform:translateY(0);opacity:0.6}to{transform:translateY(-200px);opacity:0}}
+.fish{
+  position:absolute;cursor:pointer;user-select:none;
+  display:flex;flex-direction:column;align-items:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.fish-word{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-weight:700;font-size:clamp(0.75rem,2.5vw,1rem);
+  color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  margin-top:2px;white-space:nowrap;pointer-events:none;
+}
+.fish.caught{animation:catchAnim 0.4s forwards;pointer-events:none}
+@keyframes catchAnim{
+  0%{transform:scale(1)}50%{transform:scale(1.4) rotate(20deg)}
+  100%{transform:scale(0) rotate(40deg);opacity:0}
+}
+.fish.wrong{animation:wrongAnim 0.4s}
+@keyframes wrongAnim{
+  0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}
+}
+.seaweed{position:absolute;bottom:0;pointer-events:none}
+@keyframes sway{0%,100%{transform-origin:bottom center;transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+#feedback{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:2.5rem;font-weight:900;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  pointer-events:none;opacity:0;z-index:150;
+  text-shadow:0 3px 8px rgba(0,0,0,0.4);
+}
+#feedback.show-good{color:var(--success);animation:feedAnim 0.9s forwards}
+#feedback.show-bad{color:#ef4444;animation:feedAnim 0.7s forwards}
+@keyframes feedAnim{
+  0%{opacity:0;transform:translate(-50%,-60%) scale(0.5)}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+  70%{opacity:1}100%{opacity:0;transform:translate(-50%,-40%) scale(0.9)}
+}
+#winScreen{
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;text-align:center;
+}
+#winScreen h2{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:clamp(1.8rem,5vw,3rem);color:var(--blue-dark);margin:16px 0 8px;
+}
+#starsDisplay{font-size:3rem;margin:8px 0}
+#winMsg{color:var(--slate);font-size:1.1rem;margin-bottom:20px}
+.win-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn-secondary{
+  padding:12px 28px;border-radius:50px;background:var(--blue);color:#fff;
+  font-weight:700;font-size:1rem;box-shadow:0 4px 0 var(--blue-dark);
+  transition:transform 0.1s,box-shadow 0.1s;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.btn-orange{
+  padding:12px 28px;border-radius:50px;background:var(--orange);color:#fff;
+  font-weight:700;font-size:1rem;box-shadow:0 4px 0 var(--orange-dark);
+  transition:transform 0.1s,box-shadow 0.1s;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+.btn-orange:active{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-dark)}
+#progressBar{
+  width:100%;max-width:300px;height:12px;background:rgba(255,255,255,0.4);
+  border-radius:10px;margin-top:6px;overflow:hidden;
+}
+#progressFill{height:100%;background:var(--success);border-radius:10px;transition:width 0.3s}
+#ariaLive{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+</style>
+</head>
+<body>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+<div id="feedback" role="alert"></div>
+
+<div id="topbar">
+  <div class="logo-area">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span class="brand">PGRG IA</span>
+  </div>
+  <button class="lang-btn" id="btnFR" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+
+<div id="titleScreen" class="screen active">
+  <svg width="140" height="120" viewBox="0 0 140 120" aria-hidden="true">
+    <line x1="86" y1="0" x2="86" y2="42" stroke="#475569" stroke-width="2.5"/>
+    <path d="M86,42 Q86,56 76,56 Q66,56 66,46" stroke="#475569" stroke-width="2.5" fill="none"/>
+    <rect x="54" y="6" width="66" height="26" rx="8" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+    <text x="87" y="24" text-anchor="middle" font-family="'Fredoka','Nunito',sans-serif" font-size="13" fill="#0f4c81" font-weight="bold">🐱 chat</text>
+    <polygon points="28,78 6,56 6,100" fill="#ea580c"/>
+    <ellipse cx="74" cy="78" rx="46" ry="30" fill="#f97316"/>
+    <ellipse cx="82" cy="85" rx="28" ry="17" fill="#ffd23f" opacity="0.5"/>
+    <circle cx="104" cy="66" r="10" fill="#fff"/>
+    <circle cx="106" cy="66" r="6" fill="#0f172a"/>
+    <circle cx="108" cy="64" r="2.5" fill="#fff"/>
+    <path d="M113,76 Q121,85 113,88" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M68,48 Q82,32 98,50" stroke="#ea580c" stroke-width="3" fill="#f97316" stroke-linecap="round"/>
+    <circle cx="126" cy="52" r="5" fill="none" stroke="#7ec3ee" stroke-width="2"/>
+    <circle cx="134" cy="40" r="7" fill="none" stroke="#7ec3ee" stroke-width="2"/>
+    <circle cx="129" cy="26" r="4" fill="none" stroke="#7ec3ee" stroke-width="1.5"/>
+  </svg>
+  <h1 id="titleH1">La Pêche aux Mots</h1>
+  <h2 id="titleH2">Attrape le bon poisson !</h2>
+  <button class="play-btn" onclick="startGame(1)" id="playBtn">🎣 Jouer</button>
+  <button class="parents-link" onclick="openParents()" id="parentsLink">👨‍👩‍👧 Pour les parents</button>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div id="levelInfo"></div>
+  <div id="targetBox" aria-label="">
+    <div id="targetEmoji" aria-hidden="true"></div>
+    <div id="targetLabel"></div>
+  </div>
+  <div id="scoreBar">
+    <span id="scoreText">🐟 0/0</span>
+    <div id="progressBar" aria-label="progression"><div id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div id="pond" role="application" aria-label="étang"></div>
+</div>
+
+<div id="winScreen" class="screen">
+  <svg width="100" height="80" viewBox="0 0 100 80" aria-hidden="true">
+    <polygon points="15,48 0,30 0,66" fill="#ea580c"/>
+    <ellipse cx="52" cy="48" rx="36" ry="24" fill="#f97316"/>
+    <ellipse cx="58" cy="54" rx="22" ry="14" fill="#ffd23f" opacity="0.5"/>
+    <circle cx="76" cy="38" r="8" fill="#fff"/>
+    <circle cx="78" cy="38" r="5" fill="#0f172a"/>
+    <circle cx="80" cy="36" r="2" fill="#fff"/>
+    <path d="M82,48 Q89,55 82,58" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>
+  <div id="starsDisplay"></div>
+  <h2 id="winTitle">Bravo !</h2>
+  <p id="winMsg"></p>
+  <div class="win-btns">
+    <button class="btn-secondary" onclick="showTitle()" id="homeBtn">🏠 Accueil</button>
+    <button class="btn-orange" onclick="replayLevel()" id="replayBtn">🔄 Rejouer</button>
+    <button class="btn-orange" onclick="nextLevel()" id="nextBtn">▶ Suivant</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="parentsModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3 id="parentTitle">🔐 Espace parents</h3>
+    <p id="parentChallenge"></p>
+    <input type="number" id="parentAnswer" min="0" max="999" aria-label="réponse">
+    <br>
+    <button class="modal-close" onclick="checkParents()" id="parentCheckBtn">OK</button>
+    <button class="modal-close" onclick="closeParents()" style="background:var(--slate);margin-left:8px" id="parentCancelBtn">✕</button>
+    <div id="parentInfo" style="display:none;text-align:left;margin-top:12px">
+      <p id="parentInfoText"></p>
+      <button class="modal-close" onclick="closeParents()" style="margin-top:8px" id="parentCloseBtn">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    title:"La Pêche aux Mots",subtitle:"Attrape le bon poisson !",
+    play:"🎣 Jouer",parents:"👨‍👩‍👧 Pour les parents",
+    levelLabel:"Niveau",target:"Pêche le mot :",score:"🐟",
+    home:"🏠 Accueil",replay:"🔄 Rejouer",next:"▶ Suivant",
+    bravo:"Bravo !",
+    winMsg1:"Fantastique ! Tu as attrapé tous les poissons !",
+    winMsg2:"Super pêcheur ! Niveau suivant ?",
+    winMsg3:"Bien joué ! Continue comme ça !",
+    great:"Super ! 🎉",oops:"Pas celui-là… essaie encore !",
+    parentTitle:"🔐 Espace parents",
+    parentChallenge:"Pour continuer, résous :",
+    parentCheckBtn:"OK",parentCancelBtn:"Annuler",
+    parentInfo:"<b>La Pêche aux Mots — PGRG IA</b><br><br><b>Compétences visées :</b> vocabulaire, lecture, association mot-image.<br><b>Âge recommandé :</b> 5 à 8 ans.<br><br>Ce jeu est <b>100% gratuit</b>, sans publicité, sans collecte de données, sans compte requis.<br>La progression est enregistrée localement sur cet appareil uniquement.<br>Code source libre sur <b>GitHub — PGRG IA</b>.",
+    parentClose:"Fermer",
+    catchInstruction:"Touche le poisson dont le mot correspond à l'image !",
+    pond:"étang"
+  },
+  en:{
+    title:"Word Fishing",subtitle:"Catch the right fish!",
+    play:"🎣 Play",parents:"👨‍👩‍👧 For parents",
+    levelLabel:"Level",target:"Fish the word:",score:"🐟",
+    home:"🏠 Home",replay:"🔄 Replay",next:"▶ Next",
+    bravo:"Well done!",
+    winMsg1:"Fantastic! You caught all the fish!",
+    winMsg2:"Great fisher! Ready for next level?",
+    winMsg3:"Nice work! Keep it up!",
+    great:"Great! 🎉",oops:"Not that one… try again!",
+    parentTitle:"🔐 Parent zone",
+    parentChallenge:"To continue, solve:",
+    parentCheckBtn:"OK",parentCancelBtn:"Cancel",
+    parentInfo:"<b>Word Fishing — PGRG IA</b><br><br><b>Skills targeted:</b> vocabulary, reading, word-image association.<br><b>Recommended age:</b> 5 to 8 years.<br><br>This game is <b>100% free</b>, no ads, no data collection, no account needed.<br>Progress is saved locally on this device only.<br>Open source on <b>GitHub — PGRG IA</b>.",
+    parentClose:"Close",
+    catchInstruction:"Tap the fish whose word matches the picture above!",
+    pond:"pond"
+  }
+};
+
+var WORDS={
+  fr:[
+    {e:"🐱",w:"chat"},{e:"🐶",w:"chien"},{e:"🐸",w:"grenouille"},
+    {e:"🍎",w:"pomme"},{e:"🌞",w:"soleil"},{e:"🚗",w:"voiture"},
+    {e:"🌈",w:"arc-en-ciel"},{e:"🦋",w:"papillon"},{e:"🏠",w:"maison"},
+    {e:"🌸",w:"fleur"},{e:"🍕",w:"pizza"},{e:"✈️",w:"avion"},
+    {e:"🎸",w:"guitare"},{e:"🌙",w:"lune"},{e:"⭐",w:"étoile"},
+    {e:"🐘",w:"éléphant"},{e:"🐠",w:"poisson"},{e:"🎁",w:"cadeau"},
+    {e:"🍦",w:"glace"},{e:"🐢",w:"tortue"}
+  ],
+  en:[
+    {e:"🐱",w:"cat"},{e:"🐶",w:"dog"},{e:"🐸",w:"frog"},
+    {e:"🍎",w:"apple"},{e:"🌞",w:"sun"},{e:"🚗",w:"car"},
+    {e:"🌈",w:"rainbow"},{e:"🦋",w:"butterfly"},{e:"🏠",w:"house"},
+    {e:"🌸",w:"flower"},{e:"🍕",w:"pizza"},{e:"✈️",w:"plane"},
+    {e:"🎸",w:"guitar"},{e:"🌙",w:"moon"},{e:"⭐",w:"star"},
+    {e:"🐘",w:"elephant"},{e:"🐠",w:"fish"},{e:"🎁",w:"gift"},
+    {e:"🍦",w:"ice cream"},{e:"🐢",w:"turtle"}
+  ]
+};
+
+var LEVELS=[
+  {fishCount:3,distractors:2,speed:0.9,label:"1"},
+  {fishCount:3,distractors:3,speed:1.1,label:"2"},
+  {fishCount:4,distractors:3,speed:1.3,label:"3"},
+  {fishCount:4,distractors:4,speed:1.5,label:"4"},
+  {fishCount:5,distractors:5,speed:1.8,label:"5"},
+  {fishCount:5,distractors:6,speed:2.1,label:"6"}
+];
+
+var FISH_COLORS=[
+  {body:'#f97316',belly:'#ffd23f',fin:'#ea580c',eye:'#0f172a'},
+  {body:'#7ec3ee',belly:'#eaf6ff',fin:'#0f4c81',eye:'#0f172a'},
+  {body:'#34c77b',belly:'#d1fae5',fin:'#059669',eye:'#0f172a'},
+  {body:'#a78bfa',belly:'#ede9fe',fin:'#7c3aed',eye:'#0f172a'},
+  {body:'#f43f5e',belly:'#ffe4e6',fin:'#be123c',eye:'#0f172a'},
+  {body:'#fbbf24',belly:'#fef3c7',fin:'#d97706',eye:'#0f172a'},
+  {body:'#10b981',belly:'#d1fae5',fin:'#047857',eye:'#0f172a'},
+  {body:'#60a5fa',belly:'#dbeafe',fin:'#1d4ed8',eye:'#0f172a'}
+];
+
+var lang=(navigator.language||'fr').startsWith('en')?'en':'fr';
+var muted=false;
+var audioCtx=null;
+var currentLevel=0;
+var score=0;
+var totalTarget=0;
+var caughtCount=0;
+var activeTarget=null;
+var fishData=[];
+var animFrameId=null;
+var levelTargetQueue=[];
+var roundOver=false;
+var parentA=0,parentB=0;
+
+function tr(k){return T[lang][k]||k;}
+
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,dur,type,vol){
+  if(muted)return;
+  type=type||'sine';vol=vol||0.18;
+  try{
+    var ctx=getAudio();
+    var o=ctx.createOscillator();
+    var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playCatch(){
+  [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.18,'sine',0.18);},i*80);});
+}
+function playWrong(){playTone(200,0.25,'sawtooth',0.07);}
+function playWin(){[523,587,659,698,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.22,'sine',0.2);},i*90);});}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btnFR').className='lang-btn'+(l==='fr'?' active':'');
+  document.getElementById('btnEN').className='lang-btn'+(l==='en'?' active':'');
+  applyTranslations();
+  if(document.getElementById('gameScreen').classList.contains('active')){
+    startGame(currentLevel+1);
+  }
+}
+
+function applyTranslations(){
+  var l=T[lang];
+  document.getElementById('titleH1').textContent=l.title;
+  document.getElementById('titleH2').textContent=l.subtitle;
+  document.getElementById('playBtn').textContent=l.play;
+  document.getElementById('parentsLink').textContent=l.parents;
+  document.getElementById('homeBtn').textContent=l.home;
+  document.getElementById('replayBtn').textContent=l.replay;
+  document.getElementById('nextBtn').textContent=l.next;
+  document.getElementById('winTitle').textContent=l.bravo;
+  document.getElementById('parentTitle').textContent=l.parentTitle;
+  document.getElementById('parentCheckBtn').textContent=l.parentCheckBtn;
+  document.getElementById('parentCancelBtn').textContent=l.parentCancelBtn;
+  var pcb=document.getElementById('parentCloseBtn');
+  if(pcb)pcb.textContent=l.parentClose;
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function showTitle(){stopAnimation();showScreen('titleScreen');}
+
+function showWin(stars){
+  stopAnimation();
+  showScreen('winScreen');
+  document.getElementById('starsDisplay').textContent='⭐'.repeat(stars);
+  var msgs=[tr('winMsg3'),tr('winMsg2'),tr('winMsg1')];
+  document.getElementById('winMsg').textContent=msgs[Math.min(stars-1,2)];
+  document.getElementById('winTitle').textContent=tr('bravo');
+  document.getElementById('nextBtn').style.display=currentLevel<LEVELS.length-1?'':'none';
+  playWin();
+  saveProgress();
+  setAriaLive(tr('bravo'));
+}
+
+function openParents(){
+  parentA=2+Math.floor(Math.random()*8);
+  parentB=2+Math.floor(Math.random()*8);
+  document.getElementById('parentChallenge').textContent=tr('parentChallenge')+' '+parentA+' × '+parentB+' = ?';
+  document.getElementById('parentAnswer').value='';
+  document.getElementById('parentInfo').style.display='none';
+  document.getElementById('parentAnswer').style.display='';
+  document.getElementById('parentCheckBtn').style.display='';
+  document.getElementById('parentsModal').classList.add('open');
+  setTimeout(function(){document.getElementById('parentAnswer').focus();},100);
+}
+function checkParents(){
+  var ans=parseInt(document.getElementById('parentAnswer').value)||0;
+  if(ans===parentA*parentB){
+    document.getElementById('parentInfo').style.display='block';
+    document.getElementById('parentInfoText').innerHTML=T[lang].parentInfo;
+    document.getElementById('parentAnswer').style.display='none';
+    document.getElementById('parentCheckBtn').style.display='none';
+  }else{
+    document.getElementById('parentAnswer').value='';
+    document.getElementById('parentAnswer').style.borderColor='#ef4444';
+    setTimeout(function(){document.getElementById('parentAnswer').style.borderColor='var(--blue)';},600);
+  }
+}
+function closeParents(){
+  document.getElementById('parentsModal').classList.remove('open');
+  document.getElementById('parentAnswer').style.display='';
+  document.getElementById('parentCheckBtn').style.display='';
+}
+document.getElementById('parentAnswer').addEventListener('keydown',function(e){if(e.key==='Enter')checkParents();});
+
+function saveProgress(){
+  try{
+    var d=JSON.parse(localStorage.getItem('pgrg_peche_mots')||'{}');
+    d.maxLevel=Math.max(d.maxLevel||0,currentLevel);
+    d.lang=lang;
+    localStorage.setItem('pgrg_peche_mots',JSON.stringify(d));
+  }catch(e){}
+}
+function loadProgress(){
+  try{return JSON.parse(localStorage.getItem('pgrg_peche_mots')||'{}');}
+  catch(e){return{};}
+}
+
+function makeFishSVG(color,size,flipped){
+  var w=size,h=Math.round(size*0.65);
+  var cx=Math.round(w*0.5),cy=Math.round(h*0.5);
+  var rx=Math.round(w*0.36),ry=Math.round(h*0.42);
+  var tail=Math.round(cx-rx);
+  var flip=flipped?'style="transform:scaleX(-1);transform-origin:center"':'';
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" '+flip+' aria-hidden="true">'+
+    '<polygon points="'+tail+','+cy+' '+Math.round(w*0.04)+','+Math.round(cy-ry*0.85)+' '+Math.round(w*0.04)+','+Math.round(cy+ry*0.85)+'" fill="'+color.fin+'"/>'+
+    '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+color.body+'"/>'+
+    '<ellipse cx="'+(cx+Math.round(rx*0.2))+'" cy="'+(cy+Math.round(ry*0.2))+'" rx="'+Math.round(rx*0.6)+'" ry="'+Math.round(ry*0.55)+'" fill="'+color.belly+'" opacity="0.5"/>'+
+    '<circle cx="'+(cx+Math.round(rx*0.55))+'" cy="'+(cy-Math.round(ry*0.22))+'" r="'+Math.round(h*0.17)+'" fill="#fff"/>'+
+    '<circle cx="'+(cx+Math.round(rx*0.6))+'" cy="'+(cy-Math.round(ry*0.22))+'" r="'+Math.round(h*0.09)+'" fill="'+color.eye+'"/>'+
+    '<circle cx="'+(cx+Math.round(rx*0.65))+'" cy="'+(cy-Math.round(ry*0.3))+'" r="'+Math.round(h*0.04)+'" fill="#fff"/>'+
+    '<path d="M'+(cx+Math.round(rx*0.82))+','+(cy+Math.round(ry*0.3))+' Q'+(cx+Math.round(rx*0.95))+','+(cy+Math.round(ry*0.55))+' '+(cx+Math.round(rx*0.82))+','+(cy+Math.round(ry*0.65))+'" stroke="'+color.eye+'" stroke-width="1.5" fill="none" stroke-linecap="round"/>'+
+    '<path d="M'+(cx-Math.round(rx*0.1))+','+(cy-ry)+' Q'+(cx+Math.round(rx*0.25))+','+(cy-Math.round(ry*1.55))+' '+(cx+Math.round(rx*0.5))+','+(cy-ry)+'" stroke="'+color.fin+'" stroke-width="2" fill="'+color.body+'"/>'+
+    '</svg>';
+}
+
+function addPondDecor(pond){
+  var swColors=['#34c77b','#059669','#10b981'];
+  [8,14,22,68,76,86,92].forEach(function(xp,i){
+    var sw=document.createElement('div');
+    sw.className='seaweed';
+    var c=swColors[i%swColors.length];
+    var h=28+Math.random()*32;
+    sw.style.cssText='left:'+xp+'%;bottom:0;animation:sway '+(2+Math.random()*2)+'s ease-in-out infinite;animation-delay:'+(Math.random()*2)+'s';
+    sw.innerHTML='<svg width="14" height="'+Math.round(h)+'" viewBox="0 0 14 '+Math.round(h)+'"><path d="M7,'+Math.round(h)+' Q2,'+Math.round(h*0.7)+' 7,'+Math.round(h*0.5)+' Q12,'+Math.round(h*0.3)+' 7,0" fill="'+c+'" opacity="0.85"/></svg>';
+    pond.appendChild(sw);
+  });
+  for(var i=0;i<6;i++){
+    var b=document.createElement('div');
+    b.className='bubble';
+    var s=4+Math.random()*8;
+    b.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(5+Math.random()*90)+'%;bottom:'+(Math.random()*30)+'%;animation-duration:'+(3+Math.random()*4)+'s;animation-delay:'+(Math.random()*5)+'s';
+    pond.appendChild(b);
+  }
+  var sand=document.createElement('div');
+  sand.style.cssText='position:absolute;bottom:0;left:0;right:0;height:18px;background:linear-gradient(180deg,#c8a85a,#b8943a);border-radius:0 0 24px 24px;pointer-events:none';
+  pond.appendChild(sand);
+  ['15%','35%','55%','75%','88%'].forEach(function(lp){
+    var p=document.createElement('div');
+    var s=6+Math.random()*8;
+    p.style.cssText='position:absolute;bottom:'+(4+Math.random()*8)+'px;left:'+lp+';width:'+s+'px;height:'+Math.round(s*0.6)+'px;background:#9e8060;border-radius:50%;pointer-events:none;opacity:0.7';
+    pond.appendChild(p);
+  });
+  var line=document.createElement('div');
+  line.style.cssText='position:absolute;top:0;left:50%;width:2px;height:36px;background:rgba(255,255,255,0.5);pointer-events:none;';
+  line.innerHTML='<svg width="12" height="16" viewBox="0 0 12 16" style="position:absolute;top:34px;left:-5px;display:block"><path d="M6,0 L6,10 Q6,14 2,14" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  pond.appendChild(line);
+}
+
+function stopAnimation(){
+  if(animFrameId){cancelAnimationFrame(animFrameId);animFrameId=null;}
+}
+
+function startGame(levelNum){
+  stopAnimation();
+  currentLevel=(levelNum||1)-1;
+  if(currentLevel<0)currentLevel=0;
+  if(currentLevel>=LEVELS.length)currentLevel=LEVELS.length-1;
+  score=0;caughtCount=0;roundOver=false;
+  showScreen('gameScreen');
+  buildLevel();
+}
+
+function replayLevel(){startGame(currentLevel+1);}
+function nextLevel(){startGame(currentLevel+2);}
+
+function buildLevel(){
+  var cfg=LEVELS[currentLevel];
+  var items=WORDS[lang];
+  var shuffled=items.slice().sort(function(){return Math.random()-0.5;});
+  totalTarget=cfg.fishCount;
+  levelTargetQueue=shuffled.slice(0,totalTarget);
+  caughtCount=0;score=0;roundOver=false;
+  document.getElementById('levelInfo').textContent=tr('levelLabel')+' '+LEVELS[currentLevel].label;
+  updateScore();
+  var pond=document.getElementById('pond');
+  pond.innerHTML='';
+  addPondDecor(pond);
+  fishData=[];
+  pickNextTarget();
+}
+
+function pickNextTarget(){
+  if(roundOver)return;
+  if(caughtCount>=totalTarget){endRound();return;}
+  activeTarget=levelTargetQueue[caughtCount];
+  document.getElementById('targetEmoji').textContent=activeTarget.e;
+  document.getElementById('targetLabel').textContent=tr('target');
+  document.getElementById('targetBox').setAttribute('aria-label',tr('target')+' '+activeTarget.e+' = '+activeTarget.w);
+  setAriaLive(tr('catchInstruction')+' '+activeTarget.e);
+  spawnFish();
+}
+
+function spawnFish(){
+  var cfg=LEVELS[currentLevel];
+  var pond=document.getElementById('pond');
+  var items=WORDS[lang];
+  var pW=pond.offsetWidth;
+  var pH=pond.offsetHeight;
+  fishData.forEach(function(fd){if(fd.el&&fd.el.parentNode)fd.el.parentNode.removeChild(fd.el);});
+  fishData=[];
+  var others=items.filter(function(it){return it.w!==activeTarget.w;});
+  var shuffled=others.slice().sort(function(){return Math.random()-0.5;});
+  var pool=[activeTarget].concat(shuffled.slice(0,cfg.distractors));
+  pool=pool.sort(function(){return Math.random()-0.5;});
+  var fishSize=Math.min(68,Math.max(44,Math.floor(pW/(pool.length+1)*1.1)));
+  var colorPool=FISH_COLORS.slice().sort(function(){return Math.random()-0.5;});
+  pool.forEach(function(item,i){
+    var flipped=Math.random()>0.5;
+    var color=colorPool[i%colorPool.length];
+    var el=document.createElement('div');
+    el.className='fish';
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label',item.w);
+    el.style.cssText='min-width:48px;min-height:48px;padding:4px;';
+    el.innerHTML=makeFishSVG(color,fishSize,flipped)+'<span class="fish-word">'+item.w+'</span>';
+    var margin=12;
+    var x=margin+Math.random()*(pW-fishSize-margin*2);
+    var y=20+Math.random()*(pH-fishSize-50);
+    var baseSpeed=0.5+cfg.speed*0.35;
+    var vx=(Math.random()*baseSpeed+0.3)*(flipped?-1:1);
+    var vy=(Math.random()-0.5)*0.6;
+    el.style.left=x+'px';
+    el.style.top=y+'px';
+    el.style.position='absolute';
+    var fd={el:el,x:x,y:y,vx:vx,vy:vy,word:item.w,isTarget:item.w===activeTarget.w,caught:false,wrong:false,size:fishSize};
+    fishData.push(fd);
+    (function(ffd){
+      el.addEventListener('pointerdown',function(ev){ev.preventDefault();onFishClick(ffd);});
+      el.addEventListener('keydown',function(ev){if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();onFishClick(ffd);}});
+    })(fd);
+    pond.appendChild(el);
+  });
+  stopAnimation();
+  animateFish();
+}
+
+function onFishClick(fd){
+  if(fd.caught||fd.wrong||roundOver)return;
+  if(fd.isTarget){
+    fd.caught=true;
+    fd.el.classList.add('caught');
+    playCatch();
+    showFeedback(tr('great'),true);
+    setAriaLive(tr('great'));
+    caughtCount++;score++;
+    updateScore();
+    setTimeout(function(){if(!roundOver)pickNextTarget();},650);
+  }else{
+    fd.el.classList.add('wrong');
+    playWrong();
+    showFeedback(tr('oops'),false);
+    setAriaLive(tr('oops'));
+    fd.wrong=true;
+    setTimeout(function(){fd.el.classList.remove('wrong');fd.wrong=false;},500);
+  }
+}
+
+function showFeedback(msg,good){
+  var el=document.getElementById('feedback');
+  el.className='';
+  el.textContent=msg;
+  void el.offsetWidth;
+  el.className=good?'show-good':'show-bad';
+}
+
+function updateScore(){
+  document.getElementById('scoreText').textContent=tr('score')+' '+caughtCount+'/'+totalTarget;
+  document.getElementById('progressFill').style.width=(caughtCount/totalTarget*100)+'%';
+}
+
+function setAriaLive(msg){
+  var el=document.getElementById('ariaLive');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},60);
+}
+
+function animateFish(){
+  var pond=document.getElementById('pond');
+  function frame(){
+    var pW=pond.offsetWidth;
+    var pH=pond.offsetHeight;
+    fishData.forEach(function(fd){
+      if(fd.caught)return;
+      fd.x+=fd.vx;fd.y+=fd.vy;
+      var maxX=pW-fd.size-8;
+      var maxY=pH-fd.size-22;
+      if(fd.x<5){fd.x=5;fd.vx=Math.abs(fd.vx);}
+      if(fd.x>maxX){fd.x=maxX;fd.vx=-Math.abs(fd.vx);}
+      if(fd.y<8){fd.y=8;fd.vy=Math.abs(fd.vy);}
+      if(fd.y>maxY){fd.y=maxY;fd.vy=-Math.abs(fd.vy);}
+      fd.vy+=(Math.random()-0.5)*0.06;
+      if(fd.vy>1.4)fd.vy=1.4;
+      if(fd.vy<-1.4)fd.vy=-1.4;
+      fd.el.style.left=Math.round(fd.x)+'px';
+      fd.el.style.top=Math.round(fd.y)+'px';
+    });
+    animFrameId=requestAnimationFrame(frame);
+  }
+  animFrameId=requestAnimationFrame(frame);
+}
+
+function endRound(){
+  if(roundOver)return;
+  roundOver=true;stopAnimation();
+  var stars=score>=totalTarget?3:score>=Math.ceil(totalTarget*0.6)?2:1;
+  setTimeout(function(){showWin(stars);},400);
+}
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+  document.getElementById('muteBtn').setAttribute('aria-label',muted?'Son désactivé':'Son activé');
+}
+
+(function init(){
+  var saved=loadProgress();
+  if(saved.lang)lang=saved.lang;
+  document.getElementById('btnFR').className='lang-btn'+(lang==='fr'?' active':'');
+  document.getElementById('btnEN').className='lang-btn'+(lang==='en'?' active':'');
+  document.documentElement.lang=lang;
+  applyTranslations();
+})();
+</script>
+</body>
+</html>

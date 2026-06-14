@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Synonymes Arène / Synonym Arena — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#e0f0ff 0%,#eaf6ff 60%,#f0f8ff 100%);min-height:100vh;color:var(--navy);}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);padding:8px 16px;gap:8px;flex-wrap:wrap;}
+#topbar-left{display:flex;align-items:center;gap:10px}
+#topbar-brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:#fff;font-size:1.2rem;font-weight:700;letter-spacing:.5px}
+#topbar-right{display:flex;gap:8px;align-items:center}
+.lang-btn{background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:4px 12px;font-size:.95rem;cursor:pointer;font-weight:700;min-width:48px;min-height:36px;transition:background .2s,border-color .2s;}
+.lang-btn.active,.lang-btn:hover{background:rgba(255,255,255,.2);border-color:#fff}
+#mute-btn{background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:4px 10px;font-size:1.2rem;cursor:pointer;min-width:48px;min-height:36px;transition:background .2s;}
+#mute-btn:hover{background:rgba(255,255,255,.2)}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;min-height:calc(100vh - 56px);gap:16px}
+.screen.active{display:flex}
+#title-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:clamp(2rem,6vw,3.2rem);color:var(--blue);font-weight:700;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.08);}
+#title-sub{font-size:clamp(1rem,3vw,1.3rem);color:var(--slate);text-align:center;max-width:400px;}
+.btn-orange{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:14px 36px;font-size:1.2rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;min-height:56px;min-width:160px;}
+.btn-orange:hover{transform:translateY(-2px)}
+.btn-orange:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-blue{background:var(--blue);color:#fff;border:none;border-radius:16px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;min-height:48px;}
+.btn-blue:hover{transform:translateY(-2px)}
+.btn-blue:active{transform:translateY(3px);box-shadow:0 2px 0 var(--blue-dark)}
+.btn-ghost{background:transparent;color:var(--slate);border:2px solid var(--slate);border-radius:12px;padding:8px 20px;font-size:.9rem;cursor:pointer;min-height:44px;font-weight:700;transition:background .2s;}
+.btn-ghost:hover{background:rgba(0,0,0,.06)}
+#level-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:420px}
+.level-card{background:#fff;border:3px solid var(--sky);border-radius:16px;padding:14px 20px;cursor:pointer;min-width:120px;text-align:center;transition:transform .15s,border-color .15s;box-shadow:0 3px 0 var(--sky);}
+.level-card:hover{transform:translateY(-3px);border-color:var(--blue)}
+.level-card.locked{opacity:.45;cursor:default}
+.level-card .lc-icon{font-size:2rem}
+.level-card .lc-name{font-weight:700;color:var(--blue);font-size:.95rem;margin-top:4px}
+.level-card .lc-stars{color:var(--gold);font-size:.85rem}
+#game-header{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:600px;}
+#score-display{background:var(--blue);color:#fff;border-radius:12px;padding:6px 16px;font-weight:700;font-size:1rem;}
+#lives-display{font-size:1.4rem;letter-spacing:2px}
+#progress-bar-wrap{width:100%;max-width:600px;height:10px;background:#d0e8f5;border-radius:99px;overflow:hidden;}
+#progress-bar{height:100%;background:var(--orange);border-radius:99px;transition:width .4s}
+#round-type-badge{border-radius:99px;padding:4px 18px;font-weight:700;font-size:.9rem;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#word-display{background:#fff;border:3px solid var(--sky);border-radius:20px;padding:18px 36px;font-size:clamp(1.8rem,6vw,2.8rem);font-weight:700;color:var(--blue);text-align:center;width:100%;max-width:480px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;box-shadow:0 4px 0 var(--sky);}
+#question-text{color:var(--slate);font-size:1.05rem;text-align:center;font-weight:600;}
+#choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px;}
+.choice-btn{background:#fff;border:3px solid var(--sky);border-radius:16px;padding:14px 16px;font-size:clamp(1rem,3vw,1.25rem);font-weight:700;cursor:pointer;text-align:center;color:var(--navy);transition:transform .12s,border-color .12s,background .12s;min-height:60px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;box-shadow:0 3px 0 #b8daf0;}
+.choice-btn:hover{transform:translateY(-2px);border-color:var(--orange);background:#fff7ed}
+.choice-btn.correct{background:#d1fae5;border-color:var(--success);color:#166534}
+.choice-btn.wrong{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.choice-btn:disabled{cursor:default}
+#arena-wrap{position:relative;width:100%;max-width:480px;background:linear-gradient(180deg,#eaf6ff 60%,#c5e8ff 100%);border-radius:20px;border:3px solid var(--sky);overflow:hidden;height:90px;box-shadow:0 3px 0 var(--sky);}
+#arena-track{position:absolute;bottom:0;left:0;right:0;height:18px;background:linear-gradient(90deg,#b8daf0,#7ec3ee);border-radius:0 0 20px 20px;}
+#avatar-wrap{position:absolute;bottom:16px;transition:left .6s cubic-bezier(.34,1.56,.64,1);}
+#finish-flag{position:absolute;right:12px;bottom:14px;font-size:1.6rem;}
+#crowd-left{position:absolute;left:4px;top:4px;font-size:1.2rem;}
+#crowd-right{position:absolute;right:32px;top:4px;font-size:1.2rem;}
+#feedback-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);background:#fff;border-radius:24px;padding:24px 36px;text-align:center;font-size:1.3rem;font-weight:700;box-shadow:0 8px 40px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;z-index:100;}
+#feedback-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#success-stars{font-size:3rem;letter-spacing:4px}
+#success-msg{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:clamp(1.6rem,5vw,2.4rem);color:var(--blue);font-weight:700;text-align:center;}
+#success-sub{color:var(--slate);font-size:1.05rem;text-align:center}
+#success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+#parent-gate{background:#fff;border-radius:20px;padding:28px;max-width:380px;width:100%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.1);}
+#parent-gate h2{color:var(--blue);margin-bottom:12px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#parent-math{font-size:1.4rem;font-weight:700;color:var(--navy);margin-bottom:12px}
+#parent-input{width:100%;border:2px solid var(--sky);border-radius:10px;padding:10px;font-size:1.2rem;text-align:center;outline:none;font-family:inherit;}
+#parent-input:focus{border-color:var(--blue)}
+#parent-err{color:#ef4444;font-size:.9rem;min-height:1.2em;margin-top:6px}
+#parent-info{display:none;text-align:left;line-height:1.7;color:var(--slate);font-size:.95rem;margin-top:12px}
+#parent-info h3{color:var(--blue);margin-bottom:8px}
+#aria-live{position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden}
+#level-title-h{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.6rem;font-weight:700;color:var(--blue);text-align:center}
+@media(max-width:480px){#choices-grid{grid-template-columns:1fr}#topbar-brand{font-size:1rem}}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" role="status"></div>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span id="topbar-brand">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    <button id="mute-btn" onclick="toggleMute()">🔊</button>
+  </div>
+</div>
+<div id="feedback-popup" role="alert"></div>
+
+<!-- TITLE -->
+<div class="screen active" id="screen-title">
+  <div id="title-mascot">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="70" cy="122" rx="52" ry="12" fill="#b8daf0" opacity=".5"/>
+      <ellipse cx="70" cy="124" rx="44" ry="8" fill="#7ec3ee" opacity=".35"/>
+      <ellipse cx="70" cy="90" rx="24" ry="26" fill="#f97316"/>
+      <path d="M46 87 Q37 107 52 118 Q70 110 88 118 Q103 107 94 87 Z" fill="#0f4c81" opacity=".88"/>
+      <circle cx="70" cy="58" r="22" fill="#fde68a"/>
+      <circle cx="62" cy="54" r="3.8" fill="#1e3a5f"/>
+      <circle cx="78" cy="54" r="3.8" fill="#1e3a5f"/>
+      <circle cx="63.3" cy="52.6" r="1.4" fill="#fff"/>
+      <circle cx="79.3" cy="52.6" r="1.4" fill="#fff"/>
+      <path d="M62 64 Q70 72 78 64" stroke="#d97706" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="57" cy="62" r="4.5" fill="#fca5a5" opacity=".55"/>
+      <circle cx="83" cy="62" r="4.5" fill="#fca5a5" opacity=".55"/>
+      <path d="M50 51 Q52 36 70 35 Q88 36 90 51 L86 47 Q78 30 70 32 Q62 30 54 47 Z" fill="#ffd23f"/>
+      <circle cx="70" cy="33" r="5" fill="#f97316"/>
+      <circle cx="55" cy="45" r="3.5" fill="#f97316"/>
+      <circle cx="85" cy="45" r="3.5" fill="#f97316"/>
+      <line x1="46" y1="90" x2="28" y2="74" stroke="#fde68a" stroke-width="9" stroke-linecap="round"/>
+      <line x1="94" y1="90" x2="112" y2="74" stroke="#fde68a" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="26" cy="72" r="7" fill="#fde68a"/>
+      <circle cx="114" cy="72" r="7" fill="#fde68a"/>
+      <line x1="60" y1="114" x2="57" y2="130" stroke="#fde68a" stroke-width="8" stroke-linecap="round"/>
+      <line x1="80" y1="114" x2="83" y2="130" stroke="#fde68a" stroke-width="8" stroke-linecap="round"/>
+      <ellipse cx="56" cy="131" rx="9" ry="5" fill="#0f4c81"/>
+      <ellipse cx="84" cy="131" rx="9" ry="5" fill="#0f4c81"/>
+      <text x="70" y="108" text-anchor="middle" font-size="17" fill="#ffd23f" font-weight="bold" font-family="system-ui">S</text>
+    </svg>
+  </div>
+  <div id="title-name"></div>
+  <div id="title-sub"></div>
+  <button class="btn-orange" onclick="showScreen('screen-levels')" id="btn-play"></button>
+  <button class="btn-ghost" onclick="showParentGate()" id="btn-parents"></button>
+</div>
+
+<!-- LEVELS -->
+<div class="screen" id="screen-levels">
+  <div id="level-title-h"></div>
+  <div id="level-grid"></div>
+  <button class="btn-ghost" onclick="showScreen('screen-title')" id="btn-back-levels" style="margin-top:8px"></button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div id="game-header">
+    <div id="score-display">⭐ <span id="score-val">0</span></div>
+    <div id="lives-display"></div>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="arena-wrap">
+    <div id="crowd-left">👏👏</div>
+    <div id="crowd-right">🎉🎊</div>
+    <div id="arena-track"></div>
+    <div id="avatar-wrap" style="left:6px">
+      <svg width="44" height="50" viewBox="0 0 44 50" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="22" cy="48" rx="10" ry="4" fill="#7ec3ee" opacity=".4"/>
+        <ellipse cx="22" cy="32" rx="11" ry="12" fill="#f97316"/>
+        <path d="M11 30 Q7 40 14 44 Q22 40 30 44 Q37 40 33 30 Z" fill="#0f4c81" opacity=".9"/>
+        <circle cx="22" cy="19" r="11" fill="#fde68a"/>
+        <circle cx="18" cy="17" r="2.2" fill="#1e3a5f"/>
+        <circle cx="26" cy="17" r="2.2" fill="#1e3a5f"/>
+        <circle cx="18.8" cy="16.1" r=".8" fill="#fff"/>
+        <circle cx="26.8" cy="16.1" r=".8" fill="#fff"/>
+        <path d="M18 24 Q22 28 26 24" stroke="#d97706" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <circle cx="15" cy="22" r="3" fill="#fca5a5" opacity=".5"/>
+        <circle cx="29" cy="22" r="3" fill="#fca5a5" opacity=".5"/>
+        <path d="M13 18 Q14 10 22 10 Q30 10 31 18 L29 16 Q25 8 22 9 Q19 8 15 16 Z" fill="#ffd23f"/>
+        <circle cx="22" cy="9" r="3" fill="#f97316"/>
+        <text x="22" y="42" text-anchor="middle" font-size="7" fill="#ffd23f" font-weight="bold" font-family="system-ui">S</text>
+        <line x1="11" y1="32" x2="4" y2="25" stroke="#fde68a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="33" y1="32" x2="40" y2="25" stroke="#fde68a" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div id="finish-flag">🏁</div>
+  </div>
+  <div id="round-type-badge"></div>
+  <div id="word-display"></div>
+  <div id="question-text"></div>
+  <div id="choices-grid"></div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="screen-success">
+  <div id="success-stars"></div>
+  <div id="success-msg"></div>
+  <div id="success-sub"></div>
+  <div id="success-btns">
+    <button class="btn-orange" id="btn-next-level" onclick="nextLevel()"></button>
+    <button class="btn-blue" id="btn-replay" onclick="replayLevel()"></button>
+    <button class="btn-ghost" id="btn-home-success" onclick="showScreen('screen-title')"></button>
+  </div>
+</div>
+
+<!-- PARENTS -->
+<div class="screen" id="screen-parents">
+  <div id="parent-gate">
+    <h2 id="pg-title"></h2>
+    <div id="parent-math"></div>
+    <input type="number" id="parent-input" oninput="checkParentMath()">
+    <div id="parent-err"></div>
+    <div id="parent-info">
+      <h3 id="pi-title"></h3>
+      <p id="pi-body"></p>
+    </div>
+    <button class="btn-ghost" onclick="showScreen('screen-title')" id="btn-back-parent" style="margin-top:16px"></button>
+  </div>
+</div>
+
+<script>
+const DATA={
+  fr:{
+    levels:[
+      {id:0,mode:'syn',words:[
+        {w:'content',  syn:['heureux','joyeux','ravi'],      wrong:['triste','malheureux','ennuyé']},
+        {w:'rapide',   syn:['vite','prompt','agile'],        wrong:['lent','lourd','paresseux']},
+        {w:'grand',    syn:['énorme','immense','vaste'],     wrong:['petit','minuscule','étroit']},
+        {w:'beau',     syn:['joli','magnifique','superbe'],  wrong:['laid','vilain','affreux']},
+        {w:'courageux',syn:['brave','vaillant','hardi'],     wrong:['peureux','lâche','timide']},
+        {w:'gentil',   syn:['aimable','doux','bienveillant'],wrong:['méchant','cruel','hostile']},
+        {w:'drôle',    syn:['amusant','comique','rigolo'],   wrong:['triste','ennuyeux','sombre']},
+        {w:'fort',     syn:['puissant','robuste','solide'],  wrong:['faible','fragile','délicat']},
+      ]},
+      {id:1,mode:'ant',words:[
+        {w:'chaud',    syn:['brûlant','torride','bouillant'],wrong:['froid','glacial','gelé']},
+        {w:'jour',     syn:['lumière','clarté','soleil'],    wrong:['nuit','obscurité','ténèbres']},
+        {w:'vrai',     syn:['exact','juste','certain'],      wrong:['faux','erroné','incorrect']},
+        {w:'ouvert',   syn:['accessible','libre','dégagé'],  wrong:['fermé','bouché','obstrué']},
+        {w:'simple',   syn:['facile','aisé','élémentaire'], wrong:['difficile','compliqué','ardu']},
+        {w:'propre',   syn:['net','immaculé','soigné'],      wrong:['sale','souillé','crasseux']},
+        {w:'nouveau',  syn:['récent','moderne','inédit'],    wrong:['vieux','ancien','désuet']},
+        {w:'doux',     syn:['tendre','câlin','moelleux'],    wrong:['dur','rude','âpre']},
+      ]},
+      {id:2,mode:'mix',words:[
+        {w:'peur',     syn:['crainte','terreur','angoisse'],wrong:['courage','audace','sérénité']},
+        {w:'silence',  syn:['calme','tranquillité','quiétude'],wrong:['bruit','vacarme','tumulte']},
+        {w:'ami',      syn:['copain','camarade','compagnon'],wrong:['ennemi','rival','adversaire']},
+        {w:'rare',     syn:['inhabituel','précieux','unique'],wrong:['commun','ordinaire','banal']},
+        {w:'intelligent',syn:['malin','astucieux','brillant'],wrong:['stupide','bête','naïf']},
+        {w:'pauvre',   syn:['démuni','nécessiteux','indigent'],wrong:['riche','aisé','fortuné']},
+        {w:'bruyant',  syn:['tonitruant','fracassant','assourdissant'],wrong:['silencieux','discret','feutré']},
+        {w:'ancien',   syn:['vieux','suranné','vétuste'],   wrong:['nouveau','récent','moderne']},
+      ]},
+      {id:3,mode:'mix',words:[
+        {w:'perspicace',syn:['clairvoyant','sagace','lucide'],wrong:['borné','obtus','aveugle']},
+        {w:'mélancolie',syn:['tristesse','spleen','nostalgie'],wrong:['allégresse','joie','euphorie']},
+        {w:'intrépide', syn:['audacieux','téméraire','valeureux'],wrong:['peureux','couard','timoré']},
+        {w:'abondant',  syn:['copieux','profus','opulent'],wrong:['rare','clairsemé','insuffisant']},
+        {w:'véloce',    syn:['rapide','fulgurant','preste'],wrong:['lent','languissant','traînard']},
+        {w:'concis',    syn:['bref','succinct','lapidaire'],wrong:['long','prolixe','verbeux']},
+        {w:'effrayant', syn:['terrifiant','redoutable','sinistre'],wrong:['rassurant','bienveillant','serein']},
+        {w:'habile',    syn:['adroit','expert','talentueux'],wrong:['maladroit','gauche','inhabile']},
+      ]},
+    ]
+  },
+  en:{
+    levels:[
+      {id:0,mode:'syn',words:[
+        {w:'happy',   syn:['joyful','glad','cheerful'],  wrong:['sad','gloomy','unhappy']},
+        {w:'fast',    syn:['quick','speedy','swift'],    wrong:['slow','sluggish','lazy']},
+        {w:'big',     syn:['large','huge','enormous'],   wrong:['small','tiny','little']},
+        {w:'nice',    syn:['kind','lovely','pleasant'],  wrong:['mean','rude','nasty']},
+        {w:'brave',   syn:['bold','daring','fearless'],  wrong:['scared','timid','cowardly']},
+        {w:'smart',   syn:['clever','bright','sharp'],   wrong:['foolish','dull','stupid']},
+        {w:'funny',   syn:['hilarious','amusing','comical'],wrong:['boring','dull','serious']},
+        {w:'strong',  syn:['powerful','mighty','robust'],wrong:['weak','frail','feeble']},
+      ]},
+      {id:1,mode:'ant',words:[
+        {w:'hot',    syn:['burning','scorching','blazing'],wrong:['cold','freezing','icy']},
+        {w:'light',  syn:['bright','shining','radiant'],  wrong:['dark','dim','shadowy']},
+        {w:'true',   syn:['correct','accurate','real'],   wrong:['false','wrong','untrue']},
+        {w:'open',   syn:['unlocked','free','clear'],     wrong:['closed','shut','sealed']},
+        {w:'easy',   syn:['simple','effortless','smooth'],wrong:['hard','difficult','tough']},
+        {w:'clean',  syn:['neat','spotless','tidy'],      wrong:['dirty','filthy','messy']},
+        {w:'new',    syn:['fresh','modern','recent'],     wrong:['old','ancient','worn']},
+        {w:'soft',   syn:['gentle','tender','smooth'],    wrong:['hard','rough','harsh']},
+      ]},
+      {id:2,mode:'mix',words:[
+        {w:'fear',   syn:['dread','terror','panic'],  wrong:['courage','calm','peace']},
+        {w:'silence',syn:['quiet','stillness','hush'],wrong:['noise','clamor','uproar']},
+        {w:'friend', syn:['pal','buddy','companion'], wrong:['enemy','rival','foe']},
+        {w:'rare',   syn:['unusual','precious','scarce'],wrong:['common','ordinary','typical']},
+        {w:'clever', syn:['smart','sharp','cunning'], wrong:['foolish','naive','stupid']},
+        {w:'poor',   syn:['needy','destitute','penniless'],wrong:['wealthy','rich','affluent']},
+        {w:'loud',   syn:['noisy','booming','thundering'],wrong:['quiet','silent','hushed']},
+        {w:'ancient',syn:['old','antique','archaic'], wrong:['new','modern','recent']},
+      ]},
+      {id:3,mode:'mix',words:[
+        {w:'perceptive',syn:['insightful','astute','shrewd'],wrong:['obtuse','naive','blind']},
+        {w:'melancholy',syn:['sorrow','gloom','woe'],wrong:['joy','delight','bliss']},
+        {w:'intrepid',  syn:['daring','valiant','audacious'],wrong:['cowardly','timid','fearful']},
+        {w:'abundant',  syn:['plentiful','copious','lavish'],wrong:['scarce','sparse','lacking']},
+        {w:'swift',     syn:['rapid','fleet','nimble'],wrong:['slow','sluggish','languid']},
+        {w:'concise',   syn:['brief','terse','succinct'],wrong:['wordy','lengthy','verbose']},
+        {w:'dreadful',  syn:['awful','terrible','ghastly'],wrong:['wonderful','pleasant','soothing']},
+        {w:'skilled',   syn:['expert','adept','proficient'],wrong:['clumsy','inept','unskilled']},
+      ]},
+    ]
+  }
+};
+
+const T={
+  fr:{
+    title:'Synonymes Arène',
+    sub:'Trouve le bon synonyme ou antonyme et avance dans l\'arène !',
+    play:'Jouer ▶',parents:'Pour les parents',
+    chooseLevel:'Choisis ton niveau',back:'← Retour',
+    levels:['Niveau 1 — Synonymes','Niveau 2 — Antonymes','Niveau 3 — Mixte','Niveau 4 — Expert'],
+    levelIcons:['🌱','🌿','🌳','🏆'],
+    syn:'SYNONYME',ant:'ANTONYME',
+    question_syn:'Quel est le SYNONYME de :',
+    question_ant:'Quel est l\'ANTONYME de :',
+    good:['Super !','Excellent !','Bravo !','Parfait !','Génial !','Très bien !'],
+    bad:['Presque !','Essaie encore !','Pas tout à fait...','Continue !'],
+    winMsg:['Incroyable !','Champion·ne !','Quel talent !','Magnifique !'],
+    winSub:'Tu as marqué {score} point(s) sur {max} !',
+    nextLevel:'Niveau suivant ➜',replay:'Rejouer 🔄',home:'Accueil 🏠',
+    pgTitle:'Espace Parents',pgMath:'Combien font : {a} × {b} ?',
+    pgBack:'← Retour',pgErr:'Mauvaise réponse, essaie encore.',
+    piTitle:'À propos de ce jeu',
+    piBody:'Synonymes Arène développe la richesse du vocabulaire et la conscience des nuances lexicales. Aucune donnée n\'est collectée, aucune publicité n\'est affichée. Idéal pour les 9-12 ans.',
+    locked:'🔒',score:'Score',
+  },
+  en:{
+    title:'Synonym Arena',
+    sub:'Find the right synonym or antonym and advance in the arena!',
+    play:'Play ▶',parents:'For parents',
+    chooseLevel:'Choose your level',back:'← Back',
+    levels:['Level 1 — Synonyms','Level 2 — Antonyms','Level 3 — Mixed','Level 4 — Expert'],
+    levelIcons:['🌱','🌿','🌳','🏆'],
+    syn:'SYNONYM',ant:'ANTONYM',
+    question_syn:'Find a SYNONYM for:',
+    question_ant:'Find an ANTONYM for:',
+    good:['Great!','Excellent!','Awesome!','Perfect!','Brilliant!','Well done!'],
+    bad:['Almost!','Try again!','Not quite...','Keep going!'],
+    winMsg:['Incredible!','Champion!','What talent!','Magnificent!'],
+    winSub:'You scored {score} point(s) out of {max}!',
+    nextLevel:'Next Level ➜',replay:'Play Again 🔄',home:'Home 🏠',
+    pgTitle:'Parents Area',pgMath:'What is: {a} × {b}?',
+    pgBack:'← Back',pgErr:'Wrong answer, try again.',
+    piTitle:'About this game',
+    piBody:'Synonym Arena builds vocabulary richness and lexical awareness. No data is collected, no ads are shown. Perfect for children aged 9–12.',
+    locked:'🔒',score:'Score',
+  }
+};
+
+const LS_KEY='pgrg_synonymes_arene';
+let lang='fr', muted=false;
+let savedState={unlockedLevels:[0],levelStars:[0,0,0,0]};
+let gs={levelIdx:0,roundIdx:0,score:0,lives:3,words:[],currentMode:'syn',answered:false,totalRounds:8};
+
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  type=type||'sine';vol=vol||.15;
+  if(muted)return;
+  try{var c=getAudio(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+    o.start();o.stop(c.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(523,.12);setTimeout(function(){playTone(659,.12);},130);setTimeout(function(){playTone(784,.22);},260);}
+function playWrong(){playTone(220,.12,'square',.08);setTimeout(function(){playTone(196,.18,'square',.08);},140);}
+function playWin(){var notes=[523,587,659,784,1047];for(var i=0;i<notes.length;i++){(function(n,d){setTimeout(function(){playTone(n,.18,'sine',.12);},d);})(notes[i],i*120);}}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';}
+
+function saveLS(){try{localStorage.setItem(LS_KEY,JSON.stringify(savedState));}catch(e){}}
+function loadLS(){try{var d=localStorage.getItem(LS_KEY);if(d){var p=JSON.parse(d);if(p.unlockedLevels)savedState.unlockedLevels=p.unlockedLevels;if(p.levelStars)savedState.levelStars=p.levelStars;}}catch(e){}}
+
+function setLang(l){lang=l;document.documentElement.lang=l;document.getElementById('btn-fr').className='lang-btn'+(l==='fr'?' active':'');document.getElementById('btn-en').className='lang-btn'+(l==='en'?' active':'');renderUI();}
+function tl(key){return T[lang][key]||T['fr'][key]||key;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+
+function renderUI(){
+  document.getElementById('title-name').textContent=tl('title');
+  document.getElementById('title-sub').textContent=tl('sub');
+  document.getElementById('btn-play').textContent=tl('play');
+  document.getElementById('btn-parents').textContent=tl('parents');
+  document.getElementById('level-title-h').textContent=tl('chooseLevel');
+  document.getElementById('btn-back-levels').textContent=tl('back');
+  document.getElementById('btn-next-level').textContent=tl('nextLevel');
+  document.getElementById('btn-replay').textContent=tl('replay');
+  document.getElementById('btn-home-success').textContent=tl('home');
+  document.getElementById('pg-title').textContent=tl('pgTitle');
+  document.getElementById('btn-back-parent').textContent=tl('pgBack');
+  document.getElementById('pi-title').textContent=tl('piTitle');
+  document.getElementById('pi-body').textContent=tl('piBody');
+  renderLevelGrid();
+}
+
+function renderLevelGrid(){
+  var grid=document.getElementById('level-grid');
+  grid.innerHTML='';
+  var levels=DATA[lang].levels;
+  for(var i=0;i<levels.length;i++){
+    (function(idx){
+      var locked=savedState.unlockedLevels.indexOf(idx)<0;
+      var stars=savedState.levelStars[idx]||0;
+      var card=document.createElement('div');
+      card.className='level-card'+(locked?' locked':'');
+      var starStr='';for(var s=0;s<3;s++)starStr+=s<stars?'⭐':'☆';
+      var icon=locked?tl('locked'):tl('levelIcons')[idx];
+      card.innerHTML='<div class="lc-icon">'+icon+'</div><div class="lc-name">'+tl('levels')[idx]+'</div><div class="lc-stars">'+starStr+'</div>';
+      if(!locked){card.onclick=function(){startGame(idx);};}
+      grid.appendChild(card);
+    })(i);
+  }
+}
+
+function startGame(levelIdx){
+  var levelData=DATA[lang].levels[levelIdx];
+  gs.levelIdx=levelIdx;gs.score=0;gs.lives=3;gs.roundIdx=0;gs.answered=false;
+  gs.words=shuffle(levelData.words);gs.totalRounds=gs.words.length;
+  showScreen('screen-game');
+  setAvatarPos(0);
+  renderRound();
+}
+
+function getModeForRound(){
+  var m=DATA[lang].levels[gs.levelIdx].mode;
+  if(m==='syn')return 'syn';
+  if(m==='ant')return 'ant';
+  return Math.random()<.5?'syn':'ant';
+}
+
+function renderRound(){
+  gs.answered=false;
+  var wdata=gs.words[gs.roundIdx];
+  var mode=getModeForRound();
+  gs.currentMode=mode;
+  document.getElementById('score-val').textContent=gs.score;
+  var hearts='';for(var i=0;i<3;i++)hearts+=i<gs.lives?'❤️':'🖤';
+  document.getElementById('lives-display').textContent=hearts;
+  var pct=(gs.roundIdx/gs.totalRounds)*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  var badge=document.getElementById('round-type-badge');
+  if(mode==='syn'){badge.textContent=tl('syn');badge.style.cssText='background:#d1fae5;color:#166534;border-radius:99px;padding:4px 18px;font-weight:700;font-size:.9rem;';}
+  else{badge.textContent=tl('ant');badge.style.cssText='background:#fee2e2;color:#991b1b;border-radius:99px;padding:4px 18px;font-weight:700;font-size:.9rem;';}
+  document.getElementById('word-display').textContent=wdata.w;
+  document.getElementById('question-text').textContent=mode==='syn'?tl('question_syn'):tl('question_ant');
+  var correctPool,wrongPool;
+  if(mode==='syn'){correctPool=wdata.syn;wrongPool=wdata.wrong;}
+  else{correctPool=wdata.wrong;wrongPool=wdata.syn;}
+  var correct=pick(correctPool);
+  var shuffledW=shuffle(wrongPool.filter(function(x){return x!==correct;}));
+  var wrongChoices=shuffledW.slice(0,2);
+  var allChoices=shuffle([correct].concat(wrongChoices));
+  var grid=document.getElementById('choices-grid');
+  grid.innerHTML='';
+  for(var ci=0;ci<allChoices.length;ci++){
+    (function(choice,cor){
+      var btn=document.createElement('button');
+      btn.className='choice-btn';btn.textContent=choice;
+      btn.onclick=function(){handleChoice(btn,choice,cor,allChoices);};
+      grid.appendChild(btn);
+    })(allChoices[ci],correct);
+  }
+  document.getElementById('aria-live').textContent=(mode==='syn'?tl('question_syn'):tl('question_ant'))+' '+wdata.w;
+}
+
+function handleChoice(btn,chosen,correct){
+  if(gs.answered)return;
+  gs.answered=true;
+  var isCorrect=(chosen===correct);
+  var btns=document.querySelectorAll('.choice-btn');
+  btns.forEach(function(b){
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('correct');
+    else b.classList.add('wrong');
+  });
+  if(isCorrect)btn.classList.remove('wrong');
+  if(isCorrect){gs.score++;playSuccess();showFeedback(pick(tl('good')),true);advanceAvatar();}
+  else{gs.lives--;playWrong();showFeedback(pick(tl('bad')),false);}
+  setTimeout(function(){
+    if(gs.lives<=0){endGame();return;}
+    gs.roundIdx++;
+    if(gs.roundIdx>=gs.totalRounds)endGame();
+    else renderRound();
+  },1300);
+}
+
+function setAvatarPos(roundIdx){
+  var wrap=document.getElementById('avatar-wrap');
+  var arena=document.getElementById('arena-wrap');
+  var totalW=arena.offsetWidth-60;
+  var pct=roundIdx/gs.totalRounds;
+  var x=Math.min(pct*totalW,totalW);
+  wrap.style.left=Math.max(x,4)+'px';
+}
+function advanceAvatar(){
+  var wrap=document.getElementById('avatar-wrap');
+  wrap.style.transform='translateY(-5px)';
+  setTimeout(function(){wrap.style.transform='translateY(0)';setAvatarPos(gs.roundIdx+1);},300);
+}
+
+function showFeedback(msg,good){
+  var pop=document.getElementById('feedback-popup');
+  pop.textContent=msg;
+  pop.style.color=good?'#166534':'#991b1b';
+  pop.style.border='3px solid '+(good?'var(--success)':'#ef4444');
+  pop.classList.add('show');
+  setTimeout(function(){pop.classList.remove('show');},900);
+  document.getElementById('aria-live').textContent=msg;
+}
+
+function endGame(){
+  var max=gs.totalRounds,score=gs.score;
+  var stars=0;
+  if(score>=max)stars=3;
+  else if(score>=Math.floor(max*.75))stars=2;
+  else if(score>=Math.floor(max*.5))stars=1;
+  var li=gs.levelIdx;
+  if(stars>(savedState.levelStars[li]||0))savedState.levelStars[li]=stars;
+  if(stars>=1&&li+1<DATA[lang].levels.length&&savedState.unlockedLevels.indexOf(li+1)<0)savedState.unlockedLevels.push(li+1);
+  saveLS();
+  if(gs.lives>0)playWin();
+  var starStr='';for(var s=0;s<3;s++)starStr+=s<stars?'⭐':'☆';
+  document.getElementById('success-stars').textContent=starStr;
+  document.getElementById('success-msg').textContent=pick(tl('winMsg'));
+  var sub=tl('winSub').replace('{score}',score).replace('{max}',max);
+  document.getElementById('success-sub').textContent=sub;
+  var hasNext=li+1<DATA[lang].levels.length;
+  document.getElementById('btn-next-level').style.display=hasNext?'':'none';
+  showScreen('screen-success');
+}
+
+function nextLevel(){var n=gs.levelIdx+1;if(n<DATA[lang].levels.length)startGame(n);else showScreen('screen-title');}
+function replayLevel(){startGame(gs.levelIdx);}
+
+var pA=-1,pB=-1,pAns=-1;
+function showParentGate(){
+  pA=Math.floor(Math.random()*8)+2;pB=Math.floor(Math.random()*8)+2;pAns=pA*pB;
+  document.getElementById('parent-math').textContent=tl('pgMath').replace('{a}',pA).replace('{b}',pB);
+  document.getElementById('parent-input').value='';document.getElementById('parent-input').disabled=false;
+  document.getElementById('parent-err').textContent='';document.getElementById('parent-info').style.display='none';
+  showScreen('screen-parents');
+}
+function checkParentMath(){
+  var v=parseInt(document.getElementById('parent-input').value,10);
+  if(v===pAns){document.getElementById('parent-info').style.display='block';document.getElementById('parent-err').textContent='';document.getElementById('parent-input').disabled=true;}
+  else if(!isNaN(v)&&document.getElementById('parent-input').value.length>0){document.getElementById('parent-err').textContent=tl('pgErr');}
+}
+
+function init(){
+  loadLS();
+  var nav=(navigator.language||'fr').toLowerCase();
+  lang=nav.startsWith('en')?'en':'fr';
+  document.getElementById('btn-fr').className='lang-btn'+(lang==='fr'?' active':'');
+  document.getElementById('btn-en').className='lang-btn'+(lang==='en'?' active':'');
+  renderUI();
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Le Cycle de l'Eau / Water Cycle — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(180deg,#c8e8f8 0%,#eaf6ff 60%,#d4f1c0 100%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  color:var(--navy);
+}
+#topbar{
+  width:100%;max-width:820px;display:flex;align-items:center;gap:8px;
+  padding:8px 16px;background:var(--blue);border-radius:0 0 16px 16px;
+  box-shadow:0 4px 12px #0002;
+}
+#topbar img{height:34px;}
+#brand-text{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.15rem;font-weight:700;flex:1;}
+.lang-btn{background:transparent;border:2px solid #ffffff88;color:#fff;
+  border-radius:8px;padding:4px 10px;font-size:.85rem;cursor:pointer;font-weight:700;
+  min-width:48px;min-height:36px;}
+.lang-btn.active{background:#fff;color:var(--blue);}
+#mute-btn{background:transparent;border:none;font-size:1.4rem;cursor:pointer;
+  min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;}
+.screen{display:none;flex-direction:column;align-items:center;width:100%;
+  max-width:820px;padding:16px;gap:12px;}
+.screen.active{display:flex;}
+#title-screen{gap:16px;text-align:center;}
+#title-screen h1{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:clamp(1.8rem,5vw,2.8rem);color:var(--blue);line-height:1.1;}
+#title-screen .subtitle{color:var(--slate);font-size:1.05rem;}
+.btn-play{
+  background:var(--orange);color:#fff;border:none;border-radius:16px;
+  padding:16px 40px;font-size:1.25rem;font-weight:800;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  transition:transform .1s;min-height:56px;
+}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{
+  background:var(--blue);color:#fff;border:none;border-radius:12px;
+  padding:10px 24px;font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);min-height:48px;transition:transform .1s;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#gate-screen{gap:12px;text-align:center;}
+.gate-box{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 16px #0001;
+  max-width:340px;width:100%;}
+#gate-screen h2{color:var(--blue);font-size:1.2rem;}
+#gate-q{font-size:1.3rem;font-weight:700;margin:8px 0;}
+#gate-input{border:2px solid var(--sky);border-radius:10px;padding:10px;
+  font-size:1.2rem;text-align:center;width:100px;outline:none;}
+#gate-msg{color:#c00;font-size:.9rem;min-height:1.2em;}
+#gate-info{display:none;background:var(--sky-light);border-radius:12px;
+  padding:14px;text-align:left;font-size:.9rem;color:var(--slate);max-width:480px;}
+#gate-info p{margin-bottom:6px;}
+#gate-info strong{color:var(--blue);}
+#game-screen{gap:8px;}
+#level-badge{background:var(--blue);color:#fff;border-radius:20px;
+  padding:4px 16px;font-size:.85rem;font-weight:700;text-align:center;}
+#score-bar{display:flex;gap:16px;align-items:center;font-weight:700;
+  background:#fff8;border-radius:12px;padding:6px 16px;}
+#scene-wrap{width:100%;max-width:640px;border-radius:20px;overflow:hidden;
+  box-shadow:0 4px 24px #0002;}
+#water-svg{width:100%;height:auto;display:block;}
+.choice-btn{
+  background:#fff;border:3px solid var(--sky);border-radius:14px;
+  padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer;
+  min-height:54px;min-width:140px;display:flex;align-items:center;
+  justify-content:center;gap:6px;transition:background .15s,transform .1s;
+  color:var(--navy);text-align:center;
+}
+.choice-btn:hover{background:var(--sky-light);border-color:var(--blue);}
+.choice-btn:active{transform:scale(.97);}
+.choice-btn.correct{background:#d4f8e8;border-color:var(--success);}
+.choice-btn.wrong{background:#ffd6d6;border-color:#e55;}
+.choice-btn:disabled{cursor:default;}
+.order-card{
+  background:#fff;border:3px solid var(--sky);border-radius:14px;
+  padding:14px 18px;font-size:1rem;font-weight:700;cursor:grab;
+  display:flex;align-items:center;gap:10px;min-height:56px;
+  color:var(--navy);transition:box-shadow .15s,transform .1s;
+  user-select:none;
+}
+.order-card:hover{box-shadow:0 4px 12px #0002;border-color:var(--blue);}
+.order-card.dragging{opacity:.5;transform:scale(1.04);}
+.order-card.over{border-style:dashed;background:var(--sky-light);}
+#feedback{
+  min-height:48px;border-radius:12px;padding:10px 20px;font-size:1.1rem;
+  font-weight:700;text-align:center;width:100%;max-width:500px;
+  transition:opacity .3s;opacity:0;
+}
+#feedback.show{opacity:1;}
+#feedback.good{background:#d4f8e8;color:#1a7a4a;}
+#feedback.bad{background:#ffd6d6;color:#b00;}
+#aria-live{position:absolute;left:-9999px;top:0;}
+#success-screen{text-align:center;gap:16px;}
+#success-screen h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2rem;color:var(--blue);}
+#stars-display{font-size:3rem;letter-spacing:4px;}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+@media(max-width:480px){
+  .choice-btn{min-width:100px;font-size:.9rem;padding:10px 12px;}
+  #title-screen h1{font-size:1.6rem;}
+  .order-card{font-size:.9rem;padding:10px 12px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span id="brand-text">PGRG IA</span>
+  <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <svg viewBox="0 0 200 220" width="160" height="176" aria-label="Mascotte goutte d eau">
+    <circle cx="160" cy="36" r="24" fill="#ffd23f" opacity=".8"/>
+    <g stroke="#ffd23f" stroke-width="3" opacity=".7">
+      <line x1="160" y1="6" x2="160" y2="0"/><line x1="160" y1="66" x2="160" y2="72"/>
+      <line x1="130" y1="36" x2="124" y2="36"/><line x1="190" y1="36" x2="196" y2="36"/>
+      <line x1="139" y1="15" x2="135" y2="11"/><line x1="181" y1="57" x2="185" y2="61"/>
+      <line x1="181" y1="15" x2="185" y2="11"/><line x1="139" y1="57" x2="135" y2="61"/>
+    </g>
+    <ellipse cx="50" cy="45" rx="32" ry="18" fill="#fff" opacity=".85"/>
+    <ellipse cx="30" cy="50" rx="18" ry="13" fill="#fff" opacity=".85"/>
+    <ellipse cx="70" cy="50" rx="18" ry="13" fill="#fff" opacity=".85"/>
+    <line x1="38" y1="62" x2="36" y2="72" stroke="#7ec3ee" stroke-width="2" stroke-linecap="round"/>
+    <line x1="50" y1="63" x2="48" y2="73" stroke="#7ec3ee" stroke-width="2" stroke-linecap="round"/>
+    <line x1="62" y1="62" x2="60" y2="72" stroke="#7ec3ee" stroke-width="2" stroke-linecap="round"/>
+    <defs>
+      <radialGradient id="dg" cx="40%" cy="35%">
+        <stop offset="0%" stop-color="#a8e0f8"/>
+        <stop offset="100%" stop-color="#0f4c81"/>
+      </radialGradient>
+    </defs>
+    <path d="M100 80 C100 80 60 120 60 150 C60 175 78 195 100 195 C122 195 140 175 140 150 C140 120 100 80 100 80Z" fill="url(#dg)"/>
+    <ellipse cx="88" cy="128" rx="8" ry="14" fill="#ffffff66" transform="rotate(-15,88,128)"/>
+    <ellipse cx="93" cy="155" rx="4" ry="5" fill="#fff" opacity=".9"/>
+    <ellipse cx="107" cy="155" rx="4" ry="5" fill="#fff" opacity=".9"/>
+    <circle cx="93" cy="156" r="2.5" fill="#0a3559"/>
+    <circle cx="107" cy="156" r="2.5" fill="#0a3559"/>
+    <path d="M90 168 Q100 176 110 168" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M0 200 Q50 190 100 200 Q150 210 200 200 L200 220 L0 220Z" fill="#87CEEB" opacity=".5"/>
+  </svg>
+  <h1 id="title-h1"></h1>
+  <p class="subtitle" id="title-sub"></p>
+  <button class="btn-play" id="btn-jouer" onclick="startGame()"></button>
+  <button class="btn-secondary" id="btn-parents" onclick="showGate()" style="font-size:.9rem;padding:8px 20px;box-shadow:0 3px 0 var(--blue-dark)"></button>
+</div>
+
+<!-- GATE -->
+<div id="gate-screen" class="screen">
+  <div class="gate-box">
+    <h2 id="gate-title"></h2>
+    <p id="gate-q" aria-live="polite"></p>
+    <input id="gate-input" type="number" min="0" max="200" aria-label="Reponse" oninput="checkGate()">
+    <p id="gate-msg"></p>
+  </div>
+  <div id="gate-info">
+    <p><strong id="gi-skill-label"></strong> <span id="gi-skill"></span></p>
+    <p><strong id="gi-data-label"></strong> <span id="gi-data"></span></p>
+    <p><strong id="gi-ads-label"></strong> <span id="gi-ads"></span></p>
+    <p><strong id="gi-open-label"></strong> <span id="gi-open"></span></p>
+  </div>
+  <button class="btn-secondary" onclick="showScreen('title-screen')" id="btn-back-gate" style="margin-top:8px"></button>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div id="level-badge"></div>
+  <div id="score-bar">
+    <span id="score-label"></span>
+    <span id="score-val">0</span>
+  </div>
+  <div id="scene-wrap">
+    <svg id="water-svg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" aria-label="Cycle de l eau">
+      <defs>
+        <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#c8e8f8"/>
+        </linearGradient>
+        <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4fa3d4"/><stop offset="100%" stop-color="#0f4c81"/>
+        </linearGradient>
+        <linearGradient id="rivG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#7ec3ee"/><stop offset="100%" stop-color="#4fa3d4"/>
+        </linearGradient>
+      </defs>
+      <rect width="640" height="220" fill="url(#skyG)"/>
+      <rect y="220" width="640" height="120" fill="#5ba03b"/>
+      <polygon points="200,220 340,60 480,220" fill="#8B7355"/>
+      <polygon points="280,220 340,100 400,220" fill="#9b8465"/>
+      <polygon points="312,108 340,60 368,108 340,95" fill="#fff" opacity=".9"/>
+      <ellipse cx="100" cy="265" rx="110" ry="40" fill="url(#seaG)"/>
+      <text x="100" y="267" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold" id="lbl-mer">Mer</text>
+      <path d="M340 220 Q300 235 240 250 Q180 260 150 262" stroke="url(#rivG)" stroke-width="9" fill="none" stroke-linecap="round" id="river-path"/>
+      <g id="sun-group">
+        <circle cx="555" cy="60" r="46" fill="#ffd23f" opacity=".9"/>
+        <g stroke="#ffd23f" stroke-width="3.5" opacity=".8" id="sun-rays">
+          <line x1="555" y1="6" x2="555" y2="-2"/>
+          <line x1="555" y1="114" x2="555" y2="122"/>
+          <line x1="501" y1="60" x2="493" y2="60"/>
+          <line x1="609" y1="60" x2="617" y2="60"/>
+          <line x1="517" y1="22" x2="511" y2="16"/>
+          <line x1="593" y1="98" x2="599" y2="104"/>
+          <line x1="593" y1="22" x2="599" y2="16"/>
+          <line x1="517" y1="98" x2="511" y2="104"/>
+        </g>
+        <text x="555" y="65" text-anchor="middle" font-size="12" fill="#7a5c00" font-weight="bold" id="lbl-soleil">Soleil</text>
+      </g>
+      <g id="vapor-arrows" opacity="0" style="transition:opacity .5s">
+        <path d="M140 225 Q145 200 148 175" stroke="#7ec3ee" stroke-width="2.5" fill="none" stroke-dasharray="5,4" stroke-linecap="round"/>
+        <polygon points="145,172 148,165 151,172" fill="#7ec3ee"/>
+        <path d="M100 228 Q105 203 108 178" stroke="#7ec3ee" stroke-width="2.5" fill="none" stroke-dasharray="5,4" stroke-linecap="round"/>
+        <polygon points="105,175 108,168 111,175" fill="#7ec3ee"/>
+        <path d="M80 230 Q82 205 85 180" stroke="#7ec3ee" stroke-width="2.5" fill="none" stroke-dasharray="5,4" stroke-linecap="round"/>
+        <polygon points="82,177 85,170 88,177" fill="#7ec3ee"/>
+      </g>
+      <g id="cloud-group" style="transition:opacity .5s">
+        <ellipse cx="200" cy="85" rx="52" ry="30" fill="#fff" opacity=".95"/>
+        <ellipse cx="160" cy="95" rx="32" ry="22" fill="#fff" opacity=".95"/>
+        <ellipse cx="240" cy="95" rx="32" ry="22" fill="#fff" opacity=".95"/>
+        <ellipse cx="200" cy="100" rx="52" ry="22" fill="#f0f0f0" opacity=".6"/>
+        <text x="200" y="98" text-anchor="middle" font-size="12" fill="#475569" font-weight="bold" id="lbl-nuage">Nuage</text>
+      </g>
+      <g id="rain-group" opacity="0" style="transition:opacity .5s">
+        <line x1="168" y1="118" x2="163" y2="140" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="183" y1="120" x2="178" y2="142" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="198" y1="121" x2="193" y2="143" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="213" y1="120" x2="208" y2="142" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="228" y1="118" x2="223" y2="140" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="175" y1="148" x2="170" y2="168" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="192" y1="149" x2="187" y2="169" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="209" y1="148" x2="204" y2="168" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="226" y1="147" x2="221" y2="167" stroke="#4fa3d4" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <g id="drop-anim" opacity="0">
+        <path id="drop-shape" d="M0-12 C0-12 -8,0 -8,8 C-8,13 -4,18 0,18 C4,18 8,13 8,8 C8,0 0-12 0-12Z" fill="#4fa3d4"/>
+      </g>
+      <text id="lbl-evap" x="82" y="155" font-size="11" fill="#0f4c81" font-weight="bold" opacity="0" text-anchor="middle" style="transition:opacity .5s">Evaporation</text>
+      <text id="lbl-cond" x="200" y="55" font-size="11" fill="#0f4c81" font-weight="bold" opacity="0" text-anchor="middle" style="transition:opacity .5s">Condensation</text>
+      <text id="lbl-prec" x="200" y="178" font-size="11" fill="#0f4c81" font-weight="bold" opacity="0" text-anchor="middle" style="transition:opacity .5s">Precipitation</text>
+      <text id="lbl-ruis" x="270" y="248" font-size="11" fill="#0f4c81" font-weight="bold" opacity="0" text-anchor="middle" style="transition:opacity .5s">Ruissellement</text>
+      <path id="cycle-arrow" d="M145 265 Q90 280 60 265 Q30 240 50 200 Q65 175 90 165 Q130 150 165 118 Q195 90 225 108" stroke="#0f4c81" stroke-width="2" fill="none" stroke-dasharray="7,5" opacity="0" style="transition:opacity .5s"/>
+    </svg>
+  </div>
+  <div id="feedback" role="status"></div>
+  <div id="game-content" style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:600px;"></div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success-screen" class="screen">
+  <div id="stars-display"></div>
+  <h2 id="success-title"></h2>
+  <p id="success-msg" style="color:var(--slate);font-size:1.05rem;"></p>
+  <div class="success-btns">
+    <button class="btn-secondary" id="btn-replay" onclick="replayLevel()"></button>
+    <button class="btn-play" id="btn-next-level" onclick="nextLevel()"></button>
+    <button class="btn-secondary" id="btn-home" onclick="showScreen('title-screen')"></button>
+  </div>
+</div>
+
+<script>
+'use strict';
+const T={
+  fr:{
+    title:"Le Cycle de l'Eau",
+    subtitle:"Suis la goutte d'eau dans son voyage !",
+    play:"Jouer !",parents:"Pour les parents",
+    gate_title:"Espace Parents",gate_prompt:"Pour continuer, resous :",
+    gate_wrong:"Mauvaise reponse, reessaie !",
+    gate_skill:"Competence visee :",gate_skill_val:"Sciences de la Terre - cycle de l'eau (evaporation, condensation, precipitation, ruissellement). Ages 6-10 ans.",
+    gate_data:"Donnees :",gate_data_val:"Aucune donnee collectee. Tout reste sur cet appareil.",
+    gate_ads:"Publicite :",gate_ads_val:"Aucune publicite, aucun achat integre.",
+    gate_open:"Code :",gate_open_val:"Open source PGRG IA — libre et gratuit.",
+    back:"← Retour",level:"Niveau",score:"Score :",
+    level1_name:"Remets le cycle dans l'ordre !",
+    level2_name:"Nomme les etapes !",
+    level3_name:"Quiz du cycle !",
+    check_order:"Verifier l'ordre",
+    steps:["Evaporation","Condensation","Precipitation","Ruissellement"],
+    steps_emoji:["☀️","☁️","🌧️","🌊"],
+    steps_desc:[
+      "Le soleil chauffe l'eau qui monte en vapeur.",
+      "La vapeur refroidit et forme un nuage.",
+      "L'eau tombe sous forme de pluie ou neige.",
+      "L'eau coule vers les rivieres et la mer."
+    ],
+    quiz:[
+      {q:"Que fait le soleil a l'eau de la mer ?",choices:["Il la fait monter en vapeur","Il la fait geler","Il la colore en bleu","Il la fait disparaitre"],a:0},
+      {q:"Quand la vapeur d'eau refroidit en altitude, elle forme…",choices:["Un nuage","Du sable","Une foret","Du vent"],a:0},
+      {q:"Comment l'eau retombe-t-elle du nuage ?",choices:["En pluie ou neige","En fumee","En roche","En etoile"],a:0},
+      {q:"Ou va l'eau apres avoir coule sur la terre ?",choices:["Vers les rivieres et la mer","Dans les nuages directement","Sous la Lune","Dans les volcans"],a:0},
+      {q:"Quel mot decrit l'eau qui monte en vapeur ?",choices:["Evaporation","Condensation","Precipitation","Ruissellement"],a:0},
+      {q:"Le cycle de l'eau recommence…",choices:["Toujours, sans fin","Une seule fois","Seulement en ete","Jamais la nuit"],a:0},
+      {q:"Qu'est-ce que la condensation ?",choices:["La vapeur qui forme un nuage","La pluie qui tombe","L'eau qui coule","Le soleil qui brille"],a:0},
+      {q:"Le ruissellement, c'est quoi ?",choices:["L'eau qui coule sur le sol","La vapeur qui monte","Un nuage qui grossit","La neige sur les montagnes"],a:0}
+    ],
+    fb_correct:["Super ! 🎉","Bravo ! ⭐","Excellent ! 🌟","Parfait ! 💧","Genial ! 🌈"],
+    fb_wrong:["Essaie encore !","Presque ! Reessaie.","Continue d'essayer !","Pas tout a fait, courage !"],
+    order_hint:"Glisse les etapes dans le bon ordre",
+    vocab_hint:"Quel est le nom de cette etape ?",
+    success_title:["Bravo !","Super !","Excellent !"],
+    success_msg:["Tu connais le cycle de l'eau !","La goutte est fiere de toi !","Tu es un expert de l'eau !"],
+    replay:"Rejouer",next_level:"Niveau suivant →",home:"Accueil",
+    all_done:"Tous les niveaux reussis !",all_done_msg:"Tu maitrises le cycle de l'eau ! 💧🌟"
+  },
+  en:{
+    title:"The Water Cycle",
+    subtitle:"Follow the water droplet on its journey!",
+    play:"Play!",parents:"For parents",
+    gate_title:"Parents Area",gate_prompt:"To continue, solve:",
+    gate_wrong:"Wrong answer, try again!",
+    gate_skill:"Learning goal:",gate_skill_val:"Earth Science — water cycle (evaporation, condensation, precipitation, runoff). Ages 6-10.",
+    gate_data:"Data:",gate_data_val:"No data collected. Everything stays on this device.",
+    gate_ads:"Ads:",gate_ads_val:"No ads, no in-app purchases.",
+    gate_open:"Code:",gate_open_val:"PGRG IA Open Source — free and open.",
+    back:"← Back",level:"Level",score:"Score:",
+    level1_name:"Put the cycle in order!",
+    level2_name:"Name the steps!",
+    level3_name:"Water Cycle Quiz!",
+    check_order:"Check order",
+    steps:["Evaporation","Condensation","Precipitation","Runoff"],
+    steps_emoji:["☀️","☁️","🌧️","🌊"],
+    steps_desc:[
+      "The sun heats water and it rises as vapour.",
+      "The vapour cools and forms a cloud.",
+      "Water falls as rain or snow.",
+      "Water flows to rivers and the sea."
+    ],
+    quiz:[
+      {q:"What does the sun do to sea water?",choices:["Turns it into vapour","Freezes it","Colors it blue","Makes it disappear"],a:0},
+      {q:"When water vapour cools high up, it forms…",choices:["A cloud","Sand","A forest","Wind"],a:0},
+      {q:"How does water fall back from the cloud?",choices:["As rain or snow","As smoke","As rock","As a star"],a:0},
+      {q:"Where does water go after flowing over the land?",choices:["To rivers and the sea","Straight to clouds","Under the Moon","Into volcanoes"],a:0},
+      {q:"Which word means water rising as vapour?",choices:["Evaporation","Condensation","Precipitation","Runoff"],a:0},
+      {q:"The water cycle repeats…",choices:["Always, forever","Only once","Only in summer","Never at night"],a:0},
+      {q:"What is condensation?",choices:["Vapour forming a cloud","Rain falling down","Water flowing","The sun shining"],a:0},
+      {q:"What is runoff?",choices:["Water flowing over land","Vapour rising up","A cloud getting bigger","Snow on mountains"],a:0}
+    ],
+    fb_correct:["Great! 🎉","Well done! ⭐","Excellent! 🌟","Perfect! 💧","Amazing! 🌈"],
+    fb_wrong:["Try again!","Almost! Try once more.","Keep trying!","Not quite, keep going!"],
+    order_hint:"Drag the steps into the right order",
+    vocab_hint:"What is the name of this step?",
+    success_title:["Well done!","Awesome!","Excellent!"],
+    success_msg:["You know the water cycle!","The droplet is proud of you!","You are a water cycle expert!"],
+    replay:"Replay",next_level:"Next level →",home:"Home",
+    all_done:"All levels complete!",all_done_msg:"You mastered the water cycle! 💧🌟"
+  }
+};
+
+const LS_KEY='pgrg_cycle_eau';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false,currentLevel=0,score=0,starsEarned=0;
+let gateA,gateB,currentQuizIdx=0,quizOrder=[];
+let dragSrcIdx=null,orderArr=[];
+let vocabStepIdx=0,vocabAnswered=0,quizAnswered=0;
+let dropAnimId=null;
+
+function loadState(){
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.currentLevel!==undefined)currentLevel=Math.min(d.currentLevel,2);
+    if(d.score!==undefined)score=d.score;}catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({currentLevel,score}));}catch(e){}
+}
+
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.18;
+  try{const ctx=getCtx(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);}catch(e){}
+}
+function playSuccess(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.25,'sine',0.16),i*120));}
+function playWrong(){playTone(220,.3,'sawtooth',0.1);}
+function playClick(){playTone(660,.1,'sine',0.1);}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';}
+
+function t(k){return T[lang][k];}
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI();
+}
+function renderUI(){
+  document.getElementById('title-h1').textContent=t('title');
+  document.getElementById('title-sub').textContent=t('subtitle');
+  document.getElementById('btn-jouer').textContent=t('play');
+  document.getElementById('btn-parents').textContent=t('parents');
+  document.getElementById('btn-back-gate').textContent=t('back');
+  document.getElementById('gate-title').textContent=t('gate_title');
+  document.getElementById('gi-skill-label').textContent=t('gate_skill');
+  document.getElementById('gi-skill').textContent=t('gate_skill_val');
+  document.getElementById('gi-data-label').textContent=t('gate_data');
+  document.getElementById('gi-data').textContent=t('gate_data_val');
+  document.getElementById('gi-ads-label').textContent=t('gate_ads');
+  document.getElementById('gi-ads').textContent=t('gate_ads_val');
+  document.getElementById('gi-open-label').textContent=t('gate_open');
+  document.getElementById('gi-open').textContent=t('gate_open_val');
+  const lm={
+    'lbl-mer':lang==='fr'?'Mer / Ocean':'Sea / Ocean',
+    'lbl-soleil':lang==='fr'?'Soleil':'Sun',
+    'lbl-nuage':lang==='fr'?'Nuage':'Cloud',
+    'lbl-evap':lang==='fr'?'Evaporation':'Evaporation',
+    'lbl-cond':lang==='fr'?'Condensation':'Condensation',
+    'lbl-prec':lang==='fr'?'Precipitation':'Precipitation',
+    'lbl-ruis':lang==='fr'?'Ruissellement':'Runoff'
+  };
+  Object.entries(lm).forEach(([id,txt])=>{const el=document.getElementById(id);if(el)el.textContent=txt;});
+  const rb=document.getElementById('btn-replay');if(rb)rb.textContent=t('replay');
+  const nb=document.getElementById('btn-next-level');if(nb)nb.textContent=t('next_level');
+  const hb=document.getElementById('btn-home');if(hb)hb.textContent=t('home');
+  const sl=document.getElementById('score-label');if(sl)sl.textContent=t('score');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showGate(){
+  gateA=Math.floor(Math.random()*9)+2;gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('gate-q').textContent=t('gate_prompt')+' '+gateA+' x '+gateB+' = ?';
+  document.getElementById('gate-msg').textContent='';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-info').style.display='none';
+  showScreen('gate-screen');
+}
+function checkGate(){
+  const v=parseInt(document.getElementById('gate-input').value);
+  if(v===gateA*gateB){
+    document.getElementById('gate-msg').textContent='✓';
+    document.getElementById('gate-msg').style.color='#1a7a4a';
+    document.getElementById('gate-info').style.display='block';
+  }else if(document.getElementById('gate-input').value.length>=3){
+    document.getElementById('gate-msg').textContent=t('gate_wrong');
+    document.getElementById('gate-msg').style.color='#b00';
+  }
+}
+
+function startGame(){
+  playClick();loadState();score=0;showScreen('game-screen');renderLevel();
+}
+function renderLevel(){
+  stopDropAnim();
+  document.getElementById('level-badge').textContent='';
+  document.getElementById('score-val').textContent=score;
+  highlightStep(-1);clearFeedback();
+  document.getElementById('game-content').innerHTML='';
+  if(currentLevel===0){
+    document.getElementById('level-badge').textContent=t('level')+' 1 — '+t('level1_name');
+    renderOrderLevel();
+  }else if(currentLevel===1){
+    document.getElementById('level-badge').textContent=t('level')+' 2 — '+t('level2_name');
+    vocabStepIdx=0;vocabAnswered=0;renderVocabLevel();
+  }else{
+    document.getElementById('level-badge').textContent=t('level')+' 3 — '+t('level3_name');
+    currentQuizIdx=0;quizAnswered=0;
+    quizOrder=shuffle([...Array(t('quiz').length).keys()]).slice(0,6);
+    renderQuizLevel();
+  }
+  saveState();
+}
+
+// LEVEL 1 ORDER
+function renderOrderLevel(){
+  orderArr=shuffle([0,1,2,3]);
+  const gc=document.getElementById('game-content');
+  const hint=document.createElement('p');
+  hint.style.cssText='text-align:center;color:var(--slate);font-size:.9rem;margin-bottom:4px;';
+  hint.textContent=t('order_hint');gc.appendChild(hint);
+  const area=document.createElement('div');
+  area.id='order-area';
+  area.style.cssText='display:flex;flex-direction:column;gap:8px;width:100%;max-width:500px;';
+  orderArr.forEach((si,pos)=>{
+    const card=makeOrderCard(si,pos);
+    area.appendChild(card);
+  });
+  gc.appendChild(area);
+  const btn=document.createElement('button');
+  btn.className='btn-play';btn.textContent=t('check_order');
+  btn.style.cssText='margin-top:10px;font-size:1rem;padding:12px 28px;';
+  btn.onclick=checkOrderLevel;gc.appendChild(btn);
+  animateDrop([100,265],[170,175],0.4);
+}
+function makeOrderCard(si,pos){
+  const steps=t('steps'),emojis=t('steps_emoji');
+  const card=document.createElement('div');
+  card.className='order-card';card.draggable=true;card.dataset.idx=String(pos);
+  card.innerHTML='<span style="color:var(--slate);font-size:1.3rem">☰</span><span style="font-size:1.5rem">'+emojis[si]+'</span><span>'+steps[si]+'</span>';
+  card.addEventListener('dragstart',onDragStart);
+  card.addEventListener('dragover',onDragOver);
+  card.addEventListener('drop',onDrop);
+  card.addEventListener('dragend',onDragEnd);
+  addTouchDrag(card);
+  return card;
+}
+function refreshOrderCards(){
+  const cards=document.querySelectorAll('.order-card');
+  const steps=t('steps'),emojis=t('steps_emoji');
+  cards.forEach((card,i)=>{
+    const si=orderArr[i];
+    card.innerHTML='<span style="color:var(--slate);font-size:1.3rem">☰</span><span style="font-size:1.5rem">'+emojis[si]+'</span><span>'+steps[si]+'</span>';
+    card.dataset.idx=String(i);
+  });
+}
+function onDragStart(e){dragSrcIdx=parseInt(this.dataset.idx);this.classList.add('dragging');if(e.dataTransfer)e.dataTransfer.effectAllowed='move';}
+function onDragOver(e){e.preventDefault();document.querySelectorAll('.order-card').forEach(c=>c.classList.remove('over'));this.classList.add('over');}
+function onDrop(e){e.preventDefault();const t2=parseInt(this.dataset.idx);if(dragSrcIdx===null||dragSrcIdx===t2)return;swapOrder(dragSrcIdx,t2);dragSrcIdx=null;}
+function onDragEnd(){this.classList.remove('dragging');document.querySelectorAll('.order-card').forEach(c=>c.classList.remove('over'));}
+function swapOrder(a,b){const tmp=orderArr[a];orderArr[a]=orderArr[b];orderArr[b]=tmp;refreshOrderCards();}
+function addTouchDrag(card){
+  let ty,si2;
+  card.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;si2=parseInt(card.dataset.idx);card.classList.add('dragging');},{passive:true});
+  card.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    const dy=e.touches[0].clientY-ty;
+    const cardH=card.offsetHeight+8;
+    const moved=Math.round(dy/cardH);
+    if(moved!==0){const ni=Math.max(0,Math.min(3,si2+moved));if(ni!==si2){swapOrder(si2,ni);si2=ni;ty=e.touches[0].clientY;}}
+  },{passive:false});
+  card.addEventListener('touchend',()=>document.querySelectorAll('.order-card').forEach(c=>c.classList.remove('dragging')),{passive:true});
+}
+function checkOrderLevel(){
+  playClick();
+  const ok=orderArr.every((v,i)=>v===i);
+  if(ok){
+    score+=30;document.getElementById('score-val').textContent=score;
+    starsEarned=3;showFeedback(randomFrom(t('fb_correct')),true);
+    animateFullCycle();setTimeout(()=>showSuccess(),2200);
+  }else{
+    showFeedback(randomFrom(t('fb_wrong')),false);playWrong();
+    const area=document.getElementById('order-area');
+    if(area){area.style.animation='shake .4s';setTimeout(()=>{area.style.animation='';},500);}
+  }
+}
+
+// LEVEL 2 VOCAB
+function renderVocabLevel(){
+  const steps=t('steps'),emojis=t('steps_emoji'),descs=t('steps_desc');
+  const idx=vocabStepIdx%4;
+  highlightStep(idx);
+  animateDrop(getStepPos(idx),getStepPos((idx+1)%4),0.5);
+  const gc=document.getElementById('game-content');
+  gc.innerHTML='';
+  const hint=document.createElement('p');
+  hint.style.cssText='text-align:center;color:var(--slate);font-size:.9rem;';
+  hint.textContent=t('vocab_hint');gc.appendChild(hint);
+  const imgL=document.createElement('div');
+  imgL.style.cssText='font-size:3rem;text-align:center;margin:4px 0;';
+  imgL.textContent=emojis[idx];gc.appendChild(imgL);
+  const desc=document.createElement('p');
+  desc.style.cssText='text-align:center;color:var(--slate);font-size:.92rem;margin-bottom:8px;max-width:380px;margin-left:auto;margin-right:auto;';
+  desc.textContent=descs[idx];gc.appendChild(desc);
+  const choices=shuffle([0,1,2,3]);
+  const cd=document.createElement('div');
+  cd.style.cssText='display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:600px;';
+  choices.forEach(ci=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';btn.textContent=steps[ci];
+    btn.onclick=()=>handleVocabAnswer(ci===idx,btn,cd,idx);
+    cd.appendChild(btn);
+  });
+  gc.appendChild(cd);
+  const prog=document.createElement('p');
+  prog.style.cssText='color:var(--slate);font-size:.85rem;text-align:center;margin-top:4px;';
+  prog.textContent=(vocabStepIdx+1)+' / 4';gc.appendChild(prog);
+}
+function getStepPos(idx){return[[100,265],[165,115],[200,175],[280,245]][idx];}
+function handleVocabAnswer(correct,btn,area,stepIdx){
+  const btns=area.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(correct){
+    btn.classList.add('correct');score+=10;
+    document.getElementById('score-val').textContent=score;
+    showFeedback(randomFrom(t('fb_correct')),true);playSuccess();
+    speak(t('steps')[stepIdx]);
+    vocabAnswered++;vocabStepIdx++;
+    setTimeout(()=>{
+      if(vocabStepIdx>=4){starsEarned=Math.min(3,Math.max(1,Math.round(vocabAnswered/4*3)));showSuccess();}
+      else{clearFeedback();renderVocabLevel();}
+    },1100);
+  }else{
+    btn.classList.add('wrong');showFeedback(randomFrom(t('fb_wrong')),false);playWrong();
+    btns.forEach(b=>{if(b.textContent===t('steps')[stepIdx])b.classList.add('correct');});
+    setTimeout(()=>{btns.forEach(b=>{b.classList.remove('wrong','correct');b.disabled=false;});clearFeedback();},1200);
+  }
+}
+
+// LEVEL 3 QUIZ
+function renderQuizLevel(){
+  if(currentQuizIdx>=quizOrder.length){
+    starsEarned=Math.min(3,Math.max(1,Math.round(quizAnswered/quizOrder.length*3)));
+    showSuccess();return;
+  }
+  const qi=quizOrder[currentQuizIdx];
+  const q=t('quiz')[qi];
+  const correctAns=q.choices[q.a];
+  const shuffled=shuffle([...q.choices]);
+  const gc=document.getElementById('game-content');
+  gc.innerHTML='';
+  const qText=document.createElement('p');
+  qText.style.cssText='font-weight:700;font-size:1.05rem;text-align:center;max-width:500px;margin:0 auto 4px;color:var(--navy);';
+  qText.textContent=q.q;gc.appendChild(qText);
+  const prog=document.createElement('p');
+  prog.style.cssText='color:var(--slate);font-size:.85rem;text-align:center;margin-bottom:6px;';
+  prog.textContent=(currentQuizIdx+1)+' / '+quizOrder.length;gc.appendChild(prog);
+  const cd=document.createElement('div');
+  cd.style.cssText='display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:600px;';
+  shuffled.forEach(ch=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';btn.textContent=ch;
+    btn.onclick=()=>handleQuizAnswer(ch===correctAns,btn,cd,correctAns);
+    cd.appendChild(btn);
+  });
+  gc.appendChild(cd);
+  highlightStep([0,1,2,3,0,3,1,3][qi]??-1);
+}
+function handleQuizAnswer(correct,btn,area,correctAns){
+  const btns=area.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(correct){
+    btn.classList.add('correct');score+=15;
+    document.getElementById('score-val').textContent=score;
+    showFeedback(randomFrom(t('fb_correct')),true);playSuccess();quizAnswered++;currentQuizIdx++;
+    setTimeout(()=>{clearFeedback();renderQuizLevel();},900);
+  }else{
+    btn.classList.add('wrong');
+    btns.forEach(b=>{if(b.textContent===correctAns)b.classList.add('correct');});
+    showFeedback(randomFrom(t('fb_wrong')),false);playWrong();currentQuizIdx++;
+    setTimeout(()=>{clearFeedback();renderQuizLevel();},1200);
+  }
+}
+
+// SCENE
+function highlightStep(idx){
+  const ids=['vapor-arrows','cloud-group','rain-group','river-path'];
+  const lblIds=['lbl-evap','lbl-cond','lbl-prec','lbl-ruis'];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(idx===-1){el.style.opacity=id==='cloud-group'?'1':'0';}
+    else{el.style.opacity=i===idx?'1':(id==='cloud-group'?'0.4':'0.1');}
+  });
+  lblIds.forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.style.opacity=(idx===-1||idx!==i)?'0':'1';
+  });
+  const ca=document.getElementById('cycle-arrow');
+  if(ca)ca.style.opacity=idx>=0?'0.7':'0';
+}
+function animateFullCycle(){
+  let step=0;
+  const cycle=()=>{
+    if(step>4)return;highlightStep(step%4);playTone(440+step*100,.2);step++;
+    if(step<=4)setTimeout(cycle,500);
+  };cycle();
+}
+function stopDropAnim(){if(dropAnimId){cancelAnimationFrame(dropAnimId);dropAnimId=null;}}
+function animateDrop(from,to,dur){
+  stopDropAnim();
+  const drop=document.getElementById('drop-anim');if(!drop)return;
+  drop.style.opacity='1';let start=null;
+  const go=ts=>{
+    if(!start)start=ts;
+    const prog=Math.min((ts-start)/(dur*1000),1);
+    const x=from[0]+(to[0]-from[0])*eio(prog);
+    const y=from[1]+(to[1]-from[1])*eio(prog)-Math.sin(prog*Math.PI)*30;
+    const ds=document.getElementById('drop-shape');
+    if(ds)ds.setAttribute('transform','translate('+x+','+y+')');
+    if(prog<1){dropAnimId=requestAnimationFrame(go);}else{drop.style.opacity='0';}
+  };dropAnimId=requestAnimationFrame(go);
+}
+function eio(t2){return t2<.5?2*t2*t2:-1+(4-2*t2)*t2;}
+
+function showFeedback(msg,good){
+  const fb=document.getElementById('feedback');
+  fb.textContent=msg;fb.className='show '+(good?'good':'bad');
+  document.getElementById('aria-live').textContent=msg;
+}
+function clearFeedback(){const fb=document.getElementById('feedback');fb.className='';fb.textContent='';}
+
+function showSuccess(){
+  stopDropAnim();highlightStep(-1);
+  document.getElementById('stars-display').textContent='⭐'.repeat(starsEarned)+'☆'.repeat(3-starsEarned);
+  const ti=Math.floor(Math.random()*t('success_title').length);
+  const mi=Math.floor(Math.random()*t('success_msg').length);
+  document.getElementById('success-title').textContent=t('success_title')[ti];
+  if(currentLevel>=2){
+    document.getElementById('success-msg').textContent=t('all_done_msg');
+    document.getElementById('btn-next-level').style.display='none';
+  }else{
+    document.getElementById('success-msg').textContent=t('success_msg')[mi];
+    document.getElementById('btn-next-level').style.display='';
+  }
+  document.getElementById('btn-replay').textContent=t('replay');
+  document.getElementById('btn-next-level').textContent=t('next_level');
+  document.getElementById('btn-home').textContent=t('home');
+  playSuccess();showScreen('success-screen');
+  currentLevel=Math.min(currentLevel+1,3);saveState();
+}
+function replayLevel(){playClick();currentLevel=Math.max(0,currentLevel-1);score=Math.max(0,score-10);showScreen('game-screen');renderLevel();}
+function nextLevel(){playClick();if(currentLevel>2){document.getElementById('btn-next-level').style.display='none';return;}showScreen('game-screen');renderLevel();}
+
+function speak(text){
+  if(muted||!window.speechSynthesis)return;
+  try{const u=new SpeechSynthesisUtterance(text);u.lang=lang==='fr'?'fr-FR':'en-US';u.rate=0.85;speechSynthesis.speak(u);}catch(e){}
+}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function randomFrom(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+const shakeStyle=document.createElement('style');
+shakeStyle.textContent='@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
+document.head.appendChild(shakeStyle);
+
+// Sun pulse
+(function(){
+  const rays=document.getElementById('sun-rays');if(!rays)return;
+  let tt=0;
+  const loop=()=>{tt+=0.02;const s=1+0.08*Math.sin(tt);rays.setAttribute('transform','translate(555,60) scale('+s+') translate(-555,-60)');requestAnimationFrame(loop);};
+  requestAnimationFrame(loop);
+})();
+
+// Cloud drift
+(function(){
+  const cloud=document.getElementById('cloud-group');if(!cloud)return;
+  let tt=0;
+  const loop=()=>{tt+=0.008;const dx=4*Math.sin(tt);cloud.setAttribute('transform','translate('+dx+',0)');requestAnimationFrame(loop);};
+  requestAnimationFrame(loop);
+})();
+
+loadState();renderUI();
+</script>
+</body>
+</html>

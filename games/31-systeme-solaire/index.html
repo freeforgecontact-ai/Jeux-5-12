@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f4c81">
+<title>Voyage dans le Système Solaire / Solar System Voyage — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;
+  --gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+  --bg:#0a0a2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(15,76,129,0.92);backdrop-filter:blur(6px);position:fixed;top:0;left:0;right:0;z-index:100}
+#topbar img{height:34px}
+#topbar .brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;color:var(--gold);font-weight:700;margin-right:auto}
+.lang-btn{background:var(--blue-dark);border:2px solid var(--sky);color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.85rem;font-weight:700;transition:background .2s}
+.lang-btn.active{background:var(--orange);border-color:var(--orange)}
+#mute-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .2s}
+#mute-btn:hover{background:rgba(255,255,255,.15)}
+#stars-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.screen{position:relative;z-index:1;min-height:100vh;padding-top:62px;display:none;flex-direction:column;align-items:center;justify-content:center}
+.screen.active{display:flex}
+#title-screen{text-align:center;gap:16px;padding:62px 20px 20px}
+#title-screen h1{font-size:clamp(1.8rem,5vw,3rem);color:var(--gold);text-shadow:0 2px 16px rgba(255,210,63,.5)}
+#title-screen .subtitle{font-size:clamp(.95rem,2.5vw,1.2rem);color:var(--sky);margin-bottom:8px}
+.btn-play{background:var(--orange);border:none;color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.4rem;padding:14px 44px;border-radius:50px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;margin-top:8px}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{background:var(--blue);border:2px solid var(--sky);color:#fff;font-size:1rem;padding:10px 28px;border-radius:50px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s}
+.btn-secondary:active{transform:translateY(2px)}
+.btn-small{background:var(--blue-dark);border:2px solid var(--sky);color:#fff;font-size:.9rem;padding:6px 18px;border-radius:20px;cursor:pointer;font-family:'Nunito',system-ui,sans-serif}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin:12px 0}
+.level-card{background:rgba(15,76,129,.7);border:2px solid var(--sky);border-radius:20px;padding:18px 22px;cursor:pointer;transition:transform .15s,background .2s;max-width:200px;text-align:center;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.level-card:hover{transform:scale(1.05);background:rgba(15,76,129,.95)}
+.level-card .lc-icon{font-size:2.2rem}
+.level-card .lc-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold)}
+.level-card .lc-desc{font-size:.8rem;color:var(--sky);line-height:1.3}
+#game-screen{padding:62px 0 0;width:100%;overflow:hidden}
+#scene-wrap{width:100%;position:relative;overflow:hidden}
+#solar-svg{display:block;width:100%;height:auto;cursor:default}
+#info-panel{position:relative;z-index:2;background:rgba(10,53,89,.92);border:2px solid var(--sky);border-radius:20px;padding:18px 22px;margin:10px 16px;max-width:600px;align-self:center;display:none;flex-direction:column;gap:10px}
+#info-panel.visible{display:flex}
+#info-planet-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.5rem;color:var(--gold)}
+#info-fact{font-size:1rem;color:#e0f0ff;line-height:1.5}
+.stars-display{display:flex;gap:4px;font-size:1.4rem}
+#order-screen{padding:62px 16px 20px;gap:14px;width:100%;max-width:700px;margin:0 auto}
+#order-screen h2{font-size:1.4rem;color:var(--gold);text-align:center}
+#order-instr{text-align:center;font-size:.95rem;color:var(--sky);line-height:1.4}
+#order-slots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;min-height:60px}
+#order-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+.order-planet-btn{border:2px solid var(--sky);background:rgba(10,53,89,.85);color:#fff;border-radius:14px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:'Nunito',system-ui,sans-serif;transition:transform .1s,background .15s;min-height:48px;display:flex;align-items:center;gap:6px}
+.order-planet-btn:hover{background:rgba(15,76,129,.9);transform:scale(1.05)}
+.order-planet-btn .pdot{width:14px;height:14px;border-radius:50%;display:inline-block;flex-shrink:0}
+.order-slot{border:2px dashed rgba(126,195,238,.4);border-radius:14px;padding:10px 16px;min-width:100px;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:rgba(255,255,255,.4);cursor:pointer}
+.order-slot.filled{border-color:var(--sky);background:rgba(15,76,129,.7);color:#fff;cursor:pointer}
+.order-slot .pdot{width:14px;height:14px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:5px}
+#order-feedback{min-height:28px;text-align:center;font-size:.95rem;font-weight:700;color:var(--gold)}
+#quiz-screen{padding:62px 16px 20px;gap:14px;width:100%;max-width:700px;margin:0 auto}
+#quiz-screen h2{font-size:1.4rem;color:var(--gold);text-align:center}
+#quiz-question{background:rgba(15,76,129,.7);border:2px solid var(--sky);border-radius:16px;padding:14px 18px;font-size:1.1rem;text-align:center;line-height:1.5}
+#quiz-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.quiz-opt{background:rgba(10,53,89,.85);border:2px solid var(--sky);color:#fff;border-radius:14px;padding:12px 22px;cursor:pointer;font-size:1rem;font-family:'Nunito',system-ui,sans-serif;min-width:140px;text-align:center;transition:background .15s,transform .1s;min-height:48px}
+.quiz-opt:hover{background:rgba(15,76,129,.95);transform:scale(1.03)}
+.quiz-opt.correct{background:var(--success);border-color:var(--success);color:#fff}
+.quiz-opt.wrong{background:#c0392b;border-color:#c0392b}
+#quiz-feedback{min-height:32px;text-align:center;font-size:1rem;font-weight:700;color:var(--gold)}
+#quiz-progress{text-align:center;font-size:.9rem;color:var(--sky)}
+#win-screen{text-align:center;gap:16px;padding:62px 20px 20px}
+#win-screen h2{font-size:2rem;color:var(--gold)}
+.big-stars{font-size:3rem;letter-spacing:4px}
+.win-msg{font-size:1.1rem;color:var(--sky);line-height:1.5;max-width:400px}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+#parents-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center}
+#parents-modal.visible{display:flex}
+#parents-box{background:#0a3559;border:2px solid var(--sky);border-radius:20px;padding:28px;max-width:420px;width:90%;position:relative}
+#parents-box h3{color:var(--gold);font-size:1.3rem;margin-bottom:12px}
+#parents-box p{color:var(--sky-light);font-size:.9rem;line-height:1.6;margin-bottom:10px}
+#parents-gate{display:flex;flex-direction:column;gap:10px}
+#parents-gate label{color:var(--sky);font-size:.95rem}
+#parents-gate input{background:rgba(255,255,255,.1);border:2px solid var(--sky);border-radius:10px;color:#fff;padding:8px 14px;font-size:1rem;width:100%}
+#parents-gate .hint{font-size:.8rem;color:rgba(200,230,255,.6)}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
+#aria-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(max-width:500px){
+  .level-cards{flex-direction:column;align-items:center}
+  .level-card{max-width:90%;width:90%}
+  #info-panel{margin:6px 8px;padding:12px 14px}
+  #quiz-screen,#order-screen{padding:62px 8px 12px}
+}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<canvas id="stars-canvas"></canvas>
+
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+</div>
+
+<div id="parents-modal" role="dialog" aria-labelledby="parents-title">
+  <div id="parents-box">
+    <button class="modal-close" onclick="closeParents()" aria-label="Fermer">&#x2715;</button>
+    <h3 class="title-font" id="parents-title-el"></h3>
+    <div id="parents-gate">
+      <label id="parents-gate-label"></label>
+      <span class="hint" id="parents-hint-el"></span>
+      <input type="number" id="parents-answer" min="0" max="999" aria-label="Reponse">
+      <button class="btn-secondary" onclick="checkParentsGate()" id="parents-submit-btn"></button>
+      <p id="parents-gate-err" style="color:#f97316;display:none"></p>
+    </div>
+    <div id="parents-info" style="display:none">
+      <p id="parents-p1-el"></p>
+      <p id="parents-p2-el"></p>
+      <p id="parents-p3-el"></p>
+      <button class="btn-small" onclick="closeParents()" id="parents-close-btn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="title-screen" class="screen active" role="main">
+  <div id="mascot">
+    <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="60" cy="72" rx="18" ry="26" fill="#7ec3ee"/>
+      <polygon points="60,18 46,58 74,58" fill="#f97316"/>
+      <rect x="44" y="62" width="32" height="20" rx="6" fill="#0f4c81"/>
+      <ellipse cx="60" cy="62" rx="12" ry="8" fill="#ffd23f"/>
+      <circle cx="60" cy="62" r="6" fill="#eaf6ff"/>
+      <ellipse cx="42" cy="74" rx="6" ry="10" fill="#7ec3ee" transform="rotate(-15,42,74)"/>
+      <ellipse cx="78" cy="74" rx="6" ry="10" fill="#7ec3ee" transform="rotate(15,78,74)"/>
+      <ellipse cx="52" cy="84" rx="5" ry="7" fill="#f97316" opacity=".8"/>
+      <ellipse cx="68" cy="84" rx="5" ry="7" fill="#f97316" opacity=".8"/>
+      <ellipse cx="60" cy="88" rx="7" ry="9" fill="#ffd23f" opacity=".7"/>
+      <circle cx="56" cy="61" r="2" fill="#0f4c81"/>
+      <circle cx="64" cy="61" r="2" fill="#0f4c81"/>
+      <path d="M55,65 Q60,68 65,65" stroke="#0f4c81" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 id="title-h1" class="title-font"></h1>
+  <p class="subtitle" id="title-sub"></p>
+  <button class="btn-play" id="play-btn" onclick="showLevelSelect()"></button>
+  <button class="btn-small" style="margin-top:10px" onclick="openParents()" id="parents-btn"></button>
+</div>
+
+<div id="level-select-screen" class="screen" role="main">
+  <h2 class="title-font" id="ls-title" style="color:var(--gold);font-size:1.5rem;text-align:center;margin-bottom:8px"></h2>
+  <div class="level-cards" id="level-cards"></div>
+  <button class="btn-small" style="margin-top:10px" onclick="showScreen('title-screen')" id="ls-back-btn"></button>
+</div>
+
+<div id="game-screen" class="screen" role="main">
+  <div id="scene-wrap">
+    <svg id="solar-svg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Systeme solaire interactif"></svg>
+  </div>
+  <div id="info-panel" role="region" aria-label="Information planete">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="info-planet-icon" style="font-size:2rem"></span>
+      <span id="info-planet-name" class="title-font"></span>
+      <div class="stars-display" id="info-stars"></div>
+    </div>
+    <div id="info-fact"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-small" onclick="closeInfo()" id="info-close-btn"></button>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:center;padding:10px 0 16px;flex-wrap:wrap;position:relative;z-index:2">
+    <button class="btn-secondary" onclick="showLevelSelect()" id="game-back-btn" style="font-size:.85rem;padding:8px 18px"></button>
+    <button class="btn-secondary" onclick="toggleOrbits()" id="orbit-btn" style="font-size:.85rem;padding:8px 18px"></button>
+  </div>
+</div>
+
+<div id="order-screen" class="screen" role="main">
+  <h2 class="title-font" id="order-title"></h2>
+  <p id="order-instr"></p>
+  <div style="width:100%">
+    <p id="order-slot-label" style="color:var(--sky);font-size:.85rem;text-align:center;margin-bottom:6px"></p>
+    <div id="order-slots"></div>
+  </div>
+  <div style="width:100%">
+    <p id="order-bank-label" style="color:var(--sky);font-size:.85rem;text-align:center;margin-bottom:6px"></p>
+    <div id="order-bank"></div>
+  </div>
+  <div id="order-feedback" aria-live="polite"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-secondary" id="order-check-btn" onclick="checkOrder()" style="display:none"></button>
+    <button class="btn-secondary" id="order-reset-btn" onclick="resetOrder()" style="font-size:.85rem;padding:8px 18px"></button>
+    <button class="btn-secondary" onclick="showLevelSelect()" id="order-back-btn" style="font-size:.85rem;padding:8px 18px"></button>
+  </div>
+</div>
+
+<div id="quiz-screen" class="screen" role="main">
+  <h2 class="title-font" id="quiz-title"></h2>
+  <p id="quiz-progress"></p>
+  <div id="quiz-question" role="region" aria-live="polite"></div>
+  <div id="quiz-options" role="group"></div>
+  <div id="quiz-feedback" aria-live="polite"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-secondary" id="quiz-next-btn" onclick="nextQuiz()" style="display:none"></button>
+    <button class="btn-secondary" onclick="showLevelSelect()" id="quiz-back-btn" style="font-size:.85rem;padding:8px 18px"></button>
+  </div>
+</div>
+
+<div id="win-screen" class="screen" role="main">
+  <div class="big-stars" id="win-stars"></div>
+  <h2 class="title-font" id="win-title"></h2>
+  <p class="win-msg" id="win-msg"></p>
+  <div class="btn-row">
+    <button class="btn-play" onclick="replay()" id="win-replay-btn"></button>
+    <button class="btn-secondary" onclick="showLevelSelect()" id="win-next-btn"></button>
+    <button class="btn-small" onclick="showScreen('title-screen')" id="win-home-btn"></button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    title: 'Voyage dans le Système Solaire',
+    subtitle: 'Explore les planètes et deviens un astronome !',
+    play: '🚀 Jouer',
+    parents: 'Pour les parents',
+    ls_title: 'Choisis ton aventure',
+    ls_back: '← Retour',
+    level1_name: 'Exploration libre',
+    level1_desc: 'Clique sur chaque planète pour la découvrir !',
+    level1_icon: '🔭',
+    level2_name: 'Ordre des planètes',
+    level2_desc: 'Range les planètes du Soleil vers l\'extérieur.',
+    level2_icon: '🪐',
+    level3_name: 'Quiz de faits',
+    level3_desc: 'Teste tes connaissances sur le système solaire !',
+    level3_icon: '⭐',
+    info_close: 'Fermer ✕',
+    game_back: '← Menu',
+    orbit_show: 'Orbites ON',
+    orbit_hide: 'Orbites OFF',
+    order_title: 'Ordre des planètes',
+    order_instr: 'Place les planètes dans l\'ordre : de la plus proche du Soleil à la plus éloignée.',
+    order_slot_label: 'Ta réponse (du plus proche au plus loin du Soleil) :',
+    order_bank_label: 'Planètes à placer :',
+    order_check: 'Vérifier ✓',
+    order_reset: 'Recommencer',
+    order_back: '← Menu',
+    order_correct: '🎉 Bravo ! Tu as trouvé le bon ordre !',
+    order_wrong: '🔄 Pas tout à fait… essaie encore !',
+    quiz_title: 'Quiz du système solaire',
+    quiz_back: '← Menu',
+    quiz_next: 'Question suivante →',
+    quiz_correct: ['Super !', 'Excellent !', 'Bravo !', 'Parfait !', 'Génial !'],
+    quiz_wrong: 'Pas cette fois… La bonne réponse était : ',
+    quiz_progress: 'Question {n} sur {total}',
+    win_title: 'Félicitations !',
+    win_msg_explore: 'Tu as découvert toutes les planètes du système solaire !',
+    win_msg_order: 'Tu connais l\'ordre des planètes comme un vrai astronome !',
+    win_msg_quiz: 'Tu es un expert du système solaire !',
+    win_replay: '🔄 Rejouer',
+    win_next: '🚀 Autre niveau',
+    win_home: '🏠 Accueil',
+    parents_title: 'Porte parentale',
+    parents_gate_label: 'Calcul rapide :',
+    parents_hint: '(réservé aux adultes)',
+    parents_submit: 'Valider',
+    parents_err: 'Réponse incorrecte, réessaie.',
+    parents_p1: '🎓 Compétence visée : Astronomie — noms et caractéristiques des 8 planètes du système solaire.',
+    parents_p2: '🔒 Aucune donnée collectée. Aucune publicité. Jeu 100% hors-ligne.',
+    parents_p3: '⭐ Progression sauvegardée localement sur cet appareil uniquement.',
+    parents_close: 'Fermer',
+    click_planet: 'Clique sur une planète pour la visiter !',
+    visited: 'Visité !',
+    planets: {
+      sun:     { name: 'Le Soleil', fact: 'Le Soleil est une étoile géante ! Il est tellement grand qu\'on pourrait y mettre 1 million de Terres !', icon: '☀️' },
+      mercury: { name: 'Mercure', fact: 'Mercure est la planète la plus proche du Soleil. Elle n\'a presque pas d\'atmosphère et il fait très très chaud le jour (+430°C) et très froid la nuit !', icon: '🪨' },
+      venus:   { name: 'Vénus', fact: 'Vénus est la planète la plus brillante dans notre ciel. Elle tourne à l\'envers par rapport aux autres planètes !', icon: '🌟' },
+      earth:   { name: 'La Terre', fact: 'Notre maison ! La Terre est la seule planète connue avec de l\'eau liquide et de la vie. Elle est protégée par son atmosphère.', icon: '🌍' },
+      mars:    { name: 'Mars', fact: 'Mars est la planète rouge ! Sa couleur vient de la rouille. Elle possède le plus grand volcan du système solaire : l\'Olympus Mons !', icon: '🔴' },
+      jupiter: { name: 'Jupiter', fact: 'Jupiter est la plus grande planète ! La Grande Tache Rouge est une tempête géante qui dure depuis plus de 350 ans !', icon: '🟠' },
+      saturn:  { name: 'Saturne', fact: 'Saturne a des anneaux magnifiques ! Ils sont faits de glace et de roches. Saturne est si légère qu\'elle flotterait sur l\'eau !', icon: '💫' },
+      uranus:  { name: 'Uranus', fact: 'Uranus tourne sur le côté comme une bille roulante ! Elle a 27 lunes et ses anneaux sont verticaux.', icon: '🔵' },
+      neptune: { name: 'Neptune', fact: 'Neptune est la planète la plus éloignée ! Elle a les vents les plus violents du système solaire, jusqu\'à 2 100 km/h !', icon: '🌊' }
+    }
+  },
+  en: {
+    title: 'Solar System Voyage',
+    subtitle: 'Explore the planets and become an astronomer!',
+    play: '🚀 Play',
+    parents: 'For parents',
+    ls_title: 'Choose your adventure',
+    ls_back: '← Back',
+    level1_name: 'Free Exploration',
+    level1_desc: 'Click on each planet to discover it!',
+    level1_icon: '🔭',
+    level2_name: 'Planet Order',
+    level2_desc: 'Arrange the planets from the Sun outward.',
+    level2_icon: '🪐',
+    level3_name: 'Fact Quiz',
+    level3_desc: 'Test your knowledge of the solar system!',
+    level3_icon: '⭐',
+    info_close: 'Close ✕',
+    game_back: '← Menu',
+    orbit_show: 'Orbits ON',
+    orbit_hide: 'Orbits OFF',
+    order_title: 'Planet Order',
+    order_instr: 'Place the planets in order: from closest to the Sun to furthest away.',
+    order_slot_label: 'Your answer (nearest to farthest from the Sun):',
+    order_bank_label: 'Planets to place:',
+    order_check: 'Check ✓',
+    order_reset: 'Reset',
+    order_back: '← Menu',
+    order_correct: '🎉 Great job! You found the correct order!',
+    order_wrong: '🔄 Not quite… try again!',
+    quiz_title: 'Solar System Quiz',
+    quiz_back: '← Menu',
+    quiz_next: 'Next question →',
+    quiz_correct: ['Great!', 'Excellent!', 'Well done!', 'Perfect!', 'Amazing!'],
+    quiz_wrong: 'Not this time… The correct answer was: ',
+    quiz_progress: 'Question {n} of {total}',
+    win_title: 'Congratulations!',
+    win_msg_explore: 'You discovered all the planets of the solar system!',
+    win_msg_order: 'You know the planet order like a real astronomer!',
+    win_msg_quiz: 'You are a solar system expert!',
+    win_replay: '🔄 Play again',
+    win_next: '🚀 Another level',
+    win_home: '🏠 Home',
+    parents_title: 'Parent Gate',
+    parents_gate_label: 'Quick calculation:',
+    parents_hint: '(for adults only)',
+    parents_submit: 'Submit',
+    parents_err: 'Wrong answer, try again.',
+    parents_p1: '🎓 Skill targeted: Astronomy — names and characteristics of the 8 planets of the solar system.',
+    parents_p2: '🔒 No data collected. No advertising. 100% offline game.',
+    parents_p3: '⭐ Progress saved locally on this device only.',
+    parents_close: 'Close',
+    click_planet: 'Click on a planet to visit it!',
+    visited: 'Visited!',
+    planets: {
+      sun:     { name: 'The Sun', fact: 'The Sun is a giant star! It is so large that you could fit 1 million Earths inside it!', icon: '☀️' },
+      mercury: { name: 'Mercury', fact: 'Mercury is the closest planet to the Sun. Temperatures swing from very hot (+430°C) to very cold at night!', icon: '🪨' },
+      venus:   { name: 'Venus', fact: 'Venus is the brightest planet in our sky. It rotates backwards compared to most other planets!', icon: '🌟' },
+      earth:   { name: 'Earth', fact: 'Our home! Earth is the only known planet with liquid water and life. It is protected by its atmosphere.', icon: '🌍' },
+      mars:    { name: 'Mars', fact: 'Mars is the red planet! Its color comes from rust. It has the largest volcano in the solar system: Olympus Mons!', icon: '🔴' },
+      jupiter: { name: 'Jupiter', fact: 'Jupiter is the largest planet! The Great Red Spot is a giant storm raging for over 350 years!', icon: '🟠' },
+      saturn:  { name: 'Saturn', fact: 'Saturn has beautiful rings made of ice and rocks. Saturn is so light it would float on water!', icon: '💫' },
+      uranus:  { name: 'Uranus', fact: 'Uranus rotates on its side like a rolling marble! It has 27 moons and its rings are vertical.', icon: '🔵' },
+      neptune: { name: 'Neptune', fact: 'Neptune is the farthest planet! It has the most violent winds in the solar system, up to 2,100 km/h!', icon: '🌊' }
+    }
+  }
+};
+
+var lang = (navigator.language||'fr').startsWith('fr') ? 'fr' : 'en';
+var muted = false;
+var currentScreen = 'title-screen';
+var currentLevel = 1;
+var showOrbits = true;
+var STORAGE_KEY = 'pgrg_systeme_solaire';
+var progress = { stars:0, visited:[], orderDone:false, quizHighScore:0 };
+var parentGateA = 0, parentGateB = 0;
+var quizQuestions = [], quizIndex = 0, quizScore = 0, quizAnswered = false;
+var orderAnswer = [], orderBank = [];
+var PLANET_ORDER = ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune'];
+
+var PLANETS = [
+  { id:'sun',     cx:78,  cy:260, r:52,  fill:'#FDB813', stroke:'#f97316' },
+  { id:'mercury', cx:188, cy:260, r:7,   fill:'#b5b5b5', stroke:'#888',    orbitR:110 },
+  { id:'venus',   cx:252, cy:260, r:12,  fill:'#e8cda0', stroke:'#c8a96e', orbitR:174 },
+  { id:'earth',   cx:330, cy:260, r:13,  fill:'#1a8fe3', stroke:'#0a5f8e', orbitR:252 },
+  { id:'mars',    cx:408, cy:260, r:9,   fill:'#c1440e', stroke:'#8b3200', orbitR:330 },
+  { id:'jupiter', cx:530, cy:260, r:38,  fill:'#c88b3a', stroke:'#a06820', orbitR:452 },
+  { id:'saturn',  cx:660, cy:260, r:28,  fill:'#e4d191', stroke:'#b0a260', orbitR:582 },
+  { id:'uranus',  cx:764, cy:260, r:18,  fill:'#7de8e8', stroke:'#50c0c0', orbitR:686 },
+  { id:'neptune', cx:848, cy:260, r:16,  fill:'#4b70dd', stroke:'#2d4fa0', orbitR:770 }
+];
+
+var audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,dur,type,vol,fadeOut){
+  type=type||'sine'; vol=vol||0.25; if(fadeOut===undefined)fadeOut=true;
+  if(muted) return;
+  try{
+    var ctx=getAudioCtx();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    if(fadeOut) gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){
+  if(muted)return;
+  [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.22,'sine',.2);},i*90);});
+}
+function playClick(){ playTone(440,.08,'sine',.12); }
+function playWrong(){ playTone(220,.18,'sawtooth',.1); }
+function playStar(){ playTone(880,.15,'sine',.18); setTimeout(function(){playTone(1047,.15,'sine',.15);},80); }
+function playSpaceAmbient(){
+  if(muted)return;
+  try{
+    var ctx=getAudioCtx();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type='sine'; osc.frequency.value=110;
+    gain.gain.setValueAtTime(0.04,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+1.5);
+  }catch(e){}
+}
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
+}
+
+function initStars(){
+  var canvas=document.getElementById('stars-canvas');
+  var ctx=canvas.getContext('2d');
+  var stars=[];
+  function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    stars=[];
+    var n=Math.min(200,Math.floor(canvas.width*canvas.height/4000));
+    for(var i=0;i<n;i++){
+      stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+0.3,a:Math.random(),speed:Math.random()*0.003+0.001});
+    }
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i];
+      s.a+=s.speed;
+      var alpha=0.4+0.6*Math.abs(Math.sin(s.a));
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,'+alpha+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI();
+}
+function tp(pid){ return T[lang].planets[pid]; }
+
+function renderUI(){
+  document.getElementById('title-h1').textContent=T[lang].title;
+  document.getElementById('title-sub').textContent=T[lang].subtitle;
+  document.getElementById('play-btn').textContent=T[lang].play;
+  document.getElementById('parents-btn').textContent=T[lang].parents;
+  document.getElementById('ls-title').textContent=T[lang].ls_title;
+  document.getElementById('ls-back-btn').textContent=T[lang].ls_back;
+  document.getElementById('info-close-btn').textContent=T[lang].info_close;
+  document.getElementById('game-back-btn').textContent=T[lang].game_back;
+  document.getElementById('orbit-btn').textContent=showOrbits?T[lang].orbit_hide:T[lang].orbit_show;
+  document.getElementById('order-title').textContent=T[lang].order_title;
+  document.getElementById('order-instr').textContent=T[lang].order_instr;
+  document.getElementById('order-slot-label').textContent=T[lang].order_slot_label;
+  document.getElementById('order-bank-label').textContent=T[lang].order_bank_label;
+  document.getElementById('order-check-btn').textContent=T[lang].order_check;
+  document.getElementById('order-reset-btn').textContent=T[lang].order_reset;
+  document.getElementById('order-back-btn').textContent=T[lang].order_back;
+  document.getElementById('quiz-title').textContent=T[lang].quiz_title;
+  document.getElementById('quiz-back-btn').textContent=T[lang].quiz_back;
+  document.getElementById('quiz-next-btn').textContent=T[lang].quiz_next;
+  document.getElementById('win-replay-btn').textContent=T[lang].win_replay;
+  document.getElementById('win-next-btn').textContent=T[lang].win_next;
+  document.getElementById('win-home-btn').textContent=T[lang].win_home;
+  document.getElementById('parents-title-el').textContent=T[lang].parents_title;
+  document.getElementById('parents-gate-label').textContent=T[lang].parents_gate_label+' '+parentGateA+' x '+parentGateB+' = ?';
+  document.getElementById('parents-hint-el').textContent=T[lang].parents_hint;
+  document.getElementById('parents-submit-btn').textContent=T[lang].parents_submit;
+  document.getElementById('parents-p1-el').textContent=T[lang].parents_p1;
+  document.getElementById('parents-p2-el').textContent=T[lang].parents_p2;
+  document.getElementById('parents-p3-el').textContent=T[lang].parents_p3;
+  document.getElementById('parents-close-btn').textContent=T[lang].parents_close;
+  renderLevelCards();
+  if(currentScreen==='game-screen') renderSolarSVG();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  currentScreen=id;
+}
+
+function showLevelSelect(){
+  renderLevelCards();
+  showScreen('level-select-screen');
+}
+
+function renderLevelCards(){
+  var container=document.getElementById('level-cards');
+  var levels=[
+    {fn:startExplore},
+    {fn:startOrder},
+    {fn:startQuiz}
+  ];
+  container.innerHTML='';
+  levels.forEach(function(lv,i){
+    var n=i+1;
+    var card=document.createElement('div');
+    card.className='level-card';
+    card.setAttribute('tabindex','0');
+    card.setAttribute('role','button');
+    card.setAttribute('aria-label',T[lang]['level'+n+'_name']);
+    card.innerHTML='<div class="lc-icon">'+T[lang]['level'+n+'_icon']+'</div>'
+      +'<div class="lc-name">'+T[lang]['level'+n+'_name']+'</div>'
+      +'<div class="lc-desc">'+T[lang]['level'+n+'_desc']+'</div>';
+    (function(fn){ card.addEventListener('click',function(){playClick();fn();}); card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){playClick();fn();}}); })(lv.fn);
+    container.appendChild(card);
+  });
+}
+
+function renderSolarSVG(){
+  var svg=document.getElementById('solar-svg');
+  var visited=new Set(progress.visited||[]);
+
+  var defs='<defs>'
+    +'<radialGradient id="sunGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#fff5a0"/><stop offset="60%" stop-color="#FDB813"/><stop offset="100%" stop-color="#f97316"/></radialGradient>'
+    +'<radialGradient id="mercGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#d5d5d5"/><stop offset="100%" stop-color="#8a8a8a"/></radialGradient>'
+    +'<radialGradient id="venGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#f5e6c8"/><stop offset="100%" stop-color="#c8a060"/></radialGradient>'
+    +'<radialGradient id="earGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#4db8f0"/><stop offset="50%" stop-color="#1a8fe3"/><stop offset="100%" stop-color="#0a4fa0"/></radialGradient>'
+    +'<radialGradient id="marGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#e8684e"/><stop offset="100%" stop-color="#9c3000"/></radialGradient>'
+    +'<radialGradient id="jupGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#e8b870"/><stop offset="60%" stop-color="#c88b3a"/><stop offset="100%" stop-color="#8b5e20"/></radialGradient>'
+    +'<radialGradient id="satGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#f5eaaa"/><stop offset="100%" stop-color="#b09050"/></radialGradient>'
+    +'<radialGradient id="uraGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#a8f8f8"/><stop offset="100%" stop-color="#40b0b0"/></radialGradient>'
+    +'<radialGradient id="nepGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#7090f0"/><stop offset="100%" stop-color="#2030a0"/></radialGradient>'
+    +'<filter id="sunGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'</defs>';
+
+  var orbits='';
+  if(showOrbits){
+    PLANETS.filter(function(p){return p.orbitR;}).forEach(function(p){
+      orbits+='<ellipse cx="78" cy="260" rx="'+p.orbitR+'" ry="'+Math.round(p.orbitR*0.18+10)+'" fill="none" stroke="rgba(126,195,238,0.18)" stroke-width="1" stroke-dasharray="4 6"/>';
+    });
+  }
+
+  var gradMap={sun:'sunGrad',mercury:'mercGrad',venus:'venGrad',earth:'earGrad',mars:'marGrad',jupiter:'jupGrad',saturn:'satGrad',uranus:'uraGrad',neptune:'nepGrad'};
+  var planets='';
+
+  PLANETS.forEach(function(p){
+    var pd=tp(p.id);
+    var pname=pd?pd.name:p.id;
+    var isVisited=visited.has(p.id);
+    var starMark=isVisited?'<text x="'+p.cx+'" y="'+(p.cy-p.r-8)+'" text-anchor="middle" font-size="12" fill="#ffd23f">★</text>':'';
+    var gid=gradMap[p.id];
+
+    if(p.id==='sun'){
+      planets+='<g class="planet-g" data-id="sun" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer" filter="url(#sunGlow)">'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+(p.r+8)+'" fill="rgba(255,200,60,0.18)"/>'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#sunGrad)" stroke="#f97316" stroke-width="2"/>'
+        +starMark+'</g>';
+    } else if(p.id==='saturn'){
+      planets+='<g class="planet-g" data-id="saturn" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer">'
+        +'<ellipse cx="'+p.cx+'" cy="'+p.cy+'" rx="'+(p.r+16)+'" ry="6" fill="none" stroke="#c8b050" stroke-width="5" opacity="0.7"/>'
+        +'<ellipse cx="'+p.cx+'" cy="'+p.cy+'" rx="'+(p.r+10)+'" ry="4" fill="none" stroke="#e4d191" stroke-width="3" opacity="0.5"/>'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#satGrad)" stroke="#b0a260" stroke-width="1.5"/>'
+        +'<text x="'+p.cx+'" y="'+(p.cy+p.r+22)+'" text-anchor="middle" font-size="9" fill="#c8e8ff" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pname+'</text>'
+        +starMark+'</g>';
+    } else if(p.id==='earth'){
+      planets+='<g class="planet-g" data-id="earth" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer">'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#earGrad)" stroke="#0a5f8e" stroke-width="1.5"/>'
+        +'<ellipse cx="'+(p.cx-3)+'" cy="'+(p.cy-2)+'" rx="4" ry="5" fill="#3a9e60" opacity=".7"/>'
+        +'<ellipse cx="'+(p.cx+4)+'" cy="'+(p.cy+3)+'" rx="3" ry="4" fill="#3a9e60" opacity=".6"/>'
+        +'<text x="'+p.cx+'" y="'+(p.cy+p.r+16)+'" text-anchor="middle" font-size="9" fill="#c8e8ff" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pname+'</text>'
+        +starMark+'</g>';
+    } else if(p.id==='jupiter'){
+      planets+='<g class="planet-g" data-id="jupiter" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer">'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#jupGrad)" stroke="#a06820" stroke-width="1.5"/>'
+        +'<ellipse cx="'+p.cx+'" cy="'+(p.cy-8)+'" rx="'+(p.r-2)+'" ry="4" fill="rgba(160,100,30,0.4)"/>'
+        +'<ellipse cx="'+p.cx+'" cy="'+(p.cy+4)+'" rx="'+(p.r-4)+'" ry="3" fill="rgba(180,120,50,0.3)"/>'
+        +'<ellipse cx="'+(p.cx+10)+'" cy="'+(p.cy+12)+'" rx="8" ry="5" fill="rgba(200,80,40,0.5)"/>'
+        +'<text x="'+p.cx+'" y="'+(p.cy+p.r+16)+'" text-anchor="middle" font-size="9" fill="#c8e8ff" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pname+'</text>'
+        +starMark+'</g>';
+    } else if(p.id==='uranus'){
+      planets+='<g class="planet-g" data-id="uranus" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer">'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#uraGrad)" stroke="#50c0c0" stroke-width="1.5"/>'
+        +'<ellipse cx="'+p.cx+'" cy="'+p.cy+'" rx="6" ry="'+(p.r+6)+'" fill="none" stroke="rgba(100,220,220,0.4)" stroke-width="2"/>'
+        +'<text x="'+p.cx+'" y="'+(p.cy+p.r+16)+'" text-anchor="middle" font-size="9" fill="#c8e8ff" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pname+'</text>'
+        +starMark+'</g>';
+    } else {
+      var labelY=(p.id==='sun')?p.cy+p.r+16:p.cy+p.r+16;
+      var fontSize=(p.id==='sun')?11:9;
+      var col=(p.id==='sun')?'#ffd23f':'#c8e8ff';
+      planets+='<g class="planet-g" data-id="'+p.id+'" role="button" aria-label="'+pname+'" tabindex="0" style="cursor:pointer">'
+        +'<circle cx="'+p.cx+'" cy="'+p.cy+'" r="'+p.r+'" fill="url(#'+gid+')" stroke="'+p.stroke+'" stroke-width="1.5"/>'
+        +'<text x="'+p.cx+'" y="'+(p.cy+p.r+labelY-p.cy-p.r)+'" text-anchor="middle" font-size="'+fontSize+'" fill="'+col+'" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pname+'</text>'
+        +starMark+'</g>';
+    }
+  });
+
+  // Add labels for sun and plain planets
+  var extraLabels='';
+  PLANETS.forEach(function(p){
+    if(p.id==='sun'||p.id==='earth'||p.id==='jupiter'||p.id==='uranus'||p.id==='saturn') return;
+    var pd=tp(p.id);
+    if(!pd) return;
+    var ly=p.cy+p.r+16;
+    extraLabels+='<text x="'+p.cx+'" y="'+ly+'" text-anchor="middle" font-size="9" fill="#c8e8ff" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+pd.name+'</text>';
+  });
+  var sunPd=tp('sun');
+  if(sunPd) extraLabels+='<text x="78" y="'+(260+52+16)+'" text-anchor="middle" font-size="11" fill="#ffd23f" font-family="Nunito,system-ui,sans-serif" pointer-events="none">'+sunPd.name+'</text>';
+
+  var rocket='<g id="rocket-anim" transform="translate(170,240)" opacity="0">'
+    +'<polygon points="0,-12 -5,6 5,6" fill="#f97316"/>'
+    +'<rect x="-4" y="3" width="8" height="8" rx="2" fill="#0f4c81"/>'
+    +'<ellipse cx="-6" cy="7" rx="3" ry="4" fill="#7ec3ee" transform="rotate(-20,-6,7)"/>'
+    +'<ellipse cx="6" cy="7" rx="3" ry="4" fill="#7ec3ee" transform="rotate(20,6,7)"/>'
+    +'<ellipse cx="0" cy="13" rx="4" ry="5" fill="#ffd23f" opacity=".8"/>'
+    +'</g>';
+
+  var instrText=T[lang].click_planet||'Click a planet!';
+  var instr='<text x="450" y="498" text-anchor="middle" font-size="13" fill="rgba(200,230,255,0.6)" font-family="Nunito,system-ui,sans-serif">'+instrText+'</text>';
+
+  svg.innerHTML=defs+orbits+planets+extraLabels+rocket+instr;
+
+  svg.querySelectorAll('.planet-g').forEach(function(g){
+    g.addEventListener('click',function(){
+      var pid=g.getAttribute('data-id');
+      playSpaceAmbient();
+      showPlanetInfo(pid);
+      animateRocket(pid);
+    });
+    g.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){
+        var pid=g.getAttribute('data-id');
+        playSpaceAmbient();
+        showPlanetInfo(pid);
+      }
+    });
+  });
+}
+
+function toggleOrbits(){
+  showOrbits=!showOrbits;
+  document.getElementById('orbit-btn').textContent=showOrbits?T[lang].orbit_hide:T[lang].orbit_show;
+  renderSolarSVG();
+}
+
+function animateRocket(targetId){
+  var pl=PLANETS.find(function(p){return p.id===targetId;});
+  if(!pl) return;
+  var rocket=document.getElementById('rocket-anim');
+  if(!rocket) return;
+  rocket.setAttribute('opacity','1');
+  var startX=170,startY=240;
+  var endX=pl.cx-(pl.id==='sun'?60:pl.r+15);
+  var endY=pl.cy;
+  var t2=0;
+  function step(){
+    t2+=0.04;
+    if(t2>1){rocket.setAttribute('opacity','0');return;}
+    var x=startX+(endX-startX)*t2;
+    var y=startY+(endY-startY)*t2;
+    var angle=Math.atan2(endY-startY,endX-startX)*180/Math.PI+90;
+    rocket.setAttribute('transform','translate('+x+','+y+') rotate('+angle+')');
+    requestAnimationFrame(step);
+  }
+  step();
+}
+
+function showPlanetInfo(pid){
+  var pd=tp(pid);
+  if(!pd) return;
+  document.getElementById('info-planet-icon').textContent=pd.icon;
+  document.getElementById('info-planet-name').textContent=pd.name;
+  document.getElementById('info-fact').textContent=pd.fact;
+  var starsEl=document.getElementById('info-stars');
+  if(!progress.visited) progress.visited=[];
+  var wasVisited=progress.visited.indexOf(pid)>=0;
+  if(!wasVisited){
+    progress.visited.push(pid);
+    saveProgress();
+    playStar();
+    starsEl.textContent='⭐ '+T[lang].visited;
+  } else {
+    starsEl.textContent='★ '+T[lang].visited;
+  }
+  document.getElementById('info-panel').classList.add('visible');
+  announce(pd.name+' — '+pd.fact);
+  renderSolarSVG();
+  var allIds=PLANETS.map(function(p){return p.id;});
+  var allVisited=allIds.every(function(id){return progress.visited.indexOf(id)>=0;});
+  if(allVisited && currentLevel===1){
+    setTimeout(function(){closeInfo();showWin('explore');},900);
+  }
+}
+
+function closeInfo(){
+  document.getElementById('info-panel').classList.remove('visible');
+}
+
+function startExplore(){
+  currentLevel=1;
+  if(!progress.visited) progress.visited=[];
+  renderSolarSVG();
+  showScreen('game-screen');
+  renderUI();
+  playSpaceAmbient();
+}
+
+function startOrder(){
+  currentLevel=2;
+  orderAnswer=[];
+  orderBank=PLANET_ORDER.slice();
+  shuffle(orderBank);
+  renderOrderUI();
+  showScreen('order-screen');
+  renderUI();
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+  }
+}
+
+function renderOrderUI(){
+  var slotsEl=document.getElementById('order-slots');
+  var bankEl=document.getElementById('order-bank');
+  var checkBtn=document.getElementById('order-check-btn');
+  slotsEl.innerHTML='';
+  bankEl.innerHTML='';
+  document.getElementById('order-feedback').textContent='';
+
+  for(var i=0;i<8;i++){
+    var slot=document.createElement('div');
+    if(i<orderAnswer.length){
+      var pid=orderAnswer[i];
+      var pd=tp(pid);
+      var pl=PLANETS.find(function(p){return p.id===pid;});
+      slot.className='order-slot filled';
+      slot.innerHTML='<span class="pdot" style="background:'+(pl?pl.fill:'#fff')+'"></span>'+(pd?pd.name:pid);
+      slot.setAttribute('role','button');
+      slot.setAttribute('aria-label',(pd?pd.name:pid)+' — retirer');
+      (function(idx){slot.addEventListener('click',function(){removeFromOrder(idx);});})(i);
+    } else {
+      slot.className='order-slot';
+      slot.textContent=(i+1)+'.';
+      slot.setAttribute('aria-hidden','true');
+    }
+    slotsEl.appendChild(slot);
+  }
+
+  orderBank.forEach(function(pid){
+    var pd=tp(pid);
+    var pl=PLANETS.find(function(p){return p.id===pid;});
+    var btn=document.createElement('button');
+    btn.className='order-planet-btn';
+    btn.innerHTML='<span class="pdot" style="background:'+(pl?pl.fill:'#fff')+'"></span>'+(pd?pd.name:pid);
+    (function(p){btn.addEventListener('click',function(){addToOrder(p);});})(pid);
+    bankEl.appendChild(btn);
+  });
+
+  checkBtn.style.display=orderAnswer.length===8?'inline-block':'none';
+}
+
+function addToOrder(pid){
+  if(orderAnswer.length>=8) return;
+  orderAnswer.push(pid);
+  orderBank=orderBank.filter(function(p){return p!==pid;});
+  playClick();
+  renderOrderUI();
+}
+
+function removeFromOrder(i){
+  var pid=orderAnswer.splice(i,1)[0];
+  orderBank.push(pid);
+  playClick();
+  renderOrderUI();
+}
+
+function resetOrder(){
+  orderAnswer=[];
+  orderBank=PLANET_ORDER.slice();
+  shuffle(orderBank);
+  renderOrderUI();
+}
+
+function checkOrder(){
+  var fb=document.getElementById('order-feedback');
+  var isCorrect=orderAnswer.every(function(pid,i){return pid===PLANET_ORDER[i];});
+  if(isCorrect){
+    fb.textContent=T[lang].order_correct;
+    fb.style.color='var(--success)';
+    playSuccess();
+    progress.orderDone=true;
+    saveProgress();
+    announce(T[lang].order_correct);
+    setTimeout(function(){showWin('order');},1200);
+  } else {
+    fb.textContent=T[lang].order_wrong;
+    fb.style.color='var(--orange)';
+    playWrong();
+    announce(T[lang].order_wrong);
+  }
+}
+
+function buildQuizQuestions(){
+  var qs=[];
+  var isFr=lang==='fr';
+
+  qs.push({ q: isFr?'Quelle planète est la plus proche du Soleil ?':'Which planet is closest to the Sun?', options:['mercury','venus','earth','mars'], answer:'mercury', type:'planet' });
+  qs.push({ q: isFr?'Quelle est la plus grande planète du système solaire ?':'What is the largest planet in the solar system?', options:['saturn','jupiter','neptune','uranus'], answer:'jupiter', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète est surnommée "la planète rouge" ?':'Which planet is nicknamed "the red planet"?', options:['mars','mercury','neptune','venus'], answer:'mars', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète est célèbre pour ses magnifiques anneaux ?':'Which planet is famous for its beautiful rings?', options:['saturn','uranus','jupiter','neptune'], answer:'saturn', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète est la seule avec de la vie connue ?':'Which planet is the only one with known life?', options:['earth','mars','venus','mercury'], answer:'earth', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète est la plus éloignée du Soleil ?':'Which planet is farthest from the Sun?', options:['neptune','uranus','saturn','jupiter'], answer:'neptune', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète tourne sur le côté comme une bille ?':'Which planet rotates on its side like a rolling marble?', options:['uranus','saturn','neptune','jupiter'], answer:'uranus', type:'planet' });
+  qs.push({ q: isFr?'Quelle planète est la plus brillante dans notre ciel ?':'Which planet is the brightest in our night sky?', options:['venus','mars','jupiter','mercury'], answer:'venus', type:'planet' });
+  qs.push({ q: isFr?'La Terre est la ___ième planète à partir du Soleil.':'Earth is the ___ planet from the Sun.', options: isFr?['3ième','2ième','4ième','5ième']:['3rd','2nd','4th','5th'], answer: isFr?'3ième':'3rd', type:'text' });
+  qs.push({ q: isFr?'Combien y a-t-il de planètes dans notre système solaire ?':'How many planets are in our solar system?', options:['8','9','7','10'], answer:'8', type:'text' });
+
+  shuffle(qs);
+  return qs.slice(0,8);
+}
+
+function startQuiz(){
+  currentLevel=3;
+  quizQuestions=buildQuizQuestions();
+  quizIndex=0;
+  quizScore=0;
+  quizAnswered=false;
+  renderQuizQuestion();
+  showScreen('quiz-screen');
+  renderUI();
+}
+
+function renderQuizQuestion(){
+  if(quizIndex>=quizQuestions.length){ showWin('quiz'); return; }
+  var q=quizQuestions[quizIndex];
+  var tmpl=T[lang].quiz_progress;
+  document.getElementById('quiz-progress').textContent=tmpl.replace('{n}',quizIndex+1).replace('{total}',quizQuestions.length);
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('quiz-next-btn').style.display='none';
+  quizAnswered=false;
+
+  var optEl=document.getElementById('quiz-options');
+  optEl.innerHTML='';
+  var opts=q.options.slice();
+  shuffle(opts);
+  opts.forEach(function(opt){
+    var btn=document.createElement('button');
+    btn.className='quiz-opt';
+    if(q.type==='planet'){
+      var pd=tp(opt);
+      btn.textContent=pd?pd.name:opt;
+    } else {
+      btn.textContent=opt;
+    }
+    (function(o,b){btn.addEventListener('click',function(){if(!quizAnswered)selectQuizOpt(o,b,q);});})(opt,btn);
+    optEl.appendChild(btn);
+  });
+  announce(q.q);
+}
+
+function selectQuizOpt(opt,btnEl,q){
+  quizAnswered=true;
+  var isCorrect=(opt===q.answer);
+  var fb=document.getElementById('quiz-feedback');
+  var allBtns=document.querySelectorAll('.quiz-opt');
+  allBtns.forEach(function(b){
+    var bopt='';
+    if(q.type==='planet'){
+      var found=q.options.find(function(o){var pd=tp(o);return pd&&pd.name===b.textContent;});
+      bopt=found||b.textContent;
+    } else {
+      bopt=b.textContent;
+    }
+    if(bopt===q.answer) b.classList.add('correct');
+    b.disabled=true;
+  });
+  if(isCorrect){
+    btnEl.classList.add('correct');
+    var msgs=T[lang].quiz_correct;
+    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    fb.style.color='var(--success)';
+    playSuccess();
+    quizScore++;
+    announce(msgs[0]);
+  } else {
+    btnEl.classList.add('wrong');
+    var correctName=q.type==='planet'?(tp(q.answer)?tp(q.answer).name:q.answer):q.answer;
+    fb.textContent=T[lang].quiz_wrong+correctName;
+    fb.style.color='var(--orange)';
+    playWrong();
+    announce(T[lang].quiz_wrong+correctName);
+  }
+  document.getElementById('quiz-next-btn').style.display='inline-block';
+}
+
+function nextQuiz(){
+  quizIndex++;
+  renderQuizQuestion();
+}
+
+function showWin(mode){
+  var scoreStars=mode==='quiz'?Math.max(1,Math.round(quizScore/quizQuestions.length*3)):3;
+  document.getElementById('win-stars').textContent='⭐'.repeat(scoreStars);
+  document.getElementById('win-title').textContent=T[lang].win_title;
+  var msgKey='win_msg_'+mode;
+  var msg=T[lang][msgKey]||T[lang].win_title;
+  if(mode==='quiz') msg+=' ('+quizScore+'/'+quizQuestions.length+')';
+  document.getElementById('win-msg').textContent=msg;
+  if(mode==='quiz'&&quizScore>progress.quizHighScore) progress.quizHighScore=quizScore;
+  if(mode==='order') progress.orderDone=true;
+  saveProgress();
+  playSuccess();
+  showScreen('win-screen');
+  renderUI();
+}
+
+function replay(){
+  if(currentLevel===1) startExplore();
+  else if(currentLevel===2) startOrder();
+  else startQuiz();
+}
+
+function openParents(){
+  parentGateA=Math.floor(Math.random()*9)+2;
+  parentGateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('parents-gate-label').textContent=T[lang].parents_gate_label+' '+parentGateA+' x '+parentGateB+' = ?';
+  document.getElementById('parents-answer').value='';
+  document.getElementById('parents-gate').style.display='flex';
+  document.getElementById('parents-info').style.display='none';
+  document.getElementById('parents-gate-err').style.display='none';
+  document.getElementById('parents-modal').classList.add('visible');
+  setTimeout(function(){document.getElementById('parents-answer').focus();},100);
+}
+
+function checkParentsGate(){
+  var val=parseInt(document.getElementById('parents-answer').value,10);
+  var err=document.getElementById('parents-gate-err');
+  if(val===parentGateA*parentGateB){
+    document.getElementById('parents-gate').style.display='none';
+    document.getElementById('parents-info').style.display='block';
+    err.style.display='none';
+  } else {
+    err.textContent=T[lang].parents_err;
+    err.style.display='block';
+    document.getElementById('parents-answer').value='';
+    document.getElementById('parents-answer').focus();
+  }
+}
+
+function closeParents(){
+  document.getElementById('parents-modal').classList.remove('visible');
+}
+
+function saveProgress(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress));}catch(e){}
+}
+
+function loadProgress(){
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    if(s){var p=JSON.parse(s);if(p&&typeof p==='object')progress=Object.assign(progress,p);}
+  }catch(e){}
+}
+
+function announce(msg){
+  var el=document.getElementById('aria-live');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+document.getElementById('parents-answer').addEventListener('keydown',function(e){if(e.key==='Enter')checkParentsGate();});
+
+loadProgress();
+initStars();
+setLang(lang);
+</script>
+</body>
+</html>

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Animal Sounds World – Monde des Animaux – PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,var(--sky-light) 0%,#d4eeff 100%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  overflow-x:hidden;
+}
+#topbar{
+  width:100%;background:var(--blue);display:flex;align-items:center;
+  justify-content:space-between;padding:8px 16px;position:sticky;top:0;z-index:100;
+  box-shadow:0 3px 10px rgba(0,0,0,.3);
+}
+#topbar-left{display:flex;align-items:center;gap:10px;}
+#topbar-left img{height:34px;}
+#brand-text{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.1rem;font-weight:700;letter-spacing:.5px;}
+#topbar-right{display:flex;align-items:center;gap:8px;}
+.lang-btn{
+  background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.5);
+  color:#fff;font-weight:800;font-size:.85rem;padding:5px 12px;border-radius:20px;
+  cursor:pointer;transition:background .2s;min-width:48px;min-height:48px;
+  display:flex;align-items:center;justify-content:center;
+}
+.lang-btn.active,.lang-btn:hover{background:var(--orange);border-color:var(--orange);}
+#mute-btn{
+  background:none;border:none;font-size:1.6rem;cursor:pointer;padding:4px;
+  min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;transition:background .2s;
+}
+#mute-btn:hover{background:rgba(255,255,255,.15);}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px 40px;
+  width:100%;max-width:720px;margin:0 auto;}
+.screen.active{display:flex;}
+#mascot-area{margin:16px 0 8px;}
+h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:var(--blue);font-size:clamp(1.8rem,6vw,2.8rem);text-align:center;
+  text-shadow:0 2px 0 rgba(255,255,255,.7);
+}
+.subtitle{color:var(--slate);font-size:1.1rem;margin:8px 0 24px;text-align:center;}
+.btn-play{
+  background:var(--orange);color:#fff;border:none;border-radius:30px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.6rem;font-weight:800;padding:16px 52px;cursor:pointer;
+  box-shadow:0 6px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;
+  min-height:64px;letter-spacing:.5px;
+}
+.btn-play:active{transform:translateY(4px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{
+  margin-top:16px;background:none;border:none;color:var(--slate);
+  font-size:.9rem;cursor:pointer;text-decoration:underline;padding:8px;min-height:44px;
+}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:20px;}
+.level-card{
+  background:#fff;border-radius:24px;padding:20px 24px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s;
+  display:flex;flex-direction:column;align-items:center;gap:8px;min-width:140px;
+  border:3px solid transparent;
+}
+.level-card:hover,.level-card:focus{
+  transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.18);
+  border-color:var(--orange);outline:none;
+}
+.level-card.locked{opacity:.5;cursor:default;}
+.level-icon{font-size:3rem;}
+.level-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.2rem;font-weight:700;color:var(--blue);}
+.level-stars{color:var(--gold);font-size:1.2rem;letter-spacing:3px;}
+#score-bar{
+  display:flex;gap:16px;align-items:center;justify-content:center;
+  margin-bottom:8px;font-size:1rem;color:var(--slate);width:100%;
+}
+.score-pill{
+  background:#fff;border-radius:16px;padding:6px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;font-size:1.1rem;
+}
+#mode-btns{display:flex;gap:12px;margin:8px 0 12px;flex-wrap:wrap;justify-content:center;}
+.mode-btn{
+  background:var(--blue);color:#fff;border:none;border-radius:20px;
+  font-size:.95rem;font-weight:700;padding:10px 22px;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);min-height:48px;transition:background .2s;
+}
+.mode-btn.active,.mode-btn:hover{background:var(--orange);box-shadow:0 4px 0 var(--orange-dark);}
+#explore-hint{
+  font-size:.98rem;color:var(--slate);text-align:center;margin-bottom:8px;font-style:italic;
+}
+#question-box{
+  background:#fff;border-radius:20px;padding:14px 20px;margin-bottom:10px;
+  box-shadow:0 3px 12px rgba(0,0,0,.1);text-align:center;width:100%;
+}
+#question-text{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:clamp(1.1rem,4vw,1.5rem);color:var(--blue);font-weight:700;
+}
+#question-hint{font-size:.9rem;color:var(--slate);margin-top:4px;}
+#scene-container{
+  width:100%;max-width:680px;border-radius:28px;overflow:hidden;
+  position:relative;margin-bottom:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,.15);
+}
+#scene-svg{width:100%;display:block;}
+#feedback{
+  font-size:1.25rem;font-weight:700;text-align:center;min-height:38px;
+  padding:4px 0;transition:opacity .3s;
+}
+.back-btn{
+  background:var(--blue);color:#fff;border:none;border-radius:20px;
+  font-size:1rem;font-weight:700;padding:12px 28px;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);margin-top:12px;min-height:48px;
+}
+.back-btn:hover{background:var(--blue-dark);}
+#success-stars{font-size:3.5rem;letter-spacing:8px;margin:16px 0;display:block;text-align:center;}
+#success-screen h2{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:var(--blue);font-size:2rem;text-align:center;
+}
+#success-screen p{color:var(--slate);text-align:center;margin:8px 0 20px;}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+.success-btns button{
+  background:var(--orange);color:#fff;border:none;border-radius:24px;
+  font-size:1.05rem;font-weight:800;padding:14px 28px;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);min-height:56px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+.success-btns button.secondary{background:var(--blue);box-shadow:0 5px 0 var(--blue-dark);}
+#modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:200;align-items:center;justify-content:center;
+}
+#modal-overlay.open{display:flex;}
+#modal-box{
+  background:#fff;border-radius:24px;padding:32px 28px;max-width:440px;width:90%;
+  box-shadow:0 12px 40px rgba(0,0,0,.3);text-align:center;
+}
+#modal-box h2{color:var(--blue);margin-bottom:12px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#modal-box p,#modal-box label{color:var(--slate);font-size:.95rem;line-height:1.6;}
+#gate-question{color:var(--navy);font-weight:700;font-size:1.05rem;margin:10px 0;}
+#gate-input{
+  display:block;width:100%;margin:14px auto;padding:12px;border-radius:12px;
+  border:2px solid var(--sky);font-size:1.2rem;text-align:center;
+}
+#gate-error{color:#e11;font-size:.9rem;min-height:20px;}
+#parents-info{display:none;text-align:left;margin-top:12px;}
+#parents-info p{margin-bottom:8px;font-size:.92rem;color:var(--slate);}
+#modal-btns{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+#modal-btns button{
+  padding:10px 24px;border:none;border-radius:16px;font-weight:700;
+  cursor:pointer;font-size:1rem;min-height:48px;
+}
+#modal-confirm{background:var(--orange);color:#fff;}
+#modal-close-btn{background:var(--blue);color:#fff;}
+#animal-popup{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:#fff;border-radius:20px;padding:12px 28px;
+  box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:150;
+  display:none;flex-direction:column;align-items:center;gap:4px;
+  border:3px solid var(--orange);min-width:180px;text-align:center;
+  pointer-events:none;
+}
+#animal-popup.show{display:flex;animation:pop .3s ease;}
+#popup-emoji{font-size:2.6rem;}
+#popup-en{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.4rem;font-weight:800;color:var(--blue);}
+#popup-fr{font-size:1rem;color:var(--slate);}
+.sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) scale(.7);}to{opacity:1;transform:translateX(-50%) scale(1);}}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes wiggle{0%,100%{transform:rotate(0);}25%{transform:rotate(-10deg);}75%{transform:rotate(10deg);}}
+</style>
+</head>
+<body>
+
+<div class="sr-only" aria-live="polite" id="live-announce"></div>
+
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span id="brand-text">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    <button id="mute-btn" onclick="toggleMute()" title="Son">🔊</button>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div class="screen active" id="screen-title">
+  <div id="mascot-area">
+    <svg width="160" height="170" viewBox="0 0 160 170" xmlns="http://www.w3.org/2000/svg" aria-label="Mascotte lapin musicien">
+      <ellipse cx="80" cy="130" rx="38" ry="32" fill="#f9d8a0"/>
+      <ellipse cx="80" cy="88" rx="34" ry="30" fill="#f9d8a0"/>
+      <ellipse cx="63" cy="52" rx="10" ry="23" fill="#f9d8a0" transform="rotate(-10,63,52)"/>
+      <ellipse cx="63" cy="52" rx="5" ry="17" fill="#f4a0b8" transform="rotate(-10,63,52)"/>
+      <ellipse cx="97" cy="50" rx="10" ry="23" fill="#f9d8a0" transform="rotate(10,97,50)"/>
+      <ellipse cx="97" cy="50" rx="5" ry="17" fill="#f4a0b8" transform="rotate(10,97,50)"/>
+      <circle cx="70" cy="86" r="6" fill="#fff"/>
+      <circle cx="70" cy="87" r="3.5" fill="#4a9a4a"/>
+      <circle cx="70" cy="87" r="2" fill="#222"/>
+      <circle cx="71.5" cy="85.5" r=".9" fill="#fff"/>
+      <circle cx="90" cy="86" r="6" fill="#fff"/>
+      <circle cx="90" cy="87" r="3.5" fill="#4a9a4a"/>
+      <circle cx="90" cy="87" r="2" fill="#222"/>
+      <circle cx="91.5" cy="85.5" r=".9" fill="#fff"/>
+      <ellipse cx="80" cy="96" rx="4" ry="2.5" fill="#f4a0b8"/>
+      <path d="M76 99 Q80 104 84 99" stroke="#c07080" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="65" cy="96" rx="7" ry="4" fill="#f4a0b8" opacity=".4"/>
+      <ellipse cx="95" cy="96" rx="7" ry="4" fill="#f4a0b8" opacity=".4"/>
+      <ellipse cx="49" cy="122" rx="10" ry="18" fill="#f9d8a0" transform="rotate(-20,49,122)"/>
+      <ellipse cx="111" cy="122" rx="10" ry="18" fill="#f9d8a0" transform="rotate(20,111,122)"/>
+      <ellipse cx="80" cy="132" rx="22" ry="18" fill="#fff5e8"/>
+      <ellipse cx="65" cy="157" rx="14" ry="8" fill="#f9d8a0"/>
+      <ellipse cx="95" cy="157" rx="14" ry="8" fill="#f9d8a0"/>
+      <text x="125" y="78" font-size="20" fill="#f97316">♪</text>
+      <text x="22" y="83" font-size="16" fill="#f97316">♫</text>
+      <text x="115" y="100" font-size="13" fill="#ffd23f">♩</text>
+    </svg>
+  </div>
+  <h1 id="t-title">Animal Sounds World</h1>
+  <p class="subtitle" id="t-subtitle">Apprends les animaux en anglais !</p>
+  <button class="btn-play" id="t-play" onclick="showLevelSelect()">▶ Jouer</button>
+  <button class="btn-parents" id="t-parents" onclick="openParents()">Pour les parents</button>
+</div>
+
+<!-- LEVEL SELECT -->
+<div class="screen" id="screen-levels">
+  <h1 id="t-choose-level">Choisis un monde</h1>
+  <div class="level-cards" id="level-cards-container"></div>
+  <button class="back-btn" id="t-back-home" onclick="showScreen('screen-title')">← Accueil</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div id="score-bar">
+    <span class="score-pill" id="score-label">⭐ 0</span>
+    <span class="score-pill" id="streak-label">🔥 0</span>
+  </div>
+  <div id="mode-btns">
+    <button class="mode-btn active" id="btn-explore" onclick="setMode('explore')">🌍 Explorer</button>
+    <button class="mode-btn" id="btn-quiz" onclick="setMode('quiz')">🎯 Quiz</button>
+  </div>
+  <div id="explore-hint">Touche un animal pour l'entendre !</div>
+  <div id="question-box" style="display:none;">
+    <div id="question-text"></div>
+    <div id="question-hint"></div>
+  </div>
+  <div id="scene-container">
+    <svg id="scene-svg" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="feedback" role="status" aria-live="polite"></div>
+  <button class="back-btn" id="t-back-levels" onclick="showScreen('screen-levels')">← Mondes</button>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="screen-success">
+  <span id="success-stars">⭐⭐⭐</span>
+  <h2 id="t-success-title">Bravo !</h2>
+  <p id="t-success-msg">Tu as appris tous les animaux !</p>
+  <div class="success-btns">
+    <button id="t-replay" onclick="replayLevel()">↩ Rejouer</button>
+    <button id="t-next-level" onclick="nextLevel()">Niveau suivant ▶</button>
+    <button class="secondary" id="t-home-btn" onclick="showScreen('screen-levels')">🏠 Mondes</button>
+  </div>
+</div>
+
+<!-- PARENTS MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-h2">
+  <div id="modal-box">
+    <h2 id="modal-h2">🔒 <span id="t-gate-title">Espace parents</span></h2>
+    <p id="gate-question"></p>
+    <input type="number" id="gate-input" placeholder="?" aria-label="Votre réponse">
+    <div id="gate-error" role="alert"></div>
+    <div id="parents-info">
+      <p id="t-pi-1"></p><p id="t-pi-2"></p><p id="t-pi-3"></p><p id="t-pi-4"></p>
+    </div>
+    <div id="modal-btns">
+      <button id="modal-confirm" onclick="checkGate()"><span id="t-confirm">Valider</span></button>
+      <button id="modal-close-btn" onclick="closeParents()"><span id="t-close">Fermer</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="animal-popup" aria-live="assertive">
+  <div id="popup-emoji"></div>
+  <div id="popup-en"></div>
+  <div id="popup-fr"></div>
+</div>
+
+<script>
+'use strict';
+
+const T={
+  fr:{
+    title:'Animal Sounds World',
+    subtitle:'Apprends les animaux en anglais !',
+    play:'▶ Jouer',
+    parents:'Pour les parents',
+    chooseLevel:'Choisis un monde',
+    backHome:'← Accueil',
+    backLevels:'← Mondes',
+    modeExplore:'🌍 Explorer',
+    modeQuiz:'🎯 Quiz',
+    exploreHint:'Touche un animal pour l\'entendre !',
+    whereIs:'Où est',
+    touchIt:'Touche le bon animal !',
+    bravo:['Super ! 🎉','Bravo ! ⭐','Excellent ! 🌟','Parfait ! 🏆','Génial ! 🎊','Ouiii ! 🥳'],
+    tryAgain:'Essaie encore ! 💪',
+    successTitle:'Bravo !',
+    successMsg:'Tu as trouvé tous les animaux !',
+    replay:'↩ Rejouer',
+    nextLevel:'Niveau suivant ▶',
+    homeBtn:'🏠 Mondes',
+    gateTitle:'Espace parents',
+    gateCalc:'Combien font',
+    confirm:'Valider',
+    close:'Fermer',
+    gateError:'Oups ! Mauvaise réponse.',
+    pi1:'🎯 Compétence visée : vocabulaire anglais des animaux (ferme, jungle, océan).',
+    pi2:'🔒 Aucune donnée collectée, aucun compte requis, aucune publicité.',
+    pi3:'📱 Fonctionne hors-ligne, 100 % gratuit et open source (PGRG IA).',
+    pi4:'💡 Deux modes : Explorer (découverte libre) et Quiz (trouver le bon animal).',
+    locked:'Termine le niveau précédent !',
+    levels:[
+      {name:'Ferme',emoji:'🐄',desc:'La ferme'},
+      {name:'Jungle',emoji:'🐯',desc:'La jungle'},
+      {name:'Océan',emoji:'🐬',desc:'L\'océan'},
+    ]
+  },
+  en:{
+    title:'Animal Sounds World',
+    subtitle:'Learn animals in English!',
+    play:'▶ Play',
+    parents:'For parents',
+    chooseLevel:'Choose a world',
+    backHome:'← Home',
+    backLevels:'← Worlds',
+    modeExplore:'🌍 Explore',
+    modeQuiz:'🎯 Quiz',
+    exploreHint:'Tap an animal to hear its name!',
+    whereIs:'Where is',
+    touchIt:'Tap the right animal!',
+    bravo:['Amazing! 🎉','Great! ⭐','Excellent! 🌟','Perfect! 🏆','Wonderful! 🎊','Yes! 🥳'],
+    tryAgain:'Try again! 💪',
+    successTitle:'Well done!',
+    successMsg:'You found all the animals!',
+    replay:'↩ Play again',
+    nextLevel:'Next level ▶',
+    homeBtn:'🏠 Worlds',
+    gateTitle:'Parents area',
+    gateCalc:'What is',
+    confirm:'Confirm',
+    close:'Close',
+    gateError:'Oops! Wrong answer.',
+    pi1:'🎯 Skill: English animal vocabulary (farm, jungle, ocean).',
+    pi2:'🔒 No data collected, no account required, no ads.',
+    pi3:'📱 Works offline, 100% free and open source (PGRG IA).',
+    pi4:'💡 Two modes: Explore (free discovery) and Quiz (find the animal).',
+    locked:'Complete the previous level first!',
+    levels:[
+      {name:'Farm',emoji:'🐄',desc:'The Farm'},
+      {name:'Jungle',emoji:'🐯',desc:'The Jungle'},
+      {name:'Ocean',emoji:'🐬',desc:'The Ocean'},
+    ]
+  }
+};
+
+const ANIMALS=[
+  // FARM (level 0)
+  [
+    {id:'cow',    en:'Cow',      fr:'Vache',      emoji:'🐄', x:60,  y:195, w:95,  h:82,  snd:'moo'},
+    {id:'pig',    en:'Pig',      fr:'Cochon',     emoji:'🐷', x:195, y:220, w:72,  h:65,  snd:'oink'},
+    {id:'chicken',en:'Chicken',  fr:'Poule',      emoji:'🐔', x:330, y:238, w:65,  h:60,  snd:'cluck'},
+    {id:'horse',  en:'Horse',    fr:'Cheval',     emoji:'🐴', x:455, y:178, w:98,  h:92,  snd:'neigh'},
+    {id:'sheep',  en:'Sheep',    fr:'Mouton',     emoji:'🐑', x:588, y:222, w:72,  h:65,  snd:'baa'},
+    {id:'dog',    en:'Dog',      fr:'Chien',      emoji:'🐕', x:135, y:262, w:62,  h:56,  snd:'woof'},
+    {id:'cat',    en:'Cat',      fr:'Chat',       emoji:'🐱', x:400, y:268, w:56,  h:55,  snd:'meow'},
+  ],
+  // JUNGLE (level 1)
+  [
+    {id:'tiger',   en:'Tiger',   fr:'Tigre',       emoji:'🐯', x:60,  y:188, w:98,  h:88,  snd:'roar'},
+    {id:'elephant',en:'Elephant',fr:'Éléphant',    emoji:'🐘', x:195, y:175, w:108, h:98,  snd:'trumpet'},
+    {id:'monkey',  en:'Monkey',  fr:'Singe',       emoji:'🐒', x:345, y:198, w:76,  h:82,  snd:'oohah'},
+    {id:'parrot',  en:'Parrot',  fr:'Perroquet',   emoji:'🦜', x:462, y:192, w:72,  h:76,  snd:'squawk'},
+    {id:'snake',   en:'Snake',   fr:'Serpent',     emoji:'🐍', x:578, y:250, w:88,  h:56,  snd:'hiss'},
+    {id:'frog',    en:'Frog',    fr:'Grenouille',  emoji:'🐸', x:138, y:262, w:62,  h:58,  snd:'ribbit'},
+    {id:'lion',    en:'Lion',    fr:'Lion',        emoji:'🦁', x:305, y:202, w:92,  h:88,  snd:'roar'},
+  ],
+  // OCEAN (level 2)
+  [
+    {id:'dolphin', en:'Dolphin', fr:'Dauphin',    emoji:'🐬', x:62,  y:182, w:98,  h:76,  snd:'click'},
+    {id:'shark',   en:'Shark',   fr:'Requin',     emoji:'🦈', x:200, y:196, w:104, h:72,  snd:'gulp'},
+    {id:'crab',    en:'Crab',    fr:'Crabe',      emoji:'🦀', x:348, y:252, w:72,  h:62,  snd:'snap'},
+    {id:'octopus', en:'Octopus', fr:'Pieuvre',    emoji:'🐙', x:465, y:198, w:88,  h:82,  snd:'blub'},
+    {id:'fish',    en:'Fish',    fr:'Poisson',    emoji:'🐟', x:578, y:218, w:72,  h:62,  snd:'blub'},
+    {id:'whale',   en:'Whale',   fr:'Baleine',    emoji:'🐳', x:132, y:228, w:104, h:82,  snd:'song'},
+    {id:'turtle',  en:'Turtle',  fr:'Tortue',     emoji:'🐢', x:308, y:255, w:76,  h:68,  snd:'blub'},
+  ]
+];
+
+const SOUNDS={
+  moo:    [[180,.45],[160,.55]],
+  oink:   [[310,.14],[255,.14],[310,.14],[280,.14]],
+  cluck:  [[620,.08],[510,.08],[560,.1],[520,.08]],
+  neigh:  [[420,.08],[520,.22],[300,.32],[200,.2]],
+  baa:    [[260,.42],[225,.32],[210,.22]],
+  woof:   [[310,.13],[205,.28],[180,.18]],
+  meow:   [[420,.14],[640,.32],[400,.22]],
+  roar:   [[120,.65],[100,.85],[80,.55],[60,.4]],
+  trumpet:[[210,.2],[320,.3],[260,.42],[300,.3]],
+  oohah:  [[420,.12],[310,.12],[420,.12],[310,.12],[380,.15]],
+  squawk: [[720,.1],[520,.1],[720,.1],[600,.1]],
+  hiss:   [[820,.62],[710,.45],[650,.3]],
+  ribbit: [[360,.13],[305,.22],[360,.13]],
+  click:  [[820,.05],[610,.05],[820,.05],[700,.04]],
+  gulp:   [[210,.32],[160,.42],[140,.3]],
+  snap:   [[520,.09],[420,.06],[380,.05]],
+  blub:   [[310,.1],[210,.1],[310,.1],[200,.08]],
+  song:   [[220,.42],[262,.42],[294,.52],[330,.62],[350,.5]],
+};
+
+const SK='pgrg_animal_sounds';
+let lang='fr', muted=false, curLevel=0, mode='explore',
+    score=0, streak=0, quizTarget=null, quizDone=[], levelStars=[0,0,0];
+
+(function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(SK)||'{}');
+    if(d.levelStars) levelStars=d.levelStars;
+    if(d.lang) lang=d.lang;
+  }catch(e){}
+})();
+
+function save(){
+  try{ localStorage.setItem(SK,JSON.stringify({levelStars,lang})); }catch(e){}
+}
+
+// Audio
+let ctx=null;
+function getCtx(){
+  if(!ctx) ctx=new(window.AudioContext||window.webkitAudioContext)();
+  return ctx;
+}
+function tone(freq,dur,type,vol){
+  if(muted) return;
+  type=type||'sine'; vol=vol||.28;
+  try{
+    const c=getCtx();
+    const o=c.createOscillator();
+    const g=c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.type=type; o.frequency.setValueAtTime(freq,c.currentTime);
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+    o.start(); o.stop(c.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){
+  if(muted) return;
+  [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,'sine',.22),i*110));
+}
+function playWrong(){
+  if(muted) return;
+  tone(200,.3,'sawtooth',.14);
+  setTimeout(()=>tone(180,.22,'sawtooth',.1),220);
+}
+function playSnd(snd){
+  const p=SOUNDS[snd]||[[440,.3]];
+  p.forEach(([f,d],i)=>setTimeout(()=>tone(f,d,'sine',.24),i*175));
+}
+function speak(en){
+  if(muted||!window.speechSynthesis) return;
+  try{
+    const u=new SpeechSynthesisUtterance(en);
+    u.lang='en-US'; u.rate=.82; u.pitch=1.15; u.volume=1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+// Lang
+function setLang(l){
+  lang=l; save();
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  applyT();
+  if(document.getElementById('screen-levels').classList.contains('active')) renderLevels();
+  if(document.getElementById('screen-game').classList.contains('active')){ renderScene(); updateQUI(); }
+}
+function t(k){ return T[lang][k]||T.fr[k]||k; }
+function applyT(){
+  const m={
+    't-title':'title','t-subtitle':'subtitle','t-play':'play','t-parents':'parents',
+    't-choose-level':'chooseLevel','t-back-home':'backHome','t-back-levels':'backLevels',
+    't-success-title':'successTitle','t-success-msg':'successMsg',
+    't-replay':'replay','t-next-level':'nextLevel','t-home-btn':'homeBtn',
+    't-gate-title':'gateTitle','t-confirm':'confirm','t-close':'close',
+    't-pi-1':'pi1','t-pi-2':'pi2','t-pi-3':'pi3','t-pi-4':'pi4',
+  };
+  Object.entries(m).forEach(([id,k])=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=t(k);
+  });
+  document.getElementById('btn-explore').textContent=t('modeExplore');
+  document.getElementById('btn-quiz').textContent=t('modeQuiz');
+  document.getElementById('explore-hint').textContent=t('exploreHint');
+}
+
+// Screens
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showLevelSelect(){ renderLevels(); showScreen('screen-levels'); }
+
+function renderLevels(){
+  const c=document.getElementById('level-cards-container');
+  c.innerHTML='';
+  T[lang].levels.forEach((lv,i)=>{
+    const stars=levelStars[i]||0;
+    const locked=i>0&&(levelStars[i-1]||0)<1;
+    const btn=document.createElement('button');
+    btn.className='level-card'+(locked?' locked':'');
+    btn.setAttribute('tabindex',locked?'-1':'0');
+    btn.setAttribute('aria-label',(locked?t('locked')+' ':'')+lv.name);
+    btn.innerHTML=`<div class="level-icon">${lv.emoji}</div>
+      <div class="level-name">${lv.name}</div>
+      <div class="level-stars">${'⭐'.repeat(stars)||'○○○'}</div>`;
+    if(!locked){
+      btn.addEventListener('click',()=>startLevel(i));
+      btn.addEventListener('keydown',e=>(e.key==='Enter'||e.key===' ')&&startLevel(i));
+    }
+    c.appendChild(btn);
+  });
+}
+
+// Game
+function startLevel(i){
+  curLevel=i; score=0; streak=0; mode='explore'; quizTarget=null; quizDone=[];
+  document.getElementById('btn-explore').classList.add('active');
+  document.getElementById('btn-quiz').classList.remove('active');
+  document.getElementById('question-box').style.display='none';
+  document.getElementById('explore-hint').style.display='';
+  document.getElementById('feedback').textContent='';
+  updScore();
+  renderScene();
+  showScreen('screen-game');
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btn-explore').classList.toggle('active',m==='explore');
+  document.getElementById('btn-quiz').classList.toggle('active',m==='quiz');
+  document.getElementById('question-box').style.display=m==='quiz'?'':'none';
+  document.getElementById('explore-hint').style.display=m==='explore'?'':'none';
+  document.getElementById('feedback').textContent='';
+  if(m==='quiz'){ quizDone=[]; score=0; streak=0; updScore(); pickQ(); }
+}
+
+function pickQ(){
+  const all=ANIMALS[curLevel];
+  const rem=all.filter(a=>!quizDone.includes(a.id));
+  if(rem.length===0){ showSuccess(); return; }
+  const a=rem[Math.floor(Math.random()*rem.length)];
+  quizTarget=a.id;
+  updateQUI();
+}
+
+function updateQUI(){
+  if(mode!=='quiz'||!quizTarget) return;
+  const a=ANIMALS[curLevel].find(x=>x.id===quizTarget);
+  if(!a) return;
+  document.getElementById('question-text').textContent=t('whereIs')+' '+a.en+' ?';
+  document.getElementById('question-hint').textContent='('+a.fr+') — '+t('touchIt');
+}
+
+function updScore(){
+  document.getElementById('score-label').textContent='⭐ '+score;
+  document.getElementById('streak-label').textContent='🔥 '+streak;
+}
+
+function onAnimal(id){
+  const a=ANIMALS[curLevel].find(x=>x.id===id);
+  if(!a) return;
+  playSnd(a.snd);
+  setTimeout(()=>speak(a.en),320);
+  animEl(id,false);
+  showPop(a);
+  if(mode==='explore'){
+    setFB('🎵 '+a.en+' · '+a.fr,getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0f4c81');
+  } else {
+    if(id===quizTarget){
+      score++; streak++; updScore(); playSuccess();
+      quizDone.push(id);
+      const bv=t('bravo');
+      const bMsg=Array.isArray(bv)?bv[Math.floor(Math.random()*bv.length)]:bv;
+      setFB(bMsg,'#34c77b');
+      setTimeout(()=>{ document.getElementById('feedback').textContent=''; pickQ(); },1300);
+    } else {
+      streak=0; updScore(); playWrong();
+      setFB(t('tryAgain'),'#f97316');
+      animEl(id,true);
+      setTimeout(()=>document.getElementById('feedback').textContent='',1300);
+    }
+  }
+}
+
+function setFB(txt,color){
+  const el=document.getElementById('feedback');
+  el.textContent=txt; el.style.color=color;
+  document.getElementById('live-announce').textContent=txt;
+}
+
+// Scene
+function renderScene(){
+  const svg=document.getElementById('scene-svg');
+  const lv=curLevel;
+  const an=ANIMALS[lv];
+
+  let bg='';
+  if(lv===0){
+    bg=`
+      <rect width="680" height="255" fill="#87CEEB"/>
+      <circle cx="600" cy="62" r="48" fill="#ffe870" opacity=".9"/>
+      <circle cx="600" cy="62" r="38" fill="#ffd23f"/>
+      <ellipse cx="120" cy="55" rx="55" ry="28" fill="#fff" opacity=".92"/>
+      <ellipse cx="155" cy="44" rx="40" ry="22" fill="#fff" opacity=".92"/>
+      <ellipse cx="85" cy="48" rx="38" ry="20" fill="#fff" opacity=".92"/>
+      <ellipse cx="350" cy="70" rx="48" ry="24" fill="#fff" opacity=".88"/>
+      <ellipse cx="385" cy="59" rx="35" ry="20" fill="#fff" opacity=".88"/>
+      <rect y="250" width="680" height="150" fill="#ffe0a0"/>
+      <rect y="244" width="680" height="32" fill="#90EE90"/>
+      <ellipse cx="100" cy="248" rx="65" ry="16" fill="#90EE90"/>
+      <ellipse cx="290" cy="248" rx="75" ry="15" fill="#90EE90"/>
+      <ellipse cx="490" cy="248" rx="68" ry="15" fill="#90EE90"/>
+      <rect x="578" y="140" width="92" height="82" fill="#c0392b"/>
+      <polygon points="573,145 624,102 672,145" fill="#922b21"/>
+      <rect x="606" y="188" width="22" height="34" rx="3" fill="#8b5e3c"/>
+      <rect x="588" y="155" width="22" height="22" rx="3" fill="#ffe870" opacity=".8"/>
+      ${[48,148,248,348,448,548].map(x=>`<rect x="${x}" y="268" width="8" height="42" rx="3" fill="#c8a050"/>`).join('')}
+      <rect x="48" y="273" width="512" height="8" rx="4" fill="#c8a050"/>
+      <rect x="48" y="290" width="512" height="8" rx="4" fill="#c8a050"/>
+      ${[62,188,318,438,548].map((x,i)=>`
+        <line x1="${x}" y1="262" x2="${x}" y2="278" stroke="#2d8a2d" stroke-width="2.5"/>
+        <circle cx="${x}" cy="260" r="5.5" fill="${['#f97316','#e11d48','#f4a0b8','#ffd23f','#9b59b6'][i]}"/>
+      `).join('')}
+    `;
+  } else if(lv===1){
+    bg=`
+      <rect width="680" height="400" fill="#1a3d0a"/>
+      <circle cx="340" cy="28" r="32" fill="#ffe870" opacity=".25"/>
+      <circle cx="340" cy="28" r="22" fill="#ffd23f" opacity=".35"/>
+      <ellipse cx="75" cy="115" rx="82" ry="105" fill="#2d7a1a"/>
+      <ellipse cx="55" cy="88" rx="60" ry="78" fill="#3d9a2a"/>
+      <ellipse cx="625" cy="108" rx="78" ry="100" fill="#2d7a1a"/>
+      <ellipse cx="645" cy="82" rx="58" ry="72" fill="#3d9a2a"/>
+      <ellipse cx="335" cy="78" rx="92" ry="88" fill="#2d7a1a"/>
+      <ellipse cx="188" cy="125" rx="66" ry="78" fill="#349a22"/>
+      <ellipse cx="492" cy="112" rx="72" ry="82" fill="#349a22"/>
+      <rect x="58" y="198" width="32" height="104" rx="9" fill="#6b3a1a"/>
+      <rect x="606" y="192" width="30" height="110" rx="9" fill="#6b3a1a"/>
+      <rect x="318" y="188" width="28" height="114" rx="9" fill="#6b3a1a"/>
+      <rect x="170" y="202" width="24" height="100" rx="8" fill="#6b3a1a"/>
+      <rect x="474" y="198" width="24" height="104" rx="8" fill="#6b3a1a"/>
+      <path d="M128 0 Q112 105 130 205" stroke="#2a6b0a" stroke-width="5" fill="none" opacity=".6"/>
+      <path d="M552 0 Q568 125 548 235" stroke="#2a6b0a" stroke-width="4" fill="none" opacity=".6"/>
+      <rect y="295" width="680" height="105" fill="#0d2005"/>
+      ${[78,202,352,502,612].map(x=>`<ellipse cx="${x}" cy="298" rx="26" ry="13" fill="#4a9a2a"/>`).join('')}
+      ${[120,260,420,560].map((x,i)=>`
+        <path d="M${x} 400 Q${x-8} 360 ${x+5} 330 Q${x-5} 305 ${x} 280" stroke="#2d7a10" stroke-width="4" fill="none"/>
+      `).join('')}
+    `;
+  } else {
+    bg=`
+      <rect width="680" height="400" fill="#006994"/>
+      <rect width="680" height="62" fill="#005580"/>
+      <path d="M0 40 Q85 22 170 40 Q255 58 340 40 Q425 22 510 40 Q595 58 680 40 L680 0 L0 0Z" fill="#00a8d0" opacity=".5"/>
+      <path d="M0 56 Q85 46 170 56 Q255 66 340 56 Q425 46 510 56 Q595 66 680 56" stroke="#7ec3ee" stroke-width="2" fill="none" opacity=".4"/>
+      <path d="M340 0 L180 400" stroke="#7ec3ee" stroke-width="35" opacity=".07"/>
+      <path d="M340 0 L500 400" stroke="#7ec3ee" stroke-width="28" opacity=".07"/>
+      <path d="M340 0 L80 400" stroke="#7ec3ee" stroke-width="18" opacity=".05"/>
+      <path d="M340 0 L600 400" stroke="#7ec3ee" stroke-width="18" opacity=".05"/>
+      <rect y="342" width="680" height="58" fill="#c8a052"/>
+      <rect y="337" width="680" height="22" fill="#d4ae6a"/>
+      <ellipse cx="52" cy="348" rx="24" ry="19" fill="#e74c8b" opacity=".82"/>
+      <ellipse cx="54" cy="334" rx="13" ry="19" fill="#e74c8b" opacity=".82"/>
+      <ellipse cx="622" cy="345" rx="22" ry="17" fill="#f97316" opacity=".82"/>
+      <ellipse cx="282" cy="350" rx="17" ry="15" fill="#9b59b6" opacity=".82"/>
+      ${[98,252,432,558].map(x=>`
+        <path d="M${x} 395 Q${x-10} 365 ${x+4} 335 Q${x-4} 308 ${x} 278" stroke="#2d8a3d" stroke-width="6" fill="none" stroke-linecap="round"/>
+      `).join('')}
+      ${[118,232,382,502].map((x,i)=>`
+        <circle cx="${x}" cy="${78+i*32}" r="${4+i*2}" fill="#7ec3ee" opacity=".38"/>
+        <circle cx="${x+12}" cy="${65+i*32}" r="${2+i}" fill="#7ec3ee" opacity=".25"/>
+      `).join('')}
+    `;
+  }
+
+  let animals='';
+  an.forEach(a=>{
+    const fs=Math.min(a.w,a.h)*.78;
+    const ex=a.x+a.w/2;
+    const ey=a.y+a.h/2+fs*.32;
+    const ly=a.y+a.h+22;
+    const lw=68;
+    animals+=`
+      <g id="ag-${a.id}" role="button" tabindex="0" aria-label="${a.en} ${a.fr}" style="cursor:pointer;">
+        <rect id="hit-${a.id}" x="${a.x-6}" y="${a.y-6}" width="${a.w+12}" height="${a.h+34}" rx="18" fill="rgba(255,255,255,0.13)"/>
+        <text id="em-${a.id}" x="${ex}" y="${ey}" text-anchor="middle" font-size="${fs}" dominant-baseline="middle">${a.emoji}</text>
+        <rect x="${ex-lw/2}" y="${ly-5}" width="${lw}" height="23" rx="11" fill="rgba(15,76,129,0.82)"/>
+        <text x="${ex}" y="${ly+8}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff" font-family="Nunito,system-ui,sans-serif">${a.en}</text>
+      </g>
+    `;
+  });
+
+  svg.innerHTML=`<defs><filter id="dr"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.18"/></filter></defs>`
+    +bg+animals;
+
+  an.forEach(a=>{
+    const g=document.getElementById('ag-'+a.id);
+    if(!g) return;
+    g.addEventListener('click',()=>onAnimal(a.id));
+    g.addEventListener('keydown',e=>(e.key==='Enter'||e.key===' ')&&(e.preventDefault(),onAnimal(a.id)));
+    const hit=document.getElementById('hit-'+a.id);
+    g.addEventListener('pointerenter',()=>hit&&hit.setAttribute('fill','rgba(255,255,255,0.32)'));
+    g.addEventListener('pointerleave',()=>hit&&hit.setAttribute('fill','rgba(255,255,255,0.13)'));
+  });
+
+  updateQUI();
+}
+
+function animEl(id, shake){
+  const em=document.getElementById('em-'+id);
+  if(!em) return;
+  em.style.animation='none';
+  void em.offsetWidth;
+  em.style.animation=shake?'wiggle .4s ease 2':'bounce .5s ease 2';
+  setTimeout(()=>em.style.animation='',shake?900:1100);
+}
+
+let popTimer=null;
+function showPop(a){
+  const pop=document.getElementById('animal-popup');
+  document.getElementById('popup-emoji').textContent=a.emoji;
+  document.getElementById('popup-en').textContent=a.en;
+  document.getElementById('popup-fr').textContent=a.fr;
+  pop.classList.add('show');
+  if(popTimer) clearTimeout(popTimer);
+  popTimer=setTimeout(()=>pop.classList.remove('show'),2400);
+}
+
+// Success
+function showSuccess(){
+  const total=ANIMALS[curLevel].length;
+  const s=score>=total?3:score>=Math.ceil(total*.6)?2:1;
+  levelStars[curLevel]=Math.max(levelStars[curLevel]||0,s);
+  save();
+  document.getElementById('success-stars').textContent='⭐'.repeat(s)+'☆'.repeat(3-s);
+  applyT();
+  showScreen('screen-success');
+  playSuccess(); setTimeout(playSuccess,500);
+}
+function replayLevel(){ startLevel(curLevel); }
+function nextLevel(){
+  if(curLevel<ANIMALS.length-1) startLevel(curLevel+1);
+  else showLevelSelect();
+}
+
+// Parents
+let ga=0,gb=0,gc=0;
+function openParents(){
+  ga=Math.floor(Math.random()*9)+2;
+  gb=Math.floor(Math.random()*9)+2;
+  gc=ga*gb;
+  document.getElementById('gate-question').textContent=t('gateCalc')+' '+ga+' × '+gb+' ?';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-error').textContent='';
+  document.getElementById('parents-info').style.display='none';
+  applyT();
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('gate-input').focus(),200);
+}
+function checkGate(){
+  const v=parseInt(document.getElementById('gate-input').value,10);
+  if(v===gc){
+    document.getElementById('parents-info').style.display='block';
+    document.getElementById('gate-error').textContent='';
+  } else {
+    document.getElementById('gate-error').textContent=t('gateError');
+    playWrong();
+  }
+}
+function closeParents(){ document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('gate-input').addEventListener('keydown',e=>e.key==='Enter'&&checkGate());
+document.getElementById('modal-overlay').addEventListener('click',e=>e.target===e.currentTarget&&closeParents());
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
+}
+
+// Init
+(function(){
+  const nl=(navigator.language||'fr').toLowerCase();
+  lang=nl.startsWith('en')?'en':'fr';
+  document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  applyT();
+  showScreen('screen-title');
+  const resume=()=>{try{getCtx().resume();}catch(e){}};
+  document.addEventListener('click',resume,{once:true});
+  document.addEventListener('touchstart',resume,{once:true,passive:true});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Architecte des Formes / Shape Architect — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;--orange-dark:#ea580c;
+  --gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#d8eeff 0%,#eaf6ff 60%,#fffbe0 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{width:100%;max-width:800px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--blue);border-radius:0 0 18px 18px;box-shadow:0 4px 12px #0004;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;}
+#topbar .brand img{height:34px;}
+#topbar .brand span{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.5px;}
+.lang-btn{background:transparent;border:2px solid #ffffff88;color:#fff;border-radius:8px;padding:4px 10px;font-size:.85rem;cursor:pointer;font-weight:700;transition:background .2s;}
+.lang-btn.active,.lang-btn:hover{background:#ffffff33;}
+#muteBtn{background:transparent;border:none;font-size:1.5rem;cursor:pointer;padding:4px;}
+.screen{display:none;width:100%;max-width:800px;padding:16px 12px;flex-direction:column;align-items:center;gap:16px;}
+.screen.active{display:flex;}
+#mascot{width:140px;height:140px;}
+.game-title{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:2.2rem;color:var(--blue);text-align:center;line-height:1.1;}
+.game-subtitle{color:var(--slate);font-size:1rem;text-align:center;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;cursor:pointer;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;transition:transform .1s,box-shadow .1s;user-select:none;}
+.btn:active{transform:translateY(3px);box-shadow:none!important;}
+.btn-orange{background:var(--orange);color:#fff;font-size:1.25rem;padding:14px 36px;box-shadow:0 5px 0 var(--orange-dark);}
+.btn-orange:hover{background:#fb8c3a;}
+.btn-blue{background:var(--blue);color:#fff;font-size:1rem;padding:10px 22px;box-shadow:0 4px 0 var(--blue-dark);}
+.btn-blue:hover{background:#1a5d9a;}
+.btn-sm{font-size:.85rem;padding:8px 16px;border-radius:10px;}
+.btn-ghost{background:#ffffff88;color:var(--blue);font-size:.85rem;padding:8px 18px;border:2px solid var(--blue);border-radius:10px;cursor:pointer;font-family:'Nunito',system-ui,sans-serif;font-weight:700;}
+.btn-ghost:hover{background:#e0f0ff;}
+.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 18px #0002;width:100%;max-width:480px;}
+.card h2{color:var(--blue);font-size:1.3rem;margin-bottom:12px;}
+.gate-q{font-size:1.2rem;color:var(--navy);margin:10px 0;}
+.gate-input{width:80px;font-size:1.3rem;text-align:center;border:2px solid var(--sky);border-radius:10px;padding:8px;outline:none;}
+.gate-input:focus{border-color:var(--blue);}
+.gate-err{color:#e53e3e;font-size:.9rem;min-height:1.2em;}
+#levelBadge{background:var(--blue);color:#fff;border-radius:12px;padding:6px 16px;font-size:.95rem;font-weight:700;}
+#progressBar{width:100%;max-width:560px;height:10px;background:#c8e6f7;border-radius:8px;overflow:hidden;}
+#progressFill{height:100%;background:var(--orange);border-radius:8px;transition:width .4s;}
+#scoreArea{display:flex;gap:12px;align-items:center;}
+#starDisplay{font-size:1.4rem;letter-spacing:2px;}
+#feedbackBox{min-height:36px;font-size:1.05rem;font-weight:700;text-align:center;color:var(--blue);padding:4px 12px;border-radius:10px;transition:all .3s;}
+#feedbackBox.good{color:#155724;background:#d4edda;}
+#feedbackBox.bad{color:#721c24;background:#f8d7da;}
+#shapeQuiz{display:none;flex-direction:column;align-items:center;gap:18px;width:100%;}
+.quiz-svg-wrap{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 12px #0001;}
+.shape-choices{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+.shape-btn{background:#fff;border:3px solid var(--sky);border-radius:14px;padding:14px 22px;cursor:pointer;font-size:1rem;font-family:'Nunito',system-ui,sans-serif;font-weight:700;color:var(--navy);transition:border-color .2s,transform .1s;min-width:48px;min-height:48px;}
+.shape-btn:hover{border-color:var(--blue);background:#eaf6ff;}
+.shape-btn.correct{border-color:var(--success);background:#e6fff3;}
+.shape-btn.wrong{border-color:#e53e3e;background:#fff0f0;}
+#buildArea{display:none;flex-direction:column;align-items:center;gap:16px;width:100%;}
+.build-top{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%;}
+.model-panel,.canvas-panel{background:#fff;border-radius:20px;padding:14px;box-shadow:0 4px 12px #0001;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.panel-label{font-size:.8rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:1px;}
+#modelSvg,#dropCanvas{width:240px;height:240px;border-radius:14px;}
+#dropCanvas{border:3px dashed var(--sky);background:#f5faff;touch-action:none;}
+.shapes-palette{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px;background:#fff;border-radius:18px;box-shadow:0 2px 8px #0001;width:100%;}
+.palette-shape{cursor:grab;user-select:none;touch-action:none;filter:drop-shadow(0 2px 4px #0003);transition:transform .15s;}
+.palette-shape:hover{transform:scale(1.12);}
+.palette-shape:active{cursor:grabbing;}
+.check-btn-wrap{display:flex;gap:12px;justify-content:center;}
+#symArea{display:none;flex-direction:column;align-items:center;gap:16px;width:100%;}
+#symCanvas{border-radius:18px;background:#fff;box-shadow:0 4px 12px #0001;touch-action:none;}
+.sym-instructions{font-size:.95rem;color:var(--slate);text-align:center;max-width:400px;}
+.sym-palette{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.sym-tool{background:#fff;border:2.5px solid var(--sky);border-radius:12px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-weight:700;color:var(--navy);transition:border-color .2s;min-height:48px;}
+.sym-tool:hover,.sym-tool.active{border-color:var(--blue);background:#eaf6ff;}
+.sym-tool.active{border-color:var(--orange);background:#fff7ed;}
+#symClearBtn{background:transparent;border:2px solid var(--slate);color:var(--slate);border-radius:10px;padding:8px 16px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:'Nunito',system-ui,sans-serif;}
+#successScreen{text-align:center;}
+.big-stars{font-size:3.5rem;letter-spacing:8px;}
+.success-title{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--orange);margin:8px 0;}
+.success-msg{color:var(--slate);font-size:1rem;}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;}
+#questionOverlay{display:none;position:fixed;inset:0;background:#000a;z-index:100;align-items:center;justify-content:center;}
+#questionOverlay.active{display:flex;}
+.q-card{background:#fff;border-radius:24px;padding:28px;max-width:380px;width:90%;box-shadow:0 8px 32px #0005;text-align:center;display:flex;flex-direction:column;gap:16px;}
+.q-card h3{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.4rem;color:var(--blue);}
+.q-text{font-size:1.15rem;color:var(--navy);}
+.q-choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.q-choice{background:var(--sky-light);border:2.5px solid var(--sky);border-radius:12px;padding:10px 20px;cursor:pointer;font-size:1.05rem;font-weight:700;font-family:'Nunito',system-ui,sans-serif;transition:border-color .2s;min-height:48px;}
+.q-choice:hover{border-color:var(--blue);background:#daeeff;}
+.q-choice.correct{border-color:var(--success);background:#e6fff3;color:#155724;}
+.q-choice.wrong{border-color:#e53e3e;background:#fff0f0;color:#721c24;}
+@media(max-width:540px){
+  #modelSvg,#dropCanvas{width:160px;height:160px;}
+  .game-title{font-size:1.6rem;}
+  #symCanvas{width:300px!important;height:260px!important;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Mute">🔊</button>
+</div>
+
+<div class="screen active" id="titleScreen">
+  <svg id="mascot" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="30" y="75" width="80" height="55" rx="8" fill="#0f4c81"/>
+    <polygon points="70,20 20,70 120,70" fill="#f97316"/>
+    <rect x="57" y="100" width="26" height="30" rx="6" fill="#ffd23f"/>
+    <rect x="35" y="82" width="22" height="20" rx="5" fill="#7ec3ee"/>
+    <rect x="83" y="82" width="22" height="20" rx="5" fill="#7ec3ee"/>
+    <circle cx="70" cy="50" r="12" fill="#ffe0a0"/>
+    <circle cx="66" cy="48" r="2" fill="#333"/>
+    <circle cx="74" cy="48" r="2" fill="#333"/>
+    <path d="M66 54 Q70 58 74 54" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <polygon points="70,8 72,14 78,14 73,18 75,24 70,20 65,24 67,18 62,14 68,14" fill="#ffd23f"/>
+  </svg>
+  <h1 class="game-title" id="titleText"></h1>
+  <p class="game-subtitle" id="subtitleText"></p>
+  <button class="btn btn-orange" onclick="startGame()" id="playBtn"></button>
+  <button class="btn-ghost" onclick="showParentGate()" id="parentBtn"></button>
+  <div aria-live="polite" id="ariaLive" style="position:absolute;left:-9999px;"></div>
+</div>
+
+<div class="screen" id="parentGateScreen">
+  <div class="card">
+    <h2 id="gateTitle"></h2>
+    <p class="gate-q" id="gateQ"></p>
+    <div style="display:flex;gap:10px;align-items:center;margin:8px 0;">
+      <input type="number" class="gate-input" id="gateInput" min="0" max="99">
+      <button class="btn btn-blue btn-sm" onclick="checkGate()" id="gateOkBtn"></button>
+    </div>
+    <p class="gate-err" id="gateErr"></p>
+    <button class="btn-ghost btn-sm" style="margin-top:8px;" onclick="showScreen('titleScreen')" id="gateBackBtn"></button>
+  </div>
+</div>
+
+<div class="screen" id="parentInfoScreen">
+  <div class="card">
+    <h2 id="parentInfoTitle"></h2>
+    <p id="parentInfoText" style="color:var(--slate);line-height:1.7;margin-bottom:12px;"></p>
+    <button class="btn btn-blue btn-sm" onclick="showScreen('titleScreen')" id="parentBackBtn"></button>
+  </div>
+</div>
+
+<div class="screen" id="gameScreen">
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;width:100%;max-width:560px;">
+    <span id="levelBadge"></span>
+    <div id="scoreArea"><span id="starDisplay"></span></div>
+  </div>
+  <div id="progressBar"><div id="progressFill" style="width:0%"></div></div>
+  <div id="feedbackBox" role="status" aria-live="polite"></div>
+
+  <div id="shapeQuiz">
+    <div class="quiz-svg-wrap">
+      <svg id="quizSvg" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <p id="quizQuestion" style="font-size:1.1rem;color:var(--navy);font-weight:700;text-align:center;"></p>
+    <div class="shape-choices" id="shapeChoices"></div>
+  </div>
+
+  <div id="buildArea">
+    <div class="build-top">
+      <div class="model-panel">
+        <span class="panel-label" id="modelLabel"></span>
+        <svg id="modelSvg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="canvas-panel">
+        <span class="panel-label" id="canvasLabel"></span>
+        <svg id="dropCanvas" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+    <div class="shapes-palette" id="shapesPalette"></div>
+    <div class="check-btn-wrap">
+      <button class="btn btn-orange" id="checkBuildBtn" onclick="checkBuild()"></button>
+      <button class="btn btn-blue btn-sm" id="resetBuildBtn" onclick="resetBuild()"></button>
+    </div>
+  </div>
+
+  <div id="symArea">
+    <p class="sym-instructions" id="symInstr"></p>
+    <canvas id="symCanvas" width="360" height="300" style="width:360px;height:300px;cursor:crosshair;"></canvas>
+    <div class="sym-palette" id="symPalette"></div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button id="symClearBtn" onclick="clearSymCanvas()"></button>
+      <button class="btn btn-orange" id="checkSymBtn" onclick="checkSym()"></button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="successScreen">
+  <div class="big-stars" id="successStars"></div>
+  <h2 class="success-title" id="successTitle"></h2>
+  <p class="success-msg" id="successMsg"></p>
+  <div class="success-btns">
+    <button class="btn btn-blue" onclick="replayLevel()" id="replayBtn"></button>
+    <button class="btn btn-orange" onclick="nextLevel()" id="nextLevelBtn"></button>
+    <button class="btn-ghost" onclick="showScreen('titleScreen')" id="homeBtn"></button>
+  </div>
+</div>
+
+<div id="questionOverlay" role="dialog" aria-modal="true">
+  <div class="q-card">
+    <h3 id="qTitle"></h3>
+    <p class="q-text" id="qText"></p>
+    <div class="q-choices" id="qChoices"></div>
+    <p id="qFeedback" style="font-weight:700;min-height:1.5em;"></p>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    title:"Architecte des Formes",
+    subtitle:"Géométrie, formes et symétrie — pour les 6-10 ans",
+    play:"🎮 Jouer !",
+    parent:"👨‍👩‍👧 Pour les parents",
+    gateTitle:"Espace parents",
+    gateQ:function(a,b){return"Combien font "+a+" × "+b+" ?"},
+    gateOk:"Valider",
+    gateErr:"Mauvaise réponse. Essaie encore !",
+    gateBack:"← Retour",
+    parentInfoTitle:"Pour les parents",
+    parentInfoText:"Ce jeu développe la géométrie (nommer les formes, reconstruire un modèle par glisser-déposer, symétrie). Aucune donnée collectée, aucune publicité, 100 % hors-ligne. Progression sauvegardée localement.",
+    parentBack:"← Retour",
+    level:function(n){return"Niveau "+n},
+    modelLabel:"Modèle",
+    canvasLabel:"Ton assemblage",
+    checkBuild:"✅ Vérifier",
+    resetBuild:"🔄 Recommencer",
+    checkSym:"✅ Vérifier",
+    symClear:"🗑 Effacer",
+    symInstr:"Complète la moitié droite pour que la figure soit symétrique !",
+    bravo:["Bravo ! 🎉","Super ! ✨","Excellent ! 🌟","Parfait ! 💪","Génial ! 🏆"],
+    tryAgain:["Essaie encore !","Presque ! Réessaie.","Tu y es presque !"],
+    replayBtn:"🔁 Rejouer",
+    nextBtn:"➡ Niveau suivant",
+    homeBtn:"🏠 Accueil",
+    successTitle:function(n){return n<3?"Niveau réussi !":"Jeu terminé ! Champion !"},
+    successMsg:function(s){return"Tu as "+s+" étoile"+(s>1?"s":"")},
+    quizQ:function(mode){return mode==="name"?"Comment s'appelle cette forme ?":"Combien de côtés a cette forme ?"},
+    shapesNames:{circle:"Cercle",square:"Carré",triangle:"Triangle",rectangle:"Rectangle",hexagon:"Hexagone",diamond:"Losange"},
+    qTitle:"Question ⭐",
+    pencil:"✏️ Crayon",
+    toolCircle:"⭕ Cercle",
+    toolSquare:"⬛ Carré",
+    toolTriangle:"🔺 Triangle"
+  },
+  en:{
+    title:"Shape Architect",
+    subtitle:"Geometry, shapes & symmetry — ages 6-10",
+    play:"🎮 Play!",
+    parent:"👨‍👩‍👧 For parents",
+    gateTitle:"Parent area",
+    gateQ:function(a,b){return"What is "+a+" × "+b+"?"},
+    gateOk:"Check",
+    gateErr:"Wrong answer. Try again!",
+    gateBack:"← Back",
+    parentInfoTitle:"For parents",
+    parentInfoText:"This game develops geometry skills (naming shapes, drag-and-drop model building, symmetry). No data collected, no ads, 100% offline. Progress saved locally.",
+    parentBack:"← Back",
+    level:function(n){return"Level "+n},
+    modelLabel:"Model",
+    canvasLabel:"Your build",
+    checkBuild:"✅ Check",
+    resetBuild:"🔄 Reset",
+    checkSym:"✅ Check",
+    symClear:"🗑 Clear",
+    symInstr:"Complete the right half so the shape is symmetrical!",
+    bravo:["Bravo! 🎉","Super! ✨","Excellent! 🌟","Perfect! 💪","Great! 🏆"],
+    tryAgain:["Try again!","Almost! Try once more.","You are so close!"],
+    replayBtn:"🔁 Replay",
+    nextBtn:"➡ Next level",
+    homeBtn:"🏠 Home",
+    successTitle:function(n){return n<3?"Level complete!":"Game over — Champion!"},
+    successMsg:function(s){return"You got "+s+" star"+(s>1?"s":"")},
+    quizQ:function(mode){return mode==="name"?"What is this shape called?":"How many sides does this shape have?"},
+    shapesNames:{circle:"Circle",square:"Square",triangle:"Triangle",rectangle:"Rectangle",hexagon:"Hexagon",diamond:"Diamond"},
+    qTitle:"Question ⭐",
+    pencil:"✏️ Pencil",
+    toolCircle:"⭕ Circle",
+    toolSquare:"⬛ Square",
+    toolTriangle:"🔺 Triangle"
+  }
+};
+
+const STORAGE_KEY="pgrg_architecte_formes";
+var lang=(navigator.language||"fr").startsWith("fr")?"fr":"en";
+var muted=false;
+var currentLevel=1;
+var stars=0;
+var totalSteps=0;
+var doneSteps=0;
+var state={};
+
+function loadState(){
+  try{state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");}catch(e){state={};}
+  stars=state.stars||0;
+  currentLevel=state.level||1;
+}
+function saveState(){
+  state.stars=stars;state.level=currentLevel;
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+}
+loadState();
+
+var audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function beep(freq,dur,type,vol){
+  type=type||"sine";vol=vol||0.18;
+  if(muted)return;
+  try{
+    var c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+    o.connect(g);g.connect(c.destination);
+    o.start();o.stop(c.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){beep(523,.12);setTimeout(function(){beep(659,.12)},120);setTimeout(function(){beep(784,.25)},240);}
+function playError(){beep(220,.2,"sawtooth",.1);}
+function playClick(){beep(440,.08,"sine",.08);}
+function toggleMute(){muted=!muted;document.getElementById("muteBtn").textContent=muted?"🔇":"🔊";}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById("btnFR").classList.toggle("active",l==="fr");
+  document.getElementById("btnEN").classList.toggle("active",l==="en");
+  renderUI();
+}
+
+function tv(key){return T[lang][key];}
+
+function renderUI(){
+  document.getElementById("titleText").textContent=tv("title");
+  document.getElementById("subtitleText").textContent=tv("subtitle");
+  document.getElementById("playBtn").textContent=tv("play");
+  document.getElementById("parentBtn").textContent=tv("parent");
+  document.getElementById("gateTitle").textContent=tv("gateTitle");
+  document.getElementById("parentInfoTitle").textContent=tv("parentInfoTitle");
+  document.getElementById("parentInfoText").textContent=tv("parentInfoText");
+  document.getElementById("parentBackBtn").textContent=tv("parentBack");
+  document.getElementById("gateOkBtn").textContent=tv("gateOk");
+  document.getElementById("gateBackBtn").textContent=tv("gateBack");
+  document.getElementById("modelLabel").textContent=tv("modelLabel");
+  document.getElementById("canvasLabel").textContent=tv("canvasLabel");
+  document.getElementById("checkBuildBtn").textContent=tv("checkBuild");
+  document.getElementById("resetBuildBtn").textContent=tv("resetBuild");
+  document.getElementById("checkSymBtn").textContent=tv("checkSym");
+  document.getElementById("symClearBtn").textContent=tv("symClear");
+  document.getElementById("symInstr").textContent=tv("symInstr");
+  document.getElementById("levelBadge").textContent=tv("level")(currentLevel);
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  document.getElementById(id).classList.add("active");
+}
+
+var gateA=0,gateB=0;
+function showParentGate(){
+  gateA=2+Math.floor(Math.random()*8);
+  gateB=2+Math.floor(Math.random()*8);
+  document.getElementById("gateQ").textContent=tv("gateQ")(gateA,gateB);
+  document.getElementById("gateErr").textContent="";
+  document.getElementById("gateInput").value="";
+  showScreen("parentGateScreen");
+}
+function checkGate(){
+  var val=parseInt(document.getElementById("gateInput").value,10);
+  if(val===gateA*gateB){
+    showScreen("parentInfoScreen");
+  }else{
+    document.getElementById("gateErr").textContent=tv("gateErr");
+    playError();
+  }
+}
+
+function startGame(){
+  playClick();
+  showScreen("gameScreen");
+  updateStarDisplay();
+  startLevel(currentLevel);
+}
+function updateStarDisplay(){
+  document.getElementById("starDisplay").textContent="⭐".repeat(Math.min(stars,15));
+}
+
+function startLevel(n){
+  currentLevel=n;
+  document.getElementById("levelBadge").textContent=tv("level")(n);
+  document.getElementById("feedbackBox").textContent="";
+  document.getElementById("feedbackBox").className="";
+  hideEl("shapeQuiz");hideEl("buildArea");hideEl("symArea");
+  if(n===1)startLevel1();
+  else if(n===2)startLevel2();
+  else startLevel3();
+}
+
+function hideEl(id){document.getElementById(id).style.display="none";}
+function showEl(id){document.getElementById(id).style.display="flex";}
+
+/* ===== LEVEL 1 ===== */
+var SHAPES=[
+  {id:"circle",sides:0,draw:function(c,f){return'<circle cx="100" cy="100" r="72" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}},
+  {id:"square",sides:4,draw:function(c,f){return'<rect x="28" y="28" width="144" height="144" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}},
+  {id:"triangle",sides:3,draw:function(c,f){return'<polygon points="100,22 178,178 22,178" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}},
+  {id:"rectangle",sides:4,draw:function(c,f){return'<rect x="18" y="52" width="164" height="96" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}},
+  {id:"hexagon",sides:6,draw:function(c,f){return'<polygon points="100,18 174,60 174,140 100,182 26,140 26,60" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}},
+  {id:"diamond",sides:4,draw:function(c,f){return'<polygon points="100,20 180,100 100,180 20,100" fill="'+f+'" stroke="'+c+'" stroke-width="5"/>';}}
+];
+var COLORS=[["#0f4c81","#7ec3ee"],["#f97316","#ffe0b2"],["#34c77b","#c8f7e0"],["#ffd23f","#fffbe0"],["#9b59b6","#e8d5f5"],["#e53e3e","#ffd5d5"]];
+var l1Shapes=[],l1Idx=0,l1Mode="name",l1Total=8,l1Done=0,l1Answered=false;
+
+function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function startLevel1(){
+  showEl("shapeQuiz");
+  l1Shapes=shuffleArr(SHAPES.concat(SHAPES)).slice(0,l1Total);
+  l1Idx=0;l1Done=0;
+  totalSteps=l1Total;doneSteps=0;
+  updateProgress();
+  nextL1Q();
+}
+
+function nextL1Q(){
+  if(l1Done>=l1Total){onLevelComplete();return;}
+  l1Answered=false;
+  var shape=l1Shapes[l1Idx%l1Shapes.length];l1Idx++;
+  var ci=Math.floor(Math.random()*COLORS.length);
+  var stroke=COLORS[ci][0],fill=COLORS[ci][1];
+  document.getElementById("quizSvg").innerHTML=shape.draw(stroke,fill);
+  l1Mode=(l1Done%2===0)?"name":"sides";
+  document.getElementById("quizQuestion").textContent=tv("quizQ")(l1Mode);
+  var el=document.getElementById("shapeChoices");
+  el.innerHTML="";
+  if(l1Mode==="name"){
+    var others=shuffleArr(SHAPES.filter(function(s){return s.id!==shape.id;})).slice(0,3);
+    var choices=shuffleArr([shape].concat(others));
+    choices.forEach(function(c){
+      var btn=document.createElement("button");
+      btn.className="shape-btn";
+      btn.textContent=tv("shapesNames")[c.id];
+      btn.dataset.val=c.id;
+      btn.onclick=function(){ansL1Name(btn,shape.id);};
+      el.appendChild(btn);
+    });
+  }else{
+    var correct=shape.sides;
+    var wrongs=shuffleArr([0,3,4,5,6,8].filter(function(n){return n!==correct;})).slice(0,3);
+    var nums=shuffleArr([correct].concat(wrongs));
+    nums.forEach(function(n){
+      var btn=document.createElement("button");
+      btn.className="shape-btn";
+      btn.textContent=String(n);
+      btn.dataset.val=n;
+      btn.onclick=function(){ansL1Sides(btn,shape.sides);};
+      el.appendChild(btn);
+    });
+  }
+}
+
+function ansL1Name(btn,correctId){
+  if(l1Answered)return;l1Answered=true;
+  var ok=btn.dataset.val===correctId;
+  if(ok){btn.classList.add("correct");playSuccess();stars++;saveState();updateStarDisplay();setFeedback(true);l1Done++;doneSteps++;updateProgress();}
+  else{
+    btn.classList.add("wrong");playError();setFeedback(false);
+    document.querySelectorAll(".shape-btn").forEach(function(b){if(b.dataset.val===correctId)b.classList.add("correct");});
+  }
+  setTimeout(function(){nextL1Q();},ok?900:1400);
+}
+function ansL1Sides(btn,correctSides){
+  if(l1Answered)return;l1Answered=true;
+  var ok=parseInt(btn.dataset.val,10)===correctSides;
+  if(ok){btn.classList.add("correct");playSuccess();stars++;saveState();updateStarDisplay();setFeedback(true);l1Done++;doneSteps++;updateProgress();}
+  else{
+    btn.classList.add("wrong");playError();setFeedback(false);
+    document.querySelectorAll(".shape-btn").forEach(function(b){if(parseInt(b.dataset.val,10)===correctSides)b.classList.add("correct");});
+  }
+  setTimeout(function(){nextL1Q();},ok?900:1400);
+}
+
+function setFeedback(good){
+  var el=document.getElementById("feedbackBox");
+  var arr=good?tv("bravo"):tv("tryAgain");
+  el.textContent=arr[Math.floor(Math.random()*arr.length)];
+  el.className=good?"good":"bad";
+  document.getElementById("ariaLive").textContent=el.textContent;
+}
+function updateProgress(){
+  var pct=totalSteps>0?Math.round((doneSteps/totalSteps)*100):0;
+  document.getElementById("progressFill").style.width=pct+"%";
+}
+
+/* ===== LEVEL 2 ===== */
+var MODELS=[
+  {id:"house",svgParts:[
+    {type:"rect",x:40,y:110,w:160,h:100,fill:"#0f4c81",stroke:"#0a3559",label:"rectangle"},
+    {type:"polygon",pts:"120,40 200,110 40,110",fill:"#f97316",stroke:"#ea580c",label:"triangle"},
+    {type:"rect",x:90,y:150,w:60,h:60,fill:"#ffd23f",stroke:"#e5b800",label:"square"},
+    {type:"circle",cx:185,cy:55,r:22,fill:"#7ec3ee",stroke:"#5aa8d8",label:"circle"}
+  ]},
+  {id:"rocket",svgParts:[
+    {type:"rect",x:90,y:80,w:60,h:100,fill:"#9b59b6",stroke:"#6c3483",label:"rectangle"},
+    {type:"polygon",pts:"120,20 150,80 90,80",fill:"#f97316",stroke:"#ea580c",label:"triangle"},
+    {type:"polygon",pts:"90,160 70,200 90,180",fill:"#e53e3e",stroke:"#c0392b",label:"triangle"},
+    {type:"polygon",pts:"150,160 170,200 150,180",fill:"#e53e3e",stroke:"#c0392b",label:"triangle"},
+    {type:"circle",cx:120,cy:115,r:18,fill:"#7ec3ee",stroke:"#5aa8d8",label:"circle"}
+  ]},
+  {id:"boat",svgParts:[
+    {type:"polygon",pts:"30,160 60,210 180,210 210,160",fill:"#0f4c81",stroke:"#0a3559",label:"rectangle"},
+    {type:"rect",x:105,y:80,w:12,h:80,fill:"#8B4513",stroke:"#5c2d0a",label:"rectangle"},
+    {type:"polygon",pts:"117,80 160,130 117,130",fill:"#f97316",stroke:"#ea580c",label:"triangle"},
+    {type:"circle",cx:90,cy:145,r:14,fill:"#ffd23f",stroke:"#d4a800",label:"circle"},
+    {type:"circle",cx:150,cy:145,r:14,fill:"#ffd23f",stroke:"#d4a800",label:"circle"}
+  ]},
+  {id:"cat",svgParts:[
+    {type:"circle",cx:120,cy:120,r:60,fill:"#f97316",stroke:"#ea580c",label:"circle"},
+    {type:"polygon",pts:"80,70 65,35 100,60",fill:"#f97316",stroke:"#ea580c",label:"triangle"},
+    {type:"polygon",pts:"160,70 175,35 140,60",fill:"#f97316",stroke:"#ea580c",label:"triangle"},
+    {type:"rect",x:85,y:160,w:70,h:30,fill:"#ffe0b2",stroke:"#f97316",label:"rectangle"}
+  ]}
+];
+
+var ghost=null,dragShape=null,placedParts=[],currentModel=null,modelIdx=0;
+
+function startLevel2(){
+  showEl("buildArea");
+  document.getElementById("modelLabel").textContent=tv("modelLabel");
+  document.getElementById("canvasLabel").textContent=tv("canvasLabel");
+  document.getElementById("checkBuildBtn").textContent=tv("checkBuild");
+  document.getElementById("resetBuildBtn").textContent=tv("resetBuild");
+  modelIdx=0;totalSteps=MODELS.length;doneSteps=0;
+  updateProgress();
+  loadModel(MODELS[0]);
+}
+
+function makeSvgNS(tag){return document.createElementNS("http://www.w3.org/2000/svg",tag);}
+
+function makeModelEl(p){
+  var el;
+  if(p.type==="circle"){el=makeSvgNS("circle");el.setAttribute("cx",p.cx);el.setAttribute("cy",p.cy);el.setAttribute("r",p.r);}
+  else if(p.type==="rect"){el=makeSvgNS("rect");el.setAttribute("x",p.x);el.setAttribute("y",p.y);el.setAttribute("width",p.w);el.setAttribute("height",p.h);}
+  else{el=makeSvgNS("polygon");el.setAttribute("points",p.pts);}
+  el.setAttribute("fill",p.fill||"#7ec3ee");
+  el.setAttribute("stroke",p.stroke||"#0f4c81");
+  el.setAttribute("stroke-width","3");
+  return el;
+}
+
+function makeMiniEl(name){
+  var el;
+  var fill="#7ec3ee",stroke="#0f4c81";
+  if(name==="circle"){el=makeSvgNS("circle");el.setAttribute("cx","30");el.setAttribute("cy","30");el.setAttribute("r","22");}
+  else if(name==="square"){el=makeSvgNS("rect");el.setAttribute("x","8");el.setAttribute("y","8");el.setAttribute("width","44");el.setAttribute("height","44");}
+  else if(name==="triangle"){el=makeSvgNS("polygon");el.setAttribute("points","30,5 55,55 5,55");}
+  else if(name==="rectangle"){el=makeSvgNS("rect");el.setAttribute("x","5");el.setAttribute("y","16");el.setAttribute("width","50");el.setAttribute("height","28");}
+  else if(name==="hexagon"){el=makeSvgNS("polygon");el.setAttribute("points","30,5 52,18 52,42 30,55 8,42 8,18");}
+  else{el=makeSvgNS("polygon");el.setAttribute("points","30,5 55,30 30,55 5,30");}
+  el.setAttribute("fill",fill);el.setAttribute("stroke",stroke);el.setAttribute("stroke-width","3");
+  return el;
+}
+
+function loadModel(m){
+  currentModel=m;placedParts=[];
+  var ms=document.getElementById("modelSvg");ms.innerHTML="";
+  m.svgParts.forEach(function(p){ms.appendChild(makeModelEl(p));});
+  var dc=document.getElementById("dropCanvas");dc.innerHTML="";
+  var line=makeSvgNS("line");line.setAttribute("x1","120");line.setAttribute("y1","0");line.setAttribute("x2","120");line.setAttribute("y2","240");line.setAttribute("stroke","#c8e6f7");line.setAttribute("stroke-width","1");dc.appendChild(line);
+  var pal=document.getElementById("shapesPalette");pal.innerHTML="";
+  var needed={};m.svgParts.forEach(function(p){needed[p.label]=(needed[p.label]||0)+1;});
+  Object.keys(needed).forEach(function(shapeName){
+    var count=needed[shapeName];
+    for(var k=0;k<Math.min(count,4);k++){
+      var svg=makeSvgNS("svg");
+      svg.setAttribute("viewBox","0 0 60 60");svg.setAttribute("width","60");svg.setAttribute("height","60");
+      svg.classList.add("palette-shape");svg.dataset.shape=shapeName;
+      svg.setAttribute("tabindex","0");
+      svg.setAttribute("aria-label",(tv("shapesNames")[shapeName]||shapeName));
+      svg.appendChild(makeMiniEl(shapeName));
+      pal.appendChild(svg);
+      makeDraggable(svg);
+    }
+  });
+}
+
+function makeDraggable(svg){
+  svg.addEventListener("mousedown",function(e){startDrag(e,svg);});
+  svg.addEventListener("touchstart",function(e){startDragT(e,svg);},{passive:false});
+}
+
+function startDrag(e,svg){e.preventDefault();dragShape=svg.dataset.shape;createGhost(e.clientX,e.clientY);document.addEventListener("mousemove",onDragMove);document.addEventListener("mouseup",onDragEnd);}
+function startDragT(e,svg){e.preventDefault();dragShape=svg.dataset.shape;var t=e.touches[0];createGhost(t.clientX,t.clientY);document.addEventListener("touchmove",onDragMoveT,{passive:false});document.addEventListener("touchend",onDragEndT);}
+
+function createGhost(x,y){
+  ghost=makeSvgNS("svg");ghost.setAttribute("width","50");ghost.setAttribute("height","50");ghost.setAttribute("viewBox","0 0 60 60");
+  ghost.style.cssText="position:fixed;pointer-events:none;z-index:999;opacity:.75;";
+  ghost.appendChild(makeMiniEl(dragShape));
+  document.body.appendChild(ghost);
+  moveGhost(x,y);
+}
+function moveGhost(x,y){if(!ghost)return;ghost.style.left=(x-25)+"px";ghost.style.top=(y-25)+"px";}
+function onDragMove(e){moveGhost(e.clientX,e.clientY);}
+function onDragMoveT(e){e.preventDefault();moveGhost(e.touches[0].clientX,e.touches[0].clientY);}
+function onDragEnd(e){document.removeEventListener("mousemove",onDragMove);document.removeEventListener("mouseup",onDragEnd);dropOnCanvas(e.clientX,e.clientY);}
+function onDragEndT(e){document.removeEventListener("touchmove",onDragMoveT);document.removeEventListener("touchend",onDragEndT);if(e.changedTouches.length)dropOnCanvas(e.changedTouches[0].clientX,e.changedTouches[0].clientY);}
+
+function dropOnCanvas(cx,cy){
+  if(ghost){ghost.remove();ghost=null;}
+  var dc=document.getElementById("dropCanvas");
+  var r=dc.getBoundingClientRect();
+  if(cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom){
+    var svgX=((cx-r.left)/r.width)*240;
+    var svgY=((cy-r.top)/r.height)*240;
+    var wrapper=makeSvgNS("svg");
+    wrapper.setAttribute("x",svgX-25);wrapper.setAttribute("y",svgY-25);
+    wrapper.setAttribute("width","50");wrapper.setAttribute("height","50");wrapper.setAttribute("viewBox","0 0 60 60");
+    wrapper.appendChild(makeMiniEl(dragShape));
+    dc.appendChild(wrapper);
+    placedParts.push({shape:dragShape,x:svgX,y:svgY});
+    playClick();
+  }
+  dragShape=null;
+}
+
+function resetBuild(){
+  placedParts=[];
+  if(currentModel)loadModel(currentModel);
+  document.getElementById("feedbackBox").textContent="";
+  document.getElementById("feedbackBox").className="";
+}
+
+function checkBuild(){
+  var needed={};currentModel.svgParts.forEach(function(p){needed[p.label]=(needed[p.label]||0)+1;});
+  var placed={};placedParts.forEach(function(p){placed[p.shape]=(placed[p.shape]||0)+1;});
+  var correct=true;
+  Object.keys(needed).forEach(function(k){if((placed[k]||0)<needed[k])correct=false;});
+  if(correct){
+    playSuccess();setFeedback(true);stars+=2;saveState();updateStarDisplay();
+    doneSteps++;updateProgress();
+    setTimeout(function(){
+      modelIdx++;
+      if(modelIdx<MODELS.length){
+        if(modelIdx%2===0){showGeoQ(function(){loadModel(MODELS[modelIdx]);});}
+        else{loadModel(MODELS[modelIdx]);}
+      }else{onLevelComplete();}
+    },1200);
+  }else{
+    playError();setFeedback(false);
+  }
+}
+
+/* ===== GEO QUESTIONS ===== */
+var GEO_QS=[
+  {q:function(l){return l==="fr"?"Combien de côtés a un triangle ?":"How many sides does a triangle have?"},opts:["2","3","4","6"],ans:"3"},
+  {q:function(l){return l==="fr"?"Combien de côtés a un carré ?":"How many sides does a square have?"},opts:["3","4","5","6"],ans:"4"},
+  {q:function(l){return l==="fr"?"Quelle forme n'a aucun côté ?":"Which shape has no sides?"},opts:[function(l){return l==="fr"?"Carré":"Square";},function(l){return l==="fr"?"Triangle":"Triangle";},function(l){return l==="fr"?"Cercle":"Circle";},function(l){return l==="fr"?"Rectangle":"Rectangle";}],ans:2},
+  {q:function(l){return l==="fr"?"Un rectangle a combien de côtés ?":"How many sides does a rectangle have?"},opts:["3","4","5","6"],ans:"4"},
+  {q:function(l){return l==="fr"?"Un carré a-t-il 4 côtés égaux ?":"Does a square have 4 equal sides?"},opts:[function(l){return l==="fr"?"Oui":"Yes";},function(l){return l==="fr"?"Non":"No";}],ans:0},
+  {q:function(l){return l==="fr"?"Quelle forme ressemble à une balle ?":"Which shape looks like a ball?"},opts:[function(l){return l==="fr"?"Carré":"Square";},function(l){return l==="fr"?"Triangle":"Triangle";},function(l){return l==="fr"?"Cercle":"Circle";},function(l){return l==="fr"?"Losange":"Diamond";}],ans:2},
+  {q:function(l){return l==="fr"?"Combien de côtés a un hexagone ?":"How many sides does a hexagon have?"},opts:["4","5","6","8"],ans:"6"},
+  {q:function(l){return l==="fr"?"Un triangle a combien d'angles ?":"How many angles does a triangle have?"},opts:["2","3","4","5"],ans:"3"}
+];
+var geoQIdx=0,geoQCb=null;
+
+function showGeoQ(cb){
+  geoQCb=cb;
+  var q=GEO_QS[geoQIdx%GEO_QS.length];geoQIdx++;
+  document.getElementById("qTitle").textContent=tv("qTitle");
+  document.getElementById("qText").textContent=q.q(lang);
+  document.getElementById("qFeedback").textContent="";
+  var el=document.getElementById("qChoices");el.innerHTML="";
+  var answered=false;
+  q.opts.forEach(function(opt,i){
+    var btn=document.createElement("button");btn.className="q-choice";
+    var label=typeof opt==="function"?opt(lang):opt;btn.textContent=label;
+    btn.onclick=function(){
+      if(answered)return;answered=true;
+      var correct=(typeof q.ans==="string")?(label===q.ans):(i===q.ans);
+      if(correct){
+        btn.classList.add("correct");
+        document.getElementById("qFeedback").textContent=tv("bravo")[0];
+        document.getElementById("qFeedback").style.color="var(--success)";
+        playSuccess();stars++;saveState();updateStarDisplay();
+      }else{
+        btn.classList.add("wrong");
+        document.querySelectorAll(".q-choice").forEach(function(b,j){
+          var bl=typeof q.opts[j]==="function"?q.opts[j](lang):q.opts[j];
+          if((typeof q.ans==="string"&&bl===q.ans)||(typeof q.ans==="number"&&j===q.ans))b.classList.add("correct");
+        });
+        document.getElementById("qFeedback").textContent=tv("tryAgain")[0];
+        document.getElementById("qFeedback").style.color="#e53e3e";
+        playError();
+      }
+      setTimeout(function(){
+        document.getElementById("questionOverlay").classList.remove("active");
+        if(geoQCb)geoQCb();
+      },1400);
+    };
+    el.appendChild(btn);
+  });
+  document.getElementById("questionOverlay").classList.add("active");
+}
+
+/* ===== LEVEL 3 — SYMMETRY ===== */
+var SYM_MODELS=[
+  {
+    name:"papillon",
+    leftParts:[
+      {type:"ellipse",cx:90,cy:115,rx:55,ry:38,fill:"#f97316",stroke:"#ea580c"},
+      {type:"ellipse",cx:95,cy:82,rx:32,ry:23,fill:"#ffd23f",stroke:"#d4a800"},
+      {type:"ellipse",cx:78,cy:150,rx:38,ry:20,fill:"#e53e3e",stroke:"#c0392b"}
+    ],
+    rightParts:[
+      {type:"ellipse",cx:210,cy:115,rx:55,ry:38,fill:"#f97316",stroke:"#ea580c"},
+      {type:"ellipse",cx:205,cy:82,rx:32,ry:23,fill:"#ffd23f",stroke:"#d4a800"},
+      {type:"ellipse",cx:222,cy:150,rx:38,ry:20,fill:"#e53e3e",stroke:"#c0392b"}
+    ],
+    center:[{type:"ellipse",cx:150,cy:115,rx:7,ry:52,fill:"#333",stroke:"#111"}]
+  },
+  {
+    name:"maison",
+    leftParts:[
+      {type:"rect",x:30,y:130,w:120,h:80,fill:"#0f4c81",stroke:"#0a3559"},
+      {type:"polygon",pts:"30,130 150,130 150,55",fill:"#f97316",stroke:"#ea580c"},
+      {type:"rect",x:55,y:165,w:42,h:45,fill:"#ffd23f",stroke:"#d4a800"}
+    ],
+    rightParts:[
+      {type:"rect",x:150,y:130,w:120,h:80,fill:"#0f4c81",stroke:"#0a3559"},
+      {type:"polygon",pts:"150,130 270,130 150,55",fill:"#f97316",stroke:"#ea580c"},
+      {type:"rect",x:203,y:165,w:42,h:45,fill:"#ffd23f",stroke:"#d4a800"}
+    ],
+    center:[]
+  },
+  {
+    name:"arbre",
+    leftParts:[
+      {type:"polygon",pts:"150,30 75,150 150,150",fill:"#34c77b",stroke:"#27a860"},
+      {type:"polygon",pts:"150,75 85,180 150,180",fill:"#34c77b",stroke:"#27a860"},
+      {type:"rect",x:135,y:180,w:15,h:50,fill:"#8B4513",stroke:"#5c2d0a"}
+    ],
+    rightParts:[
+      {type:"polygon",pts:"150,30 150,150 225,150",fill:"#34c77b",stroke:"#27a860"},
+      {type:"polygon",pts:"150,75 150,180 215,180",fill:"#34c77b",stroke:"#27a860"},
+      {type:"rect",x:150,y:180,w:15,h:50,fill:"#8B4513",stroke:"#5c2d0a"}
+    ],
+    center:[]
+  }
+];
+
+var symModelIdx=0,symCanvasEl=null,symCtxEl=null,symDrawing=false,symLines=[],symCurrentLine=[],symSelectedTool="pencil",symCheckDone=false,symEventsSet=false;
+
+function startLevel3(){
+  showEl("symArea");
+  document.getElementById("symInstr").textContent=tv("symInstr");
+  document.getElementById("checkSymBtn").textContent=tv("checkSym");
+  document.getElementById("symClearBtn").textContent=tv("symClear");
+  symCanvasEl=document.getElementById("symCanvas");
+  symCtxEl=symCanvasEl.getContext("2d");
+  symModelIdx=0;totalSteps=SYM_MODELS.length;doneSteps=0;
+  updateProgress();
+  buildSymPalette();
+  loadSymModel(SYM_MODELS[0]);
+}
+
+function buildSymPalette(){
+  var pal=document.getElementById("symPalette");pal.innerHTML="";
+  var tools=["pencil","circle","square","triangle"];
+  var labels=[tv("pencil"),tv("toolCircle"),tv("toolSquare"),tv("toolTriangle")];
+  tools.forEach(function(tool,i){
+    var btn=document.createElement("button");btn.className="sym-tool"+(tool==="pencil"?" active":"");
+    btn.dataset.tool=tool;btn.textContent=labels[i];
+    btn.onclick=function(){
+      symSelectedTool=tool;
+      document.querySelectorAll(".sym-tool").forEach(function(b){b.classList.toggle("active",b===btn);});
+    };
+    pal.appendChild(btn);
+  });
+}
+
+function loadSymModel(m){
+  symLines=[];symCurrentLine=[];symCheckDone=false;
+  drawSymScene(m);
+  if(!symEventsSet){symEventsSet=true;setupSymEvents();}
+}
+
+function drawSymScene(m){
+  var c=symCanvasEl,ctx=symCtxEl,W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#f5faff";ctx.fillRect(0,0,W,H);
+  var all=m.leftParts.concat(m.center||[]);
+  all.forEach(function(p){drawSymPart(ctx,p,1);});
+  // faint right hint
+  m.rightParts.forEach(function(p){drawSymPart(ctx,p,.12);});
+  // axis
+  ctx.save();ctx.setLineDash([8,5]);ctx.strokeStyle="#7ec3ee";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(150,10);ctx.lineTo(150,H-10);ctx.stroke();
+  ctx.restore();
+  // user strokes
+  ctx.save();ctx.strokeStyle="#0f4c81";ctx.lineWidth=3;ctx.lineCap="round";ctx.lineJoin="round";
+  symLines.forEach(function(line){
+    if(!line||line.shapeType)return;
+    if(line.length<2)return;
+    ctx.beginPath();ctx.moveTo(line[0].x,line[0].y);
+    line.forEach(function(pt){ctx.lineTo(pt.x,pt.y);});
+    ctx.stroke();
+  });
+  ctx.restore();
+  // user shapes
+  symLines.forEach(function(s){if(s&&s.shapeType)drawUserShape(ctx,s);});
+}
+
+function drawSymPart(ctx,p,alpha){
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.fillStyle=p.fill||"#7ec3ee";ctx.strokeStyle=p.stroke||"#0f4c81";ctx.lineWidth=2.5;
+  if(p.type==="ellipse"){ctx.beginPath();ctx.ellipse(p.cx,p.cy,p.rx,p.ry,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
+  else if(p.type==="rect"){ctx.beginPath();ctx.rect(p.x,p.y,p.w,p.h);ctx.fill();ctx.stroke();}
+  else if(p.type==="polygon"){
+    var pts=p.pts.split(" ").map(function(s){return s.split(",").map(Number);});
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(function(pt){ctx.lineTo(pt[0],pt[1]);});
+    ctx.closePath();ctx.fill();if(p.stroke!=="none")ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawUserShape(ctx,s){
+  ctx.save();ctx.fillStyle="#7ec3ee88";ctx.strokeStyle="#0f4c81";ctx.lineWidth=2;
+  var x=s.x,y=s.y,size=s.size||40;
+  if(s.shapeType==="circle"){ctx.beginPath();ctx.arc(x,y,size/2,0,Math.PI*2);ctx.fill();ctx.stroke();}
+  else if(s.shapeType==="square"){ctx.beginPath();ctx.rect(x-size/2,y-size/2,size,size);ctx.fill();ctx.stroke();}
+  else if(s.shapeType==="triangle"){ctx.beginPath();ctx.moveTo(x,y-size/2);ctx.lineTo(x+size/2,y+size/2);ctx.lineTo(x-size/2,y+size/2);ctx.closePath();ctx.fill();ctx.stroke();}
+  ctx.restore();
+}
+
+function symPos(e){
+  var r=symCanvasEl.getBoundingClientRect();
+  var scaleX=symCanvasEl.width/r.width,scaleY=symCanvasEl.height/r.height;
+  return{x:(e.clientX-r.left)*scaleX,y:(e.clientY-r.top)*scaleY};
+}
+
+function symStart(e){
+  var pos=symPos(e);
+  if(pos.x<152){setFeedback(false);document.getElementById("ariaLive").textContent=(lang==="fr"?"Dessine à droite de la ligne !":"Draw on the right side!");return;}
+  symDrawing=true;
+  if(symSelectedTool==="pencil"){symCurrentLine=[pos];}
+  else{symLines.push({shapeType:symSelectedTool,x:pos.x,y:pos.y,size:44});drawSymScene(SYM_MODELS[symModelIdx]);}
+}
+function symMove(e){
+  if(!symDrawing||symSelectedTool!=="pencil")return;
+  var pos=symPos(e);if(pos.x<152)return;
+  symCurrentLine.push(pos);
+  drawSymScene(SYM_MODELS[symModelIdx]);
+  var ctx=symCtxEl;ctx.save();ctx.strokeStyle="#0f4c81";ctx.lineWidth=3;ctx.lineCap="round";
+  if(symCurrentLine.length>1){ctx.beginPath();ctx.moveTo(symCurrentLine[0].x,symCurrentLine[0].y);symCurrentLine.forEach(function(p){ctx.lineTo(p.x,p.y);});ctx.stroke();}
+  ctx.restore();
+}
+function symEnd(){
+  if(!symDrawing)return;symDrawing=false;
+  if(symSelectedTool==="pencil"&&symCurrentLine.length>1){symLines.push(symCurrentLine.slice());symCurrentLine=[];drawSymScene(SYM_MODELS[symModelIdx]);}
+}
+function symStartT(e){e.preventDefault();symStart(e.touches[0]);}
+function symMoveT(e){e.preventDefault();symMove(e.touches[0]);}
+function symEndT(e){e.preventDefault();symEnd();}
+
+function setupSymEvents(){
+  symCanvasEl.addEventListener("mousedown",symStart);
+  symCanvasEl.addEventListener("mousemove",symMove);
+  symCanvasEl.addEventListener("mouseup",symEnd);
+  symCanvasEl.addEventListener("touchstart",symStartT,{passive:false});
+  symCanvasEl.addEventListener("touchmove",symMoveT,{passive:false});
+  symCanvasEl.addEventListener("touchend",symEndT);
+}
+
+function clearSymCanvas(){
+  symLines=[];drawSymScene(SYM_MODELS[symModelIdx]);
+}
+
+function checkSym(){
+  if(symCheckDone)return;
+  var coverage=0;
+  symLines.forEach(function(l){
+    if(Array.isArray(l))coverage+=l.filter(function(p){return p.x>155;}).length;
+    else if(l&&l.x&&l.x>155)coverage+=12;
+  });
+  if(coverage>12){
+    symCheckDone=true;playSuccess();setFeedback(true);stars+=3;saveState();updateStarDisplay();
+    var m=SYM_MODELS[symModelIdx];
+    m.rightParts.forEach(function(p){drawSymPart(symCtxEl,p,1);});
+    doneSteps++;updateProgress();
+    setTimeout(function(){
+      symModelIdx++;
+      if(symModelIdx<SYM_MODELS.length){
+        showGeoQ(function(){symCheckDone=false;loadSymModel(SYM_MODELS[symModelIdx]);});
+      }else{onLevelComplete();}
+    },1500);
+  }else{
+    playError();setFeedback(false);
+  }
+}
+
+/* ===== LEVEL COMPLETE ===== */
+function onLevelComplete(){
+  showScreen("successScreen");
+  var earned=Math.min(3,doneSteps);
+  document.getElementById("successStars").textContent="⭐".repeat(earned);
+  document.getElementById("successTitle").textContent=tv("successTitle")(currentLevel);
+  document.getElementById("successMsg").textContent=tv("successMsg")(earned);
+  document.getElementById("replayBtn").textContent=tv("replayBtn");
+  document.getElementById("homeBtn").textContent=tv("homeBtn");
+  var nb=document.getElementById("nextLevelBtn");
+  nb.textContent=tv("nextBtn");
+  nb.style.display=currentLevel<3?"inline-flex":"none";
+  state["lv"+currentLevel+"done"]=true;
+  if(currentLevel<3)state.level=currentLevel+1;
+  saveState();
+  playSuccess();setTimeout(function(){playSuccess();},400);
+}
+
+function replayLevel(){playClick();showScreen("gameScreen");updateStarDisplay();startLevel(currentLevel);}
+function nextLevel(){playClick();if(currentLevel<3){currentLevel++;saveState();}showScreen("gameScreen");updateStarDisplay();startLevel(currentLevel);}
+
+/* ===== INIT ===== */
+renderUI();
+document.getElementById("gateInput").addEventListener("keydown",function(e){if(e.key==="Enter")checkGate();});
+</script>
+</body>
+</html>

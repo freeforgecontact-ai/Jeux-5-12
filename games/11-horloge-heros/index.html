@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>L'Horloge Héros / Clock Hero — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#d0eeff 100%);min-height:100vh;display:flex;flex-direction:column;}
+button{cursor:pointer;border:none;font-family:inherit;font-size:1rem;}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:160px;}
+#topbar .brand span{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:.5px;}
+#lang-btns{display:flex;gap:4px;}
+#lang-btns button{background:rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;transition:background .2s;}
+#lang-btns button.active,#lang-btns button:hover{background:var(--orange);}
+#mute-btn{background:rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:4px 10px;font-size:1.2rem;transition:background .2s;}
+#mute-btn:hover{background:var(--orange-dark);}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;padding:20px 16px 30px;}
+.screen.active{display:flex;}
+#game-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.2rem;font-weight:700;color:var(--blue);text-align:center;line-height:1.2;margin-top:8px;}
+#game-sub{color:var(--slate);font-size:1.1rem;margin:8px 0 20px;text-align:center;}
+.btn-play{background:var(--orange);color:#fff;border-radius:18px;padding:14px 44px;font-size:1.3rem;font-weight:800;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.btn-play:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(5px);box-shadow:none;}
+.btn-parents{background:none;color:var(--blue);font-size:.95rem;text-decoration:underline;margin-top:16px;padding:8px;}
+#parents-check{background:#fff;border-radius:16px;padding:24px;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center;margin-top:20px;}
+#parents-check h2{color:var(--blue);margin-bottom:12px;font-size:1.2rem;}
+#parents-check .math-q{font-size:1.5rem;font-weight:700;margin:12px 0;}
+#parents-check input{font-size:1.2rem;text-align:center;border:2px solid var(--sky);border-radius:10px;padding:8px 14px;width:80px;outline:none;}
+#parents-check input:focus{border-color:var(--blue);}
+#parents-check .err{color:#e53e3e;font-size:.9rem;min-height:1.2em;margin:6px 0;}
+.btn-blue{background:var(--blue);color:#fff;border-radius:14px;padding:10px 28px;font-weight:700;font-size:1rem;box-shadow:0 4px 0 var(--blue-dark);margin-top:10px;transition:transform .1s,box-shadow .1s;}
+.btn-blue:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#parents-info{background:#fff;border-radius:16px;padding:24px;max-width:420px;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-top:20px;}
+#parents-info h2{color:var(--blue);margin-bottom:10px;}
+#parents-info p{color:var(--slate);line-height:1.6;margin-bottom:8px;}
+.btn-back{background:var(--slate);color:#fff;border-radius:12px;padding:8px 22px;font-size:.95rem;font-weight:700;margin-top:12px;}
+#level-badge{background:var(--blue);color:#fff;border-radius:20px;padding:5px 18px;font-weight:700;font-size:.95rem;margin-bottom:8px;}
+#score-bar{display:flex;gap:12px;align-items:center;margin-bottom:8px;font-weight:700;color:var(--blue);font-size:1rem;}
+#question-text{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.25rem;color:var(--navy);text-align:center;background:#fff;border-radius:14px;padding:12px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:12px;max-width:520px;width:100%;}
+#feedback{min-height:44px;font-size:1.05rem;font-weight:700;text-align:center;padding:8px;border-radius:10px;margin-bottom:10px;max-width:520px;width:100%;transition:background .3s;}
+#feedback.ok{background:#dcfce7;color:#15803d;}
+#feedback.ko{background:#fee2e2;color:#b91c1c;}
+#n1-choices{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:520px;}
+.choice-card{background:#fff;border:3px solid var(--sky);border-radius:16px;padding:14px 20px;font-size:1.5rem;font-weight:800;color:var(--blue);min-width:80px;text-align:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.07);transition:transform .15s,border-color .15s,box-shadow .15s;min-height:60px;display:flex;align-items:center;justify-content:center;}
+.choice-card:hover{transform:scale(1.07);border-color:var(--orange);box-shadow:0 6px 16px rgba(249,115,22,.2);}
+.choice-card.correct{border-color:var(--success);background:#dcfce7;}
+.choice-card.wrong{border-color:#e53e3e;background:#fee2e2;}
+#n2-area{flex-direction:column;align-items:center;gap:10px;width:100%;}
+#n2-hint{color:var(--slate);font-size:.9rem;text-align:center;max-width:300px;}
+#n2-validate{background:var(--orange);color:#fff;border-radius:14px;padding:10px 32px;font-size:1.1rem;font-weight:800;box-shadow:0 4px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;}
+#n2-validate:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-dark);}
+#n2-time-display{font-size:1.5rem;font-weight:700;color:var(--blue);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#progress-dots{display:flex;gap:8px;margin-bottom:6px;}
+.dot{width:14px;height:14px;border-radius:50%;background:#ccc;}
+.dot.done{background:var(--success);}
+.dot.current{background:var(--orange);}
+#win-screen{text-align:center;}
+#win-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;font-weight:700;color:var(--blue);margin-bottom:8px;}
+#stars-display{font-size:2.8rem;margin:10px 0;}
+#win-sub{color:var(--slate);margin-bottom:20px;font-size:1.1rem;}
+.win-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+#draggable-clock{cursor:grab;touch-action:none;}
+#draggable-clock:active{cursor:grabbing;}
+.clock-svg{display:block;}
+@media(max-width:480px){#game-title{font-size:1.5rem;}.choice-card{padding:10px 12px;font-size:1.2rem;min-width:70px;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div id="lang-btns">
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Muet">🔊</button>
+</div>
+
+<div aria-live="polite" aria-atomic="true" id="aria-msg" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"></div>
+
+<!-- TITLE -->
+<div id="screen-title" class="screen active">
+  <svg width="130" height="140" viewBox="0 0 130 140" xmlns="http://www.w3.org/2000/svg" style="margin:12px 0 4px">
+    <ellipse cx="65" cy="100" rx="34" ry="28" fill="#7ec3ee"/>
+    <circle cx="65" cy="100" r="20" fill="white" stroke="#0f4c81" stroke-width="2.5"/>
+    <circle cx="65" cy="100" r="3" fill="#0f172a"/>
+    <text x="65" y="84" text-anchor="middle" font-size="9" fill="#0f4c81" font-weight="bold">12</text>
+    <text x="65" y="119" text-anchor="middle" font-size="9" fill="#0f4c81" font-weight="bold">6</text>
+    <text x="84" y="105" text-anchor="middle" font-size="9" fill="#0f4c81" font-weight="bold">3</text>
+    <text x="46" y="105" text-anchor="middle" font-size="9" fill="#0f4c81" font-weight="bold">9</text>
+    <line x1="65" y1="100" x2="65" y2="86" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+    <line x1="65" y1="100" x2="77" y2="100" stroke="#0f4c81" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="65" cy="58" r="28" fill="#ffd23f"/>
+    <ellipse cx="56" cy="53" rx="5" ry="6" fill="white"/>
+    <ellipse cx="74" cy="53" rx="5" ry="6" fill="white"/>
+    <circle cx="57" cy="54" r="3" fill="#0f4c81"/>
+    <circle cx="75" cy="54" r="3" fill="#0f4c81"/>
+    <circle cx="58" cy="53" r="1" fill="white"/>
+    <circle cx="76" cy="53" r="1" fill="white"/>
+    <path d="M54 67 Q65 76 76 67" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M31 98 Q22 126 33 130 Q65 142 97 130 Q108 126 99 98" fill="#f97316" opacity=".85"/>
+    <text x="65" y="126" text-anchor="middle" font-size="14" fill="#ffd23f">★</text>
+    <line x1="31" y1="96" x2="12" y2="110" stroke="#ffd23f" stroke-width="5" stroke-linecap="round"/>
+    <line x1="99" y1="96" x2="118" y2="110" stroke="#ffd23f" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+  <div id="game-title">L'Horloge Héros</div>
+  <div id="game-sub">Lis l'heure comme un super-héros !</div>
+  <button class="btn-play" onclick="startGame()" id="btn-play">▶ Jouer</button>
+  <button class="btn-parents" onclick="showParentsGate()" id="btn-parents-link">👨‍👩‍👧 Pour les parents</button>
+</div>
+
+<!-- PARENTS GATE -->
+<div id="screen-parents-gate" class="screen">
+  <div id="parents-check">
+    <h2 id="pg-title">Espace parents</h2>
+    <div class="math-q" id="pg-question"></div>
+    <input type="number" id="pg-answer" min="0" max="999" inputmode="numeric" aria-label="Réponse">
+    <div class="err" id="pg-err"></div>
+    <button class="btn-blue" onclick="checkParents()" id="pg-ok">Valider</button><br>
+    <button class="btn-back" style="margin-top:10px" onclick="showScreen('screen-title')" id="pg-back">← Retour</button>
+  </div>
+</div>
+
+<!-- PARENTS INFO -->
+<div id="screen-parents-info" class="screen">
+  <div id="parents-info">
+    <h2 id="pi-title">Pour les parents</h2>
+    <p id="pi-body"></p>
+    <p><strong id="pi-privacy-lbl">Confidentialité :</strong> <span id="pi-privacy"></span></p>
+    <p><strong id="pi-ads-lbl">Publicité :</strong> <span id="pi-ads"></span></p>
+    <button class="btn-back" onclick="showScreen('screen-title')" id="pi-back">← Retour</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div id="level-badge">Niveau 1</div>
+  <div id="score-bar">
+    <span id="score-label">Score :</span>
+    <span id="score-val">0</span><span>/</span><span id="score-max">7</span>
+  </div>
+  <div id="progress-dots"></div>
+  <div id="question-text">...</div>
+  <div id="feedback" role="status"></div>
+
+  <!-- N1 & N3 area (read clock / duration) -->
+  <div id="n1-area" style="display:none;flex-direction:column;align-items:center;gap:12px;width:100%;">
+    <div id="n1-clock-area"></div>
+    <div id="n1-choices"></div>
+  </div>
+
+  <!-- N2 area (set clock) -->
+  <div id="n2-area" style="display:none;flex-direction:column;align-items:center;gap:10px;width:100%;">
+    <div id="n2-time-display">12:00</div>
+    <div id="n2-hint"></div>
+    <svg id="draggable-clock" width="220" height="220" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg">
+      <circle r="106" fill="white" stroke="#0f4c81" stroke-width="4"/>
+      <g id="clock-marks"></g>
+      <g id="clock-nums"></g>
+      <line id="n2-hour-hand" x1="0" y1="0" x2="0" y2="-56" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+      <line id="n2-min-hand" x1="0" y1="0" x2="0" y2="-82" stroke="#0f4c81" stroke-width="4.5" stroke-linecap="round"/>
+      <circle r="8" fill="#0f172a"/>
+    </svg>
+    <button id="n2-validate" onclick="validateN2()">Valider</button>
+  </div>
+
+  <button class="btn-blue" id="btn-next" style="display:none;margin-top:12px;min-height:48px;" onclick="nextQuestion()">Suivant →</button>
+</div>
+
+<!-- WIN -->
+<div id="screen-win" class="screen">
+  <div id="win-title">Bravo !</div>
+  <div id="stars-display">⭐⭐⭐</div>
+  <div id="win-sub"></div>
+  <div class="win-btns">
+    <button class="btn-play" onclick="restartLevel()" id="btn-replay">🔁 Rejouer</button>
+    <button class="btn-blue" id="btn-next-level" onclick="nextLevel()" style="display:none;padding:10px 22px;font-weight:800;font-size:1rem;">Niveau suivant →</button>
+    <button class="btn-back" onclick="showScreen('screen-title')" id="btn-home">🏠 Accueil</button>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    game_title:"L'Horloge Héros",game_sub:"Lis l'heure comme un super-héros !",
+    btn_play:"▶ Jouer",btn_parents_link:"👨‍👩‍👧 Pour les parents",
+    mute_on:"🔇",mute_off:"🔊",
+    pg_title:"Espace parents",pg_q:"Combien font",pg_ok:"Valider",pg_back:"← Retour",pg_err:"Réponse incorrecte, essaie encore.",
+    pi_title:"Pour les parents",
+    pi_body:"Ce jeu aide les enfants de 6 à 9 ans à lire l'heure sur une horloge analogique, à distinguer les heures et les minutes, et à calculer des durées simples. Il comporte 3 niveaux progressifs : heures et demies, quarts d'heure, puis durées.",
+    pi_privacy_lbl:"Confidentialité :",pi_privacy:"Aucune donnée collectée. Progression sauvegardée uniquement en local sur cet appareil.",
+    pi_ads_lbl:"Publicité :",pi_ads:"Aucune publicité. Totalement gratuit et open source.",
+    pi_back:"← Retour",
+    level1:"Niveau 1 — Heures et demies",level2:"Niveau 2 — Quarts et réglage",level3:"Niveau 3 — Durées",
+    score_label:"Score :",
+    q_choose_time:"Quelle heure indique cette horloge ?",
+    q_set_clock:"Règle l'horloge sur :",
+    q_duration2:"Dans",q_duration3:"heure(s), il sera quelle heure ?",
+    validate:"✔ Valider",
+    correct:"Bravo ! ⭐",wrong:"Essaie encore !",wrong_was:"C'était",
+    next:"Suivant →",
+    win_title:"Bravo, Héros du Temps ! 🏆",win_sub:"Parfait ! Tu maîtrises l'horloge.",
+    win_sub2:"Tu as fait",win_sub3:"sur",
+    btn_replay:"🔁 Rejouer",btn_next_level:"Niveau suivant →",btn_home:"🏠 Accueil",
+    n2_hint2:"Aiguille orange = heures  •  Bleue = minutes",
+  },
+  en:{
+    game_title:"Clock Hero",game_sub:"Tell the time like a superhero!",
+    btn_play:"▶ Play",btn_parents_link:"👨‍👩‍👧 For parents",
+    mute_on:"🔇",mute_off:"🔊",
+    pg_title:"Parent area",pg_q:"What is",pg_ok:"OK",pg_back:"← Back",pg_err:"Wrong answer, try again.",
+    pi_title:"For parents",
+    pi_body:"This game helps children aged 6-9 to read time on an analog clock, tell hours and minutes apart, and calculate simple durations. It has 3 progressive levels: hours & halves, quarters, then durations.",
+    pi_privacy_lbl:"Privacy:",pi_privacy:"No data collected. Progress saved locally on this device only.",
+    pi_ads_lbl:"Ads:",pi_ads:"No ads. Completely free and open source.",
+    pi_back:"← Back",
+    level1:"Level 1 — Hours & Halves",level2:"Level 2 — Quarters & Setting",level3:"Level 3 — Durations",
+    score_label:"Score:",
+    q_choose_time:"What time does this clock show?",
+    q_set_clock:"Set the clock to:",
+    q_duration2:"In",q_duration3:"hour(s), what time will it be?",
+    validate:"✔ Check",
+    correct:"Well done! ⭐",wrong:"Try again!",wrong_was:"It was",
+    next:"Next →",
+    win_title:"Amazing, Time Hero! 🏆",win_sub:"You mastered the clock!",
+    win_sub2:"You scored",win_sub3:"out of",
+    btn_replay:"🔁 Play again",btn_next_level:"Next level →",btn_home:"🏠 Home",
+    n2_hint2:"Orange hand = hours  •  Blue = minutes",
+  }
+};
+
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let audioCtx=null;
+
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.16;
+  try{const c=getAudioCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(523,.13);setTimeout(()=>playTone(659,.13),110);setTimeout(()=>playTone(784,.28),220);}
+function playWrong(){playTone(220,.22,'sawtooth',.09);}
+function playClick(){playTone(660,.07);}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?T[lang].mute_on:T[lang].mute_off;}
+
+function setLang(l){lang=l;document.getElementById('btn-fr').classList.toggle('active',l==='fr');document.getElementById('btn-en').classList.toggle('active',l==='en');renderUI();}
+
+function renderUI(){
+  const t=T[lang];
+  document.getElementById('game-title').textContent=t.game_title;
+  document.getElementById('game-sub').textContent=t.game_sub;
+  document.getElementById('btn-play').textContent=t.btn_play;
+  document.getElementById('btn-parents-link').textContent=t.btn_parents_link;
+  document.getElementById('mute-btn').textContent=muted?t.mute_on:t.mute_off;
+  document.getElementById('pg-title').textContent=t.pg_title;
+  document.getElementById('pg-ok').textContent=t.pg_ok;
+  document.getElementById('pg-back').textContent=t.pg_back;
+  document.getElementById('pi-title').textContent=t.pi_title;
+  document.getElementById('pi-body').textContent=t.pi_body;
+  document.getElementById('pi-privacy-lbl').textContent=t.pi_privacy_lbl;
+  document.getElementById('pi-privacy').textContent=t.pi_privacy;
+  document.getElementById('pi-ads-lbl').textContent=t.pi_ads_lbl;
+  document.getElementById('pi-ads').textContent=t.pi_ads;
+  document.getElementById('pi-back').textContent=t.pi_back;
+  document.getElementById('btn-home').textContent=t.btn_home;
+  document.getElementById('n2-validate').textContent=t.validate;
+  document.getElementById('btn-next').textContent=t.next;
+  document.getElementById('btn-replay').textContent=t.btn_replay;
+  document.getElementById('btn-next-level').textContent=t.btn_next_level;
+  document.title=t.game_title+' — PGRG IA';
+  if(document.getElementById('n2-hint'))document.getElementById('n2-hint').textContent=t.n2_hint2;
+  if(currentLevel>0)updateScoreBar();
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// Parents gate
+let pgA=0,pgB=0,pgAns=0;
+function showParentsGate(){
+  pgA=2+Math.floor(Math.random()*8);pgB=2+Math.floor(Math.random()*8);pgAns=pgA*pgB;
+  document.getElementById('pg-question').textContent=T[lang].pg_q+' '+pgA+' × '+pgB+' ?';
+  document.getElementById('pg-answer').value='';
+  document.getElementById('pg-err').textContent='';
+  showScreen('screen-parents-gate');
+}
+function checkParents(){
+  if(parseInt(document.getElementById('pg-answer').value,10)===pgAns){showScreen('screen-parents-info');}
+  else{document.getElementById('pg-err').textContent=T[lang].pg_err;playWrong();}
+}
+document.getElementById('pg-answer').addEventListener('keydown',e=>{if(e.key==='Enter')checkParents();});
+
+// Storage
+const STORAGE_KEY='pgrg_horloge_heros';
+let state={bestLevel:1,totalScore:0};
+try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&typeof s==='object'){state={...state,...s};}}catch(e){}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+
+// Game state
+const QPL=7;
+let currentLevel=0,questions=[],qIndex=0,score=0,answered=false;
+let n2H=12,n2M=0,n2Dragging=null;
+
+// Time formatting
+function fmtTime(h,m){
+  if(lang==='fr'){return h+'h'+String(m).padStart(2,'0');}
+  else{const ap=h<12?'AM':'PM';const h12=h===0?12:(h>12?h-12:h);return h12+':'+String(m).padStart(2,'0')+' '+ap;}
+}
+
+// Clock SVG factory
+function makeClockSVG(h,m,size){
+  size=size||150;
+  const r=size/2-4;const cx=size/2;const cy=size/2;
+  const hAng=((h%12)+m/60)*30-90;const mAng=m*6-90;
+  const hRad=hAng*Math.PI/180;const mRad=mAng*Math.PI/180;
+  const hLen=r*0.50;const mLen=r*0.72;
+  const hx=cx+hLen*Math.cos(hRad);const hy=cy+hLen*Math.sin(hRad);
+  const mx=cx+mLen*Math.cos(mRad);const my=cy+mLen*Math.sin(mRad);
+  let marks='';
+  for(let i=0;i<60;i++){
+    const isH=i%5===0;
+    const a=i*6*Math.PI/180-Math.PI/2;
+    const x1=(cx+(r-2)*Math.cos(a)).toFixed(1);const y1=(cy+(r-2)*Math.sin(a)).toFixed(1);
+    const x2=(cx+(r-(isH?11:6))*Math.cos(a)).toFixed(1);const y2=(cy+(r-(isH?11:6))*Math.sin(a)).toFixed(1);
+    marks+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isH?'#0f4c81':'#94a3b8'}" stroke-width="${isH?2.5:1}" stroke-linecap="round"/>`;
+  }
+  let nums='';
+  const nr=r-18;
+  [12,1,2,3,4,5,6,7,8,9,10,11].forEach((n,i)=>{
+    const a=i*30*Math.PI/180-Math.PI/2;
+    const nx=(cx+nr*Math.cos(a)).toFixed(1);const ny=(cy+nr*Math.sin(a)+4.5).toFixed(1);
+    nums+=`<text x="${nx}" y="${ny}" text-anchor="middle" font-size="${size<130?9:12}" font-weight="700" fill="#0f172a" font-family="'Nunito',system-ui,sans-serif">${n}</text>`;
+  });
+  const hw=size<130?4:6;const mw=size<130?2.5:3.5;const cc=size<130?4:6;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" class="clock-svg">
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="#0f4c81" stroke-width="3"/>
+  ${marks}${nums}
+  <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#f97316" stroke-width="${hw}" stroke-linecap="round"/>
+  <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="#0f4c81" stroke-width="${mw}" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${cc}" fill="#0f172a"/>
+</svg>`;
+}
+
+// Draggable clock
+function buildDraggableClock(){
+  const marksEl=document.getElementById('clock-marks');
+  const numsEl=document.getElementById('clock-nums');
+  marksEl.innerHTML='';numsEl.innerHTML='';
+  const ns='http://www.w3.org/2000/svg';
+  for(let i=0;i<60;i++){
+    const isH=i%5===0;
+    const a=i*6*Math.PI/180-Math.PI/2;
+    const r=100;
+    const x1=(r-2)*Math.cos(a);const y1=(r-2)*Math.sin(a);
+    const x2=(r-(isH?12:6))*Math.cos(a);const y2=(r-(isH?12:6))*Math.sin(a);
+    const l=document.createElementNS(ns,'line');
+    l.setAttribute('x1',x1.toFixed(1));l.setAttribute('y1',y1.toFixed(1));
+    l.setAttribute('x2',x2.toFixed(1));l.setAttribute('y2',y2.toFixed(1));
+    l.setAttribute('stroke',isH?'#0f4c81':'#94a3b8');
+    l.setAttribute('stroke-width',isH?'2.5':'1');
+    l.setAttribute('stroke-linecap','round');
+    marksEl.appendChild(l);
+  }
+  const nr=82;
+  [12,1,2,3,4,5,6,7,8,9,10,11].forEach((n,i)=>{
+    const a=i*30*Math.PI/180-Math.PI/2;
+    const txt=document.createElementNS(ns,'text');
+    txt.setAttribute('x',(nr*Math.cos(a)).toFixed(1));
+    txt.setAttribute('y',(nr*Math.sin(a)+5).toFixed(1));
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','14');
+    txt.setAttribute('font-weight','700');txt.setAttribute('fill','#0f172a');
+    txt.setAttribute('font-family',"'Nunito',system-ui,sans-serif");
+    txt.textContent=n;numsEl.appendChild(txt);
+  });
+  updateN2Hands();
+}
+
+function updateN2Hands(){
+  const hAng=((n2H%12)+n2M/60)*30-90;const mAng=n2M*6-90;
+  const hRad=hAng*Math.PI/180;const mRad=mAng*Math.PI/180;
+  const hhx=(56*Math.cos(hRad)).toFixed(1);const hhy=(56*Math.sin(hRad)).toFixed(1);
+  const mmx=(82*Math.cos(mRad)).toFixed(1);const mmy=(82*Math.sin(mRad)).toFixed(1);
+  document.getElementById('n2-hour-hand').setAttribute('x2',hhx);
+  document.getElementById('n2-hour-hand').setAttribute('y2',hhy);
+  document.getElementById('n2-min-hand').setAttribute('x2',mmx);
+  document.getElementById('n2-min-hand').setAttribute('y2',mmy);
+  document.getElementById('n2-time-display').textContent=fmtTime(n2H,n2M);
+}
+
+function svgCoords(e){
+  const svg=document.getElementById('draggable-clock');
+  const rect=svg.getBoundingClientRect();
+  const scaleX=220/rect.width;const scaleY=220/rect.height;
+  const cx=e.clientX!==undefined?e.clientX:e.touches[0].clientX;
+  const cy=e.clientY!==undefined?e.clientY:e.touches[0].clientY;
+  return{x:(cx-rect.left)*scaleX-110,y:(cy-rect.top)*scaleY-110};
+}
+
+document.getElementById('draggable-clock').addEventListener('mousedown',e=>{
+  e.preventDefault();
+  const p=svgCoords(e);
+  const hAng=((n2H%12)+n2M/60)*30-90;const mAng=n2M*6-90;
+  const hhx=56*Math.cos(hAng*Math.PI/180);const hhy=56*Math.sin(hAng*Math.PI/180);
+  const mmx=82*Math.cos(mAng*Math.PI/180);const mmy=82*Math.sin(mAng*Math.PI/180);
+  const dh=Math.hypot(p.x-hhx,p.y-hhy);const dm=Math.hypot(p.x-mmx,p.y-mmy);
+  n2Dragging=dh<dm?'hour':'min';
+});
+document.getElementById('draggable-clock').addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const p=svgCoords(e);
+  const hAng=((n2H%12)+n2M/60)*30-90;const mAng=n2M*6-90;
+  const hhx=56*Math.cos(hAng*Math.PI/180);const hhy=56*Math.sin(hAng*Math.PI/180);
+  const mmx=82*Math.cos(mAng*Math.PI/180);const mmy=82*Math.sin(mAng*Math.PI/180);
+  const dh=Math.hypot(p.x-hhx,p.y-hhy);const dm=Math.hypot(p.x-mmx,p.y-mmy);
+  n2Dragging=dh<dm?'hour':'min';
+},{passive:false});
+
+function handleDragMove(e){
+  if(!n2Dragging)return;
+  e.preventDefault();
+  const p=svgCoords(e);
+  let ang=Math.atan2(p.y,p.x)*180/Math.PI+90;
+  if(ang<0)ang+=360;
+  if(n2Dragging==='hour'){
+    // snap to nearest hour
+    const steps=[0,15,30,45];
+    const rawH=ang/30;
+    const hInt=Math.round(rawH)%12;
+    n2H=hInt===0?12:hInt;
+  }else{
+    // snap to nearest 5 min
+    const rawM=ang/6;
+    n2M=Math.round(rawM/5)*5%60;
+  }
+  updateN2Hands();
+}
+document.addEventListener('mousemove',handleDragMove);
+document.addEventListener('touchmove',handleDragMove,{passive:false});
+document.addEventListener('mouseup',()=>{n2Dragging=null;});
+document.addEventListener('touchend',()=>{n2Dragging=null;});
+
+// Question generators
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function rnd(lo,hi){return lo+Math.floor(Math.random()*(hi-lo+1));}
+
+function wrongTimes(h,m,n){
+  const pool=[];const used=new Set([h+':'+m]);
+  const mins=currentLevel===1?[0,30]:[0,15,30,45];
+  let tries=0;
+  while(pool.length<n&&tries<200){
+    tries++;
+    const wh=rnd(1,12);const wm=mins[Math.floor(Math.random()*mins.length)];
+    const k=wh+':'+wm;
+    if(!used.has(k)){used.add(k);pool.push({h:wh,m:wm});}
+  }
+  return pool;
+}
+
+function genQuestions(lv){
+  const qs=[];
+  if(lv===1){
+    for(let i=0;i<QPL;i++){
+      const h=rnd(1,12);const m=[0,30][Math.floor(Math.random()*2)];
+      qs.push({type:'read',h,m});
+    }
+  }else if(lv===2){
+    for(let i=0;i<QPL;i++){
+      const h=rnd(1,12);const m=[0,15,30,45][Math.floor(Math.random()*4)];
+      qs.push({type:i%2===0?'set':'read',h,m});
+    }
+  }else{
+    for(let i=0;i<QPL;i++){
+      const h=rnd(1,10);const m=[0,30][Math.floor(Math.random()*2)];
+      const dur=rnd(1,4);
+      const nh=((h-1+dur)%12)+1;
+      qs.push({type:'dur',h,m,dur,nh});
+    }
+  }
+  return shuffle(qs);
+}
+
+// Score bar
+function updateScoreBar(){
+  const t=T[lang];
+  const lvNames=[t.level1,t.level2,t.level3];
+  document.getElementById('level-badge').textContent=lvNames[currentLevel-1]||'';
+  document.getElementById('score-label').textContent=t.score_label;
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('score-max').textContent=QPL;
+}
+
+function updateDots(){
+  const el=document.getElementById('progress-dots');el.innerHTML='';
+  for(let i=0;i<QPL;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<qIndex?' done':(i===qIndex?' current':''));
+    d.setAttribute('aria-hidden','true');el.appendChild(d);
+  }
+}
+
+function startGame(){playClick();currentLevel=Math.max(1,state.bestLevel);launchLevel(currentLevel);}
+function restartLevel(){playClick();launchLevel(currentLevel);}
+function nextLevel(){playClick();const nl=Math.min(currentLevel+1,3);if(nl>state.bestLevel){state.bestLevel=nl;saveState();}launchLevel(nl);}
+
+function launchLevel(lv){
+  currentLevel=lv;qIndex=0;score=0;answered=false;
+  questions=genQuestions(lv);
+  updateScoreBar();
+  showScreen('screen-game');
+  renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=questions[qIndex];
+  const t=T[lang];
+  document.getElementById('n1-area').style.display='none';
+  document.getElementById('n2-area').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='';
+  updateDots();
+  updateScoreBar();
+
+  if(q.type==='read'){
+    document.getElementById('question-text').textContent=t.q_choose_time;
+    document.getElementById('n1-area').style.display='flex';
+    document.getElementById('n1-clock-area').innerHTML=makeClockSVG(q.h,q.m,160);
+    const wrongs=wrongTimes(q.h,q.m,2);
+    const choices=shuffle([{h:q.h,m:q.m,correct:true},...wrongs.map(w=>({...w,correct:false}))]);
+    const ch=document.getElementById('n1-choices');ch.innerHTML='';
+    choices.forEach(c=>{
+      const btn=document.createElement('button');
+      btn.className='choice-card';btn.textContent=fmtTime(c.h,c.m);
+      btn.setAttribute('aria-label',fmtTime(c.h,c.m));
+      btn.style.minHeight='60px';btn.style.minWidth='90px';
+      btn.onclick=()=>{if(!answered)doAnswer(btn,c.correct,q.h,q.m);};
+      ch.appendChild(btn);
+    });
+  }else if(q.type==='set'){
+    document.getElementById('question-text').textContent=t.q_set_clock+' '+fmtTime(q.h,q.m);
+    document.getElementById('n2-area').style.display='flex';
+    n2H=rnd(1,12);n2M=[0,15,30,45][Math.floor(Math.random()*4)];
+    while(n2H===q.h&&n2M===q.m){n2H=rnd(1,12);n2M=[0,15,30,45][Math.floor(Math.random()*4)];}
+    document.getElementById('n2-hint').textContent=t.n2_hint2;
+    document.getElementById('n2-validate').textContent=t.validate;
+    buildDraggableClock();
+  }else{
+    document.getElementById('question-text').textContent=t.q_duration2+' '+q.dur+' '+t.q_duration3;
+    document.getElementById('n1-area').style.display='flex';
+    document.getElementById('n1-clock-area').innerHTML=makeClockSVG(q.h,q.m,160);
+    const wrongs=wrongTimes(q.nh,q.m,2);
+    const choices=shuffle([{h:q.nh,m:q.m,correct:true},...wrongs.map(w=>({...w,correct:false}))]);
+    const ch=document.getElementById('n1-choices');ch.innerHTML='';
+    choices.forEach(c=>{
+      const btn=document.createElement('button');
+      btn.className='choice-card';btn.textContent=fmtTime(c.h,c.m);
+      btn.setAttribute('aria-label',fmtTime(c.h,c.m));
+      btn.style.minHeight='60px';btn.style.minWidth='90px';
+      btn.onclick=()=>{if(!answered)doAnswer(btn,c.correct,q.nh,q.m);};
+      ch.appendChild(btn);
+    });
+  }
+}
+
+function doAnswer(btn,correct,ch,cm){
+  answered=true;
+  const t=T[lang];
+  if(correct){
+    btn.classList.add('correct');score++;
+    document.getElementById('score-val').textContent=score;
+    showFb(true,'');playSuccess();
+    setTimeout(nextQuestion,1100);
+  }else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.choice-card').forEach(b=>{if(b.textContent===fmtTime(ch,cm))b.classList.add('correct');});
+    showFb(false,t.wrong_was+' '+fmtTime(ch,cm));playWrong();
+    document.getElementById('btn-next').style.display='inline-block';
+    document.getElementById('btn-next').textContent=t.next;
+  }
+}
+
+function validateN2(){
+  if(answered)return;
+  const q=questions[qIndex];const t=T[lang];
+  const ch=q.h%12||12;const cm=q.m;
+  const sh=n2H%12||12;const sm=n2M;
+  if(sh===ch&&sm===cm){
+    answered=true;score++;
+    document.getElementById('score-val').textContent=score;
+    showFb(true,'');playSuccess();
+    setTimeout(nextQuestion,1100);
+  }else{
+    showFb(false,t.wrong_was+' '+fmtTime(q.h,q.m));playWrong();
+    document.getElementById('btn-next').style.display='inline-block';
+    document.getElementById('btn-next').textContent=t.next;
+  }
+}
+
+function showFb(ok,extra){
+  const t=T[lang];
+  const fb=document.getElementById('feedback');
+  fb.textContent=(ok?t.correct:t.wrong)+(extra?' — '+extra:'');
+  fb.className=ok?'ok':'ko';
+  document.getElementById('aria-msg').textContent=fb.textContent;
+}
+
+function nextQuestion(){qIndex++;if(qIndex>=QPL){showWin();}else{renderQ();}}
+
+function showWin(){
+  playSuccess();setTimeout(playSuccess,350);
+  const t=T[lang];
+  const stars=score>=6?'⭐⭐⭐':score>=4?'⭐⭐':'⭐';
+  document.getElementById('win-title').textContent=t.win_title;
+  document.getElementById('stars-display').textContent=stars;
+  document.getElementById('win-sub').textContent=t.win_sub2+' '+score+' '+t.win_sub3+' '+QPL+' !';
+  document.getElementById('btn-replay').textContent=t.btn_replay;
+  document.getElementById('btn-home').textContent=t.btn_home;
+  const nlBtn=document.getElementById('btn-next-level');
+  if(currentLevel<3){nlBtn.style.display='inline-block';nlBtn.textContent=t.btn_next_level;}
+  else{nlBtn.style.display='none';}
+  state.totalScore=(state.totalScore||0)+score;
+  if(score>=5&&currentLevel>=state.bestLevel&&currentLevel<3){state.bestLevel=currentLevel+1;}
+  saveState();
+  showScreen('screen-win');
+}
+
+// Init
+setLang(lang);
+document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+document.getElementById('btn-en').classList.toggle('active',lang==='en');
+</script>
+</body>
+</html>

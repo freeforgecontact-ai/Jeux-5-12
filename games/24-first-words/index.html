@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>First Words — Mes Premiers Mots Anglais | PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,#d9eeff 0%,#eaf6ff 60%,#fff5e6 100%);
+  min-height:100vh;color:var(--navy);
+}
+#topbar{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;background:var(--blue);
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  position:sticky;top:0;z-index:100;
+}
+#topbar img{height:34px}
+#topbar .brand{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:#fff;font-size:1.15rem;font-weight:700;flex:1;
+}
+.lang-btn{
+  background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);
+  color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;
+  font-weight:700;font-size:.9rem;transition:background .2s;
+}
+.lang-btn.active,.lang-btn:hover{background:var(--orange);border-color:var(--orange)}
+#muteBtn{
+  background:none;border:none;cursor:pointer;font-size:1.5rem;
+  line-height:1;padding:4px;border-radius:8px;
+  transition:background .2s;
+}
+#muteBtn:hover{background:rgba(255,255,255,.2)}
+.screen{display:none;padding:20px 16px;max-width:700px;margin:0 auto}
+.screen.active{display:block}
+#titleScreen{text-align:center}
+.mascot-wrap{margin:16px auto;width:180px;height:180px}
+.mascot-wrap svg{width:100%;height:100%}
+h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.2rem;color:var(--blue);line-height:1.1;margin-bottom:6px;
+}
+.subtitle{font-size:1.1rem;color:var(--slate);margin-bottom:24px}
+.btn-primary{
+  display:inline-block;background:var(--orange);color:#fff;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.4rem;font-weight:700;padding:14px 48px;
+  border-radius:50px;border:none;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform .1s,box-shadow .1s;margin-bottom:12px;
+}
+.btn-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{
+  display:inline-block;background:var(--blue);color:#fff;
+  font-size:1rem;font-weight:700;padding:10px 28px;
+  border-radius:50px;border:none;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);
+  transition:transform .1s,box-shadow .1s;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.btn-small{
+  display:inline-block;background:transparent;color:var(--slate);
+  font-size:.9rem;padding:8px 16px;border-radius:50px;
+  border:2px solid var(--slate);cursor:pointer;margin-top:16px;
+}
+.btn-small:hover{border-color:var(--blue);color:var(--blue)}
+#parentGate{
+  background:#fff;border-radius:20px;padding:28px 20px;
+  box-shadow:0 8px 32px rgba(15,76,129,.12);
+  max-width:360px;margin:24px auto;text-align:center;
+}
+#parentGate h2{color:var(--blue);margin-bottom:12px;font-size:1.4rem}
+#parentGate p{color:var(--slate);margin-bottom:16px;font-size:1rem}
+#parentMathQ{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:12px}
+#parentInput{
+  width:120px;text-align:center;font-size:1.4rem;padding:8px;
+  border:2px solid var(--sky);border-radius:12px;margin-bottom:12px;
+}
+#parentError{color:var(--orange-dark);font-size:.9rem;min-height:1.2em;margin-bottom:8px}
+.parents-info{
+  background:#fff;border-radius:20px;padding:24px;
+  box-shadow:0 8px 32px rgba(15,76,129,.12);
+  max-width:480px;margin:0 auto;
+}
+.parents-info h2{color:var(--blue);margin-bottom:12px}
+.parents-info p{color:var(--slate);margin-bottom:10px;line-height:1.6}
+#levelsScreen{text-align:center}
+.levels-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:16px;margin:24px 0;
+}
+.level-card{
+  background:#fff;border-radius:20px;padding:20px 12px;
+  box-shadow:0 4px 16px rgba(15,76,129,.1);cursor:pointer;
+  border:3px solid transparent;transition:all .2s;
+  min-height:120px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
+}
+.level-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+.level-card.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.level-card .level-emoji{font-size:2.5rem}
+.level-card .level-name{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1rem;color:var(--blue);font-weight:700;
+}
+.level-card .level-stars{color:var(--gold);font-size:1rem;letter-spacing:2px}
+.level-card .lock-icon{font-size:1.4rem}
+#gameScreen{text-align:center}
+.game-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;gap:8px;
+}
+.progress-wrap{flex:1;height:14px;background:rgba(15,76,129,.12);border-radius:10px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--sky),var(--blue));border-radius:10px;transition:width .4s}
+.score-badge{
+  background:var(--gold);color:var(--navy);border-radius:50px;
+  padding:4px 14px;font-weight:700;font-size:.95rem;white-space:nowrap;
+}
+.mode-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.mode-tab{
+  flex:1;max-width:160px;padding:10px;border-radius:50px;border:2px solid var(--blue);
+  background:#fff;color:var(--blue);font-weight:700;cursor:pointer;font-size:.9rem;
+  transition:all .2s;
+}
+.mode-tab.active{background:var(--blue);color:#fff}
+#exploreArea .card-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:12px;margin-top:8px;
+}
+.vocab-card{
+  background:#fff;border-radius:16px;padding:14px 8px;
+  box-shadow:0 4px 12px rgba(15,76,129,.1);cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  border:3px solid transparent;text-align:center;
+}
+.vocab-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,76,129,.15)}
+.vocab-card.highlight{border-color:var(--gold);background:#fffaeb}
+.vocab-card .vc-emoji{font-size:2.4rem;display:block}
+.vocab-card .vc-en{font-size:.95rem;font-weight:700;color:var(--navy);margin-top:4px}
+.vocab-card .vc-fr{font-size:.75rem;color:var(--slate)}
+#quizArea{max-width:500px;margin:0 auto}
+.quiz-question{
+  background:#fff;border-radius:24px;padding:20px;
+  box-shadow:0 8px 24px rgba(15,76,129,.12);margin-bottom:18px;text-align:center;
+}
+.quiz-word{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.6rem;color:var(--blue);font-weight:700;margin-bottom:6px;
+}
+.quiz-instruction{font-size:.95rem;color:var(--slate);margin-bottom:8px}
+.choices-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:16px;
+}
+.choice-btn{
+  background:#fff;border:3px solid rgba(15,76,129,.15);
+  border-radius:16px;padding:12px 4px;cursor:pointer;
+  text-align:center;transition:all .18s;min-height:96px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  -webkit-tap-highlight-color:transparent;
+}
+.choice-btn:hover{border-color:var(--orange);transform:scale(1.03)}
+.choice-btn .ch-emoji{font-size:2.2rem}
+.choice-btn .ch-fr{font-size:.75rem;color:var(--slate)}
+.choice-btn.correct{border-color:var(--success);background:#e8faf2}
+.choice-btn.wrong{border-color:#f87171;background:#fef2f2}
+.choice-btn:disabled{cursor:default}
+.feedback-msg{
+  min-height:44px;font-size:1.1rem;font-weight:700;
+  padding:8px;border-radius:12px;margin-bottom:10px;
+}
+.feedback-msg.ok{color:var(--success);background:#e8faf2}
+.feedback-msg.ko{color:#dc2626;background:#fef2f2}
+.quiz-stats{
+  display:flex;justify-content:center;gap:24px;
+  font-size:.9rem;color:var(--slate);margin-bottom:8px;
+}
+.quiz-stats span{font-weight:700;color:var(--navy)}
+.speak-btn{
+  background:var(--sky-light);border:2px solid var(--sky);
+  border-radius:50px;padding:8px 20px;cursor:pointer;
+  font-size:1rem;color:var(--blue);font-weight:700;
+  margin-top:10px;display:inline-flex;align-items:center;gap:6px;
+}
+.speak-btn:hover{background:var(--sky)}
+#resultScreen{text-align:center;padding:30px 16px}
+.stars-display{font-size:3.5rem;letter-spacing:4px;margin:16px 0}
+.result-title{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2rem;color:var(--blue);margin-bottom:8px;
+}
+.result-sub{color:var(--slate);font-size:1.05rem;margin-bottom:24px}
+.result-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.confetti-piece{
+  position:fixed;width:10px;height:10px;border-radius:50%;
+  pointer-events:none;z-index:9999;animation:fall 1.4s ease-in forwards;
+}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+.back-btn{
+  background:none;border:2px solid var(--slate);color:var(--slate);
+  border-radius:50px;padding:6px 16px;cursor:pointer;font-size:.9rem;
+  margin-bottom:16px;
+}
+.back-btn:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:400px){
+  h1{font-size:1.7rem}
+  .quiz-word{font-size:2rem}
+  .choices-grid{gap:8px}
+  .choice-btn{min-height:80px;padding:8px 2px}
+  .choice-btn .ch-emoji{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+  <button id="muteBtn" aria-label="Mute" onclick="toggleMute()">&#128266;</button>
+</div>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+
+<div id="titleScreen" class="screen active">
+  <div class="mascot-wrap">
+    <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="90" cy="130" rx="50" ry="38" fill="#7ec3ee"/>
+      <circle cx="90" cy="75" r="48" fill="#ffe9c2"/>
+      <ellipse cx="50" cy="40" rx="14" ry="18" fill="#ffe9c2"/>
+      <ellipse cx="50" cy="40" rx="8" ry="12" fill="#ffcfcf"/>
+      <ellipse cx="130" cy="40" rx="14" ry="18" fill="#ffe9c2"/>
+      <ellipse cx="130" cy="40" rx="8" ry="12" fill="#ffcfcf"/>
+      <ellipse cx="73" cy="72" rx="9" ry="10" fill="#fff"/>
+      <circle cx="75" cy="73" r="6" fill="#0f172a"/>
+      <circle cx="77" cy="71" r="2" fill="#fff"/>
+      <ellipse cx="107" cy="72" rx="9" ry="10" fill="#fff"/>
+      <circle cx="109" cy="73" r="6" fill="#0f172a"/>
+      <circle cx="111" cy="71" r="2" fill="#fff"/>
+      <ellipse cx="90" cy="85" rx="6" ry="4" fill="#f97316"/>
+      <path d="M80 93 Q90 102 100 93" stroke="#ea580c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="63" cy="87" rx="10" ry="7" fill="#ffd23f" opacity=".5"/>
+      <ellipse cx="117" cy="87" rx="10" ry="7" fill="#ffd23f" opacity=".5"/>
+      <rect x="52" y="145" width="76" height="24" rx="4" fill="#f97316"/>
+      <rect x="56" y="148" width="68" height="18" rx="3" fill="#fff"/>
+      <text x="90" y="161" text-anchor="middle" font-size="11" font-family="Nunito,sans-serif" font-weight="700" fill="#0f4c81">A B C</text>
+      <text x="22" y="50" font-size="18" fill="#ffd23f">&#9733;</text>
+      <text x="148" y="50" font-size="14" fill="#ffd23f">&#9733;</text>
+      <text x="140" y="25" font-size="10" fill="#7ec3ee">&#9733;</text>
+    </svg>
+  </div>
+  <h1 id="titleH1"></h1>
+  <p class="subtitle" id="titleSub"></p>
+  <br>
+  <button class="btn-primary" onclick="showLevels()" id="btnPlay"></button>
+  <br><br>
+  <button class="btn-small" onclick="showParentGate()" id="btnParents"></button>
+</div>
+
+<div id="parentGateScreen" class="screen">
+  <div id="parentGate">
+    <h2 id="pgTitle"></h2>
+    <p id="pgDesc"></p>
+    <div id="parentMathQ"></div>
+    <input type="number" id="parentInput" min="0" max="200" placeholder="?">
+    <div id="parentError"></div>
+    <br>
+    <button class="btn-primary" onclick="checkParentGate()" id="pgCheck"></button>
+    <br><br>
+    <button class="btn-secondary" onclick="showScreen('titleScreen')" id="pgBack"></button>
+  </div>
+</div>
+
+<div id="parentsInfoScreen" class="screen">
+  <div class="parents-info">
+    <h2 id="piTitle"></h2>
+    <p id="piP1"></p>
+    <p id="piP2"></p>
+    <p id="piP3"></p>
+    <br>
+    <button class="btn-secondary" onclick="showScreen('titleScreen')" id="piBack"></button>
+  </div>
+</div>
+
+<div id="levelsScreen" class="screen">
+  <button class="back-btn" onclick="showScreen('titleScreen')">&#8592; <span class="backHomeLabel"></span></button>
+  <h1 id="levTitle"></h1>
+  <p class="subtitle" id="levSub"></p>
+  <div class="levels-grid" id="levelsGrid"></div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <button class="back-btn" onclick="showScreen('levelsScreen')">&#8592; <span class="backLevelsLabel"></span></button>
+  <div class="game-header">
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="score-badge">&#11088; <span id="scoreVal">0</span></div>
+  </div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabExplore" onclick="switchMode('explore')"></button>
+    <button class="mode-tab" id="tabQuiz" onclick="switchMode('quiz')"></button>
+  </div>
+  <div id="exploreArea">
+    <p id="exploreHint" style="color:var(--slate);margin-bottom:8px;font-size:.9rem"></p>
+    <div class="card-grid" id="cardGrid"></div>
+    <br>
+    <button class="btn-primary" onclick="switchMode('quiz')" id="startQuizBtn"></button>
+  </div>
+  <div id="quizArea" style="display:none">
+    <div class="quiz-question">
+      <div class="quiz-word" id="quizWord"></div>
+      <div class="quiz-instruction" id="quizInstruction"></div>
+      <button class="speak-btn" onclick="speakCurrent()" id="quizSpeakBtn">&#128266; <span id="speakLabel"></span></button>
+    </div>
+    <div class="quiz-stats">
+      <div id="qStat1"></div>
+      <div id="qStat2"></div>
+    </div>
+    <div class="choices-grid" id="choicesGrid"></div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+  </div>
+</div>
+
+<div id="resultScreen" class="screen">
+  <div class="stars-display" id="starsDisplay"></div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-sub" id="resultSub"></div>
+  <div class="result-actions">
+    <button class="btn-secondary" onclick="replayLevel()" id="btnReplay"></button>
+    <button class="btn-primary" onclick="nextLevel()" id="btnNextLevel"></button>
+    <button class="btn-secondary" onclick="showScreen('levelsScreen')" id="btnBackLevels2"></button>
+  </div>
+</div>
+
+<script>
+var LEVELS=[
+  {id:'animals',emoji:'🦁',words:[
+    {en:'cat',fr:'chat',e:'🐱'},
+    {en:'dog',fr:'chien',e:'🐶'},
+    {en:'bird',fr:'oiseau',e:'🐦'},
+    {en:'fish',fr:'poisson',e:'🐟'},
+    {en:'horse',fr:'cheval',e:'🐴'},
+    {en:'rabbit',fr:'lapin',e:'🐰'},
+    {en:'duck',fr:'canard',e:'🦆'},
+    {en:'frog',fr:'grenouille',e:'🐸'},
+    {en:'bear',fr:'ours',e:'🐻'},
+    {en:'lion',fr:'lion',e:'🦁'}
+  ]},
+  {id:'food',emoji:'🍎',words:[
+    {en:'apple',fr:'pomme',e:'🍎'},
+    {en:'banana',fr:'banane',e:'🍌'},
+    {en:'bread',fr:'pain',e:'🍞'},
+    {en:'milk',fr:'lait',e:'🥛'},
+    {en:'egg',fr:'oeuf',e:'🥚'},
+    {en:'cake',fr:'gateau',e:'🎂'},
+    {en:'pizza',fr:'pizza',e:'🍕'},
+    {en:'carrot',fr:'carotte',e:'🥕'},
+    {en:'strawberry',fr:'fraise',e:'🍓'},
+    {en:'orange',fr:'orange',e:'🍊'}
+  ]},
+  {id:'house',emoji:'🏠',words:[
+    {en:'book',fr:'livre',e:'📚'},
+    {en:'ball',fr:'balle',e:'⚽'},
+    {en:'chair',fr:'chaise',e:'🪑'},
+    {en:'door',fr:'porte',e:'🚪'},
+    {en:'window',fr:'fenetre',e:'🪟'},
+    {en:'bed',fr:'lit',e:'🛏️'},
+    {en:'table',fr:'table',e:'🪞'},
+    {en:'clock',fr:'horloge',e:'🕐'},
+    {en:'key',fr:'cle',e:'🔑'},
+    {en:'pencil',fr:'crayon',e:'✏️'}
+  ]}
+];
+
+var T={
+  fr:{
+    title:'First Words',
+    subtitle:'Mes premiers mots en anglais ⭐',
+    play:'Jouer !',
+    parents:'Pour les parents',
+    pgTitle:'Espace Parents',
+    pgDesc:'Repondez a cette petite question pour continuer :',
+    pgCheck:'Continuer',
+    pgBack:'Retour',
+    piTitle:'A propos de ce jeu',
+    piP1:'First Words aide les enfants de 5 a 8 ans a apprendre leur premier vocabulaire en anglais grace a des images, des sons et des petits jeux.',
+    piP2:"Aucune donnee personnelle n'est collectee. La progression est sauvegardee localement sur cet appareil. Aucune publicite.",
+    piP3:'Competences visees : vocabulaire anglais de base (animaux, nourriture, maison), prononciation, memorisation visuelle.',
+    piBack:'Retour',
+    backHome:'Accueil',
+    backLevels:'Niveaux',
+    levTitle:'Choisis un theme !',
+    levSub:'Apprends les mots de chaque groupe.',
+    levelNames:{animals:'Animaux',food:'Nourriture',house:'Maison et Objets'},
+    tabExplore:'Explorer',
+    tabQuiz:'Jouer',
+    exploreHint:"Clique sur un mot pour l'entendre !",
+    startQuiz:'Commencer le jeu !',
+    quizInstruction:'Retrouve la bonne image !',
+    speakLabel:'Ecouter',
+    qStat1:'Question :',
+    qStat2:'Bonnes reponses :',
+    feedOk:['Super !','Bravo !','Excellent !','Parfait !','Ouais !'],
+    feedKo:"Essaie encore ! C'est :",
+    btnReplay:'Rejouer',
+    btnNextLevel:'Niveau suivant',
+    btnBackLevels:'Niveaux',
+    resultTitle:'Bravo !',
+    locked:'Termine le niveau precedent d\'abord !',
+    pgError:"Ce n'est pas la bonne reponse, essaie encore !",
+    noVoice:'(sans voix)'
+  },
+  en:{
+    title:'First Words',
+    subtitle:'My first words in English ⭐',
+    play:'Play!',
+    parents:'For Parents',
+    pgTitle:'Parents Zone',
+    pgDesc:'Please answer this small question to continue:',
+    pgCheck:'Continue',
+    pgBack:'Back',
+    piTitle:'About this game',
+    piP1:'First Words helps children aged 5-8 learn their first English vocabulary through pictures, sounds and mini-games.',
+    piP2:'No personal data is collected. Progress is saved locally on this device. No advertising.',
+    piP3:'Skills: basic English vocabulary (animals, food, home objects), pronunciation, visual memory.',
+    piBack:'Back',
+    backHome:'Home',
+    backLevels:'Levels',
+    levTitle:'Choose a theme!',
+    levSub:'Learn the words in each group.',
+    levelNames:{animals:'Animals',food:'Food',house:'Home & Objects'},
+    tabExplore:'Explore',
+    tabQuiz:'Play',
+    exploreHint:'Click a word to hear it!',
+    startQuiz:'Start the game!',
+    quizInstruction:'Find the right picture!',
+    speakLabel:'Listen',
+    qStat1:'Question:',
+    qStat2:'Correct:',
+    feedOk:['Great!','Well done!','Excellent!','Perfect!','Yeah!'],
+    feedKo:'Try again! It is:',
+    btnReplay:'Play again',
+    btnNextLevel:'Next level',
+    btnBackLevels:'Levels',
+    resultTitle:'Well done!',
+    locked:'Finish the previous level first!',
+    pgError:"That's not right, try again!",
+    noVoice:'(no voice)'
+  }
+};
+
+var LS_KEY='pgrg_first_words';
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var audioCtx=null;
+var progress={stars:{},unlocked:['animals']};
+var currentLevel=null;
+var currentMode='explore';
+var quizWords=[];
+var quizIndex=0;
+var quizCorrect=0;
+var currentWord=null;
+var voices=[];
+var pgA=0,pgB=0;
+
+function loadProgress(){
+  try{var s=localStorage.getItem(LS_KEY);if(s){var p=JSON.parse(s);if(p&&p.stars)progress=p;}}catch(e){}
+}
+function saveProgress(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(progress));}catch(e){}
+}
+
+function getAudio(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,duration,type,vol){
+  if(muted)return;
+  type=type||'sine';vol=vol||0.25;
+  try{
+    var ac=getAudio();
+    var osc=ac.createOscillator();
+    var gain=ac.createGain();
+    osc.connect(gain);gain.connect(ac.destination);
+    osc.type=type;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+duration);
+    osc.start();osc.stop(ac.currentTime+duration);
+  }catch(e){}
+}
+function playSuccess(){
+  if(muted)return;
+  [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.18,'sine',.22);},i*100);});
+}
+function playWrong(){playTone(220,.3,'sawtooth',.15);}
+function playClick(){playTone(660,.08,'sine',.15);}
+
+function loadVoices(){
+  voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+}
+if(window.speechSynthesis){
+  window.speechSynthesis.onvoiceschanged=loadVoices;
+  loadVoices();
+}
+function speakWord(word){
+  if(!window.speechSynthesis||muted)return;
+  try{
+    window.speechSynthesis.cancel();
+    var utt=new SpeechSynthesisUtterance(word);
+    utt.lang='en-US';utt.rate=0.85;utt.pitch=1.1;
+    var enV=voices.filter(function(v){return v.lang&&v.lang.startsWith('en');});
+    if(enV.length)utt.voice=enV[0];
+    window.speechSynthesis.speak(utt);
+  }catch(e){}
+}
+function speakCurrent(){if(currentWord)speakWord(currentWord.en);}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  renderUI();
+}
+
+function el(id){return document.getElementById(id);}
+function setText(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt;}
+
+function renderUI(){
+  var L=T[lang];
+  setText('titleH1',L.title);
+  setText('titleSub',L.subtitle);
+  el('btnPlay').textContent=L.play;
+  el('btnParents').textContent=L.parents;
+  setText('pgTitle',L.pgTitle);
+  setText('pgDesc',L.pgDesc);
+  el('pgCheck').textContent=L.pgCheck;
+  el('pgBack').textContent=L.pgBack;
+  setText('piTitle',L.piTitle);
+  setText('piP1',L.piP1);
+  setText('piP2',L.piP2);
+  setText('piP3',L.piP3);
+  el('piBack').textContent=L.piBack;
+  document.querySelectorAll('.backHomeLabel').forEach(function(e){e.textContent=L.backHome;});
+  document.querySelectorAll('.backLevelsLabel').forEach(function(e){e.textContent=L.backLevels;});
+  setText('levTitle',L.levTitle);
+  setText('levSub',L.levSub);
+  el('tabExplore').textContent=L.tabExplore;
+  el('tabQuiz').textContent=L.tabQuiz;
+  setText('exploreHint',L.exploreHint);
+  el('startQuizBtn').textContent=L.startQuiz;
+  setText('quizInstruction',L.quizInstruction);
+  setText('speakLabel',L.speakLabel);
+  el('btnReplay').textContent=L.btnReplay;
+  el('btnNextLevel').textContent=L.btnNextLevel;
+  el('btnBackLevels2').textContent=L.btnBackLevels;
+  if(el('levelsScreen').classList.contains('active'))renderLevels();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  el(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showParentGate(){
+  playClick();
+  pgA=Math.floor(Math.random()*9)+2;
+  pgB=Math.floor(Math.random()*9)+2;
+  setText('parentMathQ',pgA+' x '+pgB+' = ?');
+  el('parentInput').value='';
+  setText('parentError','');
+  showScreen('parentGateScreen');
+}
+function checkParentGate(){
+  var val=parseInt(el('parentInput').value,10);
+  if(val===pgA*pgB){showScreen('parentsInfoScreen');}
+  else{setText('parentError',T[lang].pgError);playWrong();}
+}
+
+function showLevels(){
+  playClick();
+  renderLevels();
+  showScreen('levelsScreen');
+}
+function renderLevels(){
+  var grid=el('levelsGrid');
+  var L=T[lang];
+  grid.innerHTML='';
+  LEVELS.forEach(function(lv,i){
+    var unlocked=progress.unlocked.indexOf(lv.id)>=0;
+    var stars=progress.stars[lv.id]||0;
+    var card=document.createElement('div');
+    card.className='level-card'+(unlocked?'':' locked');
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    var starStr='★'.repeat(stars)+'☆'.repeat(3-stars);
+    card.innerHTML='<div class="level-emoji">'+lv.emoji+'</div>'
+      +'<div class="level-name">'+L.levelNames[lv.id]+'</div>'
+      +(unlocked?'<div class="level-stars">'+starStr+'</div>':'<div class="lock-icon">🔒</div>');
+    if(unlocked){
+      (function(id){
+        card.addEventListener('click',function(){startLevel(id);});
+        card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')startLevel(id);});
+      })(lv.id);
+    }else{
+      card.addEventListener('click',function(){playWrong();announce(L.locked);});
+    }
+    grid.appendChild(card);
+  });
+}
+
+function startLevel(id){
+  playClick();
+  /* FIX: find the level by id with a guard — prevents null.words error */
+  var found=null;
+  for(var i=0;i<LEVELS.length;i++){if(LEVELS[i].id===id){found=LEVELS[i];break;}}
+  if(!found){return;}
+  currentLevel=found;
+  currentMode='explore';
+  quizWords=shuffle(currentLevel.words.slice());
+  quizIndex=0;quizCorrect=0;
+  setText('scoreVal','0');
+  el('progressBar').style.width='0%';
+  switchMode('explore');
+  showScreen('gameScreen');
+}
+
+function switchMode(mode){
+  /* FIX: guard — currentLevel must be set before accessing .words */
+  if(!currentLevel){return;}
+  currentMode=mode;
+  el('tabExplore').classList.toggle('active',mode==='explore');
+  el('tabQuiz').classList.toggle('active',mode==='quiz');
+  el('exploreArea').style.display=mode==='explore'?'':'none';
+  el('quizArea').style.display=mode==='quiz'?'':'none';
+  if(mode==='explore'){renderExplore();}
+  else{
+    quizWords=shuffle(currentLevel.words.slice());
+    quizIndex=0;quizCorrect=0;
+    setText('scoreVal','0');
+    el('progressBar').style.width='0%';
+    renderQuiz();
+  }
+}
+
+function renderExplore(){
+  /* FIX: guard against null currentLevel */
+  if(!currentLevel){return;}
+  var grid=el('cardGrid');
+  grid.innerHTML='';
+  currentLevel.words.forEach(function(w){
+    var card=document.createElement('div');
+    card.className='vocab-card';
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.innerHTML='<span class="vc-emoji">'+w.e+'</span>'
+      +'<div class="vc-en">'+w.en+'</div>'
+      +'<div class="vc-fr">'+w.fr+'</div>';
+    (function(word){
+      card.addEventListener('click',function(){
+        document.querySelectorAll('.vocab-card').forEach(function(c){c.classList.remove('highlight');});
+        card.classList.add('highlight');
+        currentWord=word;
+        speakWord(word.en);
+        playClick();
+        announce(word.en+' — '+word.fr);
+      });
+      card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')card.click();});
+    })(w);
+    grid.appendChild(card);
+  });
+}
+
+function renderQuiz(){
+  /* FIX: guard against null currentLevel */
+  if(!currentLevel){return;}
+  if(quizIndex>=quizWords.length){showResult();return;}
+  var L=T[lang];
+  var word=quizWords[quizIndex];
+  currentWord=word;
+  var pct=(quizIndex/quizWords.length)*100;
+  el('progressBar').style.width=pct+'%';
+  el('qStat1').innerHTML=L.qStat1+' <span>'+(quizIndex+1)+'/'+quizWords.length+'</span>';
+  el('qStat2').innerHTML=L.qStat2+' <span>'+quizCorrect+'</span>';
+  setText('quizWord',word.en);
+  setText('quizInstruction',L.quizInstruction);
+  setText('feedbackMsg','');
+  el('feedbackMsg').className='feedback-msg';
+  setTimeout(function(){speakWord(word.en);},250);
+  var others=shuffle(currentLevel.words.filter(function(w){return w.en!==word.en;})).slice(0,2);
+  var choices=shuffle([word].concat(others));
+  var grid=el('choicesGrid');
+  grid.innerHTML='';
+  choices.forEach(function(ch){
+    var btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.setAttribute('aria-label',ch.fr);
+    btn.innerHTML='<span class="ch-emoji">'+ch.e+'</span><span class="ch-fr">'+ch.fr+'</span>';
+    (function(chosen,correct){
+      btn.addEventListener('click',function(){handleChoice(chosen,correct,grid);});
+    })(ch,word);
+    grid.appendChild(btn);
+  });
+}
+
+function handleChoice(chosen,correct,grid){
+  var btns=grid.querySelectorAll('.choice-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  var L=T[lang];
+  if(chosen.en===correct.en){
+    btns.forEach(function(b){if(b.querySelector('.ch-fr').textContent===correct.fr)b.classList.add('correct');});
+    quizCorrect++;
+    setText('scoreVal',''+quizCorrect);
+    var msg=L.feedOk[Math.floor(Math.random()*L.feedOk.length)];
+    var fb=el('feedbackMsg');
+    fb.textContent=msg;fb.className='feedback-msg ok';
+    announce(msg);
+    playSuccess();confetti();
+    setTimeout(function(){quizIndex++;renderQuiz();},1200);
+  }else{
+    btns.forEach(function(b){
+      if(b.querySelector('.ch-fr').textContent===chosen.fr)b.classList.add('wrong');
+      if(b.querySelector('.ch-fr').textContent===correct.fr)b.classList.add('correct');
+    });
+    var msg2=L.feedKo+' "'+correct.en+'" '+correct.e;
+    var fb2=el('feedbackMsg');
+    fb2.textContent=msg2;fb2.className='feedback-msg ko';
+    announce(msg2);
+    playWrong();
+    setTimeout(function(){quizIndex++;renderQuiz();},1800);
+  }
+}
+
+function showResult(){
+  /* FIX: guard against null currentLevel */
+  if(!currentLevel){showScreen('levelsScreen');return;}
+  var total=quizWords.length;
+  var pct=quizCorrect/total;
+  var stars=pct>=0.9?3:pct>=0.6?2:1;
+  var prev=progress.stars[currentLevel.id]||0;
+  if(stars>prev)progress.stars[currentLevel.id]=stars;
+  var idx=LEVELS.map(function(l){return l.id;}).indexOf(currentLevel.id);
+  if(idx>=0&&idx<LEVELS.length-1){
+    var nextId=LEVELS[idx+1].id;
+    if(progress.unlocked.indexOf(nextId)<0)progress.unlocked.push(nextId);
+  }
+  saveProgress();
+  var starStr='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  setText('starsDisplay',starStr);
+  setText('resultTitle',T[lang].resultTitle);
+  var c=quizCorrect,t2=total;
+  var sub=lang==='fr'?
+    'Tu as eu '+c+' bonne'+(c>1?'s':'')+' reponse'+(c>1?'s':'')+' sur '+t2+' !':
+    'You got '+c+' correct answer'+(c>1?'s':'')+' out of '+t2+'!';
+  setText('resultSub',sub);
+  var nextIdx=idx+1;
+  el('btnNextLevel').style.display=nextIdx<LEVELS.length?'':'none';
+  showScreen('resultScreen');
+  if(stars===3)confetti(40);else playSuccess();
+}
+
+function replayLevel(){if(currentLevel)startLevel(currentLevel.id);}
+function nextLevel(){
+  if(!currentLevel){return;}
+  var idx=LEVELS.map(function(l){return l.id;}).indexOf(currentLevel.id);
+  if(idx<LEVELS.length-1)startLevel(LEVELS[idx+1].id);
+}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=a[i];a[i]=a[j];a[j]=tmp;
+  }
+  return a;
+}
+function announce(msg){
+  var e=el('ariaLive');
+  e.textContent='';
+  setTimeout(function(){e.textContent=msg;},50);
+}
+function toggleMute(){
+  muted=!muted;
+  el('muteBtn').textContent=muted?'🔇':'🔊';
+  if(muted&&window.speechSynthesis)window.speechSynthesis.cancel();
+}
+function confetti(count){
+  count=count||18;
+  var colors=['#f97316','#ffd23f','#7ec3ee','#34c77b','#0f4c81','#ff7eb3'];
+  for(var i=0;i<count;i++){
+    (function(delay){
+      setTimeout(function(){
+        var d=document.createElement('div');
+        d.className='confetti-piece';
+        d.style.left=Math.random()*100+'vw';
+        d.style.top='-20px';
+        d.style.background=colors[Math.floor(Math.random()*colors.length)];
+        d.style.width=(8+Math.random()*8)+'px';
+        d.style.height=(8+Math.random()*8)+'px';
+        d.style.borderRadius=Math.random()>.5?'50%':'3px';
+        document.body.appendChild(d);
+        setTimeout(function(){d.remove();},1500);
+      },delay);
+    })(i*55);
+  }
+}
+
+loadProgress();
+renderUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "lang_name": "Français",
+  "title": "Titre du jeu",
+  "subtitle": "Apprendre en s'amusant",
+  "play": "Jouer",
+  "instructions": "Touche la bonne réponse !",
+  "encourage": "Essaie encore, tu y es presque !",
+  "success": "Bravo ! Tu as réussi !",
+  "next": "Suivant",
+  "help": "Aide",
+  "sound_on": "Son activé",
+  "sound_off": "Son coupé",
+  "back": "Retour",
+  "parents": "Espace parents"
+}

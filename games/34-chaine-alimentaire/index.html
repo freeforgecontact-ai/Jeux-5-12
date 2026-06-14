@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Chaîne Alimentaire / Food Web — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#eaf6ff 0%,#cce9fb 100%);min-height:100vh;color:var(--navy);}
+button{cursor:pointer;border:none;font-family:inherit;}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);padding:8px 14px;flex-wrap:wrap;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+#topbar .brand{display:flex;align-items:center;gap:8px;}
+#topbar .brand span{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;}
+#topbar .controls{display:flex;gap:6px;align-items:center;}
+.btn-lang{background:rgba(255,255,255,.18);color:#fff;border-radius:6px;padding:4px 10px;font-size:.85rem;font-weight:700;transition:background .2s;}
+.btn-lang.active,.btn-lang:hover{background:var(--orange);}
+.btn-mute{background:none;color:#fff;font-size:1.25rem;padding:4px 6px;}
+.screen{display:none;padding:16px;max-width:740px;margin:0 auto;}
+.screen.active{display:block;}
+#screen-title{text-align:center;}
+#screen-title h1{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:clamp(1.7rem,5vw,2.6rem);color:var(--blue);margin:10px 0 4px;}
+#screen-title .subtitle{color:var(--slate);font-size:1rem;margin-bottom:18px;}
+.btn-play{background:var(--orange);color:#fff;font-size:1.2rem;font-weight:700;padding:14px 36px;border-radius:14px;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;margin:10px 4px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{background:var(--blue);color:#fff;font-size:.9rem;font-weight:700;padding:10px 22px;border-radius:10px;box-shadow:0 4px 0 var(--blue-dark);margin:6px 4px;}
+.btn-secondary:hover{opacity:.9;}
+#screen-parents{text-align:center;}
+#screen-parents h2{color:var(--blue);margin-bottom:12px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#parent-question{font-size:1.4rem;font-weight:700;margin:14px 0;}
+#parent-answer{font-size:1.3rem;text-align:center;border:2px solid var(--blue);border-radius:8px;padding:8px 14px;width:100px;margin:0 auto 12px;display:block;}
+#parent-err{color:red;min-height:1.2em;}
+#parent-info{background:#fff;border-radius:12px;padding:16px;text-align:left;margin-top:16px;display:none;line-height:1.6;}
+#parent-info h3{color:var(--blue);margin-bottom:8px;}
+#screen-game{padding:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.game-header h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);font-size:1.2rem;}
+.progress-bar-wrap{background:#c3dff5;border-radius:8px;height:12px;flex:1;min-width:80px;margin:0 10px;}
+.progress-bar{background:var(--orange);height:100%;border-radius:8px;transition:width .4s;}
+.level-badge{background:var(--gold);color:var(--navy);border-radius:8px;padding:4px 12px;font-weight:700;font-size:.85rem;}
+#habitat-banner{text-align:center;background:var(--blue);color:#fff;border-radius:10px;padding:6px 14px;margin-bottom:12px;font-weight:700;font-size:1rem;}
+#chain-area{background:var(--sky-light);border-radius:12px;padding:10px 14px;margin:10px 0;min-height:60px;}
+#chain-area h3{font-size:.9rem;color:var(--slate);margin-bottom:6px;}
+#chain-slots{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:44px;}
+.chain-arrow{font-size:1.3rem;color:var(--orange);}
+.chain-slot{background:#fff;border:2px dashed var(--blue);border-radius:10px;min-width:80px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;padding:4px 8px;position:relative;flex-direction:column;}
+.chain-slot.filled{border-style:solid;border-color:var(--success);background:#f0fff8;}
+.chain-slot .slot-label{font-size:.65rem;color:var(--slate);}
+#options-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0;}
+.option-card{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:8px 14px;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:80px;transition:transform .15s,box-shadow .15s;min-height:52px;box-shadow:0 2px 6px rgba(0,0,0,.08);flex-direction:column;justify-content:center;}
+.option-card:hover{transform:translateY(-2px);box-shadow:0 5px 12px rgba(0,0,0,.13);}
+.option-card:active{transform:scale(.96);}
+.option-card.used{opacity:.35;pointer-events:none;}
+.option-card.correct{border-color:var(--success);background:#f0fff8;}
+.option-card.wrong{border-color:#ef4444;background:#fff0f0;}
+.option-card .card-name{font-size:.8rem;font-weight:700;color:var(--navy);}
+#quiz-area{text-align:center;}
+#quiz-question{font-size:1.1rem;font-weight:700;color:var(--blue);margin:10px 0 14px;}
+.quiz-choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.quiz-btn{background:var(--blue);color:#fff;border-radius:12px;padding:10px 20px;font-size:1.1rem;font-weight:700;min-width:100px;min-height:52px;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s;}
+.quiz-btn:hover{transform:translateY(-2px);}
+.quiz-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.quiz-btn.correct-ans{background:var(--success)!important;box-shadow:0 4px 0 #1e9c58;}
+.quiz-btn.wrong-ans{background:#ef4444!important;box-shadow:0 4px 0 #b91c1c;}
+#consequence-area{text-align:center;}
+#consequence-q{font-size:1rem;font-weight:700;color:var(--blue);margin-bottom:10px;}
+.consequence-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.conseq-btn{background:#fff;border:2px solid var(--blue);border-radius:12px;padding:10px 16px;font-size:.95rem;font-weight:700;cursor:pointer;min-height:52px;min-width:140px;transition:transform .1s;}
+.conseq-btn:hover{background:var(--sky-light);}
+.conseq-btn.conseq-correct{border-color:var(--success);background:#f0fff8;}
+.conseq-btn.conseq-wrong{border-color:#ef4444;background:#fff0f0;}
+#feedback{text-align:center;font-size:1.1rem;font-weight:700;min-height:36px;margin:8px 0;}
+#feedback.pos{color:var(--success);}
+#feedback.neg{color:#ef4444;}
+#btn-next{background:var(--orange);color:#fff;border-radius:12px;padding:12px 28px;font-size:1.05rem;font-weight:700;box-shadow:0 4px 0 var(--orange-dark);margin:8px auto;display:none;}
+#btn-next.show{display:block;}
+#screen-success{text-align:center;}
+.stars-row{font-size:2.8rem;margin:10px 0;}
+#screen-success h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);font-size:1.8rem;margin-bottom:8px;}
+#success-msg{color:var(--slate);margin-bottom:18px;}
+.success-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px;}
+#aria-feedback{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+@media(max-width:520px){#screen-game{padding:6px;}.game-header h2{font-size:1rem;}}
+</style>
+</head>
+<body>
+<div id="aria-feedback" aria-live="polite" aria-atomic="true"></div>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="controls">
+    <button class="btn-lang" id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="btn-lang" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="btn-mute" id="btn-mute" onclick="toggleMute()" aria-label="Mute">🔊</button>
+  </div>
+</div>
+
+<div class="screen active" id="screen-title">
+  <div style="margin:14px auto 0;width:120px;height:120px;">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="60" cy="80" rx="32" ry="34" fill="#7c5c38"/>
+      <ellipse cx="60" cy="90" rx="20" ry="20" fill="#f5e6c8"/>
+      <circle cx="60" cy="46" r="28" fill="#7c5c38"/>
+      <polygon points="38,22 30,6 46,18" fill="#7c5c38"/>
+      <polygon points="82,22 90,6 74,18" fill="#7c5c38"/>
+      <circle cx="49" cy="44" r="12" fill="#fff"/>
+      <circle cx="71" cy="44" r="12" fill="#fff"/>
+      <circle cx="49" cy="44" r="7" fill="#1e3a5f"/>
+      <circle cx="71" cy="44" r="7" fill="#1e3a5f"/>
+      <circle cx="52" cy="41" r="2.5" fill="#fff"/>
+      <circle cx="74" cy="41" r="2.5" fill="#fff"/>
+      <polygon points="60,52 55,60 65,60" fill="#f97316"/>
+      <ellipse cx="34" cy="82" rx="14" ry="22" fill="#5e4226" transform="rotate(-15,34,82)"/>
+      <ellipse cx="86" cy="82" rx="14" ry="22" fill="#5e4226" transform="rotate(15,86,82)"/>
+      <line x1="50" y1="112" x2="44" y2="118" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="50" y1="112" x2="50" y2="119" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="50" y1="112" x2="56" y2="118" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="70" y1="112" x2="64" y2="118" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="70" y1="112" x2="70" y2="119" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="70" y1="112" x2="76" y2="118" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <rect x="20" y="111" width="80" height="7" rx="3" fill="#8B4513"/>
+      <ellipse cx="16" cy="109" rx="8" ry="5" fill="#34c77b" transform="rotate(-20,16,109)"/>
+      <ellipse cx="104" cy="109" rx="8" ry="5" fill="#34c77b" transform="rotate(20,104,109)"/>
+    </svg>
+  </div>
+  <h1 id="title-main"></h1>
+  <p class="subtitle" id="title-sub"></p>
+  <button class="btn-play" id="btn-play" onclick="startGame()"></button>
+  <br>
+  <button class="btn-secondary" id="btn-parents-open" onclick="openParents()"></button>
+</div>
+
+<div class="screen" id="screen-parents">
+  <h2 id="parent-title"></h2>
+  <p id="parent-q-label"></p>
+  <div id="parent-question"></div>
+  <input type="number" id="parent-answer" aria-label="Réponse" inputmode="numeric">
+  <div id="parent-err" role="alert"></div>
+  <button class="btn-play" id="btn-parent-check" onclick="checkParent()"></button>
+  <div id="parent-info">
+    <h3 id="info-title"></h3>
+    <p id="info-body"></p>
+  </div>
+  <br>
+  <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-back-title"></button>
+</div>
+
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <h2 id="game-level-label"></h2>
+    <div class="progress-bar-wrap" title="Progression">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <span class="level-badge" id="level-badge"></span>
+  </div>
+  <div id="habitat-banner"></div>
+  <div id="mode-chain">
+    <p id="chain-instruction" style="font-size:.95rem;color:var(--slate);margin-bottom:6px;"></p>
+    <div id="chain-area">
+      <h3 id="chain-title"></h3>
+      <div id="chain-slots"></div>
+    </div>
+    <div id="options-area"></div>
+  </div>
+  <div id="mode-quiz" style="display:none;">
+    <div id="quiz-area">
+      <p id="quiz-question"></p>
+      <div class="quiz-choices" id="quiz-choices"></div>
+    </div>
+  </div>
+  <div id="mode-consequence" style="display:none;">
+    <div id="consequence-area">
+      <p id="consequence-q"></p>
+      <div class="consequence-options" id="consequence-options"></div>
+    </div>
+  </div>
+  <div id="feedback" aria-live="polite"></div>
+  <div style="text-align:center;">
+    <button id="btn-next" onclick="nextQuestion()"></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-success">
+  <div class="stars-row" id="stars-row">&#11088;&#11088;&#11088;</div>
+  <h2 id="success-title"></h2>
+  <p id="success-msg"></p>
+  <div class="success-btns">
+    <button class="btn-play" onclick="replayLevel()" id="btn-replay"></button>
+    <button class="btn-play" onclick="nextLevel()" id="btn-next-level" style="background:var(--blue);box-shadow:0 5px 0 var(--blue-dark);"></button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-home"></button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    title:"La Chaine Alimentaire",
+    subtitle:"Decouvre qui mange quoi dans la nature !",
+    play:"Jouer",
+    parents:"Pour les parents",
+    parent_title:"Espace Parents",
+    parent_q:"Resolvre pour acceder :",
+    parent_check:"Valider",
+    parent_err:"Mauvaise reponse, essaie encore !",
+    back:"Retour",
+    info_title:"Ce que votre enfant apprend",
+    info_body:"Ce jeu enseigne les ecosystemes et les chaines alimentaires (qui mange qui). L'enfant explore prairies, oceans et forets, ordonne des chaines simples, identifie les relations predateur-proie, et decouvre les consequences de la disparition d'un maillon. Aucune donnee collectee, aucune publicite.",
+    level:"Niveau",
+    chain_instr:"Classe les etapes de la chaine alimentaire dans le bon ordre. Clique sur chaque element !",
+    chain_title:"Chaine alimentaire",
+    next:"Suivant",
+    success_title:"Bravo !",
+    success_msgs:["Super travail !","Tu es un expert !","Excellent ! Continue !","Incroyable ! Tu es brillant(e) !"],
+    replay:"Rejouer",
+    next_level:"Niveau suivant",
+    home:"Accueil",
+    feedback_correct:["Super !","Bravo !","Excellent !","Parfait !"],
+    feedback_wrong:["Essaie encore !","Pas tout a fait... Reessaie !","Presque ! Essaie encore."],
+    level_labels:["Chaine simple","Reseau alimentaire","Consequences"],
+  },
+  en:{
+    title:"The Food Web",
+    subtitle:"Discover who eats what in nature!",
+    play:"Play",
+    parents:"For Parents",
+    parent_title:"Parent Zone",
+    parent_q:"Solve to enter:",
+    parent_check:"Check",
+    parent_err:"Wrong answer, try again!",
+    back:"Back",
+    info_title:"What your child learns",
+    info_body:"This game teaches ecosystems and food chains (who eats whom). Children explore meadows, oceans, and forests, order simple chains, identify predator-prey relationships, and discover the consequences of removing a link. No data collected, no advertising.",
+    level:"Level",
+    chain_instr:"Sort the food chain steps in the right order. Click each element!",
+    chain_title:"Food chain",
+    next:"Next",
+    success_title:"Well done!",
+    success_msgs:["Great work!","You are an expert!","Excellent! Keep going!","Amazing! You are brilliant!"],
+    replay:"Replay",
+    next_level:"Next level",
+    home:"Home",
+    feedback_correct:["Great!","Well done!","Excellent!","Perfect!"],
+    feedback_wrong:["Try again!","Not quite... Try again!","Almost! Try once more."],
+    level_labels:["Simple Chain","Food Web","Consequences"],
+  }
+};
+
+var HABITATS={
+  prairie:{
+    nameFr:"prairie",nameEn:"meadow",
+    bannerFr:"Prairie",bannerEn:"Meadow",
+    bannerEmoji:"🌾",
+    organisms:{
+      sun:{emoji:"☀️",nameFr:"Soleil",nameEn:"Sun",type:"energy"},
+      herbe:{emoji:"🌿",nameFr:"Herbe",nameEn:"Grass",type:"producer"},
+      fleur:{emoji:"🌸",nameFr:"Fleur",nameEn:"Flower",type:"producer"},
+      graine:{emoji:"🌾",nameFr:"Graine",nameEn:"Seed",type:"producer"},
+      criquet:{emoji:"🦗",nameFr:"Criquet",nameEn:"Cricket",type:"herbivore"},
+      lapin:{emoji:"🐇",nameFr:"Lapin",nameEn:"Rabbit",type:"herbivore"},
+      souris:{emoji:"🐭",nameFr:"Souris",nameEn:"Mouse",type:"herbivore"},
+      renard:{emoji:"🦊",nameFr:"Renard",nameEn:"Fox",type:"carnivore"},
+      faucon:{emoji:"🦅",nameFr:"Faucon",nameEn:"Falcon",type:"carnivore"},
+      couleuvre:{emoji:"🐍",nameFr:"Couleuvre",nameEn:"Snake",type:"carnivore"},
+    },
+    chains:[
+      ["sun","herbe","lapin","renard"],
+      ["sun","graine","souris","couleuvre"],
+      ["sun","herbe","criquet","faucon"],
+    ],
+    links:[
+      ["lapin","herbe"],["lapin","fleur"],["lapin","graine"],
+      ["souris","graine"],["souris","herbe"],
+      ["criquet","herbe"],["criquet","fleur"],
+      ["renard","lapin"],["renard","souris"],
+      ["faucon","lapin"],["faucon","souris"],["faucon","criquet"],
+      ["couleuvre","souris"],["couleuvre","criquet"],
+    ],
+    consequence:{
+      remove:"renard",
+      effect:"lapin",
+      effectFr:"Les lapins deviennent trop nombreux et mangent toute l'herbe !",
+      effectEn:"Rabbits overpopulate and eat all the grass!",
+      wrongFr:["Les renards reviennent d'eux-memes","Les fleurs poussent plus vite"],
+      wrongEn:["The foxes come back on their own","The flowers grow faster"],
+    },
+  },
+  ocean:{
+    nameFr:"ocean",nameEn:"ocean",
+    bannerFr:"Ocean",bannerEn:"Ocean",
+    bannerEmoji:"🌊",
+    organisms:{
+      sun:{emoji:"☀️",nameFr:"Soleil",nameEn:"Sun",type:"energy"},
+      algue:{emoji:"🌿",nameFr:"Algue",nameEn:"Algae",type:"producer"},
+      plancton:{emoji:"🔵",nameFr:"Plancton",nameEn:"Plankton",type:"producer"},
+      crevette:{emoji:"🦐",nameFr:"Crevette",nameEn:"Shrimp",type:"herbivore"},
+      petitpoisson:{emoji:"🐟",nameFr:"Petit poisson",nameEn:"Small fish",type:"herbivore"},
+      crabe:{emoji:"🦀",nameFr:"Crabe",nameEn:"Crab",type:"omnivore"},
+      thon:{emoji:"🐠",nameFr:"Thon",nameEn:"Tuna",type:"carnivore"},
+      requin:{emoji:"🦈",nameFr:"Requin",nameEn:"Shark",type:"carnivore"},
+      mouette:{emoji:"🐦",nameFr:"Mouette",nameEn:"Seagull",type:"carnivore"},
+    },
+    chains:[
+      ["sun","plancton","crevette","petitpoisson"],
+      ["sun","algue","crabe","mouette"],
+      ["sun","plancton","petitpoisson","thon","requin"],
+    ],
+    links:[
+      ["crevette","plancton"],["petitpoisson","plancton"],["petitpoisson","algue"],
+      ["crabe","algue"],["crabe","crevette"],
+      ["thon","petitpoisson"],["thon","crevette"],
+      ["requin","petitpoisson"],["requin","thon"],["requin","crabe"],
+      ["mouette","petitpoisson"],["mouette","crevette"],["mouette","crabe"],
+    ],
+    consequence:{
+      remove:"requin",
+      effect:"thon",
+      effectFr:"Le thon se reproduit trop et mange tout le petit poisson !",
+      effectEn:"Tuna overpopulate and eat all the small fish!",
+      wrongFr:["L'ocean devient plus calme","Les algues disparaissent"],
+      wrongEn:["The ocean becomes calmer","The algae disappear"],
+    },
+  },
+  foret:{
+    nameFr:"foret",nameEn:"forest",
+    bannerFr:"Foret",bannerEn:"Forest",
+    bannerEmoji:"🌲",
+    organisms:{
+      sun:{emoji:"☀️",nameFr:"Soleil",nameEn:"Sun",type:"energy"},
+      arbre:{emoji:"🌳",nameFr:"Arbre",nameEn:"Tree",type:"producer"},
+      champignon:{emoji:"🍄",nameFr:"Champignon",nameEn:"Mushroom",type:"producer"},
+      baie:{emoji:"🫐",nameFr:"Baie",nameEn:"Berry",type:"producer"},
+      ecureuil:{emoji:"🐿️",nameFr:"Ecureuil",nameEn:"Squirrel",type:"herbivore"},
+      chevreuil:{emoji:"🦌",nameFr:"Chevreuil",nameEn:"Deer",type:"herbivore"},
+      ver:{emoji:"🐛",nameFr:"Ver",nameEn:"Worm",type:"herbivore"},
+      renard:{emoji:"🦊",nameFr:"Renard",nameEn:"Fox",type:"carnivore"},
+      loup:{emoji:"🐺",nameFr:"Loup",nameEn:"Wolf",type:"carnivore"},
+      chouette:{emoji:"🦉",nameFr:"Chouette",nameEn:"Owl",type:"carnivore"},
+    },
+    chains:[
+      ["sun","arbre","ecureuil","renard"],
+      ["sun","arbre","chevreuil","loup"],
+      ["sun","champignon","ver","chouette"],
+    ],
+    links:[
+      ["ecureuil","arbre"],["ecureuil","baie"],["ecureuil","champignon"],
+      ["chevreuil","arbre"],["chevreuil","baie"],
+      ["ver","champignon"],["ver","arbre"],
+      ["renard","ecureuil"],["renard","ver"],
+      ["loup","chevreuil"],["loup","ecureuil"],
+      ["chouette","ver"],["chouette","ecureuil"],
+    ],
+    consequence:{
+      remove:"loup",
+      effect:"chevreuil",
+      effectFr:"Les chevreuils mangent trop d'arbres et la foret s'abime !",
+      effectEn:"Deer eat too many trees and the forest is damaged!",
+      wrongFr:["Les loups reviennent vite","Les champignons poussent mieux"],
+      wrongEn:["The wolves come back quickly","The mushrooms grow better"],
+    },
+  }
+};
+
+var HABITAT_ORDER=["prairie","ocean","foret"];
+var LEVEL_COUNT=9;
+
+var lang="fr";
+var muted=false;
+var audioCtx=null;
+
+var state={level:0,score:0};
+var currentHabitat=null;
+var currentMode=null;
+var chainOrder=[];
+var chainFilled=[];
+var chainChosen=0;
+var questionIndex=0;
+var questionsInRound=[];
+var questionsDone=0;
+var roundCorrect=0;
+var parentA=0,parentB=0;
+
+var LS_KEY="pgrg_chaine_alimentaire";
+
+function saveProgress(){try{localStorage.setItem(LS_KEY,JSON.stringify({level:state.level,score:state.score}));}catch(e){}}
+function loadProgress(){try{var d=JSON.parse(localStorage.getItem(LS_KEY)||"{}");if(d.level!=null)state.level=d.level;if(d.score!=null)state.score=d.score;}catch(e){}}
+
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.18;
+  try{var ac=getAudio();var o=ac.createOscillator();var g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);o.start();o.stop(ac.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(660,.12,'sine',.18);setTimeout(function(){playTone(880,.12,'sine',.16);},130);setTimeout(function(){playTone(1100,.2,'sine',.14);},260);}
+function playError(){playTone(200,.3,'sawtooth',.09);}
+function playClick(){playTone(440,.07,'sine',.11);}
+function playWin(){var notes=[523,659,784,1047];notes.forEach(function(f,i){setTimeout(function(){playTone(f,.18,'sine',.15);},i*130);});}
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';}
+
+function t(key){return (T[lang]||T.fr)[key]||key;}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderTexts();
+  var cur=document.querySelector('.screen.active');
+  if(cur&&cur.id==='screen-game')renderCurrentQuestion();
+  if(cur&&cur.id==='screen-title'){/* nothing extra */}
+}
+
+function renderTexts(){
+  document.getElementById('title-main').textContent=t('title');
+  document.getElementById('title-sub').textContent=t('subtitle');
+  document.getElementById('btn-play').textContent=t('play');
+  document.getElementById('btn-parents-open').textContent=t('parents');
+  document.getElementById('parent-title').textContent=t('parent_title');
+  document.getElementById('parent-q-label').textContent=t('parent_q');
+  document.getElementById('info-title').textContent=t('info_title');
+  document.getElementById('info-body').textContent=t('info_body');
+  document.getElementById('btn-back-title').textContent=t('back');
+  document.getElementById('btn-replay').textContent=t('replay');
+  document.getElementById('btn-next-level').textContent=t('next_level');
+  document.getElementById('btn-home').textContent=t('home');
+  document.getElementById('btn-next').textContent=t('next');
+  document.getElementById('btn-parent-check').textContent=t('parent_check');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function openParents(){
+  parentA=2+Math.floor(Math.random()*8);
+  parentB=2+Math.floor(Math.random()*8);
+  document.getElementById('parent-question').textContent=parentA+" x "+parentB+" = ?";
+  document.getElementById('parent-answer').value="";
+  document.getElementById('parent-err').textContent="";
+  document.getElementById('parent-info').style.display="none";
+  showScreen('screen-parents');
+}
+function checkParent(){
+  var ans=parseInt(document.getElementById('parent-answer').value,10);
+  if(ans===parentA*parentB){
+    document.getElementById('parent-info').style.display="block";
+    document.getElementById('parent-err').textContent="";
+    playSuccess();
+  }else{
+    document.getElementById('parent-err').textContent=t('parent_err');
+    playError();
+  }
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}
+  return arr;
+}
+
+function startGame(){
+  loadProgress();
+  beginLevel(state.level);
+}
+
+function beginLevel(lvl){
+  state.level=lvl;
+  saveProgress();
+  var habitatIdx=Math.floor(lvl/3)%HABITAT_ORDER.length;
+  var modeIdx=lvl%3;
+  currentHabitat=HABITATS[HABITAT_ORDER[habitatIdx]];
+  var modeNames=['chain','quiz','consequence'];
+  currentMode=modeNames[modeIdx];
+  questionsDone=0;
+  roundCorrect=0;
+  if(currentMode==='chain'){
+    questionsInRound=currentHabitat.chains.slice(0,3).map(function(c){return {type:'chain',chain:c};});
+  }else if(currentMode==='quiz'){
+    questionsInRound=buildQuizQuestions(currentHabitat);
+  }else{
+    questionsInRound=buildConsequenceQuestions(currentHabitat);
+  }
+  questionIndex=0;
+  document.getElementById('game-level-label').textContent=t('level')+' '+(lvl+1)+'/'+LEVEL_COUNT;
+  document.getElementById('level-badge').textContent=t('level_labels')[modeIdx];
+  updateHabitatBanner();
+  updateProgress();
+  showScreen('screen-game');
+  renderCurrentQuestion();
+}
+
+function updateHabitatBanner(){
+  var b=document.getElementById('habitat-banner');
+  if(!currentHabitat)return;
+  b.textContent=currentHabitat.bannerEmoji+' '+(lang==='fr'?currentHabitat.bannerFr:currentHabitat.bannerEn);
+}
+
+function updateProgress(){
+  var pct=questionsInRound.length>0?Math.round((questionsDone/questionsInRound.length)*100):0;
+  document.getElementById('progress-bar').style.width=pct+'%';
+}
+
+function renderCurrentQuestion(){
+  updateHabitatBanner();
+  clearFeedback();
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('mode-chain').style.display='none';
+  document.getElementById('mode-quiz').style.display='none';
+  document.getElementById('mode-consequence').style.display='none';
+  if(questionIndex>=questionsInRound.length){showSuccess();return;}
+  var q=questionsInRound[questionIndex];
+  if(q.type==='chain')renderChainQuestion(q);
+  else if(q.type==='who-eats'||q.type==='intrus')renderQuizQuestion(q);
+  else if(q.type==='consequence')renderConsequenceQuestion(q);
+  else if(q.type==='chain_c')renderChainQuestion(q);
+  else renderChainQuestion(q);
+}
+
+function renderChainQuestion(q){
+  document.getElementById('mode-chain').style.display='block';
+  document.getElementById('chain-instruction').textContent=t('chain_instr');
+  document.getElementById('chain-title').textContent=t('chain_title');
+  chainOrder=q.chain.slice();
+  chainFilled=new Array(chainOrder.length).fill(null);
+  chainChosen=0;
+  var slotsDiv=document.getElementById('chain-slots');
+  slotsDiv.innerHTML='';
+  chainOrder.forEach(function(id,i){
+    if(i>0){var arr=document.createElement('span');arr.className='chain-arrow';arr.textContent='→';slotsDiv.appendChild(arr);}
+    var slot=document.createElement('div');slot.className='chain-slot';slot.id='slot-'+i;
+    var lbl=document.createElement('span');lbl.className='slot-label';lbl.textContent=(i+1);slot.appendChild(lbl);
+    slotsDiv.appendChild(slot);
+  });
+  var optArea=document.getElementById('options-area');optArea.innerHTML='';
+  var shuffled=chainOrder.slice();shuffle(shuffled);
+  shuffled.forEach(function(id){
+    var org=currentHabitat.organisms[id];if(!org)return;
+    var card=document.createElement('button');card.className='option-card';card.id='opt-'+id;
+    card.setAttribute('aria-label',lang==='fr'?org.nameFr:org.nameEn);
+    var espan=document.createElement('span');espan.style.fontSize='1.7rem';espan.textContent=org.emoji;
+    var nspan=document.createElement('span');nspan.className='card-name';nspan.textContent=lang==='fr'?org.nameFr:org.nameEn;
+    card.appendChild(espan);card.appendChild(nspan);
+    card.onclick=function(){chainSelectOption(id);};
+    optArea.appendChild(card);
+  });
+}
+
+function chainSelectOption(id){
+  if(chainChosen>=chainOrder.length)return;
+  playClick();
+  chainFilled[chainChosen]=id;
+  var org=currentHabitat.organisms[id];
+  var slot=document.getElementById('slot-'+chainChosen);
+  if(slot&&org){
+    slot.innerHTML='';
+    var espan=document.createElement('span');espan.style.fontSize='1.5rem';espan.textContent=org.emoji;
+    var nspan=document.createElement('span');nspan.style.cssText='font-size:.75rem;font-weight:700;color:var(--navy)';nspan.textContent=lang==='fr'?org.nameFr:org.nameEn;
+    var lbl=document.createElement('span');lbl.className='slot-label';lbl.textContent=(chainChosen+1);
+    slot.appendChild(espan);slot.appendChild(nspan);slot.appendChild(lbl);
+    slot.classList.add('filled');
+  }
+  var optCard=document.getElementById('opt-'+id);if(optCard)optCard.classList.add('used');
+  chainChosen++;
+  if(chainChosen>=chainOrder.length){
+    var correct=chainFilled.every(function(v,i){return v===chainOrder[i];});
+    if(correct){
+      playSuccess();showFeedback(true);roundCorrect++;questionsDone++;updateProgress();
+      document.getElementById('btn-next').classList.add('show');
+    }else{
+      playError();showFeedback(false);
+      setTimeout(function(){
+        chainFilled=new Array(chainOrder.length).fill(null);chainChosen=0;
+        chainOrder.forEach(function(_,i){
+          var slot=document.getElementById('slot-'+i);
+          if(slot){slot.innerHTML='';slot.classList.remove('filled');var lbl=document.createElement('span');lbl.className='slot-label';lbl.textContent=(i+1);slot.appendChild(lbl);}
+        });
+        document.querySelectorAll('.option-card').forEach(function(c){c.classList.remove('used');});
+        clearFeedback();
+      },1500);
+    }
+  }
+}
+
+function buildQuizQuestions(habitat){
+  var qs=[];
+  var orgs=habitat.organisms;
+  var links=habitat.links;
+  var consumers=Object.keys(orgs).filter(function(id){return ['herbivore','carnivore','omnivore'].indexOf(orgs[id].type)>=0;});
+  shuffle(consumers);
+  var used=consumers.slice(0,3);
+  used.forEach(function(pred){
+    var preys=links.filter(function(l){return l[0]===pred;}).map(function(l){return l[1];});
+    if(preys.length===0)return;
+    var correctPrey=preys[Math.floor(Math.random()*preys.length)];
+    var wrong=Object.keys(orgs).filter(function(id){return id!==correctPrey&&id!=='sun'&&preys.indexOf(id)<0;});
+    shuffle(wrong);
+    var choices=[correctPrey].concat(wrong.slice(0,2));shuffle(choices);
+    qs.push({type:'who-eats',pred:pred,correct:correctPrey,choices:choices});
+  });
+  // intrus questions
+  var otherOrgs=[];
+  HABITAT_ORDER.forEach(function(hk){
+    if(HABITATS[hk]!==habitat){
+      var ho=HABITATS[hk].organisms;
+      Object.keys(ho).filter(function(id){return id!=='sun';}).forEach(function(id){otherOrgs.push({id:id,h:HABITATS[hk]});});
+    }
+  });
+  shuffle(otherOrgs);
+  for(var i=0;i<2;i++){
+    var intruder=otherOrgs[i%otherOrgs.length];
+    var localIds=Object.keys(orgs).filter(function(id){return id!=='sun';});
+    shuffle(localIds);
+    var choices=[intruder.id].concat(localIds.slice(0,2));shuffle(choices);
+    var choiceHabitats=choices.map(function(id){return id===intruder.id?intruder.h:habitat;});
+    qs.push({type:'intrus',intruderHabitat:intruder.h,intruder:intruder.id,choices:choices,choiceHabitats:choiceHabitats});
+  }
+  return qs.slice(0,5);
+}
+
+function renderQuizQuestion(q){
+  document.getElementById('mode-quiz').style.display='block';
+  var qEl=document.getElementById('quiz-question');
+  var choicesEl=document.getElementById('quiz-choices');choicesEl.innerHTML='';
+  if(q.type==='who-eats'){
+    var pred=currentHabitat.organisms[q.pred];
+    var predName=(lang==='fr'?pred.nameFr:pred.nameEn);
+    qEl.innerHTML=(lang==='fr'?'Que mange ':'What does ')+pred.emoji+' <strong>'+predName+'</strong>'+(lang==='fr'?' ?':' eat?');
+    q.choices.forEach(function(id,ci){
+      var org=currentHabitat.organisms[id];if(!org)return;
+      var btn=document.createElement('button');btn.className='quiz-btn';
+      btn.innerHTML=org.emoji+'<br><span style="font-size:.75rem">'+(lang==='fr'?org.nameFr:org.nameEn)+'</span>';
+      btn.setAttribute('aria-label',lang==='fr'?org.nameFr:org.nameEn);
+      (function(chosenId,b){btn.onclick=function(){quizAnswer(q,chosenId,b);};})(id,btn);
+      choicesEl.appendChild(btn);
+    });
+  }else{
+    qEl.textContent=lang==='fr'?"Trouve l'intrus ! Quel etre vivant n'appartient pas a ce milieu ?":"Find the odd one out! Which living thing doesn't belong here?";
+    q.choices.forEach(function(id,ci){
+      var h=q.choiceHabitats[ci];
+      var org=h.organisms[id];if(!org)return;
+      var btn=document.createElement('button');btn.className='quiz-btn';
+      btn.innerHTML=org.emoji+'<br><span style="font-size:.75rem">'+(lang==='fr'?org.nameFr:org.nameEn)+'</span>';
+      btn.setAttribute('aria-label',lang==='fr'?org.nameFr:org.nameEn);
+      (function(chosenId,b){btn.onclick=function(){quizAnswer(q,chosenId,b);};})(id,btn);
+      choicesEl.appendChild(btn);
+    });
+  }
+}
+
+function quizAnswer(q,chosen,btn){
+  document.querySelectorAll('.quiz-btn').forEach(function(b){b.onclick=null;b.style.opacity='.7';});
+  var correct=q.type==='who-eats'?q.correct:q.intruder;
+  if(chosen===correct){
+    btn.classList.add('correct-ans');playSuccess();showFeedback(true);roundCorrect++;
+  }else{
+    btn.classList.add('wrong-ans');
+    var idx=q.choices.indexOf(correct);
+    var btns=document.querySelectorAll('.quiz-btn');
+    if(btns[idx])btns[idx].classList.add('correct-ans');
+    playError();showFeedback(false);
+  }
+  questionsDone++;updateProgress();document.getElementById('btn-next').classList.add('show');
+}
+
+function buildConsequenceQuestions(habitat){
+  var qs=[];
+  var c=habitat.consequence;
+  qs.push({type:'consequence',remove:c.remove,effect:c.effect,correctFr:c.effectFr,correctEn:c.effectEn,wrongFr:c.wrongFr,wrongEn:c.wrongEn});
+  var chain=habitat.chains[1]||habitat.chains[0];
+  qs.push({type:'chain_c',chain:chain});
+  var links=habitat.links;var orgs=habitat.organisms;
+  var consumers=Object.keys(orgs).filter(function(id){return ['herbivore','carnivore','omnivore'].indexOf(orgs[id].type)>=0;});
+  shuffle(consumers);
+  var pred=consumers[0];
+  var preys=links.filter(function(l){return l[0]===pred;}).map(function(l){return l[1];});
+  if(preys.length>0){
+    var correctPrey=preys[0];
+    var wrong=Object.keys(orgs).filter(function(id){return id!==correctPrey&&id!=='sun'&&preys.indexOf(id)<0;});
+    shuffle(wrong);
+    var choices=[correctPrey].concat(wrong.slice(0,2));shuffle(choices);
+    qs.push({type:'who-eats',pred:pred,correct:correctPrey,choices:choices});
+  }
+  return qs;
+}
+
+function renderConsequenceQuestion(q){
+  document.getElementById('mode-consequence').style.display='block';
+  var remOrg=currentHabitat.organisms[q.remove];
+  var qEl=document.getElementById('consequence-q');
+  var remName=lang==='fr'?remOrg.nameFr:remOrg.nameEn;
+  qEl.innerHTML=(lang==='fr'?'Que se passe-t-il si ':'What happens if ')+remOrg.emoji+' <strong>'+remName+'</strong>'+(lang==='fr'?' disparait ?':' disappears?');
+  var optDiv=document.getElementById('consequence-options');optDiv.innerHTML='';
+  var correctTxt=lang==='fr'?q.correctFr:q.correctEn;
+  var wrongArr=lang==='fr'?q.wrongFr:q.wrongEn;
+  var opts=[correctTxt].concat(wrongArr);
+  shuffle(opts);
+  opts.forEach(function(txt){
+    var btn=document.createElement('button');btn.className='conseq-btn';btn.textContent=txt;
+    (function(isCorr,b){btn.onclick=function(){conseqAnswer(q,isCorr,b);};})(txt===correctTxt,btn);
+    optDiv.appendChild(btn);
+  });
+}
+
+function conseqAnswer(q,isCorrect,btn){
+  document.querySelectorAll('.conseq-btn').forEach(function(b){b.onclick=null;b.style.opacity='.7';});
+  if(isCorrect){
+    btn.classList.add('conseq-correct');playSuccess();showFeedback(true);roundCorrect++;
+  }else{
+    btn.classList.add('conseq-wrong');
+    var correctTxt=lang==='fr'?q.correctFr:q.correctEn;
+    document.querySelectorAll('.conseq-btn').forEach(function(b){if(b.textContent===correctTxt)b.classList.add('conseq-correct');});
+    playError();showFeedback(false);
+  }
+  questionsDone++;updateProgress();document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQuestion(){
+  playClick();
+  questionIndex++;
+  renderCurrentQuestion();
+}
+
+function showFeedback(correct){
+  var el=document.getElementById('feedback');
+  var aria=document.getElementById('aria-feedback');
+  var msgs=correct?t('feedback_correct'):t('feedback_wrong');
+  var msg=msgs[Math.floor(Math.random()*msgs.length)];
+  el.textContent=msg;el.className=correct?'pos':'neg';aria.textContent=msg;
+}
+function clearFeedback(){var el=document.getElementById('feedback');el.textContent='';el.className='';}
+
+function showSuccess(){
+  playWin();
+  var pct=questionsInRound.length>0?Math.round((roundCorrect/questionsInRound.length)*100):100;
+  var stars='⭐';if(pct>=60)stars='⭐⭐';if(pct>=85)stars='⭐⭐⭐';
+  document.getElementById('stars-row').textContent=stars;
+  var msgs=t('success_msgs');
+  document.getElementById('success-title').textContent=t('success_title');
+  document.getElementById('success-msg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  var nextLvl=state.level+1;
+  var btnNL=document.getElementById('btn-next-level');
+  if(nextLvl<LEVEL_COUNT){btnNL.style.display='';btnNL.textContent=t('next_level');}
+  else{btnNL.style.display='none';}
+  if(nextLvl<=LEVEL_COUNT)state.level=nextLvl;
+  saveProgress();
+  showScreen('screen-success');
+}
+function replayLevel(){
+  var lvl=Math.max(0,state.level-1);
+  beginLevel(lvl);
+}
+function nextLevel(){
+  if(state.level<LEVEL_COUNT)beginLevel(state.level);
+  else beginLevel(0);
+}
+
+function init(){
+  var nav=(navigator.language||'fr').toLowerCase();
+  lang=nav.indexOf('en')===0?'en':'fr';
+  document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  renderTexts();
+  loadProgress();
+  showScreen('screen-title');
+}
+init();
+</script>
+</body>
+</html>

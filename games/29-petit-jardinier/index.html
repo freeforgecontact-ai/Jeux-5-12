@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Le Petit Jardinier / Tiny Gardener – PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#d0eeff 0%,#eaf6ff 60%,#c8f0d0 100%);min-height:100vh;color:var(--navy);}
+h1,h2,h3,.title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);padding:8px 14px;box-shadow:0 2px 8px #0003;}
+#topbar-left{display:flex;align-items:center;gap:10px;}
+#topbar-left img{height:34px;}
+#topbar-brand{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:.5px;}
+#topbar-right{display:flex;gap:8px;}
+.lang-btn,.mute-btn{background:rgba(255,255,255,.18);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 13px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;min-width:48px;min-height:40px;}
+.lang-btn.active{background:var(--orange);border-color:var(--orange-dark);}
+.mute-btn{font-size:1.2rem;padding:5px 10px;}
+.screen{display:none;padding:16px;max-width:700px;margin:0 auto;}
+.screen.active{display:block;}
+#title-screen{text-align:center;padding-top:20px;}
+#title-screen h1{font-size:2.4rem;color:var(--blue);text-shadow:0 2px 0 #fff;}
+#title-screen .subtitle{font-size:1.1rem;color:var(--slate);margin:8px 0 24px;}
+.mascot-container{display:flex;justify-content:center;margin:16px 0;}
+.btn-play{background:var(--orange);color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.5rem;font-weight:700;border:none;border-radius:30px;padding:16px 48px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{background:var(--blue);color:#fff;font-family:inherit;font-size:1rem;font-weight:700;border:none;border-radius:20px;padding:10px 24px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);margin-top:16px;min-height:48px;}
+.btn-secondary:active{transform:translateY(2px);}
+#plant-select{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;margin:20px 0;}
+.plant-card{background:#fff;border-radius:20px;padding:16px;cursor:pointer;box-shadow:0 4px 12px #0002;transition:transform .15s,box-shadow .15s;border:3px solid transparent;min-width:130px;text-align:center;}
+.plant-card:hover,.plant-card:focus{transform:translateY(-4px);box-shadow:0 8px 20px #0003;outline:3px solid var(--orange);border-color:var(--orange);}
+.plant-card.locked{opacity:.5;cursor:not-allowed;}
+.plant-card svg{display:block;margin:0 auto 8px;}
+.plant-card .plant-name{font-weight:700;font-size:1rem;color:var(--blue);}
+.plant-card .plant-lvl{font-size:.8rem;color:var(--slate);}
+#game-screen{padding-top:12px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.game-header h2{font-size:1.3rem;color:var(--blue);}
+.stage-bar{display:flex;gap:6px;align-items:center;}
+.stage-dot{width:18px;height:18px;border-radius:50%;background:#cde;border:2px solid #aac;transition:background .3s;}
+.stage-dot.done{background:var(--success);}
+.stage-dot.current{background:var(--gold);border-color:#c8a200;}
+#garden-area{background:linear-gradient(180deg,#87ceeb 0%,#87ceeb 55%,#5d9e3c 55%,#4a7c2e 100%);border-radius:24px;width:100%;aspect-ratio:4/3;max-height:340px;position:relative;overflow:hidden;box-shadow:0 4px 16px #0003;margin-bottom:14px;}
+#plant-svg-container{position:absolute;left:50%;bottom:28%;transform:translateX(-50%);transition:bottom .4s;}
+#soil{position:absolute;bottom:0;left:0;right:0;height:28%;background:linear-gradient(180deg,#7c5228 0%,#5a3b1a 100%);border-radius:0 0 24px 24px;}
+.weed{position:absolute;bottom:28%;cursor:pointer;font-size:1.8rem;transition:transform .15s;user-select:none;}
+.weed:hover{transform:scale(1.2);}
+.water-drop{position:absolute;font-size:1.6rem;pointer-events:none;animation:dropFall .6s ease-in forwards;}
+@keyframes dropFall{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(60px);}}
+.happy-particle{position:absolute;font-size:1.4rem;pointer-events:none;animation:riseUp 1s ease-out forwards;}
+@keyframes riseUp{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.4);}}
+#tools-area{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.tool-btn{background:#fff;border:3px solid var(--sky);border-radius:18px;padding:10px 16px;cursor:pointer;font-size:1.5rem;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:72px;min-height:72px;justify-content:center;box-shadow:0 3px 8px #0002;transition:transform .12s,border-color .12s;-webkit-tap-highlight-color:transparent;}
+.tool-btn:hover,.tool-btn:focus{border-color:var(--orange);transform:scale(1.08);outline:none;}
+.tool-btn:active{transform:scale(.97);}
+.tool-btn span.tool-label{font-size:.72rem;font-weight:700;color:var(--slate);white-space:nowrap;}
+#status-msg{text-align:center;min-height:44px;font-size:1.05rem;font-weight:700;color:var(--blue);background:rgba(255,255,255,.75);border-radius:14px;padding:8px 16px;margin-bottom:10px;transition:color .3s;}
+#status-msg.bad{color:#c0392b;}
+#status-msg.good{color:var(--success);}
+#water-meter-wrap{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:10px;}
+#water-meter-wrap label{font-size:.85rem;font-weight:700;color:var(--blue);}
+#water-meter{height:16px;flex:1;max-width:180px;border-radius:8px;background:#c8e6ff;border:2px solid #aac;overflow:hidden;}
+#water-bar{height:100%;background:var(--sky);border-radius:8px;transition:width .4s;}
+#water-level-text{font-size:.82rem;font-weight:700;color:var(--slate);}
+#quiz-panel{background:#fff;border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 3px 12px #0002;display:none;}
+#quiz-panel h3{font-size:1.1rem;color:var(--blue);margin-bottom:12px;text-align:center;}
+#quiz-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.quiz-opt{background:var(--sky-light);border:2.5px solid var(--sky);border-radius:16px;padding:10px 18px;cursor:pointer;font-weight:700;font-size:1rem;min-height:48px;transition:background .15s,border-color .15s;}
+.quiz-opt:hover,.quiz-opt:focus{background:#cde;border-color:var(--blue);outline:none;}
+.quiz-opt.correct{background:#b6f5d0;border-color:var(--success);}
+.quiz-opt.wrong{background:#ffd0cc;border-color:#e74c3c;}
+#success-screen{text-align:center;padding-top:30px;}
+#success-screen h2{font-size:2rem;color:var(--blue);}
+.stars{font-size:2.5rem;margin:12px 0;}
+.success-plant{display:flex;justify-content:center;margin:14px 0;}
+.btn-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px;}
+#parents-modal{display:none;position:fixed;inset:0;background:#0008;z-index:1000;justify-content:center;align-items:center;}
+#parents-modal.open{display:flex;}
+#parents-box{background:#fff;border-radius:24px;padding:28px;max-width:420px;width:92%;box-shadow:0 8px 40px #0005;text-align:center;}
+#parents-box h2{color:var(--blue);font-size:1.4rem;margin-bottom:12px;}
+#gate-q{font-size:1rem;color:var(--slate);margin-bottom:10px;}
+#gate-input{border:2px solid var(--sky);border-radius:12px;padding:10px;font-size:1.3rem;text-align:center;width:100px;margin-bottom:12px;}
+#gate-feedback{min-height:24px;font-weight:700;margin-bottom:8px;}
+#gate-content{display:none;text-align:left;font-size:.95rem;color:var(--navy);line-height:1.6;}
+#gate-content p{margin-bottom:8px;}
+.modal-close{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:9px 24px;font-size:1rem;font-weight:700;cursor:pointer;min-height:48px;box-shadow:0 4px 0 var(--orange-dark);}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:500px){
+  #title-screen h1{font-size:1.8rem;}
+  .tool-btn{min-width:60px;min-height:60px;font-size:1.3rem;padding:7px 10px;}
+  #garden-area{aspect-ratio:3/2;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span id="topbar-brand">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button class="mute-btn" id="btn-mute" onclick="toggleMute()" aria-label="Muet">🔊</button>
+  </div>
+</div>
+<div id="aria-live" role="status" aria-live="polite"></div>
+
+<!-- TITLE SCREEN -->
+<div class="screen active" id="title-screen">
+  <div class="mascot-container">
+    <svg width="160" height="170" viewBox="0 0 160 170" xmlns="http://www.w3.org/2000/svg" aria-label="Mascotte jardinier">
+      <ellipse cx="80" cy="120" rx="34" ry="32" fill="#f97316"/>
+      <rect x="54" y="112" width="52" height="28" rx="10" fill="#0f4c81"/>
+      <rect x="64" y="94" width="10" height="24" rx="5" fill="#0f4c81"/>
+      <rect x="86" y="94" width="10" height="24" rx="5" fill="#0f4c81"/>
+      <ellipse cx="80" cy="75" rx="30" ry="28" fill="#fde3b8"/>
+      <ellipse cx="70" cy="71" rx="4.5" ry="5" fill="#fff"/>
+      <ellipse cx="90" cy="71" rx="4.5" ry="5" fill="#fff"/>
+      <circle cx="71" cy="72" r="2.5" fill="#333"/>
+      <circle cx="91" cy="72" r="2.5" fill="#333"/>
+      <circle cx="72" cy="71" r="1" fill="#fff"/>
+      <circle cx="92" cy="71" r="1" fill="#fff"/>
+      <ellipse cx="63" cy="79" rx="5" ry="3.5" fill="#f9a8a8" opacity=".7"/>
+      <ellipse cx="97" cy="79" rx="5" ry="3.5" fill="#f9a8a8" opacity=".7"/>
+      <path d="M71 83 Q80 91 89 83" stroke="#c07048" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="80" cy="49" rx="34" ry="10" fill="#5d9e3c"/>
+      <rect x="52" y="33" width="56" height="20" rx="10" fill="#4a7c2e"/>
+      <rect x="52" y="46" width="56" height="6" rx="3" fill="#ffd23f"/>
+      <circle cx="100" cy="37" r="6" fill="#f97316"/>
+      <circle cx="100" cy="37" r="3" fill="#ffd23f"/>
+      <ellipse cx="44" cy="113" rx="10" ry="7" fill="#f97316" transform="rotate(-20,44,113)"/>
+      <ellipse cx="116" cy="113" rx="10" ry="7" fill="#f97316" transform="rotate(20,116,113)"/>
+      <g transform="translate(108,117) rotate(-30)">
+        <rect x="0" y="0" width="20" height="13" rx="4" fill="#7ec3ee"/>
+        <rect x="20" y="3" width="16" height="4" rx="2" fill="#7ec3ee"/>
+        <line x1="20" y1="7" x2="36" y2="14" stroke="#7ec3ee" stroke-width="3"/>
+      </g>
+      <rect x="63" y="144" width="12" height="14" rx="6" fill="#0a3559"/>
+      <rect x="85" y="144" width="12" height="14" rx="6" fill="#0a3559"/>
+      <ellipse cx="69" cy="159" rx="9" ry="5" fill="#5d3a1a"/>
+      <ellipse cx="91" cy="159" rx="9" ry="5" fill="#5d3a1a"/>
+    </svg>
+  </div>
+  <h1 id="t-title">Le Petit Jardinier</h1>
+  <p class="subtitle" id="t-subtitle">Fais pousser tes plantes !</p>
+  <button class="btn-play" id="t-play" onclick="showPlantSelect()">Jouer !</button>
+  <br>
+  <button class="btn-secondary" id="t-parents" onclick="openParents()">Pour les parents</button>
+</div>
+
+<!-- PLANT SELECT SCREEN -->
+<div class="screen" id="select-screen">
+  <h2 style="text-align:center;color:var(--blue);margin-bottom:6px;" id="t-choose">Choisis ta plante !</h2>
+  <div id="plant-select"></div>
+  <div style="text-align:center;margin-top:8px;">
+    <button class="btn-secondary" onclick="showScreen('title-screen')" id="t-back-sel">Retour</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="game-screen">
+  <div class="game-header">
+    <button class="btn-secondary" onclick="showScreen('select-screen')" style="font-size:.85rem;padding:7px 14px;margin-top:0;">
+      <span id="t-back">Retour</span>
+    </button>
+    <h2 id="game-plant-name">Tournesol</h2>
+    <div class="stage-bar" id="stage-bar"></div>
+  </div>
+  <div id="garden-area" aria-label="Jardin">
+    <div id="soil"></div>
+    <div id="plant-svg-container"></div>
+  </div>
+  <div id="water-meter-wrap">
+    <label id="t-water-lbl">Eau :</label>
+    <div id="water-meter" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+      <div id="water-bar" style="width:50%"></div>
+    </div>
+    <span id="water-level-text">50%</span>
+  </div>
+  <div id="status-msg" aria-live="polite"></div>
+  <div id="tools-area">
+    <button class="tool-btn" onclick="useTool('water')" id="tool-water" aria-label="Arroser">
+      🚿<span class="tool-label" id="t-tool-water">Arroser</span>
+    </button>
+    <button class="tool-btn" onclick="useTool('sun')" id="tool-sun" aria-label="Soleil">
+      ☀️<span class="tool-label" id="t-tool-sun">Soleil</span>
+    </button>
+    <button class="tool-btn" onclick="useTool('weed')" id="tool-weed" aria-label="Desherber">
+      🌿<span class="tool-label" id="t-tool-weed">Desherber</span>
+    </button>
+    <button class="tool-btn" onclick="useTool('plant')" id="tool-plant" aria-label="Planter">
+      🌱<span class="tool-label" id="t-tool-plant">Planter</span>
+    </button>
+  </div>
+  <div id="quiz-panel">
+    <h3 id="quiz-q"></h3>
+    <div id="quiz-options"></div>
+  </div>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="screen" id="success-screen">
+  <div class="stars" id="success-stars">⭐⭐⭐</div>
+  <h2 id="t-success-title">Bravo !</h2>
+  <p id="t-success-msg" style="color:var(--slate);margin:8px 0;font-size:1.05rem;"></p>
+  <div class="success-plant" id="success-plant-svg"></div>
+  <div class="btn-row">
+    <button class="btn-play" onclick="replayLevel()" id="t-replay">Rejouer</button>
+    <button class="btn-play" onclick="nextLevel()" id="t-next" style="background:var(--success);box-shadow:0 5px 0 #228a52;">Suivant</button>
+    <button class="btn-secondary" onclick="showPlantSelect()" id="t-home2">Accueil</button>
+  </div>
+</div>
+
+<!-- PARENTS MODAL -->
+<div id="parents-modal" role="dialog" aria-modal="true" aria-labelledby="parents-title">
+  <div id="parents-box">
+    <h2 id="parents-title">Pour les parents</h2>
+    <p id="gate-q"></p>
+    <input id="gate-input" type="number" min="0" max="999" placeholder="?" aria-label="Reponse" oninput="checkGate()">
+    <div id="gate-feedback" aria-live="polite"></div>
+    <div id="gate-content">
+      <p id="t-p1"></p>
+      <p id="t-p2"></p>
+      <p id="t-p3"></p>
+    </div>
+    <button class="modal-close" onclick="closeParents()" id="t-close">Fermer</button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    title: "Le Petit Jardinier",
+    subtitle: "Fais pousser tes plantes ! 🌱",
+    play: "🌻 Jouer !",
+    parents: "👨‍👩‍👧 Pour les parents",
+    choose: "Choisis ta plante !",
+    back: "← Retour",
+    backSel: "← Retour",
+    waterLbl: "💧 Eau :",
+    toolWater: "Arroser",
+    toolSun: "Soleil",
+    toolWeed: "Désherber",
+    toolPlant: "Planter",
+    successTitle: "Bravo !",
+    replay: "🔄 Rejouer",
+    next: "🌻 Suivant",
+    home2: "🏡 Accueil",
+    parentsTitle: "Pour les parents",
+    gateQ: "Combien font",
+    gateOk: "✅ Correct !",
+    gateBad: "❌ Essaie encore…",
+    p1: "🌱 Compétence : cycle de vie des plantes, besoins du vivant (eau, lumière, entretien).",
+    p2: "🔒 Aucune donnée collectée, aucune pub, 100% hors-ligne. Open source PGRG IA.",
+    p3: "💡 Encouragez l'enfant à nommer ce dont la plante a besoin dans la vraie vie !",
+    close: "Fermer",
+    stages: ["Graine","Pousse","Plante","Fleur","Fruit"],
+    stagePrompt: ["Plante la graine ! 🌱","Arrose et donne du soleil ! ☀️","Continue à prendre soin ! 🌿","Encore un peu... 🌸","Super ! La récolte arrive ! 🎉"],
+    plantNames: ["Tournesol","Tomate","Pommier"],
+    plantLvl: ["Niveau 1","Niveau 2","Niveau 3"],
+    locked: "🔒 Bloqué",
+    msgWater: ["Super arrosage ! 💧","Bonne idée ! La plante adore ça 🌧️","Continue à arroser ! 🚿"],
+    msgSun: ["Le soleil réchauffe ! ☀️","La plante grandit avec la lumière ! 🌞","Super rayon de soleil ! ✨"],
+    msgWeed: ["Mauvaise herbe enlevée ! 🌿","Bravo, le jardin est propre ! ✂️","La plante respire mieux ! 🍃"],
+    msgTooMuch: "Trop d'eau ! La plante se noie ! 🌊 Attends un peu…",
+    msgTooLittle: "La plante a soif ! 💧 Arrose-la !",
+    msgNeedSun: "Il manque du soleil ! ☀️ Donne-lui de la lumière !",
+    msgNoWeeds: "Pas de mauvaises herbes ici ! 🌿",
+    msgGrow: ["La graine germe ! 🌱","La pousse grandit ! 🌿","La plante fleurit ! 🌸","Le fruit arrive ! 🍊"],
+    msgDone: ["Ton tournesol est magnifique ! 🌻","Ta tomate est prête ! 🍅","Ton pommier donne des fruits ! 🍎"],
+    quizQ: "De quoi la plante a-t-elle besoin ?",
+    quizOpts: [
+      { text:"💧 De l'eau", correct:true },
+      { text:"☀️ Du soleil", correct:true },
+      { text:"📺 La télévision", correct:false },
+      { text:"🌱 De la terre", correct:true },
+      { text:"🍕 De la pizza", correct:false },
+      { text:"🌬️ De l'air", correct:true }
+    ],
+    quizCorrect: "✅ Oui ! La plante a besoin de ça ! 🌟",
+    quizWrong: "😄 Hmm, pas vraiment ! Essaie autre chose !",
+    successMsg: ["Ton tournesol est superbe ! Tu es un vrai jardinier ! 🌻","Ta tomate est prête à manger ! Quel talent ! 🍅","Ton pommier est magique ! Bravo ! 🍎"]
+  },
+  en: {
+    title: "Tiny Gardener",
+    subtitle: "Grow your plants! 🌱",
+    play: "🌻 Play!",
+    parents: "👨‍👩‍👧 For parents",
+    choose: "Pick your plant!",
+    back: "← Back",
+    backSel: "← Back",
+    waterLbl: "💧 Water:",
+    toolWater: "Water",
+    toolSun: "Sunlight",
+    toolWeed: "Weed",
+    toolPlant: "Plant",
+    successTitle: "Well done!",
+    replay: "🔄 Play again",
+    next: "🌻 Next",
+    home2: "🏡 Home",
+    parentsTitle: "For parents",
+    gateQ: "How much is",
+    gateOk: "✅ Correct!",
+    gateBad: "❌ Try again…",
+    p1: "🌱 Learning goal: plant life cycles, living needs (water, light, care).",
+    p2: "🔒 No data collected, no ads, 100% offline. PGRG IA open source.",
+    p3: "💡 Encourage the child to name what plants need in real life!",
+    close: "Close",
+    stages: ["Seed","Sprout","Plant","Flower","Fruit"],
+    stagePrompt: ["Plant the seed! 🌱","Water and give sunlight! ☀️","Keep caring for it! 🌿","Almost there... 🌸","Great! Harvest time! 🎉"],
+    plantNames: ["Sunflower","Tomato","Apple Tree"],
+    plantLvl: ["Level 1","Level 2","Level 3"],
+    locked: "🔒 Locked",
+    msgWater: ["Great watering! 💧","Good idea! The plant loves it 🌧️","Keep watering! 🚿"],
+    msgSun: ["Sunshine warms it up! ☀️","The plant grows with light! 🌞","Super sunshine! ✨"],
+    msgWeed: ["Weed removed! 🌿","Great, the garden is tidy! ✂️","The plant can breathe! 🍃"],
+    msgTooMuch: "Too much water! The plant is drowning! 🌊 Wait a bit…",
+    msgTooLittle: "The plant is thirsty! 💧 Water it!",
+    msgNeedSun: "Not enough sun! ☀️ Give it some light!",
+    msgNoWeeds: "No weeds here! 🌿",
+    msgGrow: ["The seed sprouts! 🌱","The sprout grows! 🌿","The plant blooms! 🌸","A fruit appears! 🍊"],
+    msgDone: ["Your sunflower is beautiful! 🌻","Your tomato is ready! 🍅","Your apple tree has fruit! 🍎"],
+    quizQ: "What does a plant need?",
+    quizOpts: [
+      { text:"💧 Water", correct:true },
+      { text:"☀️ Sunlight", correct:true },
+      { text:"📺 Television", correct:false },
+      { text:"🌱 Soil", correct:true },
+      { text:"🍕 Pizza", correct:false },
+      { text:"🌬️ Air", correct:true }
+    ],
+    quizCorrect: "✅ Yes! The plant needs that! 🌟",
+    quizWrong: "😄 Hmm, not really! Try something else!",
+    successMsg: ["Your sunflower is gorgeous! You're a real gardener! 🌻","Your tomato is ready to eat! 🍅","Your apple tree is magical! Well done! 🍎"]
+  }
+};
+
+var PLANTS = [
+  { svgs: [
+    '<svg width="60" height="60" viewBox="0 0 60 60"><ellipse cx="30" cy="38" rx="13" ry="10" fill="#c8a060"/><ellipse cx="30" cy="36" rx="9" ry="7" fill="#e8c07a"/><ellipse cx="30" cy="33" rx="6" ry="5" fill="#d4a060"/><line x1="30" y1="38" x2="30" y2="52" stroke="#8b6020" stroke-width="3"/></svg>',
+    '<svg width="80" height="110" viewBox="0 0 80 110"><line x1="40" y1="100" x2="40" y2="40" stroke="#5d9e3c" stroke-width="5" stroke-linecap="round"/><ellipse cx="22" cy="65" rx="18" ry="9" fill="#7ec865" transform="rotate(-35,22,65)"/><ellipse cx="58" cy="55" rx="18" ry="9" fill="#7ec865" transform="rotate(35,58,55)"/><circle cx="40" cy="35" r="13" fill="#a0d860"/><circle cx="40" cy="35" r="8" fill="#7ec865"/></svg>',
+    '<svg width="100" height="145" viewBox="0 0 100 145"><line x1="50" y1="135" x2="50" y2="35" stroke="#5d9e3c" stroke-width="6" stroke-linecap="round"/><ellipse cx="25" cy="90" rx="24" ry="11" fill="#7ec865" transform="rotate(-25,25,90)"/><ellipse cx="75" cy="75" rx="24" ry="11" fill="#7ec865" transform="rotate(25,75,75)"/><ellipse cx="25" cy="65" rx="18" ry="9" fill="#a0d860" transform="rotate(-20,25,65)"/><circle cx="50" cy="30" r="18" fill="#7ec865"/></svg>',
+    '<svg width="120" height="165" viewBox="0 0 120 165"><line x1="60" y1="155" x2="60" y2="55" stroke="#5d9e3c" stroke-width="7" stroke-linecap="round"/><ellipse cx="30" cy="108" rx="26" ry="12" fill="#7ec865" transform="rotate(-25,30,108)"/><ellipse cx="90" cy="93" rx="26" ry="12" fill="#7ec865" transform="rotate(25,90,93)"/><g transform="translate(60,55)"><circle cx="0" cy="-24" r="13" fill="#ffd23f"/><circle cx="17" cy="-17" r="13" fill="#ffd23f"/><circle cx="22" cy="0" r="13" fill="#ffd23f"/><circle cx="17" cy="17" r="13" fill="#ffd23f"/><circle cx="0" cy="22" r="13" fill="#ffd23f"/><circle cx="-17" cy="17" r="13" fill="#ffd23f"/><circle cx="-22" cy="0" r="13" fill="#ffd23f"/><circle cx="-17" cy="-17" r="13" fill="#ffd23f"/><circle cx="0" cy="0" r="19" fill="#c07048"/></g></svg>',
+    '<svg width="120" height="170" viewBox="0 0 120 170"><line x1="60" y1="162" x2="60" y2="62" stroke="#5d9e3c" stroke-width="7" stroke-linecap="round"/><ellipse cx="30" cy="118" rx="26" ry="12" fill="#7ec865" transform="rotate(-25,30,118)"/><ellipse cx="90" cy="103" rx="26" ry="12" fill="#7ec865" transform="rotate(25,90,103)"/><g transform="translate(60,62)"><circle cx="0" cy="-26" r="14" fill="#ffd23f"/><circle cx="18" cy="-18" r="14" fill="#ffd23f"/><circle cx="26" cy="0" r="14" fill="#ffd23f"/><circle cx="18" cy="18" r="14" fill="#ffd23f"/><circle cx="0" cy="26" r="14" fill="#ffd23f"/><circle cx="-18" cy="18" r="14" fill="#ffd23f"/><circle cx="-26" cy="0" r="14" fill="#ffd23f"/><circle cx="-18" cy="-18" r="14" fill="#ffd23f"/><circle cx="0" cy="0" r="22" fill="#8b4513"/><circle cx="-7" cy="-7" r="3.5" fill="#5a2d0c"/><circle cx="5" cy="-9" r="3.5" fill="#5a2d0c"/><circle cx="9" cy="3" r="3.5" fill="#5a2d0c"/><circle cx="-2" cy="8" r="3.5" fill="#5a2d0c"/><circle cx="-9" cy="2" r="3.5" fill="#5a2d0c"/></g></svg>'
+  ]},
+  { svgs: [
+    '<svg width="60" height="60" viewBox="0 0 60 60"><ellipse cx="30" cy="40" rx="11" ry="8" fill="#c09050"/><ellipse cx="30" cy="37" rx="8" ry="6" fill="#d4a870"/><ellipse cx="30" cy="35" rx="5" ry="4" fill="#c09050"/></svg>',
+    '<svg width="80" height="110" viewBox="0 0 80 110"><line x1="40" y1="100" x2="40" y2="42" stroke="#5d9e3c" stroke-width="5" stroke-linecap="round"/><ellipse cx="22" cy="68" rx="16" ry="8" fill="#6ec055" transform="rotate(-35,22,68)"/><ellipse cx="58" cy="57" rx="16" ry="8" fill="#6ec055" transform="rotate(35,58,57)"/><circle cx="40" cy="37" r="12" fill="#90d050"/></svg>',
+    '<svg width="105" height="155" viewBox="0 0 105 155"><line x1="52" y1="145" x2="52" y2="45" stroke="#5d9e3c" stroke-width="6" stroke-linecap="round"/><line x1="52" y1="85" x2="30" y2="62" stroke="#5d9e3c" stroke-width="4" stroke-linecap="round"/><line x1="52" y1="85" x2="74" y2="67" stroke="#5d9e3c" stroke-width="4" stroke-linecap="round"/><ellipse cx="26" cy="98" rx="20" ry="10" fill="#6ec055" transform="rotate(-20,26,98)"/><ellipse cx="78" cy="84" rx="20" ry="10" fill="#6ec055" transform="rotate(20,78,84)"/><circle cx="52" cy="40" r="16" fill="#90d050"/></svg>',
+    '<svg width="110" height="162" viewBox="0 0 110 162"><line x1="55" y1="152" x2="55" y2="55" stroke="#5d9e3c" stroke-width="6" stroke-linecap="round"/><line x1="55" y1="95" x2="32" y2="72" stroke="#5d9e3c" stroke-width="4"/><line x1="55" y1="95" x2="78" y2="74" stroke="#5d9e3c" stroke-width="4"/><ellipse cx="30" cy="110" rx="21" ry="10" fill="#6ec055" transform="rotate(-20,30,110)"/><ellipse cx="80" cy="97" rx="21" ry="10" fill="#6ec055" transform="rotate(20,80,97)"/><circle cx="32" cy="68" r="11" fill="#ffcc00"/><circle cx="78" cy="70" r="11" fill="#ffcc00"/><circle cx="55" cy="50" r="13" fill="#ffcc00"/></svg>',
+    '<svg width="120" height="172" viewBox="0 0 120 172"><line x1="60" y1="162" x2="60" y2="60" stroke="#5d9e3c" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="102" x2="36" y2="78" stroke="#5d9e3c" stroke-width="4"/><line x1="60" y1="102" x2="84" y2="80" stroke="#5d9e3c" stroke-width="4"/><ellipse cx="33" cy="122" rx="22" ry="10" fill="#6ec055" transform="rotate(-20,33,122)"/><ellipse cx="87" cy="109" rx="22" ry="10" fill="#6ec055" transform="rotate(20,87,109)"/><circle cx="38" cy="74" r="16" fill="#e53e3e"/><circle cx="38" cy="74" r="6" fill="#c0392b" opacity=".4"/><circle cx="84" cy="76" r="16" fill="#e53e3e"/><circle cx="84" cy="76" r="6" fill="#c0392b" opacity=".4"/><circle cx="62" cy="55" r="18" fill="#e53e3e"/><circle cx="62" cy="55" r="7" fill="#c0392b" opacity=".4"/></svg>'
+  ]},
+  { svgs: [
+    '<svg width="60" height="60" viewBox="0 0 60 60"><ellipse cx="30" cy="40" rx="10" ry="7" fill="#c09050"/><ellipse cx="30" cy="37" rx="7" ry="5" fill="#d4b07a"/><ellipse cx="30" cy="35" rx="4" ry="3" fill="#b08040"/></svg>',
+    '<svg width="80" height="115" viewBox="0 0 80 115"><line x1="40" y1="105" x2="40" y2="50" stroke="#8b5e3c" stroke-width="7" stroke-linecap="round"/><ellipse cx="22" cy="70" rx="17" ry="9" fill="#6ec055" transform="rotate(-30,22,70)"/><ellipse cx="58" cy="60" rx="17" ry="9" fill="#6ec055" transform="rotate(30,58,60)"/><circle cx="40" cy="45" r="14" fill="#90d050"/></svg>',
+    '<svg width="115" height="165" viewBox="0 0 115 165"><line x1="57" y1="158" x2="57" y2="85" stroke="#8b5e3c" stroke-width="11" stroke-linecap="round"/><line x1="57" y1="115" x2="32" y2="88" stroke="#8b5e3c" stroke-width="6"/><line x1="57" y1="115" x2="82" y2="90" stroke="#8b5e3c" stroke-width="6"/><ellipse cx="57" cy="58" rx="44" ry="40" fill="#5d9e3c"/><ellipse cx="40" cy="51" rx="29" ry="25" fill="#7ec865"/><ellipse cx="70" cy="55" rx="27" ry="23" fill="#6db855"/></svg>',
+    '<svg width="122" height="172" viewBox="0 0 122 172"><line x1="61" y1="165" x2="61" y2="92" stroke="#8b5e3c" stroke-width="13" stroke-linecap="round"/><line x1="61" y1="122" x2="34" y2="94" stroke="#8b5e3c" stroke-width="7"/><line x1="61" y1="122" x2="88" y2="97" stroke="#8b5e3c" stroke-width="7"/><ellipse cx="61" cy="63" rx="50" ry="44" fill="#5d9e3c"/><ellipse cx="44" cy="55" rx="34" ry="29" fill="#7ec865"/><ellipse cx="74" cy="59" rx="32" ry="27" fill="#6db855"/><circle cx="43" cy="49" r="9" fill="#fff9c4"/><circle cx="67" cy="43" r="8" fill="#fff9c4"/><circle cx="73" cy="64" r="8" fill="#fff9c4"/></svg>',
+    '<svg width="130" height="182" viewBox="0 0 130 182"><line x1="65" y1="175" x2="65" y2="102" stroke="#8b5e3c" stroke-width="15" stroke-linecap="round"/><line x1="65" y1="132" x2="36" y2="104" stroke="#8b5e3c" stroke-width="8"/><line x1="65" y1="132" x2="94" y2="106" stroke="#8b5e3c" stroke-width="8"/><ellipse cx="65" cy="68" rx="54" ry="48" fill="#5d9e3c"/><ellipse cx="47" cy="60" rx="36" ry="31" fill="#7ec865"/><ellipse cx="78" cy="64" rx="33" ry="28" fill="#6db855"/><circle cx="40" cy="59" r="14" fill="#e74c3c"/><circle cx="40" cy="59" r="5" fill="#c0392b" opacity=".4"/><circle cx="66" cy="44" r="15" fill="#e74c3c"/><circle cx="66" cy="44" r="6" fill="#c0392b" opacity=".4"/><circle cx="89" cy="61" r="14" fill="#e74c3c"/><circle cx="89" cy="61" r="5" fill="#c0392b" opacity=".4"/><circle cx="53" cy="79" r="13" fill="#e74c3c"/><circle cx="80" cy="81" r="13" fill="#c0392b"/></svg>'
+  ]}
+];
+
+var lang = (navigator.language||'fr').startsWith('fr') ? 'fr' : 'en';
+var muted = false;
+var audioCtx = null;
+var LSKEY = 'pgrg_petit_jardinier';
+var saveData = { unlocked: 1, stars: [0,0,0] };
+try { var d = JSON.parse(localStorage.getItem(LSKEY)||'{}'); if(d.unlocked) saveData = d; } catch(e){}
+
+var currentPlant = 0;
+var currentStage = 0;
+var waterLevel = 50;
+var sunActions = 0;
+var weedActions = 0;
+var weedsOnField = 0;
+var weedTimers = [];
+var stageProgress = 0;
+var quizShown = false;
+var quizAnswered = false;
+var gameActive = false;
+var gateAnswer = 0;
+var quizDone = 0;
+
+function getAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, type, dur, vol, delay){
+  if(muted) return;
+  try{
+    var ac=getAudio(); var o=ac.createOscillator(); var g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type=type||'sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,ac.currentTime+(delay||0));
+    g.gain.linearRampToValueAtTime(vol||0.15,ac.currentTime+(delay||0)+0.02);
+    g.gain.linearRampToValueAtTime(0,ac.currentTime+(delay||0)+(dur||0.2));
+    o.start(ac.currentTime+(delay||0)); o.stop(ac.currentTime+(delay||0)+(dur||0.2)+0.01);
+  }catch(e){}
+}
+function playSuccess(){ [523,659,784,1047].forEach(function(f,i){playTone(f,'sine',0.2,0.18,i*0.12);}); }
+function playPositive(){ playTone(523,'sine',0.1,0.15); playTone(659,'sine',0.1,0.15,0.11); }
+function playError(){ playTone(200,'sawtooth',0.15,0.12); }
+function playGrow(){ [330,392,523].forEach(function(f,i){playTone(f,'sine',0.18,0.16,i*0.1);}); }
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderTexts();
+}
+function t(k){ return T[lang][k] || T['fr'][k] || k; }
+function randArr(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function renderTexts(){
+  var d=T[lang];
+  document.getElementById('t-title').textContent=d.title;
+  document.getElementById('t-subtitle').textContent=d.subtitle;
+  document.getElementById('t-play').textContent=d.play;
+  document.getElementById('t-parents').textContent=d.parents;
+  document.getElementById('t-choose').textContent=d.choose;
+  document.getElementById('t-back').textContent=d.back;
+  document.getElementById('t-back-sel').textContent=d.backSel;
+  document.getElementById('t-water-lbl').textContent=d.waterLbl;
+  document.getElementById('t-tool-water').textContent=d.toolWater;
+  document.getElementById('t-tool-sun').textContent=d.toolSun;
+  document.getElementById('t-tool-weed').textContent=d.toolWeed;
+  document.getElementById('t-tool-plant').textContent=d.toolPlant;
+  document.getElementById('t-success-title').textContent=d.successTitle;
+  document.getElementById('t-replay').textContent=d.replay;
+  document.getElementById('t-next').textContent=d.next;
+  document.getElementById('t-home2').textContent=d.home2;
+  document.getElementById('parents-title').textContent=d.parentsTitle;
+  document.getElementById('t-close').textContent=d.close;
+  document.getElementById('t-p1').textContent=d.p1;
+  document.getElementById('t-p2').textContent=d.p2;
+  document.getElementById('t-p3').textContent=d.p3;
+  if(document.getElementById('select-screen').classList.contains('active')) renderPlantSelect();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showPlantSelect(){ renderPlantSelect(); showScreen('select-screen'); }
+
+function renderPlantSelect(){
+  var d=T[lang];
+  var cont=document.getElementById('plant-select');
+  cont.innerHTML='';
+  [0,1,2].forEach(function(i){
+    var locked=(saveData.unlocked<=i);
+    var stars=saveData.stars[i]||0;
+    var card=document.createElement('div');
+    card.className='plant-card'+(locked?' locked':'');
+    card.setAttribute('tabindex',locked?'-1':'0');
+    card.setAttribute('role','button');
+    card.setAttribute('aria-label',d.plantNames[i]+(locked?' '+d.locked:''));
+    card.innerHTML=PLANTS[i].svgs[3]+
+      '<div class="plant-name">'+d.plantNames[i]+'</div>'+
+      '<div class="plant-lvl">'+d.plantLvl[i]+'</div>'+
+      '<div style="font-size:1.1rem;margin-top:4px;">'+'⭐'.repeat(stars)+'☆'.repeat(3-stars)+'</div>'+
+      (locked?'<div style="color:#e74c3c;font-weight:700;font-size:.85rem;">'+d.locked+'</div>':'');
+    if(!locked){
+      card.onclick=function(){ startGame(i); };
+      card.onkeydown=function(e){ if(e.key==='Enter'||e.key===' ') startGame(i); };
+    }
+    cont.appendChild(card);
+  });
+}
+
+function startGame(plantIdx){
+  currentPlant=plantIdx; currentStage=0; waterLevel=50;
+  sunActions=0; weedActions=0; weedsOnField=0; stageProgress=0;
+  quizShown=false; quizAnswered=false; quizDone=0; gameActive=true;
+  clearWeedTimers();
+  document.getElementById('game-plant-name').textContent=T[lang].plantNames[currentPlant];
+  document.getElementById('tool-plant').style.display='';
+  document.getElementById('quiz-panel').style.display='none';
+  renderStageBar(); renderPlantSVG(); updateWaterBar();
+  setStatus(T[lang].stagePrompt[0]);
+  showScreen('game-screen');
+}
+
+function clearWeedTimers(){
+  weedTimers.forEach(function(t){clearTimeout(t);});
+  weedTimers=[];
+  document.querySelectorAll('.weed').forEach(function(w){w.remove();});
+  weedsOnField=0;
+}
+
+function renderStageBar(){
+  var bar=document.getElementById('stage-bar'); bar.innerHTML='';
+  T[lang].stages.forEach(function(s,i){
+    var dot=document.createElement('div');
+    dot.className='stage-dot'+(i<currentStage?' done':i===currentStage?' current':'');
+    dot.title=s; dot.setAttribute('aria-label',s);
+    bar.appendChild(dot);
+  });
+}
+
+function renderPlantSVG(){
+  var cont=document.getElementById('plant-svg-container');
+  var s=Math.min(currentStage,4);
+  cont.innerHTML=PLANTS[currentPlant].svgs[s];
+  cont.style.opacity='0'; cont.style.transform='translateX(-50%) scale(.7)';
+  requestAnimationFrame(function(){
+    cont.style.transition='opacity .4s, transform .4s';
+    cont.style.opacity='1'; cont.style.transform='translateX(-50%) scale(1)';
+  });
+}
+
+function updateWaterBar(){
+  var bar=document.getElementById('water-bar');
+  var txt=document.getElementById('water-level-text');
+  bar.style.width=waterLevel+'%';
+  if(waterLevel<25){ bar.style.background='#e74c3c'; txt.textContent='🏜️ '+Math.round(waterLevel)+'%'; }
+  else if(waterLevel>80){ bar.style.background='#3498db'; txt.textContent='🌊 '+Math.round(waterLevel)+'%'; }
+  else { bar.style.background='var(--sky)'; txt.textContent=Math.round(waterLevel)+'%'; }
+  document.getElementById('water-meter').setAttribute('aria-valuenow',Math.round(waterLevel));
+}
+
+function setStatus(msg,cls){
+  var el=document.getElementById('status-msg');
+  el.textContent=msg; el.className=cls||'';
+  document.getElementById('aria-live').textContent=msg;
+}
+
+function useTool(tool){
+  if(!gameActive) return;
+  if(quizShown && !quizAnswered) return;
+  var garden=document.getElementById('garden-area');
+
+  if(tool==='plant'){
+    if(currentStage===0){
+      document.getElementById('tool-plant').style.display='none';
+      stageProgress=35; playGrow(); spawnParticle('🌱',garden);
+      setStatus(randArr(T[lang].msgWater),'good'); checkAdvance();
+    } return;
+  }
+  if(tool==='water'){
+    if(currentStage===0){ setStatus(T[lang].stagePrompt[0]); return; }
+    if(waterLevel>85){
+      waterLevel=Math.min(100,waterLevel+3);
+      updateWaterBar(); playError();
+      setStatus(T[lang].msgTooMuch,'bad');
+      stageProgress=Math.max(0,stageProgress-8); return;
+    }
+    waterLevel=Math.min(100,waterLevel+22); updateWaterBar();
+    playPositive(); setStatus(randArr(T[lang].msgWater),'good');
+    spawnParticle('💧',garden); stageProgress+=20; checkAdvance(); return;
+  }
+  if(tool==='sun'){
+    if(currentStage===0){ setStatus(T[lang].stagePrompt[0]); return; }
+    if(waterLevel<15){ playError(); setStatus(T[lang].msgTooLittle,'bad'); return; }
+    sunActions++; waterLevel=Math.max(0,waterLevel-9); updateWaterBar();
+    playPositive(); setStatus(randArr(T[lang].msgSun),'good');
+    spawnParticle('☀️',garden); stageProgress+=22; checkAdvance(); return;
+  }
+  if(tool==='weed'){
+    if(currentStage===0){ setStatus(T[lang].stagePrompt[0]); return; }
+    var weeds=document.querySelectorAll('.weed');
+    if(weeds.length===0){ setStatus(T[lang].msgNoWeeds); return; }
+    var w=weeds[0];
+    w.style.animation='riseUp .4s ease-out forwards';
+    setTimeout(function(){w.remove();},400);
+    weedsOnField=Math.max(0,weedsOnField-1);
+    playPositive(); setStatus(randArr(T[lang].msgWeed),'good');
+    stageProgress+=18; checkAdvance(); return;
+  }
+}
+
+function checkAdvance(){
+  if(stageProgress>=100 && currentStage<4){
+    currentStage++; stageProgress=0;
+    waterLevel=Math.max(20,waterLevel-5); updateWaterBar();
+    renderStageBar(); renderPlantSVG(); playGrow();
+    var garden=document.getElementById('garden-area');
+    if(currentStage<4){
+      setStatus(T[lang].msgGrow[currentStage-1]||'','good');
+      spawnParticle('🌟',garden);
+      if(currentStage===2 && quizDone===0){ setTimeout(showQuiz,700); }
+    }
+    if(currentStage>=1) scheduleWeed();
+    if(currentStage===4){
+      stageProgress=50;
+      setTimeout(function(){ setStatus(T[lang].msgDone[currentPlant],'good'); if(quizDone<2) setTimeout(showQuiz,800); else setTimeout(winGame,1000); },600);
+    }
+    setStatus(T[lang].stagePrompt[currentStage]||'');
+  }
+  if(currentStage===4 && stageProgress>=100){ winGame(); }
+}
+
+function scheduleWeed(){
+  if(!gameActive) return;
+  var delay=8000-currentPlant*1500+Math.random()*4000;
+  var tid=setTimeout(function(){
+    if(gameActive && currentStage>=1){ spawnWeed(); }
+    scheduleWeed();
+  },delay);
+  weedTimers.push(tid);
+}
+
+function spawnWeed(){
+  if(weedsOnField>=3) return;
+  var garden=document.getElementById('garden-area');
+  var weeds=['🌾','🍃','🌿'];
+  var w=document.createElement('div');
+  w.className='weed'; w.textContent=randArr(weeds);
+  w.setAttribute('aria-label','mauvaise herbe');
+  w.setAttribute('role','button'); w.setAttribute('tabindex','0');
+  w.style.left=(12+Math.random()*76)+'%';
+  w.onclick=function(){ useTool('weed'); };
+  w.onkeydown=function(e){ if(e.key==='Enter'||e.key===' ') useTool('weed'); };
+  garden.appendChild(w); weedsOnField++;
+  if(weedsOnField>=3) stageProgress=Math.max(0,stageProgress-6);
+}
+
+function spawnParticle(emoji,container){
+  var p=document.createElement('div');
+  p.className='happy-particle'; p.textContent=emoji;
+  p.style.left=(25+Math.random()*50)+'%'; p.style.bottom='38%';
+  container.appendChild(p); setTimeout(function(){p.remove();},1100);
+}
+
+function showQuiz(){
+  if(!gameActive||quizShown) return;
+  quizShown=true; quizAnswered=false;
+  var panel=document.getElementById('quiz-panel'); panel.style.display='block';
+  document.getElementById('quiz-q').textContent=T[lang].quizQ;
+  var optsEl=document.getElementById('quiz-options'); optsEl.innerHTML='';
+  var opts=T[lang].quizOpts;
+  var correct=opts.filter(function(o){return o.correct;});
+  var wrong=opts.filter(function(o){return !o.correct;});
+  var chosen=correct.sort(function(){return .5-Math.random();}).slice(0,2)
+    .concat(wrong.sort(function(){return .5-Math.random();}).slice(0,2))
+    .sort(function(){return .5-Math.random();});
+  chosen.forEach(function(opt){
+    var btn=document.createElement('button');
+    btn.className='quiz-opt'; btn.textContent=opt.text;
+    btn.onclick=function(){ answerQuiz(btn,opt.correct); };
+    optsEl.appendChild(btn);
+  });
+}
+
+function answerQuiz(btn,correct){
+  if(quizAnswered) return;
+  if(correct){
+    btn.classList.add('correct'); playSuccess();
+    setStatus(T[lang].quizCorrect,'good');
+    quizAnswered=true; quizDone++;
+    stageProgress+=30;
+    setTimeout(function(){
+      document.getElementById('quiz-panel').style.display='none';
+      quizShown=false;
+      checkAdvance();
+      if(currentStage===4 && stageProgress>=100) winGame();
+    },1300);
+  } else {
+    btn.classList.add('wrong'); playError();
+    setStatus(T[lang].quizWrong,'bad');
+    setTimeout(function(){ btn.classList.remove('wrong'); setStatus(T[lang].quizQ); },950);
+  }
+}
+
+function winGame(){
+  if(!gameActive) return;
+  gameActive=false; clearWeedTimers();
+  document.getElementById('quiz-panel').style.display='none';
+  var stars=3;
+  if(weedsOnField>1) stars--;
+  if(waterLevel<12||waterLevel>92) stars--;
+  stars=Math.max(1,stars);
+  if(stars>(saveData.stars[currentPlant]||0)) saveData.stars[currentPlant]=stars;
+  if(currentPlant+1>=saveData.unlocked) saveData.unlocked=Math.min(3,currentPlant+2);
+  try { localStorage.setItem(LSKEY,JSON.stringify(saveData)); } catch(e){}
+  playSuccess();
+  document.getElementById('success-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('t-success-title').textContent=T[lang].successTitle;
+  document.getElementById('t-success-msg').textContent=T[lang].successMsg[currentPlant];
+  document.getElementById('success-plant-svg').innerHTML=PLANTS[currentPlant].svgs[4];
+  var nb=document.getElementById('t-next');
+  nb.style.display=(currentPlant>=2)?'none':'';
+  showScreen('success-screen');
+}
+function replayLevel(){ startGame(currentPlant); }
+function nextLevel(){ if(currentPlant<2) startGame(currentPlant+1); else showPlantSelect(); }
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';
+  document.getElementById('btn-mute').setAttribute('aria-label',muted?'Son désactivé':'Muet');
+}
+function openParents(){
+  var a=2+Math.floor(Math.random()*7); var b=2+Math.floor(Math.random()*7);
+  gateAnswer=a*b;
+  document.getElementById('gate-q').textContent=T[lang].gateQ+' '+a+' × '+b+' ?';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-feedback').textContent='';
+  document.getElementById('gate-content').style.display='none';
+  document.getElementById('parents-modal').classList.add('open');
+}
+function closeParents(){ document.getElementById('parents-modal').classList.remove('open'); }
+function checkGate(){
+  var val=parseInt(document.getElementById('gate-input').value);
+  var fb=document.getElementById('gate-feedback');
+  if(val===gateAnswer){
+    fb.textContent=T[lang].gateOk; fb.style.color='var(--success)';
+    document.getElementById('gate-content').style.display='block';
+  } else if(!isNaN(val)&&document.getElementById('gate-input').value.length>0){
+    fb.textContent=T[lang].gateBad; fb.style.color='#e74c3c';
+    document.getElementById('gate-content').style.display='none';
+  }
+}
+renderTexts();
+setStatus('');
+</script>
+</body>
+</html>

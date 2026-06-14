@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Rébus &amp; Charades / Riddle Rumble — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#d0eaff 100%);min-height:100vh;color:var(--navy);overflow-x:hidden;}
+h1,h2,h3,.tf{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--blue);box-shadow:0 3px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:100;}
+#topbar img{height:34px;}
+#topbar .brand{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;flex:1;}
+.lang-btn{padding:6px 12px;border-radius:20px;border:2px solid rgba(255,255,255,.5);background:transparent;color:#fff;cursor:pointer;font-weight:700;font-size:.9rem;transition:.2s;min-width:48px;min-height:36px;}
+.lang-btn.active{background:#fff;color:var(--blue);}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,.2);}
+#muteBtn{background:none;border:none;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.2s;}
+#muteBtn:hover{background:rgba(255,255,255,.2);}
+.screen{display:none;padding:20px 16px 40px;max-width:700px;margin:0 auto;}
+.screen.active{display:block;}
+#titleScreen{text-align:center;}
+.mascot-wrap{margin:20px auto;display:block;width:180px;}
+.game-title{font-size:2.4rem;color:var(--blue);margin:10px 0 4px;line-height:1.1;}
+.game-sub{color:var(--slate);font-size:1.1rem;margin-bottom:24px;}
+.btn-play{display:inline-block;background:var(--orange);color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.5rem;padding:14px 48px;border-radius:40px;border:none;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:.1s;margin-bottom:16px;min-height:56px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{display:inline-block;background:none;border:2px solid var(--blue);color:var(--blue);border-radius:30px;padding:8px 20px;cursor:pointer;font-size:.9rem;font-weight:700;margin-top:8px;min-height:48px;}
+.btn-parents:hover{background:var(--blue);color:#fff;}
+#levelScreen{text-align:center;}
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:20px 0;}
+.level-card{background:#fff;border-radius:16px;padding:16px 10px;cursor:pointer;border:3px solid transparent;box-shadow:0 3px 10px rgba(0,0,0,.1);transition:.2s;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.level-card:hover{border-color:var(--orange);transform:translateY(-2px);}
+.level-card.locked{opacity:.45;cursor:not-allowed;}
+.level-card .lv-icon{font-size:2rem;margin-bottom:4px;}
+.level-card .lv-name{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;font-size:.95rem;color:var(--blue);}
+.level-card .lv-stars{font-size:.85rem;color:var(--gold);}
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.btn-back{background:var(--blue);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:1.2rem;cursor:pointer;flex-shrink:0;}
+.progress-bar-wrap{flex:1;background:#d0eaff;border-radius:20px;height:16px;overflow:hidden;}
+.progress-bar{background:var(--orange);height:100%;border-radius:20px;transition:.4s;}
+.score-badge{background:var(--blue);color:#fff;border-radius:20px;padding:4px 14px;font-weight:700;font-size:1rem;white-space:nowrap;}
+.question-box{background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 4px 16px rgba(0,0,0,.1);margin-bottom:20px;text-align:center;}
+.q-type-badge{display:inline-block;background:var(--sky);color:var(--blue);border-radius:20px;padding:3px 14px;font-size:.8rem;font-weight:700;margin-bottom:10px;}
+.rebus-display{font-size:3rem;letter-spacing:6px;margin:12px 0;line-height:1.3;}
+.question-text{font-size:1.15rem;line-height:1.5;margin:8px 0 4px;color:var(--navy);white-space:pre-line;}
+.hint-text{font-size:.9rem;color:var(--slate);margin-top:6px;font-style:italic;}
+.reveal-zone{margin-top:14px;padding:12px;background:var(--sky-light);border-radius:12px;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.4rem;color:var(--blue);font-weight:700;display:none;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.opt-btn{background:#fff;border:3px solid #d0eaff;border-radius:14px;padding:14px 10px;font-size:1rem;font-weight:700;cursor:pointer;transition:.15s;min-height:56px;color:var(--navy);font-family:'Nunito',system-ui,sans-serif;}
+.opt-btn:hover:not(:disabled){border-color:var(--orange);background:#fff8f3;}
+.opt-btn.correct{border-color:var(--success);background:#e8fff4;color:#1a7a4a;}
+.opt-btn.wrong{border-color:#f87171;background:#fff0f0;color:#b91c1c;}
+.opt-btn:disabled{cursor:default;}
+.letter-target{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:14px 0;min-height:52px;}
+.letter-slot{width:44px;height:52px;border-bottom:3px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--blue);transition:.2s;}
+.letter-choices{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+.letter-tile{width:44px;height:48px;border-radius:10px;background:var(--blue);color:#fff;font-size:1.3rem;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+.letter-tile:hover:not(:disabled){background:var(--orange);}
+.letter-tile:disabled{opacity:.3;cursor:default;}
+.btn-clear{background:none;border:2px solid var(--slate);color:var(--slate);border-radius:20px;padding:8px 20px;cursor:pointer;font-size:.9rem;margin:0 auto 14px;display:block;min-height:44px;}
+.btn-clear:hover{border-color:var(--orange);color:var(--orange);}
+.feedback-banner{text-align:center;padding:14px;border-radius:14px;font-size:1.1rem;font-weight:700;margin-bottom:14px;display:none;}
+.feedback-banner.good{background:#e8fff4;color:#1a7a4a;}
+.feedback-banner.bad{background:#fff0f0;color:#b91c1c;}
+.btn-next{display:none;width:100%;background:var(--orange);color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.2rem;padding:14px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:.1s;margin-top:8px;min-height:52px;}
+.btn-next:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+#successScreen{text-align:center;}
+.success-stars{font-size:3rem;margin:20px 0;}
+.success-title{font-size:2rem;color:var(--blue);margin-bottom:8px;}
+.success-score{font-size:1.1rem;color:var(--slate);margin-bottom:24px;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.btn-sec{background:var(--blue);color:#fff;border:none;border-radius:30px;padding:12px 28px;cursor:pointer;font-size:1rem;font-weight:700;box-shadow:0 4px 0 var(--blue-dark);min-height:48px;}
+.btn-sec:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#parentsModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center;}
+#parentsModal.open{display:flex;}
+.modal-box{background:#fff;border-radius:24px;padding:28px 24px;max-width:460px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.3);position:relative;text-align:center;}
+.modal-box h2{color:var(--blue);margin-bottom:12px;}
+.modal-box p{color:var(--slate);line-height:1.5;margin-bottom:12px;font-size:.95rem;}
+#gateForm{display:flex;flex-direction:column;align-items:center;gap:12px;}
+#gateForm input{padding:10px 16px;border:2px solid var(--sky);border-radius:12px;font-size:1.1rem;text-align:center;width:120px;outline:none;}
+#gateForm input:focus{border-color:var(--blue);}
+#gateError{color:#b91c1c;font-size:.9rem;display:none;}
+.btn-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--slate);}
+#parentsInfo{display:none;}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){.game-title{font-size:1.8rem;}.rebus-display{font-size:2.2rem;letter-spacing:4px;}.options-grid{grid-template-columns:1fr;}.btn-play{font-size:1.2rem;padding:12px 36px;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button class="lang-btn" id="btnFR" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+<div id="ariaLive" aria-live="polite" role="status"></div>
+
+<!-- TITLE -->
+<div id="titleScreen" class="screen active">
+  <div class="mascot-wrap">
+    <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hibou malin avec ampoule">
+      <ellipse cx="90" cy="110" rx="52" ry="60" fill="#f97316"/>
+      <ellipse cx="90" cy="118" rx="34" ry="42" fill="#ffd23f"/>
+      <circle cx="90" cy="62" r="46" fill="#f97316"/>
+      <polygon points="60,22 50,2 72,20" fill="#ea580c"/>
+      <polygon points="120,22 130,2 108,20" fill="#ea580c"/>
+      <circle cx="72" cy="60" r="16" fill="#fff"/>
+      <circle cx="108" cy="60" r="16" fill="#fff"/>
+      <circle cx="75" cy="60" r="10" fill="#0f4c81"/>
+      <circle cx="111" cy="60" r="10" fill="#0f4c81"/>
+      <circle cx="78" cy="57" r="4" fill="#fff"/>
+      <circle cx="114" cy="57" r="4" fill="#fff"/>
+      <polygon points="90,72 80,82 90,80 100,82" fill="#ffd23f"/>
+      <ellipse cx="43" cy="118" rx="22" ry="36" fill="#ea580c" transform="rotate(-20 43 118)"/>
+      <ellipse cx="137" cy="118" rx="22" ry="36" fill="#ea580c" transform="rotate(20 137 118)"/>
+      <ellipse cx="76" cy="168" rx="14" ry="8" fill="#ffd23f"/>
+      <ellipse cx="104" cy="168" rx="14" ry="8" fill="#ffd23f"/>
+      <circle cx="43" cy="115" r="13" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+      <rect x="38" y="127" width="10" height="6" rx="3" fill="#ea580c"/>
+      <line x1="43" y1="104" x2="43" y2="100" stroke="#ffd23f" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="52" y1="108" x2="56" y2="104" stroke="#ffd23f" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="34" y1="108" x2="30" y2="104" stroke="#ffd23f" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="43" cy="115" r="6" fill="#fff" opacity=".8"/>
+    </svg>
+  </div>
+  <h1 class="game-title tf" id="titleH1">Rébus &amp; Charades</h1>
+  <p class="game-sub" id="titleSub">Déchiffre les rébus, résous les charades !</p>
+  <br>
+  <button class="btn-play" onclick="showLevels()" id="btnPlay">▶ Jouer</button><br>
+  <button class="btn-parents" onclick="openParents()" id="btnParents">👨‍👩‍👧 Pour les parents</button>
+</div>
+
+<!-- LEVELS -->
+<div id="levelScreen" class="screen">
+  <h2 class="tf" id="levelTitle" style="color:var(--blue);margin-bottom:4px;">Choisis un niveau</h2>
+  <p id="levelSub" style="color:var(--slate);font-size:.95rem;margin-bottom:16px;">Commence par les rébus simples !</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <button class="btn-parents" onclick="showScreen('titleScreen')" id="btnLevelBack" style="margin-top:12px;">← Accueil</button>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <button class="btn-back" onclick="showLevels()" aria-label="Retour">←</button>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div class="score-badge" id="scoreBadge">0</div>
+  </div>
+  <div class="question-box">
+    <span class="q-type-badge" id="qTypeBadge">Rébus</span>
+    <div class="rebus-display" id="rebusDisplay"></div>
+    <div class="question-text" id="questionText"></div>
+    <div class="hint-text" id="hintText"></div>
+    <div class="reveal-zone" id="revealZone" aria-live="polite"></div>
+  </div>
+  <div id="mcqZone"><div class="options-grid" id="optionsGrid"></div></div>
+  <div id="letterZone" style="display:none;">
+    <div class="letter-target" id="letterTarget"></div>
+    <button class="btn-clear" id="btnClear" onclick="clearLetters()">↩ Effacer</button>
+    <div class="letter-choices" id="letterChoices"></div>
+  </div>
+  <div class="feedback-banner" id="feedbackBanner"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">Suivant →</button>
+</div>
+
+<!-- SUCCESS -->
+<div id="successScreen" class="screen">
+  <div class="success-stars" id="successStars">⭐⭐⭐</div>
+  <h2 class="tf success-title" id="successTitle">Bravo !</h2>
+  <p class="success-score" id="successScore"></p>
+  <div class="btn-row">
+    <button class="btn-sec" onclick="replayLevel()" id="btnReplay">↺ Rejouer</button>
+    <button class="btn-sec" style="background:var(--orange);box-shadow:0 4px 0 var(--orange-dark);" onclick="nextLevel()" id="btnNextLevel">Niveau suivant →</button>
+    <button class="btn-sec" onclick="showScreen('titleScreen')" id="btnHome">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- PARENTS -->
+<div id="parentsModal">
+  <div class="modal-box">
+    <button class="btn-modal-close" onclick="closeParents()">✕</button>
+    <div id="gateSection">
+      <h2 id="gateTitle">Espace parents</h2>
+      <p id="gateDesc">Répondez à cette question pour accéder :</p>
+      <form id="gateForm" onsubmit="checkGate(event)">
+        <div id="gateQuestion" style="font-size:1.1rem;font-weight:700;color:var(--blue);"></div>
+        <input type="number" id="gateInput" placeholder="?" min="0" max="999" required>
+        <div id="gateError">Réponse incorrecte. Essayez encore !</div>
+        <button type="submit" class="btn-sec" style="min-height:44px;" id="gateSubmit">Valider</button>
+      </form>
+    </div>
+    <div id="parentsInfo">
+      <h2 id="piTitle">Espace parents</h2>
+      <p id="piP1"></p><p id="piP2"></p><p id="piP3"></p>
+      <button class="btn-sec" onclick="closeParents()" style="margin-top:12px;" id="piClose">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    title:"Rébus & Charades",sub:"Déchiffre les rébus, résous les charades !",
+    play:"▶ Jouer",parents:"👨‍👩‍👧 Pour les parents",
+    chooseLevel:"Choisis un niveau",levelSub:"Commence par les rébus simples !",
+    back:"← Accueil",rebus:"Rébus",charade:"Charade",riddle:"Devinette",
+    next:"Suivant →",replay:"↺ Rejouer",nextLevel:"Niveau suivant →",home:"🏠 Accueil",
+    bravo:"Bravo !",excellent:"Excellent !",super_:"Super !",good:"Bien joué !",
+    wrongMsg:["Pas tout à fait, essaie encore !","Presque ! Regarde bien…","Courage, tu vas trouver !"],
+    correctMsg:["Excellent ! 🎉","Bravo ! ⭐","Super ! 🌟","C'est ça ! 🎊","Parfait ! 🏆"],
+    gateTitle:"Espace parents",gateDesc:"Répondez à cette question pour accéder :",
+    gateError:"Réponse incorrecte. Essayez encore !",gateSubmit:"Valider",
+    piTitle:"Espace parents",
+    piP1:"Compétences visées : langage, déduction, conscience phonologique, culture générale.",
+    piP2:"Ce jeu ne collecte aucune donnée personnelle et ne contient aucune publicité. La progression est sauvegardée localement sur cet appareil uniquement.",
+    piP3:"Astuce : jouez ensemble et discutez des rébus — expliquer le raisonnement renforce la compréhension !",
+    piClose:"Fermer",clearBtn:"↩ Effacer",levelLocked:"Termine le niveau précédent d'abord !",
+    levels:[
+      {name:"Rébus faciles",icon:"🔤",desc:"Images → mots"},
+      {name:"Rébus fun",icon:"😄",desc:"Assemble les lettres"},
+      {name:"Charades",icon:"🎭",desc:"Mon premier…"},
+      {name:"Devinettes",icon:"🧩",desc:"Trouve-moi !"},
+    ],
+    successScore:function(s){return"Tu as répondu juste à "+s+" question"+(s>1?"s":"")+" !";}
+  },
+  en:{
+    title:"Riddle Rumble",sub:"Crack the rebus puzzles, solve the riddles!",
+    play:"▶ Play",parents:"👨‍👩‍👧 For parents",
+    chooseLevel:"Choose a level",levelSub:"Start with easy rebuses!",
+    back:"← Home",rebus:"Rebus",charade:"Charade",riddle:"Riddle",
+    next:"Next →",replay:"↺ Play again",nextLevel:"Next level →",home:"🏠 Home",
+    bravo:"Amazing!",excellent:"Excellent!",super_:"Awesome!",good:"Well done!",
+    wrongMsg:["Not quite — try again!","Almost! Look carefully…","Keep going, you've got this!"],
+    correctMsg:["Excellent! 🎉","Great! ⭐","Awesome! 🌟","That's it! 🎊","Perfect! 🏆"],
+    gateTitle:"Parent zone",gateDesc:"Answer this question to continue:",
+    gateError:"Wrong answer. Try again!",gateSubmit:"Submit",
+    piTitle:"Parent zone",
+    piP1:"Skills targeted: language, deduction, phonological awareness, general knowledge.",
+    piP2:"No personal data is collected; no advertisements. Progress is saved locally on this device only.",
+    piP3:"Tip: play together and discuss the rebus clues — explaining the logic deepens understanding!",
+    piClose:"Close",clearBtn:"↩ Clear",levelLocked:"Finish the previous level first!",
+    levels:[
+      {name:"Easy Rebus",icon:"🔤",desc:"Images → words"},
+      {name:"Fun Rebus",icon:"😄",desc:"Assemble letters"},
+      {name:"Charades",icon:"🎭",desc:"My first is…"},
+      {name:"Riddles",icon:"🧩",desc:"What am I?"},
+    ],
+    successScore:function(s){return"You answered "+s+" question"+(s>1?"s":"")+" correctly!";}
+  }
+};
+
+const QUESTIONS={
+  fr:[
+    [
+      {type:"rebus",rebus:"🐱 + 🎩",answer:"CHAPEAU",hint:"Cha (chat) + peau = vêtement de tête",options:["CHAPEAU","MAISON","BALLON","JARDIN"],mode:"mcq"},
+      {type:"rebus",rebus:"⭐ + 🌊",answer:"ÉTOILE",hint:"É (étoile) + toile. Brille la nuit !",options:["ÉTOILE","SOLEIL","LUNE","NUAGE"],mode:"mcq"},
+      {type:"rebus",rebus:"🏔️ + 🐭",answer:"MONTAGNE",hint:"Mont (montagne) + agne. Grande élévation.",options:["VALLÉE","MONTAGNE","COLLINE","PLAINE"],mode:"mcq"},
+      {type:"rebus",rebus:"🐝 + 🎵",answer:"CHANSON",hint:"Chan (chant) + son (note de musique)",options:["CHANSON","MÉLODIE","MUSIQUE","CONCERT"],mode:"mcq"},
+      {type:"rebus",rebus:"🐢 + 🏠",answer:"TORTUE",hint:"Tor + tue. Animal lent avec carapace.",options:["SERPENT","TORTUE","POISSON","RENARD"],mode:"mcq"},
+      {type:"rebus",rebus:"🌸 + 🦟",answer:"FLEUR",hint:"Fle (flèche) + ur ? Joli végétal coloré !",options:["FLEUR","OISEAU","PRINTEMPS","JARDIN"],mode:"mcq"},
+      {type:"rebus",rebus:"🐺 + 🔑",answer:"CLÉ",hint:"🔑 = clé. Simple comme bonjour !",options:["CLÉ","PORTE","MAISON","FENÊTRE"],mode:"mcq"},
+      {type:"rebus",rebus:"🍎 + 🌲",answer:"ARBRE",hint:"🌲 = arbre. Pousse dans la forêt.",options:["POMME","ARBRE","FORÊT","FEUILLE"],mode:"mcq"},
+    ],
+    [
+      {type:"rebus",rebus:"🦁 + 👑",answer:"LION",hint:"Le roi de la savane",mode:"letters",pool:["L","I","O","N","A","E","U"]},
+      {type:"rebus",rebus:"🌙 + 🦋",answer:"PAPILLON",hint:"Bel insecte aux grandes ailes",mode:"letters",pool:["P","A","P","I","L","L","O","N","E","U"]},
+      {type:"rebus",rebus:"🌈 + ☀️",answer:"SOLEIL",hint:"Astre brillant du jour",mode:"letters",pool:["S","O","L","E","I","L","A","R"]},
+      {type:"rebus",rebus:"🎂 + 🕯️",answer:"GATEAU",hint:"On le mange le jour de l'anniversaire",mode:"letters",pool:["G","A","T","E","A","U","R","S"]},
+      {type:"rebus",rebus:"🐸 + 💧",answer:"GRENOUILLE",hint:"Vert et saute très haut !",mode:"letters",pool:["G","R","E","N","O","U","I","L","L","E","A"]},
+      {type:"rebus",rebus:"🦊 + 🌿",answer:"RENARD",hint:"Animal roux rusé",mode:"letters",pool:["R","E","N","A","R","D","O","L"]},
+      {type:"rebus",rebus:"🏰 + 🗡️",answer:"CHÂTEAU",hint:"Où vivent les chevaliers",mode:"letters",pool:["C","H","Â","T","E","A","U","R"]},
+      {type:"rebus",rebus:"🐘 + 🌿",answer:"ELEPHANT",hint:"Grand mammifère à trompe",mode:"letters",pool:["E","L","E","P","H","A","N","T","O"]},
+    ],
+    [
+      {type:"charade",question:"Mon premier est une note de musique.\nMon deuxième est ce qu'on fait la nuit.\nMon tout est un oiseau qui vit la nuit.",answer:"HIBOU",hint:"Do (note) + do (sommeil) → oiseau nocturne",options:["HIBOU","AIGLE","CANARD","PIGEON"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est le contraire de 'froid'.\nMon second est une voiture en commun.\nMon tout roule sur la route.",answer:"AUTOBUS",hint:"Chaud → Auto + bus !",options:["AUTOBUS","VÉLO","TRAIN","AVION"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est le cri du lion.\nMon second est le chiffre après neuf.\nMon tout est un vêtement féminin.",answer:"ROBE",hint:"Roa + dix → robe !",options:["ROBE","JEAN","VESTE","MANTEAU"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est la couleur du ciel.\nMon second est une petite baie rouge.\nMon tout est un fruit bleu.",answer:"MYRTILLE",hint:"Bleu → myr + tille",options:["MYRTILLE","FRAISE","RAISIN","FRAMBOISE"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est ce que font les abeilles.\nMon second vole dans les airs.\nMon tout est un sport d'hiver.",answer:"BOBSLEIGH",hint:"Buzz + fly → bobsleigh ?",options:["SKI","BOBSLEIGH","LUGE","PATINAGE"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est la boisson préférée des bébés.\nMon second est le chiffre 1.\nMon tout saute et a de longues oreilles.",answer:"LAPIN",hint:"Lait + un = lapin !",options:["LAPIN","CHAT","CHIEN","SOURIS"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est ce que fait le soleil.\nMon second est un outil pour couper.\nMon tout est un légume.",answer:"POIREAU",hint:"Poire + eau → légume long et vert",options:["POIREAU","CAROTTE","TOMATE","HARICOT"],mode:"mcq"},
+      {type:"charade",question:"Mon premier est le son du chat.\nMon second est une petite case.\nMon tout est un légume jaune en épi.",answer:"MAÏS",hint:"Miaou + case → maïs !",options:["MAÏS","BLÉ","RIZ","AVOINE"],mode:"mcq"},
+    ],
+    [
+      {type:"riddle",question:"J'ai des aiguilles mais je ne couds pas.\nJe vis dans la forêt.\nQu'est-ce que je suis ?",answer:"SAPIN",options:["SAPIN","CACTUS","ROSIER","BAOBAB"],mode:"mcq",hint:"Arbre de Noël"},
+      {type:"riddle",question:"Je cours sans jambes, j'ai un lit mais je ne dors pas.\nQu'est-ce que je suis ?",answer:"RIVIÈRE",options:["RIVIÈRE","TRAIN","SERPENT","VENT"],mode:"mcq",hint:"L'eau coule en moi"},
+      {type:"riddle",question:"Plus je sèche, plus je suis mouillée.\nQu'est-ce que je suis ?",answer:"SERVIETTE",options:["SERVIETTE","ÉPONGE","PISCINE","SAVON"],mode:"mcq",hint:"Elle sèche ton corps"},
+      {type:"riddle",question:"Je suis toujours devant toi mais on ne peut jamais me rattraper.\nQu'est-ce que je suis ?",answer:"FUTUR",options:["FUTUR","PASSÉ","OMBRE","RÊVE"],mode:"mcq",hint:"Demain, après-demain…"},
+      {type:"riddle",question:"J'ai une queue mais je ne suis pas un animal.\nJ'ai des feuilles mais je ne suis pas un arbre.\nQu'est-ce que je suis ?",answer:"LIVRE",options:["LIVRE","CAHIER","CRAYON","STYLO"],mode:"mcq",hint:"On me lit"},
+      {type:"riddle",question:"Je monte mais je ne descends jamais.\nQu'est-ce que je suis ?",answer:"ÂGE",options:["ÂGE","FUMÉE","BALLON","THERMOMÈTRE"],mode:"mcq",hint:"Anniversaire après anniversaire…"},
+      {type:"riddle",question:"Je suis plein de trous mais je retiens l'eau.\nQu'est-ce que je suis ?",answer:"ÉPONGE",options:["ÉPONGE","PASSOIRE","FILET","GRUYÈRE"],mode:"mcq",hint:"Utilisée pour nettoyer"},
+      {type:"riddle",question:"Je parle sans bouche et j'entends sans oreilles.\nJe n'ai pas de corps mais je vis avec le vent.\nQu'est-ce que je suis ?",answer:"ÉCHO",options:["ÉCHO","RADIO","FANTÔME","PERROQUET"],mode:"mcq",hint:"Répète ce que tu dis en montagne"},
+    ],
+  ],
+  en:[
+    [
+      {type:"rebus",rebus:"🌞 + 🌻",answer:"SUNFLOWER",hint:"Sun + flower = tall yellow bloom!",options:["SUNFLOWER","DAISY","ROSE","TULIP"],mode:"mcq"},
+      {type:"rebus",rebus:"🐝 + 🏠",answer:"BEEHIVE",hint:"Bee + hive = where honey is made.",options:["BEEHIVE","ANTHILL","NEST","DEN"],mode:"mcq"},
+      {type:"rebus",rebus:"🌊 + ⭐",answer:"STARFISH",hint:"Star + fish = ocean creature.",options:["STARFISH","SEAHORSE","JELLYFISH","CRAB"],mode:"mcq"},
+      {type:"rebus",rebus:"🍎 + 🥧",answer:"APPLE PIE",hint:"Apple + pie = delicious dessert!",options:["APPLE PIE","PEACH PIE","PUMPKIN PIE","CHERRY PIE"],mode:"mcq"},
+      {type:"rebus",rebus:"🌙 + 🌟",answer:"MOONLIGHT",hint:"Moon + light = night glow.",options:["MOONLIGHT","SUNSHINE","STARLIGHT","TWILIGHT"],mode:"mcq"},
+      {type:"rebus",rebus:"🐱 + 🏠",answer:"CATHOUSE",hint:"Cat + house = feline home.",options:["CATHOUSE","DOGHOUSE","BARN","STABLE"],mode:"mcq"},
+      {type:"rebus",rebus:"🔥 + 🚒",answer:"FIREMAN",hint:"Fire + man = hero!",options:["FIREMAN","POLICE","DOCTOR","TEACHER"],mode:"mcq"},
+      {type:"rebus",rebus:"🌈 + 💧",answer:"RAINDROP",hint:"Rain + drop = from the sky.",options:["RAINDROP","PUDDLE","RIVER","OCEAN"],mode:"mcq"},
+    ],
+    [
+      {type:"rebus",rebus:"🦁 + 👑",answer:"LION",hint:"King of the savannah",mode:"letters",pool:["L","I","O","N","A","E","U"]},
+      {type:"rebus",rebus:"🌈 + 🎠",answer:"RAINBOW",hint:"Colourful arc after rain",mode:"letters",pool:["R","A","I","N","B","O","W","E"]},
+      {type:"rebus",rebus:"🦋 + 🌺",answer:"BUTTERFLY",hint:"Beautiful flying insect",mode:"letters",pool:["B","U","T","T","E","R","F","L","Y","A"]},
+      {type:"rebus",rebus:"🏰 + 👑",answer:"CASTLE",hint:"Where kings and queens live",mode:"letters",pool:["C","A","S","T","L","E","R","O"]},
+      {type:"rebus",rebus:"🐋 + 🌊",answer:"WHALE",hint:"Largest ocean mammal",mode:"letters",pool:["W","H","A","L","E","O","I","S"]},
+      {type:"rebus",rebus:"🎂 + 🕯️",answer:"CAKE",hint:"Birthday treat with candles",mode:"letters",pool:["C","A","K","E","I","O","R","T"]},
+      {type:"rebus",rebus:"🦊 + 🌿",answer:"FOX",hint:"Clever red animal",mode:"letters",pool:["F","O","X","A","E","L","I"]},
+      {type:"rebus",rebus:"🐘 + 🌿",answer:"ELEPHANT",hint:"Big grey animal with a trunk",mode:"letters",pool:["E","L","E","P","H","A","N","T","O"]},
+    ],
+    [
+      {type:"charade",question:"My first is what you do with your eyes.\nMy second is a short sleep.\nMy whole is a tiny body of water.",answer:"POND",hint:"Look + nap → think of a small lake",options:["POND","LAKE","RIVER","OCEAN"],mode:"mcq"},
+      {type:"charade",question:"My first is the opposite of night.\nMy second is illumination.\nMy whole helps you see in the dark.",answer:"DAYLIGHT",hint:"Day + light",options:["DAYLIGHT","CANDLE","LANTERN","TORCH"],mode:"mcq"},
+      {type:"charade",question:"My first is what birds are covered in.\nMy second weighs very little.\nMy whole is used to write.",answer:"FEATHER",hint:"Birds have lots of these",options:["FEATHER","PENCIL","BRUSH","PEN"],mode:"mcq"},
+      {type:"charade",question:"My first is a colour like the sky.\nMy second is a tiny berry.\nMy whole is a dark blue fruit.",answer:"BLUEBERRY",hint:"Blue + berry",options:["BLUEBERRY","BLACKBERRY","STRAWBERRY","RASPBERRY"],mode:"mcq"},
+      {type:"charade",question:"My first is what bees make.\nMy second falls from the sky.\nMy whole is a sweet melon.",answer:"HONEYDEW",hint:"Honey + dew = a melon!",options:["HONEYDEW","WATERMELON","APRICOT","MANGO"],mode:"mcq"},
+      {type:"charade",question:"My first helps plants grow.\nMy second is a bolt from the sky.\nMy whole is a wild weather event.",answer:"RAINSTORM",hint:"Rain + storm",options:["RAINSTORM","THUNDER","TORNADO","TYPHOON"],mode:"mcq"},
+      {type:"charade",question:"My first is what cats say.\nMy second is a musical note.\nMy whole is a grassy field.",answer:"MEADOW",hint:"Me + a + dow (do = note)",options:["MEADOW","FOREST","DESERT","JUNGLE"],mode:"mcq"},
+      {type:"charade",question:"My first is to look at.\nMy second is a reptile.\nMy whole is a fun party game.",answer:"WATCHMAN",hint:"Watch + man or watch a snake?",options:["BLINDFOLD","TREASURE HUNT","CHARADES","TAG"],mode:"mcq"},
+    ],
+    [
+      {type:"riddle",question:"I have needles but I don't sew.\nI live in the forest but have no legs.\nWhat am I?",answer:"PINE TREE",options:["PINE TREE","CACTUS","ROSEBUSH","HOLLY"],mode:"mcq",hint:"Think Christmas!"},
+      {type:"riddle",question:"I run without legs and have a bed but never sleep.\nWhat am I?",answer:"RIVER",options:["RIVER","TRAIN","SNAKE","WIND"],mode:"mcq",hint:"Water flows through me"},
+      {type:"riddle",question:"The more you dry me, the wetter I get.\nWhat am I?",answer:"TOWEL",options:["TOWEL","SPONGE","POOL","SOAP"],mode:"mcq",hint:"Used after a shower"},
+      {type:"riddle",question:"I am always in front of you but can never be caught.\nWhat am I?",answer:"FUTURE",options:["FUTURE","PAST","SHADOW","DREAM"],mode:"mcq",hint:"Tomorrow, next year…"},
+      {type:"riddle",question:"I have a spine but no bones.\nI have leaves but I am not a tree.\nWhat am I?",answer:"BOOK",options:["BOOK","NOTEBOOK","PENCIL","PEN"],mode:"mcq",hint:"You read me"},
+      {type:"riddle",question:"I go up but never come down.\nWhat am I?",answer:"AGE",options:["AGE","SMOKE","BALLOON","TEMPERATURE"],mode:"mcq",hint:"Birthday after birthday…"},
+      {type:"riddle",question:"I am full of holes but I hold water.\nWhat am I?",answer:"SPONGE",options:["SPONGE","COLANDER","NET","CHEESE"],mode:"mcq",hint:"Used for washing dishes"},
+      {type:"riddle",question:"I speak without a mouth and hear without ears.\nI have no body but I come alive with wind.\nWhat am I?",answer:"ECHO",options:["ECHO","RADIO","GHOST","PARROT"],mode:"mcq",hint:"Shout in the mountains!"},
+    ],
+  ]
+};
+
+const SAVE_KEY="pgrg_rebus_charades";
+let lang=navigator.language.startsWith('fr')?'fr':'en';
+let muted=false;
+let state={stars:[0,0,0,0],unlocked:1};
+let curLevel=0,curQ=0,score=0,correctCount=0;
+let curQData=null;
+let letterAnswer=[],letterPool=[],usedIndexes=[];
+let answered=false;
+
+function loadState(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s)state=Object.assign(state,s);}catch(e){}}
+function saveState(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
+
+const actx=new(window.AudioContext||window.webkitAudioContext)();
+function beep(freq,dur,type,vol){
+  if(muted)return;
+  freq=freq||520;dur=dur||0.18;type=type||'sine';vol=vol||0.35;
+  try{
+    var g=actx.createGain();g.gain.setValueAtTime(vol,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);
+    var o=actx.createOscillator();o.type=type;o.frequency.value=freq;
+    o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function playCorrect(){beep(523,.1);setTimeout(function(){beep(659,.1);},100);setTimeout(function(){beep(784,.22);},210);}
+function playWrong(){beep(220,.28,'square',.2);}
+function playReveal(){beep(880,.12);setTimeout(function(){beep(988,.18);},130);}
+function playWin(){beep(784,.15);setTimeout(function(){beep(880,.15);},170);setTimeout(function(){beep(988,.3);},340);}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  renderUI();
+}
+
+function tl(){return T[lang];}
+
+function renderUI(){
+  var t=tl();
+  document.title=t.title+' — PGRG IA';
+  document.getElementById('titleH1').textContent=t.title;
+  document.getElementById('titleSub').textContent=t.sub;
+  document.getElementById('btnPlay').textContent=t.play;
+  document.getElementById('btnParents').textContent=t.parents;
+  document.getElementById('levelTitle').textContent=t.chooseLevel;
+  document.getElementById('levelSub').textContent=t.levelSub;
+  document.getElementById('btnLevelBack').textContent=t.back;
+  document.getElementById('btnNext').textContent=t.next;
+  document.getElementById('btnReplay').textContent=t.replay;
+  document.getElementById('btnNextLevel').textContent=t.nextLevel;
+  document.getElementById('btnHome').textContent=t.home;
+  document.getElementById('btnClear').textContent=t.clearBtn;
+  document.getElementById('gateTitle').textContent=t.gateTitle;
+  document.getElementById('gateDesc').textContent=t.gateDesc;
+  document.getElementById('gateError').textContent=t.gateError;
+  document.getElementById('gateSubmit').textContent=t.gateSubmit;
+  document.getElementById('piTitle').textContent=t.piTitle;
+  document.getElementById('piP1').textContent=t.piP1;
+  document.getElementById('piP2').textContent=t.piP2;
+  document.getElementById('piP3').textContent=t.piP3;
+  document.getElementById('piClose').textContent=t.piClose;
+  renderLevelGrid();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showLevels(){renderLevelGrid();showScreen('levelScreen');}
+
+function renderLevelGrid(){
+  var grid=document.getElementById('levelGrid');
+  var lvls=tl().levels;
+  grid.innerHTML='';
+  lvls.forEach(function(lv,i){
+    var locked=(i>=state.unlocked);
+    var stars=state.stars[i]||0;
+    var starStr=stars>=3?'⭐⭐⭐':stars>=2?'⭐⭐':stars>=1?'⭐':'○○○';
+    var d=document.createElement('div');
+    d.className='level-card'+(locked?' locked':'');
+    d.setAttribute('role','button');
+    d.setAttribute('tabindex',locked?'-1':'0');
+    d.setAttribute('aria-label',lv.name+(locked?' (verrouillé)':''));
+    d.innerHTML='<div class="lv-icon">'+lv.icon+'</div>'
+      +'<div class="lv-name">'+lv.name+'</div>'
+      +'<div style="font-size:.75rem;color:var(--slate);margin:2px 0">'+lv.desc+'</div>'
+      +'<div class="lv-stars">'+starStr+'</div>';
+    if(!locked){
+      d.onclick=function(){startLevel(i);};
+      d.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')startLevel(i);};
+    } else {
+      d.onclick=function(){aria(tl().levelLocked);};
+    }
+    grid.appendChild(d);
+  });
+}
+
+function startLevel(lv){
+  curLevel=lv;curQ=0;score=0;correctCount=0;answered=false;
+  showScreen('gameScreen');
+  loadQuestion();
+}
+
+function loadQuestion(){
+  var qs=QUESTIONS[lang][curLevel];
+  answered=false;
+  letterAnswer=[];letterPool=[];usedIndexes=[];
+  var fb=document.getElementById('feedbackBanner');
+  fb.style.display='none';fb.className='feedback-banner';
+  document.getElementById('btnNext').style.display='none';
+  document.getElementById('revealZone').style.display='none';
+  document.getElementById('revealZone').textContent='';
+  var pct=Math.round((curQ/qs.length)*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('scoreBadge').textContent=score;
+  if(curQ>=qs.length){endLevel();return;}
+  curQData=qs[curQ];
+  var typeNames={rebus:tl().rebus,charade:tl().charade,riddle:tl().riddle};
+  document.getElementById('qTypeBadge').textContent=typeNames[curQData.type]||curQData.type;
+  var rd=document.getElementById('rebusDisplay');
+  rd.textContent=curQData.rebus||'';
+  rd.style.display=curQData.rebus?'block':'none';
+  var qt=document.getElementById('questionText');
+  qt.textContent=curQData.question||'';
+  qt.style.display=curQData.question?'block':'none';
+  var ht=document.getElementById('hintText');
+  ht.textContent=curQData.hint?'💡 '+curQData.hint:'';
+  if(curQData.mode==='letters'){
+    document.getElementById('mcqZone').style.display='none';
+    document.getElementById('letterZone').style.display='block';
+    setupLetters(curQData);
+  } else {
+    document.getElementById('mcqZone').style.display='block';
+    document.getElementById('letterZone').style.display='none';
+    setupMCQ(curQData);
+  }
+  aria((typeNames[curQData.type]||'')+' '+(curQData.question||curQData.rebus||''));
+}
+
+function setupMCQ(q){
+  var grid=document.getElementById('optionsGrid');
+  grid.innerHTML='';
+  var opts=q.options.slice().sort(function(){return Math.random()-.5;});
+  opts.forEach(function(opt){
+    var b=document.createElement('button');
+    b.className='opt-btn';
+    b.textContent=opt;
+    b.onclick=function(){checkMCQ(opt,q.answer,b,grid);};
+    grid.appendChild(b);
+  });
+}
+
+function checkMCQ(chosen,answer,btn,grid){
+  if(answered)return;
+  answered=true;
+  var correct=(chosen===answer);
+  Array.from(grid.children).forEach(function(b){
+    b.disabled=true;
+    if(b.textContent===answer)b.classList.add('correct');
+    else if(b===btn&&!correct)b.classList.add('wrong');
+  });
+  handleResult(correct,answer);
+}
+
+function setupLetters(q){
+  var answer=q.answer;
+  var target=document.getElementById('letterTarget');
+  target.innerHTML='';
+  answer.split('').forEach(function(){
+    var s=document.createElement('div');
+    s.className='letter-slot';
+    target.appendChild(s);
+  });
+  var pool=q.pool?q.pool.slice():answer.split('').concat(['A','E','I','O','U','S','R','T','L']);
+  pool=pool.sort(function(){return Math.random()-.5;});
+  letterPool=pool;
+  letterAnswer=[];
+  usedIndexes=[];
+  renderLetterChoices();
+}
+
+function renderLetterChoices(){
+  var choices=document.getElementById('letterChoices');
+  choices.innerHTML='';
+  letterPool.forEach(function(l,i){
+    var b=document.createElement('button');
+    b.className='letter-tile';
+    b.textContent=l;
+    b.setAttribute('aria-label','Lettre '+l);
+    b.disabled=usedIndexes.indexOf(i)>=0;
+    if(!b.disabled){
+      (function(ll,ii){b.onclick=function(){pickLetter(ll,ii,b);};})(l,i);
+    }
+    choices.appendChild(b);
+  });
+}
+
+function pickLetter(l,idx,btn){
+  if(answered)return;
+  var target=document.getElementById('letterTarget');
+  var slots=Array.from(target.children);
+  var pos=letterAnswer.length;
+  if(pos>=curQData.answer.length)return;
+  letterAnswer.push({l:l,idx:idx});
+  usedIndexes.push(idx);
+  slots[pos].textContent=l;
+  beep(440,.07);
+  btn.disabled=true;
+  if(letterAnswer.length===curQData.answer.length){
+    var formed=letterAnswer.map(function(x){return x.l;}).join('');
+    var correct=(formed===curQData.answer);
+    answered=true;
+    setTimeout(function(){handleResult(correct,curQData.answer);},200);
+  }
+}
+
+function clearLetters(){
+  if(answered)return;
+  letterAnswer=[];usedIndexes=[];
+  var slots=Array.from(document.getElementById('letterTarget').children);
+  slots.forEach(function(s){s.textContent='';});
+  renderLetterChoices();
+}
+
+function handleResult(correct,answer){
+  answered=true;
+  var fb=document.getElementById('feedbackBanner');
+  var t=tl();
+  if(correct){
+    score+=10;correctCount++;
+    playCorrect();
+    var m=t.correctMsg[Math.floor(Math.random()*t.correctMsg.length)];
+    fb.textContent=m;
+    fb.className='feedback-banner good';
+    fb.style.display='block';
+  } else {
+    playWrong();
+    var m=t.wrongMsg[Math.floor(Math.random()*t.wrongMsg.length)];
+    fb.textContent=m;
+    fb.className='feedback-banner bad';
+    fb.style.display='block';
+    var rv=document.getElementById('revealZone');
+    rv.textContent='✅ '+answer;
+    rv.style.display='block';
+    playReveal();
+  }
+  document.getElementById('scoreBadge').textContent=score;
+  document.getElementById('btnNext').style.display='block';
+  aria(fb.textContent);
+}
+
+function nextQuestion(){
+  curQ++;
+  if(curQ>=QUESTIONS[lang][curLevel].length)endLevel();
+  else loadQuestion();
+}
+
+function endLevel(){
+  var total=QUESTIONS[lang][curLevel].length;
+  var pct=correctCount/total;
+  var stars=pct>=0.875?3:pct>=0.625?2:1;
+  if(stars>(state.stars[curLevel]||0))state.stars[curLevel]=stars;
+  if(stars>=2&&curLevel+1<4&&state.unlocked<=curLevel+1)state.unlocked=curLevel+1;
+  saveState();
+  document.getElementById('successStars').textContent='⭐'.repeat(stars);
+  var t=tl();
+  document.getElementById('successTitle').textContent=stars===3?t.excellent:stars===2?t.bravo:t.good;
+  document.getElementById('successScore').textContent=t.successScore(correctCount);
+  document.getElementById('btnNextLevel').style.display=curLevel<3?'inline-block':'none';
+  showScreen('successScreen');
+  playWin();
+}
+
+function replayLevel(){startLevel(curLevel);}
+function nextLevel(){if(curLevel<3)startLevel(curLevel+1);else showLevels();}
+
+var gateA=0;
+function openParents(){
+  var a=Math.floor(Math.random()*9)+2;
+  var b=Math.floor(Math.random()*9)+2;
+  gateA=a*b;
+  document.getElementById('gateQuestion').textContent=a+' × '+b+' = ?';
+  document.getElementById('gateInput').value='';
+  document.getElementById('gateError').style.display='none';
+  document.getElementById('gateSection').style.display='block';
+  document.getElementById('parentsInfo').style.display='none';
+  document.getElementById('parentsModal').classList.add('open');
+}
+function checkGate(e){
+  e.preventDefault();
+  var v=parseInt(document.getElementById('gateInput').value,10);
+  if(v===gateA){
+    document.getElementById('gateSection').style.display='none';
+    document.getElementById('parentsInfo').style.display='block';
+  } else {
+    document.getElementById('gateError').style.display='block';
+  }
+}
+function closeParents(){document.getElementById('parentsModal').classList.remove('open');}
+
+function aria(msg){
+  var el=document.getElementById('ariaLive');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+loadState();
+setLang(lang);
+</script>
+</body>
+</html>

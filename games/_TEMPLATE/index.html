@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lumio — Gabarit de jeu</title>
+<style>
+  :root{
+    --soleil:#FFC542; --turquoise:#2EC4B6; --corail:#FF6B6B;
+    --pousse:#6BCB77; --encre:#2D3142; --creme:#FFF8EE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:"Fredoka","Baloo 2","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:radial-gradient(circle at 50% 30%, #FFF8EE 0%, #FFE9C7 100%);
+    color:var(--encre); display:flex; align-items:center; justify-content:center;
+    min-height:100dvh; overflow:hidden; text-align:center;
+  }
+  .card{ padding:28px 22px; max-width:520px; width:92%; }
+  .mascotte{ width:140px; height:140px; margin:0 auto 10px; filter:drop-shadow(0 8px 14px rgba(255,197,66,.45)); animation:float 3.2s ease-in-out infinite; }
+  @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  h1{ font-size:clamp(2.2rem,8vw,3.4rem); letter-spacing:.5px; color:var(--encre); }
+  h1 .dot{ color:var(--soleil); }
+  .subtitle{ font-size:clamp(1rem,4vw,1.3rem); color:#6b6f7d; margin:6px 0 22px; }
+  .play{
+    font:inherit; font-size:clamp(1.3rem,5vw,1.7rem); font-weight:600;
+    background:var(--turquoise); color:#fff; border:none; border-radius:999px;
+    padding:16px 46px; cursor:pointer; box-shadow:0 6px 0 #25a89c; transition:transform .08s, box-shadow .08s;
+  }
+  .play:active{ transform:translateY(4px); box-shadow:0 2px 0 #25a89c; }
+  .controls{ margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .chip{
+    font:inherit; font-size:1rem; background:#fff; color:var(--encre);
+    border:3px solid var(--soleil); border-radius:999px; padding:10px 18px; cursor:pointer;
+    min-height:48px; min-width:48px;
+  }
+  .chip.active{ background:var(--soleil); }
+  .note{ margin-top:26px; font-size:.85rem; color:#9a9ead; }
+  .stage{ display:none; }
+  .stage h2{ font-size:1.8rem; margin-bottom:10px;}
+</style>
+</head>
+<body>
+  <main class="card">
+    <!-- Mascotte « Lumi » la luciole (placeholder SVG) -->
+    <svg class="mascotte" viewBox="0 0 120 120" aria-hidden="true">
+      <ellipse cx="60" cy="98" rx="30" ry="7" fill="rgba(0,0,0,.06)"/>
+      <circle cx="60" cy="72" r="26" fill="#FFC542"/>
+      <circle cx="60" cy="72" r="14" fill="#FFE9A8"/>
+      <circle cx="50" cy="48" r="20" fill="#3A3F58"/>
+      <circle cx="44" cy="46" r="6" fill="#fff"/><circle cx="45" cy="47" r="3" fill="#2D3142"/>
+      <circle cx="57" cy="46" r="6" fill="#fff"/><circle cx="58" cy="47" r="3" fill="#2D3142"/>
+      <path d="M44 56 q6 6 14 0" stroke="#2D3142" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <line x1="42" y1="30" x2="34" y2="20" stroke="#3A3F58" stroke-width="3" stroke-linecap="round"/>
+      <line x1="58" y1="30" x2="66" y2="20" stroke="#3A3F58" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="33" cy="19" r="4" fill="#FFC542"/><circle cx="67" cy="19" r="4" fill="#FFC542"/>
+      <path d="M34 70 q-22 -6 -26 8 q18 6 26 -2 Z" fill="#9FE7DF" opacity=".85"/>
+      <path d="M86 70 q22 -6 26 8 q-18 6 -26 -2 Z" fill="#9FE7DF" opacity=".85"/>
+    </svg>
+
+    <h1>Lumio<span class="dot">.</span></h1>
+    <p class="subtitle" data-i18n="subtitle">Apprendre en s'amusant</p>
+    <button class="play" data-i18n="play" onclick="startGame()">Jouer</button>
+
+    <div class="stage" id="stage">
+      <h2 data-i18n="instructions">Touche la bonne réponse !</h2>
+      <p data-i18n="encourage">Essaie encore, tu y es presque !</p>
+    </div>
+
+    <div class="controls">
+      <button class="chip active" id="fr" onclick="setLang('fr')">FR</button>
+      <button class="chip" id="en" onclick="setLang('en')">EN</button>
+      <button class="chip" id="snd" onclick="toggleSound()">🔊</button>
+    </div>
+
+    <p class="note">Gabarit de jeu Lumio — remplace ce contenu par ton jeu. Voir <code>README.md</code> et <code>GAME.md</code>.</p>
+  </main>
+
+<script>
+  // i18n minimal embarqué (la source de vérité reste i18n/fr.json et i18n/en.json,
+  // chargés par le moteur commun lors de la construction du vrai jeu).
+  const STRINGS = {
+    fr:{ subtitle:"Apprendre en s'amusant", play:"Jouer", instructions:"Touche la bonne réponse !", encourage:"Essaie encore, tu y es presque !" },
+    en:{ subtitle:"Learning made fun", play:"Play", instructions:"Tap the correct answer!", encourage:"Try again, you're almost there!" }
+  };
+  let lang = (navigator.language||"fr").startsWith("en") ? "en" : "fr";
+  let soundOn = true;
+
+  function apply(){
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      const k = el.getAttribute("data-i18n");
+      if(STRINGS[lang][k]) el.textContent = STRINGS[lang][k];
+    });
+    document.getElementById("fr").classList.toggle("active", lang==="fr");
+    document.getElementById("en").classList.toggle("active", lang==="en");
+  }
+  function setLang(l){ lang=l; apply(); }
+  function toggleSound(){ soundOn=!soundOn; document.getElementById("snd").textContent = soundOn?"🔊":"🔇"; }
+  function startGame(){ document.getElementById("stage").style.display="block"; }
+  apply();
+</script>
+</body>
+</html>

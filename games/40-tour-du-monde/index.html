@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Tour du Monde / World Tour — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c;
+  --gold:#ffd23f; --sky:#7ec3ee; --sky-light:#eaf6ff;
+  --slate:#475569; --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,#eaf6ff 0%,#d0eaff 100%);
+  min-height:100vh; color:var(--navy);
+  display:flex; flex-direction:column;
+}
+#topbar{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 14px; background:var(--blue);
+  box-shadow:0 2px 8px #0003;
+}
+#topbar img{height:34px;}
+#brand{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:#fff; font-size:1.15rem; font-weight:700; flex:1;
+}
+.lang-btn{
+  background:transparent; border:2px solid #fff8;
+  color:#fff; border-radius:8px; padding:4px 10px;
+  cursor:pointer; font-size:.85rem; font-weight:700;
+  transition:background .2s;
+}
+.lang-btn.active{background:#fff3; border-color:#fff;}
+.lang-btn:hover{background:#fff2;}
+#muteBtn{
+  background:transparent; border:none; cursor:pointer;
+  font-size:1.4rem; line-height:1; padding:2px 6px;
+}
+.screen{display:none; flex-direction:column; align-items:center; padding:20px 12px; flex:1;}
+.screen.active{display:flex;}
+#titleScreen{justify-content:center; gap:14px;}
+#gameTitleTxt{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.2rem; font-weight:700; color:var(--blue); text-align:center;
+  line-height:1.15;
+}
+#gameSubtitle{color:var(--slate); font-size:1.05rem; text-align:center;}
+.btn-play{
+  background:var(--orange); color:#fff; border:none;
+  font-family:inherit; font-size:1.2rem; font-weight:700;
+  padding:14px 40px; border-radius:30px;
+  box-shadow:0 5px 0 var(--orange-dark);
+  cursor:pointer; transition:transform .1s, box-shadow .1s;
+  margin-top:6px;
+}
+.btn-play:active{transform:translateY(3px); box-shadow:0 2px 0 var(--orange-dark);}
+.btn-sec{
+  background:var(--blue); color:#fff; border:none;
+  font-family:inherit; font-size:1rem; font-weight:700;
+  padding:10px 26px; border-radius:20px;
+  box-shadow:0 4px 0 var(--blue-dark);
+  cursor:pointer; transition:transform .1s, box-shadow .1s;
+}
+.btn-sec:active{transform:translateY(2px); box-shadow:0 2px 0 var(--blue-dark);}
+#parentModal{
+  display:none; position:fixed; inset:0;
+  background:#0009; z-index:100;
+  align-items:center; justify-content:center;
+}
+#parentModal.open{display:flex;}
+.modal-box{
+  background:#fff; border-radius:20px; padding:28px 24px;
+  max-width:360px; width:90%; text-align:center;
+  box-shadow:0 8px 40px #0004;
+}
+.modal-box h2{color:var(--blue); margin-bottom:12px; font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.modal-box input{
+  width:100%; padding:10px; font-size:1.1rem;
+  border:2px solid var(--sky); border-radius:10px;
+  text-align:center; margin:10px 0;
+}
+.modal-box .err{color:#e55; font-size:.9rem; min-height:1.2em;}
+#levelSelectScreen{gap:16px;}
+#levelTitle{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.7rem; color:var(--blue); text-align:center;
+}
+.level-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
+  gap:12px; width:100%; max-width:600px;
+}
+.level-card{
+  background:#fff; border-radius:16px; padding:14px 10px;
+  box-shadow:0 3px 12px #0002; text-align:center;
+  cursor:pointer; border:3px solid transparent;
+  transition:transform .15s, border-color .15s;
+  position:relative;
+}
+.level-card:hover{transform:translateY(-3px);}
+.level-card.locked{opacity:.55; cursor:not-allowed;}
+.level-card.unlocked{border-color:var(--sky);}
+.level-card.completed{border-color:var(--success); background:#f0fff7;}
+.level-card .cont-icon{font-size:2rem;}
+.level-card .cont-name{font-weight:700; color:var(--blue); font-size:1rem; margin-top:4px;}
+.lock-icon{position:absolute;top:6px;right:10px;font-size:1rem;}
+#gameScreen{gap:10px; max-width:900px; width:100%; margin:0 auto;}
+#gameHeader{display:flex; align-items:center; gap:10px; width:100%;}
+#backBtn{
+  background:var(--blue); color:#fff; border:none;
+  border-radius:12px; padding:7px 14px; cursor:pointer;
+  font-family:inherit; font-size:.95rem; font-weight:700;
+  box-shadow:0 3px 0 var(--blue-dark);
+}
+#levelLabel{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.1rem; color:var(--blue); font-weight:700; flex:1; text-align:center;
+}
+#scoreArea{font-size:.95rem; color:var(--slate); white-space:nowrap;}
+#questionBox{
+  background:#fff; border-radius:16px; padding:14px 18px;
+  width:100%; text-align:center; font-size:1.1rem;
+  font-weight:700; color:var(--navy);
+  box-shadow:0 2px 10px #0002; min-height:56px;
+}
+#feedbackLive{min-height:30px; font-size:1rem; font-weight:700; text-align:center;}
+#mapContainer{
+  width:100%; max-width:800px;
+  background:#c8e8ff; border-radius:18px;
+  box-shadow:0 3px 14px #0003;
+  position:relative; overflow:hidden;
+}
+#mapContainer svg{width:100%; height:auto; display:block;}
+.country-path{stroke:#fff; stroke-width:1.2; cursor:pointer; transition:opacity .15s;}
+.country-path:hover{opacity:.78; stroke-width:2.2;}
+.correct-anim{animation:correctPulse .5s ease;}
+.wrong-anim{animation:wrongShake .4s ease;}
+@keyframes correctPulse{0%{opacity:1}30%{opacity:.4}60%{opacity:1}100%{opacity:1}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+#optionsArea{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;}
+.opt-btn{
+  background:#fff; border:3px solid var(--sky);
+  border-radius:14px; padding:10px 18px;
+  font-family:inherit; font-size:1rem; font-weight:700;
+  color:var(--navy); cursor:pointer; min-width:140px; min-height:48px;
+  transition:background .15s, border-color .15s;
+}
+.opt-btn:hover{background:var(--sky-light); border-color:var(--blue);}
+.opt-btn.correct{background:#e0fff0; border-color:var(--success); color:#1a7a4a;}
+.opt-btn.wrong{background:#ffe0e0; border-color:#e55; color:#c00;}
+#collectionBar{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; width:100%; padding:6px 0;}
+.flag-chip{
+  background:#fff; border-radius:10px; padding:4px 8px;
+  font-size:1.3rem; box-shadow:0 2px 6px #0002;
+  display:flex; align-items:center; gap:4px;
+}
+.flag-chip span.cc{font-size:.7rem; color:var(--slate); font-weight:700;}
+.flag-chip.locked-chip{filter:grayscale(1) opacity(.35);}
+#progressWrap{width:100%; background:#dde; border-radius:20px; height:10px; overflow:hidden;}
+#progressBar{height:100%; background:var(--success); border-radius:20px; transition:width .4s;}
+#successScreen{justify-content:center; gap:16px;}
+#successTitle{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2rem; color:var(--orange); text-align:center;
+}
+#starsRow{font-size:2.5rem; text-align:center; letter-spacing:4px;}
+#successMsg{color:var(--slate); text-align:center; font-size:1.05rem;}
+.btn-row{display:flex; flex-wrap:wrap; gap:12px; justify-content:center;}
+@media(max-width:500px){
+  #gameTitleTxt{font-size:1.6rem;}
+  .opt-btn{font-size:.9rem; padding:8px 12px; min-width:110px;}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span id="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" title="Son/Sound">&#128266;</button>
+</div>
+
+<div id="parentModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 id="pmTitle">Pour les parents</h2>
+    <p id="pmQuestion" style="margin-bottom:8px;font-size:1.05rem;"></p>
+    <input type="number" id="pmInput" inputmode="numeric" placeholder="?">
+    <div class="err" id="pmErr"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
+      <button class="btn-sec" onclick="checkParent()" id="pmOk">OK</button>
+      <button class="btn-sec" onclick="closeParent()" style="background:var(--slate);">&#10005;</button>
+    </div>
+  </div>
+</div>
+
+<div id="titleScreen" class="screen active">
+  <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="65" cy="72" r="50" fill="#1a6faa"/>
+    <circle cx="65" cy="72" r="50" fill="none" stroke="#fff" stroke-width="1.5" opacity=".25"/>
+    <ellipse cx="52" cy="58" rx="16" ry="12" fill="#5cbf4a" opacity=".9"/>
+    <ellipse cx="75" cy="55" rx="14" ry="10" fill="#5cbf4a" opacity=".9"/>
+    <ellipse cx="82" cy="73" rx="10" ry="13" fill="#5cbf4a" opacity=".9"/>
+    <ellipse cx="48" cy="80" rx="11" ry="9" fill="#5cbf4a" opacity=".9"/>
+    <ellipse cx="65" cy="72" rx="50" ry="16" fill="none" stroke="#fff" stroke-width="1" opacity=".2"/>
+    <ellipse cx="65" cy="72" rx="50" ry="32" fill="none" stroke="#fff" stroke-width="1" opacity=".18"/>
+    <line x1="65" y1="22" x2="65" y2="122" stroke="#fff" stroke-width="1" opacity=".18"/>
+    <circle cx="55" cy="28" r="24" fill="#ffe5b4"/>
+    <circle cx="47" cy="25" r="3" fill="#333"/>
+    <circle cx="63" cy="25" r="3" fill="#333"/>
+    <path d="M47 34 Q55 41 63 34" stroke="#c0692a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="55" cy="9" rx="20" ry="5" fill="#0f4c81"/>
+    <rect x="38" y="4" width="34" height="14" rx="4" fill="#0f4c81"/>
+    <text x="55" y="14" text-anchor="middle" font-size="9" fill="#ffd23f">&#9733;</text>
+  </svg>
+  <div id="gameTitleTxt">Tour du Monde<br><span style="font-size:1.4rem;color:var(--orange)">World Tour</span></div>
+  <div id="gameSubtitle"></div>
+  <button class="btn-play" onclick="showLevelSelect()" id="playBtn"></button>
+  <button class="btn-sec" onclick="openParent(null)" id="parentBtn" style="font-size:.95rem;padding:8px 20px;"></button>
+  <div id="titleCollection" style="margin-top:10px;text-align:center;">
+    <div id="titleCollLabel" style="font-size:.9rem;color:var(--slate);margin-bottom:6px;"></div>
+    <div id="titleCollChips" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:440px;"></div>
+  </div>
+</div>
+
+<div id="levelSelectScreen" class="screen">
+  <div id="levelTitle"></div>
+  <p id="levelSubtitle" style="color:var(--slate);font-size:.95rem;text-align:center;"></p>
+  <div class="level-grid" id="levelGrid"></div>
+  <button class="btn-sec" onclick="showTitle()" id="levelBackBtn" style="margin-top:6px;"></button>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div id="gameHeader" style="width:100%;max-width:800px;">
+    <button id="backBtn" onclick="showLevelSelect()"></button>
+    <div id="levelLabel"></div>
+    <div id="scoreArea"></div>
+  </div>
+  <div id="progressWrap" style="max-width:800px;width:100%;">
+    <div id="progressBar" style="width:0%"></div>
+  </div>
+  <div id="questionBox" role="status" aria-live="polite"></div>
+  <div id="feedbackLive" aria-live="assertive"></div>
+  <div id="mapContainer"></div>
+  <div id="optionsArea"></div>
+  <div id="collectionBar"></div>
+</div>
+
+<div id="successScreen" class="screen">
+  <div id="starsRow"></div>
+  <div id="successTitle"></div>
+  <div id="successMsg"></div>
+  <div class="btn-row">
+    <button class="btn-play" onclick="replayLevel()" id="replayBtn"></button>
+    <button class="btn-sec" onclick="nextLevelOrEnd()" id="nextBtn"></button>
+    <button class="btn-sec" onclick="showLevelSelect()" id="homeBtn" style="background:var(--slate);box-shadow:0 4px 0 #2c3a4a;"></button>
+  </div>
+  <div style="margin-top:14px;text-align:center;">
+    <div id="successCollLabel" style="font-size:.9rem;color:var(--slate);margin-bottom:6px;"></div>
+    <div id="successCollChips" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:500px;"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const T={
+  fr:{
+    subtitle:"Explore le monde ! Pays, capitales, continents",
+    play:"Jouer !",parentBtn:"Pour les parents",
+    pmTitle:"Porte parentale",pmQ:"Calcule : ",pmOk:"OK",pmErr:"Essaie encore !",
+    pmInfo:"Tour du Monde — Ce jeu educatif apprend aux enfants (8-12 ans) les pays du monde, leurs capitales et leurs continents. Aucune donnee collectee, aucune publicite, 100% hors-ligne.",
+    levelTitle:"Choisis un continent",levelSub:"Debloque les continents un par un !",levelBack:"Accueil",
+    back:"Retour",score:"Score : ",
+    qFindCountry:"Trouve sur la carte :",qCapitalOf:"Quelle est la capitale de",qCountryOfCapital:"A quel pays appartient la capitale",
+    correct:"Bravo !",wrong:"Essaie encore !",wrongReveal:"C'etait : ",
+    stars3:"Parfait !",stars2:"Tres bien !",stars1:"Continue !",
+    successMsg:"Tu as decouvert de nouveaux pays !",collectionLabel:"Ta collection :",
+    replay:"Rejouer",next:"Continent suivant",home:"Accueil",
+    locked:"Verrouille",completed:"Termine",
+    continents:["Amerique","Europe","Afrique","Asie","Oceanie"],
+    continentSubs:["12 pays","10 pays","8 pays","8 pays","5 pays"]
+  },
+  en:{
+    subtitle:"Explore the world! Countries, capitals, continents",
+    play:"Play!",parentBtn:"For parents",
+    pmTitle:"Parent gate",pmQ:"Calculate: ",pmOk:"OK",pmErr:"Try again!",
+    pmInfo:"World Tour — This educational game teaches children (8-12) countries, capitals and continents. No data collected, no ads, 100% offline.",
+    levelTitle:"Choose a continent",levelSub:"Unlock continents one by one!",levelBack:"Home",
+    back:"Back",score:"Score: ",
+    qFindCountry:"Find on the map:",qCapitalOf:"What is the capital of",qCountryOfCapital:"Which country has the capital",
+    correct:"Great!",wrong:"Try again!",wrongReveal:"It was: ",
+    stars3:"Perfect!",stars2:"Very good!",stars1:"Keep going!",
+    successMsg:"You discovered new countries!",collectionLabel:"Your collection:",
+    replay:"Play again",next:"Next continent",home:"Home",
+    locked:"Locked",completed:"Done",
+    continents:["Americas","Europe","Africa","Asia","Oceania"],
+    continentSubs:["12 countries","10 countries","8 countries","8 countries","5 countries"]
+  }
+};
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+function t(k){return T[lang][k]||k;}
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  renderCurrentScreen();
+}
+
+let muted=false;
+let AC=null;
+try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+function beep(freq,dur,type,vol){
+  if(muted||!AC)return;
+  type=type||'sine';vol=vol||0.15;
+  try{
+    if(AC.state==='suspended')AC.resume();
+    var g=AC.createGain();g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    var o=AC.createOscillator();o.type=type;o.frequency.value=freq;
+    o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur);
+  }catch(e){}
+}
+function soundCorrect(){beep(660,.1);setTimeout(function(){beep(880,.18);},110);}
+function soundWrong(){beep(200,.25,'sawtooth',.1);}
+function soundWin(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){beep(f,.2);},i*110);});}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+var COUNTRIES=[
+  {id:'us',name:{fr:'Etats-Unis',en:'United States'},capital:{fr:'Washington D.C.',en:'Washington D.C.'},flag:'🇺🇸',continent:0},
+  {id:'ca',name:{fr:'Canada',en:'Canada'},capital:{fr:'Ottawa',en:'Ottawa'},flag:'🇨🇦',continent:0},
+  {id:'mx',name:{fr:'Mexique',en:'Mexico'},capital:{fr:'Mexico',en:'Mexico City'},flag:'🇲🇽',continent:0},
+  {id:'br',name:{fr:'Bresil',en:'Brazil'},capital:{fr:'Brasilia',en:'Brasilia'},flag:'🇧🇷',continent:0},
+  {id:'ar',name:{fr:'Argentine',en:'Argentina'},capital:{fr:'Buenos Aires',en:'Buenos Aires'},flag:'🇦🇷',continent:0},
+  {id:'co',name:{fr:'Colombie',en:'Colombia'},capital:{fr:'Bogota',en:'Bogota'},flag:'🇨🇴',continent:0},
+  {id:'pe',name:{fr:'Perou',en:'Peru'},capital:{fr:'Lima',en:'Lima'},flag:'🇵🇪',continent:0},
+  {id:'cl',name:{fr:'Chili',en:'Chile'},capital:{fr:'Santiago',en:'Santiago'},flag:'🇨🇱',continent:0},
+  {id:'ve',name:{fr:'Venezuela',en:'Venezuela'},capital:{fr:'Caracas',en:'Caracas'},flag:'🇻🇪',continent:0},
+  {id:'cu',name:{fr:'Cuba',en:'Cuba'},capital:{fr:'La Havane',en:'Havana'},flag:'🇨🇺',continent:0},
+  {id:'bo',name:{fr:'Bolivie',en:'Bolivia'},capital:{fr:'La Paz',en:'La Paz'},flag:'🇧🇴',continent:0},
+  {id:'uy',name:{fr:'Uruguay',en:'Uruguay'},capital:{fr:'Montevideo',en:'Montevideo'},flag:'🇺🇾',continent:0},
+  {id:'fr',name:{fr:'France',en:'France'},capital:{fr:'Paris',en:'Paris'},flag:'🇫🇷',continent:1},
+  {id:'de',name:{fr:'Allemagne',en:'Germany'},capital:{fr:'Berlin',en:'Berlin'},flag:'🇩🇪',continent:1},
+  {id:'es',name:{fr:'Espagne',en:'Spain'},capital:{fr:'Madrid',en:'Madrid'},flag:'🇪🇸',continent:1},
+  {id:'it',name:{fr:'Italie',en:'Italy'},capital:{fr:'Rome',en:'Rome'},flag:'🇮🇹',continent:1},
+  {id:'gb',name:{fr:'Royaume-Uni',en:'United Kingdom'},capital:{fr:'Londres',en:'London'},flag:'🇬🇧',continent:1},
+  {id:'pt',name:{fr:'Portugal',en:'Portugal'},capital:{fr:'Lisbonne',en:'Lisbon'},flag:'🇵🇹',continent:1},
+  {id:'nl',name:{fr:'Pays-Bas',en:'Netherlands'},capital:{fr:'Amsterdam',en:'Amsterdam'},flag:'🇳🇱',continent:1},
+  {id:'be',name:{fr:'Belgique',en:'Belgium'},capital:{fr:'Bruxelles',en:'Brussels'},flag:'🇧🇪',continent:1},
+  {id:'pl',name:{fr:'Pologne',en:'Poland'},capital:{fr:'Varsovie',en:'Warsaw'},flag:'🇵🇱',continent:1},
+  {id:'se',name:{fr:'Suede',en:'Sweden'},capital:{fr:'Stockholm',en:'Stockholm'},flag:'🇸🇪',continent:1},
+  {id:'eg',name:{fr:'Egypte',en:'Egypt'},capital:{fr:'Le Caire',en:'Cairo'},flag:'🇪🇬',continent:2},
+  {id:'za',name:{fr:'Afrique du Sud',en:'South Africa'},capital:{fr:'Pretoria',en:'Pretoria'},flag:'🇿🇦',continent:2},
+  {id:'ng',name:{fr:'Nigeria',en:'Nigeria'},capital:{fr:'Abuja',en:'Abuja'},flag:'🇳🇬',continent:2},
+  {id:'ke',name:{fr:'Kenya',en:'Kenya'},capital:{fr:'Nairobi',en:'Nairobi'},flag:'🇰🇪',continent:2},
+  {id:'ma',name:{fr:'Maroc',en:'Morocco'},capital:{fr:'Rabat',en:'Rabat'},flag:'🇲🇦',continent:2},
+  {id:'et',name:{fr:'Ethiopie',en:'Ethiopia'},capital:{fr:'Addis-Abeba',en:'Addis Ababa'},flag:'🇪🇹',continent:2},
+  {id:'gh',name:{fr:'Ghana',en:'Ghana'},capital:{fr:'Accra',en:'Accra'},flag:'🇬🇭',continent:2},
+  {id:'tn',name:{fr:'Tunisie',en:'Tunisia'},capital:{fr:'Tunis',en:'Tunis'},flag:'🇹🇳',continent:2},
+  {id:'cn',name:{fr:'Chine',en:'China'},capital:{fr:'Pekin',en:'Beijing'},flag:'🇨🇳',continent:3},
+  {id:'jp',name:{fr:'Japon',en:'Japan'},capital:{fr:'Tokyo',en:'Tokyo'},flag:'🇯🇵',continent:3},
+  {id:'in',name:{fr:'Inde',en:'India'},capital:{fr:'New Delhi',en:'New Delhi'},flag:'🇮🇳',continent:3},
+  {id:'sa',name:{fr:'Arabie Saoudite',en:'Saudi Arabia'},capital:{fr:'Riyad',en:'Riyadh'},flag:'🇸🇦',continent:3},
+  {id:'ru',name:{fr:'Russie',en:'Russia'},capital:{fr:'Moscou',en:'Moscow'},flag:'🇷🇺',continent:3},
+  {id:'kr',name:{fr:'Coree du Sud',en:'South Korea'},capital:{fr:'Seoul',en:'Seoul'},flag:'🇰🇷',continent:3},
+  {id:'th',name:{fr:'Thailande',en:'Thailand'},capital:{fr:'Bangkok',en:'Bangkok'},flag:'🇹🇭',continent:3},
+  {id:'tr',name:{fr:'Turquie',en:'Turkey'},capital:{fr:'Ankara',en:'Ankara'},flag:'🇹🇷',continent:3},
+  {id:'au',name:{fr:'Australie',en:'Australia'},capital:{fr:'Canberra',en:'Canberra'},flag:'🇦🇺',continent:4},
+  {id:'nz',name:{fr:'Nouvelle-Zelande',en:'New Zealand'},capital:{fr:'Wellington',en:'Wellington'},flag:'🇳🇿',continent:4},
+  {id:'pg',name:{fr:'Papouasie',en:'Papua New Guinea'},capital:{fr:'Port Moresby',en:'Port Moresby'},flag:'🇵🇬',continent:4},
+  {id:'fj',name:{fr:'Fidji',en:'Fiji'},capital:{fr:'Suva',en:'Suva'},flag:'🇫🇯',continent:4},
+  {id:'ws',name:{fr:'Samoa',en:'Samoa'},capital:{fr:'Apia',en:'Apia'},flag:'🇼🇸',continent:4}
+];
+
+function getContCountries(ci){return COUNTRIES.filter(function(c){return c.continent===ci;});}
+function getCountryById(id){return COUNTRIES.find(function(c){return c.id===id;})||null;}
+
+// SVG map - continent colored regions with clickable country paths
+var MAP_SVG='<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" id="worldMap"><rect width="800" height="450" fill="#c8e8ff"/>'
+// Americas
++'<path id="cp-ca" data-country="ca" class="country-path" fill="#5a9fd4" d="M70,40 L170,40 L175,55 L185,60 L180,80 L165,88 L140,92 L120,100 L95,96 L75,86 L60,68 Z"/>'
++'<path id="cp-us" data-country="us" class="country-path" fill="#3d7dbf" d="M72,100 L162,92 L168,102 L170,120 L162,132 L148,140 L120,140 L96,136 L76,128 L66,114 Z"/>'
++'<path id="cp-cu" data-country="cu" class="country-path" fill="#4a8fc8" d="M148,146 L178,143 L182,150 L174,156 L150,156 L144,150 Z"/>'
++'<path id="cp-mx" data-country="mx" class="country-path" fill="#2e6da8" d="M68,140 L132,138 L150,144 L148,160 L138,168 L116,168 L96,158 L78,150 Z"/>'
++'<path id="cp-co" data-country="co" class="country-path" fill="#5a9fd4" d="M108,172 L138,170 L142,182 L136,196 L118,198 L104,190 L102,178 Z"/>'
++'<path id="cp-ve" data-country="ve" class="country-path" fill="#3d7dbf" d="M140,170 L166,168 L170,180 L162,190 L144,192 L134,184 L132,174 Z"/>'
++'<path id="cp-pe" data-country="pe" class="country-path" fill="#4a8fc8" d="M98,198 L120,196 L130,206 L128,224 L112,232 L96,224 L90,210 Z"/>'
++'<path id="cp-bo" data-country="bo" class="country-path" fill="#2e6da8" d="M122,198 L140,196 L148,210 L142,224 L126,226 L114,216 Z"/>'
++'<path id="cp-br" data-country="br" class="country-path" fill="#5a9fd4" d="M140,172 L178,168 L196,180 L198,204 L186,224 L168,238 L146,240 L130,228 L126,210 L134,196 Z"/>'
++'<path id="cp-cl" data-country="cl" class="country-path" fill="#3d7dbf" d="M92,230 L108,228 L116,248 L110,272 L96,278 L84,268 L86,250 Z"/>'
++'<path id="cp-ar" data-country="ar" class="country-path" fill="#4a8fc8" d="M110,232 L142,226 L148,244 L142,266 L126,276 L106,272 L96,256 L100,238 Z"/>'
++'<path id="cp-uy" data-country="uy" class="country-path" fill="#2e6da8" d="M144,250 L160,246 L164,258 L152,264 L140,260 L136,252 Z"/>'
+// Europe
++'<path id="cp-gb" data-country="gb" class="country-path" fill="#e8734a" d="M286,56 L302,54 L308,66 L300,78 L286,78 L280,68 Z"/>'
++'<path id="cp-se" data-country="se" class="country-path" fill="#e8734a" d="M334,34 L352,30 L360,48 L354,68 L340,70 L330,56 L330,42 Z"/>'
++'<path id="cp-nl" data-country="nl" class="country-path" fill="#c04a28" d="M316,66 L332,64 L334,76 L320,78 L312,72 Z"/>'
++'<path id="cp-be" data-country="be" class="country-path" fill="#d4603a" d="M306,76 L322,74 L324,86 L316,90 L304,86 Z"/>'
++'<path id="cp-fr" data-country="fr" class="country-path" fill="#d4603a" d="M292,84 L318,80 L326,92 L320,108 L304,114 L290,108 L284,96 Z"/>'
++'<path id="cp-es" data-country="es" class="country-path" fill="#c04a28" d="M280,112 L314,108 L320,120 L314,134 L290,136 L272,126 L272,116 Z"/>'
++'<path id="cp-pt" data-country="pt" class="country-path" fill="#e8734a" d="M270,114 L280,112 L278,136 L268,136 L264,124 Z"/>'
++'<path id="cp-de" data-country="de" class="country-path" fill="#e8734a" d="M318,76 L348,72 L354,88 L346,106 L324,110 L314,96 L316,82 Z"/>'
++'<path id="cp-it" data-country="it" class="country-path" fill="#d4603a" d="M320,112 L344,108 L354,120 L348,136 L334,148 L322,148 L316,134 L316,120 Z"/>'
++'<path id="cp-pl" data-country="pl" class="country-path" fill="#c04a28" d="M348,70 L376,68 L382,84 L372,98 L346,98 L340,84 Z"/>'
+// Africa
++'<path id="cp-ma" data-country="ma" class="country-path" fill="#f5a623" d="M274,146 L304,142 L310,156 L302,168 L276,170 L268,158 Z"/>'
++'<path id="cp-tn" data-country="tn" class="country-path" fill="#e09010" d="M318,142 L336,140 L340,152 L330,162 L316,158 Z"/>'
++'<path id="cp-eg" data-country="eg" class="country-path" fill="#f5a623" d="M356,142 L396,140 L400,164 L390,174 L356,174 L350,162 L352,150 Z"/>'
++'<path id="cp-gh" data-country="gh" class="country-path" fill="#f5a623" d="M286,188 L308,184 L312,200 L300,210 L282,206 L280,194 Z"/>'
++'<path id="cp-ng" data-country="ng" class="country-path" fill="#e09010" d="M308,188 L336,184 L344,200 L336,216 L312,216 L302,202 Z"/>'
++'<path id="cp-et" data-country="et" class="country-path" fill="#e09010" d="M390,184 L424,180 L430,200 L418,212 L392,214 L380,200 Z"/>'
++'<path id="cp-ke" data-country="ke" class="country-path" fill="#f5a623" d="M406,214 L434,210 L438,232 L422,242 L400,240 L394,226 Z"/>'
++'<path id="cp-za" data-country="za" class="country-path" fill="#e09010" d="M312,256 L360,250 L376,268 L368,290 L342,300 L314,292 L300,276 Z"/>'
+// Asia
++'<path id="cp-ru" data-country="ru" class="country-path" fill="#8b5cf6" d="M376,36 L584,30 L592,58 L580,80 L550,84 L470,82 L396,78 L368,58 Z"/>'
++'<path id="cp-tr" data-country="tr" class="country-path" fill="#7c3aed" d="M380,130 L434,126 L442,138 L432,150 L386,152 L374,140 Z"/>'
++'<path id="cp-sa" data-country="sa" class="country-path" fill="#8b5cf6" d="M414,158 L464,152 L472,170 L462,192 L428,196 L410,180 Z"/>'
++'<path id="cp-in" data-country="in" class="country-path" fill="#7c3aed" d="M486,150 L534,146 L542,166 L534,192 L514,214 L494,216 L476,202 L474,180 Z"/>'
++'<path id="cp-cn" data-country="cn" class="country-path" fill="#6d28d9" d="M524,84 L614,80 L622,102 L616,128 L594,144 L552,146 L524,140 L514,120 Z"/>'
++'<path id="cp-kr" data-country="kr" class="country-path" fill="#8b5cf6" d="M614,104 L632,100 L636,114 L626,124 L610,122 L606,112 Z"/>'
++'<path id="cp-jp" data-country="jp" class="country-path" fill="#7c3aed" d="M638,88 L658,84 L664,100 L658,118 L638,118 L628,106 Z"/>'
++'<path id="cp-th" data-country="th" class="country-path" fill="#6d28d9" d="M552,164 L582,160 L588,178 L576,196 L552,196 L542,180 Z"/>'
+// Oceania
++'<path id="cp-pg" data-country="pg" class="country-path" fill="#2aa866" d="M638,216 L678,210 L686,226 L672,238 L636,238 L628,224 Z"/>'
++'<path id="cp-au" data-country="au" class="country-path" fill="#34c77b" d="M598,242 L684,234 L704,260 L698,296 L670,314 L628,316 L596,300 L580,274 L584,252 Z"/>'
++'<path id="cp-nz" data-country="nz" class="country-path" fill="#2aa866" d="M700,302 L720,296 L726,314 L718,330 L700,330 L692,316 Z"/>'
++'<path id="cp-fj" data-country="fj" class="country-path" fill="#34c77b" d="M714,270 L728,264 L732,276 L722,282 L710,278 Z"/>'
++'<path id="cp-ws" data-country="ws" class="country-path" fill="#2aa866" d="M742,272 L756,268 L758,278 L748,284 L738,280 Z"/>'
+// subtle labels
++'<text x="122" y="70" font-size="7" fill="#fff" opacity=".6" text-anchor="middle">Canada</text>'
++'<text x="118" y="118" font-size="7" fill="#fff" opacity=".6" text-anchor="middle">USA</text>'
++'<text x="108" y="157" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Mexico</text>'
++'<text x="168" y="208" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Brazil</text>'
++'<text x="124" y="254" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Argentina</text>'
++'<text x="297" y="98" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">France</text>'
++'<text x="334" y="90" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Germany</text>'
++'<text x="293" y="124" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Spain</text>'
++'<text x="335" y="128" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Italy</text>'
++'<text x="373" y="158" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Egypt</text>'
++'<text x="319" y="202" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Nigeria</text>'
++'<text x="412" y="228" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Kenya</text>'
++'<text x="568" y="114" font-size="7" fill="#fff" opacity=".6" text-anchor="middle">China</text>'
++'<text x="506" y="184" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">India</text>'
++'<text x="646" y="104" font-size="6" fill="#fff" opacity=".6" text-anchor="middle">Japan</text>'
++'<text x="641" y="276" font-size="7" fill="#fff" opacity=".6" text-anchor="middle">Australia</text>'
++'</svg>';
+
+var LS_KEY='pgrg_tour_monde';
+var state={unlockedLevels:[0],completedLevels:[],collection:[],scores:{}};
+function loadState(){
+  try{var s=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(s.unlockedLevels)state.unlockedLevels=s.unlockedLevels;
+    if(s.completedLevels)state.completedLevels=s.completedLevels;
+    if(s.collection)state.collection=s.collection;
+    if(s.scores)state.scores=s.scores;
+  }catch(e){}
+}
+function saveState(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+
+var currentScreen='title';
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  currentScreen=id;
+}
+function renderCurrentScreen(){
+  if(currentScreen==='title')renderTitle();
+  else if(currentScreen==='levelSelect')renderLevelSelect();
+  else if(currentScreen==='game')renderGameUI();
+  else if(currentScreen==='success')renderSuccess();
+}
+function showTitle(){renderTitle();showScreen('titleScreen');}
+function renderTitle(){
+  document.getElementById('gameSubtitle').textContent=t('subtitle');
+  document.getElementById('playBtn').textContent=t('play');
+  document.getElementById('parentBtn').textContent=t('parentBtn');
+  document.getElementById('titleCollLabel').textContent=t('collectionLabel');
+  renderChips('titleCollChips');
+}
+function renderChips(cid){
+  var el=document.getElementById(cid);el.innerHTML='';
+  COUNTRIES.forEach(function(c){
+    var d=document.createElement('div');
+    d.className='flag-chip'+(state.collection.indexOf(c.id)<0?' locked-chip':'');
+    d.title=c.name[lang];
+    d.innerHTML=c.flag+'<span class="cc">'+c.id.toUpperCase()+'</span>';
+    el.appendChild(d);
+  });
+}
+
+var pmAnswer=0,pmCallback=null;
+function openParent(cb){
+  pmCallback=cb;
+  var a=2+Math.floor(Math.random()*8),b=2+Math.floor(Math.random()*8);
+  pmAnswer=a*b;
+  document.getElementById('pmTitle').textContent=t('pmTitle');
+  document.getElementById('pmQuestion').textContent=t('pmQ')+a+' x '+b+' = ?';
+  document.getElementById('pmOk').textContent=t('pmOk');
+  document.getElementById('pmErr').textContent='';
+  document.getElementById('pmInput').value='';
+  document.getElementById('parentModal').classList.add('open');
+  setTimeout(function(){document.getElementById('pmInput').focus();},120);
+}
+function closeParent(){document.getElementById('parentModal').classList.remove('open');}
+function checkParent(){
+  var v=parseInt(document.getElementById('pmInput').value,10);
+  if(v===pmAnswer){
+    closeParent();
+    if(pmCallback)pmCallback();
+    else alert(T[lang].pmInfo);
+  }else{
+    document.getElementById('pmErr').textContent=t('pmErr');
+    document.getElementById('pmInput').value='';
+    document.getElementById('pmInput').focus();
+  }
+}
+document.getElementById('pmInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkParent();});
+
+var CONT_ICONS=['🌎','🌍','🌍','🌏','🌏'];
+function showLevelSelect(){renderLevelSelect();showScreen('levelSelectScreen');}
+function renderLevelSelect(){
+  document.getElementById('levelTitle').textContent=t('levelTitle');
+  document.getElementById('levelSubtitle').textContent=t('levelSub');
+  document.getElementById('levelBackBtn').textContent=t('levelBack');
+  var grid=document.getElementById('levelGrid');grid.innerHTML='';
+  var names=t('continents'),subs=t('continentSubs');
+  for(var ci=0;ci<5;ci++){
+    (function(ci){
+      var card=document.createElement('div');
+      var isUnlocked=state.unlockedLevels.indexOf(ci)>=0;
+      var isCompleted=state.completedLevels.indexOf(ci)>=0;
+      card.className='level-card '+(isCompleted?'completed':isUnlocked?'unlocked':'locked');
+      card.innerHTML='<div class="cont-icon">'+CONT_ICONS[ci]+'</div>'
+        +'<div class="cont-name">'+names[ci]+'</div>'
+        +'<div style="font-size:.8rem;color:var(--slate);margin-top:4px;">'+subs[ci]+'</div>'
+        +(isCompleted?'<div style="font-size:.75rem;color:var(--success);margin-top:4px;">'+t('completed')+' ✓</div>':'')
+        +(!isUnlocked?'<div class="lock-icon">🔒</div>':'');
+      if(isUnlocked)card.addEventListener('click',function(){startLevel(ci);});
+      grid.appendChild(card);
+    })(ci);
+  }
+}
+
+var currentContinent=0,questions=[],qIndex=0,correct=0,wrongCountQ=0,waitingNext=false;
+function startLevel(ci){
+  currentContinent=ci;
+  buildQuestions(ci);
+  qIndex=0;correct=0;wrongCountQ=0;waitingNext=false;
+  renderGameUI();
+  showScreen('gameScreen');
+  initMap();
+  nextQuestion();
+}
+function buildQuestions(ci){
+  var countries=getContCountries(ci);questions=[];
+  countries.forEach(function(c,i){
+    var type=['find','capital','capitalReverse'][i%3];
+    questions.push({type:type,country:c});
+  });
+  for(var i=questions.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=questions[i];questions[i]=questions[j];questions[j]=tmp;
+  }
+}
+function renderGameUI(){
+  var names=t('continents');
+  document.getElementById('backBtn').textContent=t('back');
+  document.getElementById('levelLabel').textContent=CONT_ICONS[currentContinent]+' '+names[currentContinent];
+  updateScore();
+}
+function updateScore(){
+  document.getElementById('scoreArea').textContent=t('score')+correct+' / '+questions.length;
+  document.getElementById('progressBar').style.width=(qIndex/Math.max(questions.length,1)*100)+'%';
+  renderChips('collectionBar');
+}
+function initMap(){
+  document.getElementById('mapContainer').innerHTML=MAP_SVG;
+  document.querySelectorAll('.country-path').forEach(function(p){
+    p.addEventListener('click',function(){onMapClick(p.dataset.country);});
+    p.addEventListener('touchend',function(e){e.preventDefault();onMapClick(p.dataset.country);},{passive:false});
+  });
+  resetMapHighlights();
+}
+function resetMapHighlights(){
+  document.querySelectorAll('.country-path').forEach(function(p){
+    p.classList.remove('correct-anim','wrong-anim');
+    p.style.opacity='';
+    p.style.strokeWidth='';
+  });
+}
+function dimOtherContinents(ci){
+  var ids=getContCountries(ci).map(function(c){return c.id;});
+  document.querySelectorAll('.country-path').forEach(function(p){
+    p.style.opacity=(ids.indexOf(p.dataset.country)>=0)?'1':'0.38';
+  });
+}
+function nextQuestion(){
+  if(qIndex>=questions.length){endLevel();return;}
+  waitingNext=false;wrongCountQ=0;
+  var q=questions[qIndex];
+  resetMapHighlights();
+  dimOtherContinents(currentContinent);
+  document.getElementById('feedbackLive').textContent='';
+  document.getElementById('optionsArea').innerHTML='';
+  updateScore();
+  if(q.type==='find'){
+    document.getElementById('questionBox').textContent=t('qFindCountry')+' '+q.country.name[lang]+' '+q.country.flag;
+    document.getElementById('optionsArea').style.display='none';
+    document.getElementById('mapContainer').style.display='';
+  }else if(q.type==='capital'){
+    document.getElementById('questionBox').textContent=t('qCapitalOf')+' '+q.country.name[lang]+' '+q.country.flag+' ?';
+    showOptions(q.country,false);
+    document.getElementById('mapContainer').style.display='none';
+    document.getElementById('optionsArea').style.display='flex';
+  }else{
+    document.getElementById('questionBox').textContent=t('qCountryOfCapital')+' '+q.country.capital[lang]+' ?';
+    showOptions(q.country,true);
+    document.getElementById('mapContainer').style.display='none';
+    document.getElementById('optionsArea').style.display='flex';
+  }
+}
+function showOptions(correctC,reverse){
+  var area=document.getElementById('optionsArea');area.innerHTML='';
+  var pool=COUNTRIES.filter(function(c){return c.id!==correctC.id;});
+  pool.sort(function(){return Math.random()-.5;});
+  var wrongs=pool.slice(0,3);
+  var all=[correctC].concat(wrongs);all.sort(function(){return Math.random()-.5;});
+  all.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.textContent=reverse?(c.name[lang]+' '+c.flag):(c.capital[lang]);
+    btn.addEventListener('click',function(){onOptionClick(btn,c.id,correctC.id);});
+    area.appendChild(btn);
+  });
+}
+function onMapClick(cid){
+  if(waitingNext)return;
+  var q=questions[qIndex];if(q.type!=='find')return;
+  var path=document.querySelector('[data-country="'+cid+'"]');if(!path)return;
+  if(cid===q.country.id)handleCorrect(path,null);
+  else handleWrong(path,null,q.country.id);
+}
+function onOptionClick(btn,selectedId,correctId){
+  if(waitingNext)return;
+  if(selectedId===correctId)handleCorrect(null,btn);
+  else handleWrong(null,btn,correctId);
+}
+function handleCorrect(path,btn){
+  waitingNext=true;correct++;
+  var q=questions[qIndex];
+  if(state.collection.indexOf(q.country.id)<0){state.collection.push(q.country.id);saveState();}
+  soundCorrect();
+  var fb=document.getElementById('feedbackLive');
+  fb.style.color='var(--success)';fb.textContent=t('correct')+' '+q.country.flag;
+  if(path){path.classList.add('correct-anim');path.style.fill='#34c77b';path.style.stroke='#fff';}
+  if(btn){btn.classList.add('correct');document.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;});}
+  updateScore();qIndex++;
+  setTimeout(nextQuestion,950);
+}
+function handleWrong(path,btn,correctId){
+  wrongCountQ++;
+  soundWrong();
+  var fb=document.getElementById('feedbackLive');
+  fb.style.color='#e55';fb.textContent=t('wrong');
+  if(path){path.classList.add('wrong-anim');setTimeout(function(){path.classList.remove('wrong-anim');},450);}
+  if(btn){btn.classList.add('wrong');btn.disabled=true;}
+  if(wrongCountQ>=2){
+    waitingNext=true;
+    var q=questions[qIndex];
+    if(q.type==='find'){
+      var cp=document.querySelector('[data-country="'+correctId+'"]');
+      if(cp){cp.style.fill='#ffd23f';cp.style.stroke='#f97316';}
+    }else{
+      var cc=getCountryById(correctId);
+      document.querySelectorAll('.opt-btn').forEach(function(b){
+        var txt=b.textContent;
+        if(cc&&(txt.indexOf(cc.capital[lang])>=0||txt.indexOf(cc.name[lang])>=0))b.classList.add('correct');
+        b.disabled=true;
+      });
+    }
+    fb.textContent=t('wrongReveal')+(getCountryById(correctId)?getCountryById(correctId).name[lang]:'');
+    qIndex++;wrongCountQ=0;
+    setTimeout(function(){fb.textContent='';nextQuestion();},1500);
+  }
+}
+var lastStars=0;
+function endLevel(){
+  var pct=correct/questions.length;
+  lastStars=pct>=.9?3:pct>=.7?2:1;
+  if(state.completedLevels.indexOf(currentContinent)<0)state.completedLevels.push(currentContinent);
+  if(currentContinent<4&&state.unlockedLevels.indexOf(currentContinent+1)<0)state.unlockedLevels.push(currentContinent+1);
+  state.scores[currentContinent]=Math.max(state.scores[currentContinent]||0,Math.round(pct*100));
+  saveState();soundWin();
+  renderSuccess();showScreen('successScreen');
+}
+function renderSuccess(){
+  document.getElementById('starsRow').textContent=['⭐','⭐⭐','⭐⭐⭐'][lastStars-1];
+  document.getElementById('successTitle').textContent=[t('stars1'),t('stars2'),t('stars3')][lastStars-1];
+  document.getElementById('successMsg').textContent=t('successMsg');
+  document.getElementById('replayBtn').textContent=t('replay');
+  var hasNext=currentContinent<4&&state.unlockedLevels.indexOf(currentContinent+1)>=0;
+  var nb=document.getElementById('nextBtn');nb.textContent=t('next')+' →';nb.style.display=hasNext?'':'none';
+  document.getElementById('homeBtn').textContent=t('home');
+  document.getElementById('successCollLabel').textContent=t('collectionLabel');
+  renderChips('successCollChips');
+}
+function replayLevel(){startLevel(currentContinent);}
+function nextLevelOrEnd(){if(currentContinent<4)startLevel(currentContinent+1);else showLevelSelect();}
+
+loadState();renderTitle();showScreen('titleScreen');
+document.addEventListener('touchend',function(e){if(e.detail>1)e.preventDefault();},{passive:false});
+</script>
+</body>
+</html>

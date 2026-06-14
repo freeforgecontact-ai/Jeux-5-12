@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Fabrique de Rimes / Rhyme Lab — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--sky-light) 0%,#d0eeff 100%);
+  min-height:100vh;color:var(--navy);
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--blue);color:#fff;flex-wrap:wrap;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1}
+#topbar .brand span{font-family:'Fredoka','Nunito',system-ui;font-size:1.2rem;font-weight:700;letter-spacing:.5px}
+.lang-btn{background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.4);color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.9rem;font-weight:700;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;}
+.lang-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+#muteBtn{background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:50%;width:48px;height:48px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;}
+.screen{display:none;padding:20px 16px;max-width:700px;margin:0 auto;}
+.screen.active{display:block}
+#titleScreen{text-align:center}
+.mascot-wrap{margin:20px auto;display:flex;justify-content:center}
+#mainTitle{font-size:2.4rem;color:var(--blue);margin-bottom:6px}
+#subTitle{font-size:1.1rem;color:var(--slate);margin-bottom:24px}
+.btn-play{display:inline-block;background:var(--orange);color:#fff;padding:16px 48px;border-radius:32px;font-size:1.4rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 0 var(--orange-dark);font-family:'Fredoka','Nunito',system-ui;transition:transform .1s,box-shadow .1s;min-height:60px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 3px 0 var(--orange-dark)}
+.btn-parents{display:inline-block;margin-top:18px;color:var(--slate);font-size:.9rem;cursor:pointer;text-decoration:underline;background:none;border:none;}
+#parentsGate{background:#fff;border-radius:20px;padding:24px;margin-top:16px;box-shadow:0 4px 24px rgba(15,76,129,.12);}
+#parentsGate h3{color:var(--blue);margin-bottom:12px}
+.gate-question{font-size:1.2rem;margin:12px 0}
+#gateInput{border:2px solid var(--sky);border-radius:12px;padding:10px 16px;font-size:1.2rem;width:100%;max-width:200px;margin:8px 0;}
+.gate-error{color:#e53e3e;font-size:.9rem;margin-top:6px}
+#parentsInfo{display:none;background:var(--sky-light);border-radius:16px;padding:20px;margin-top:12px}
+#parentsInfo h3{color:var(--blue-dark);margin-bottom:10px}
+#gameScreen{padding:16px}
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.level-badge{background:var(--blue);color:#fff;padding:6px 18px;border-radius:20px;font-weight:700;font-size:1rem;}
+.score-badge{background:var(--gold);color:var(--navy);padding:6px 18px;border-radius:20px;font-weight:700;font-size:1rem;}
+.progress-bar-wrap{background:#cde5f8;border-radius:10px;height:10px;margin-bottom:18px;overflow:hidden}
+.progress-bar{height:10px;background:var(--orange);border-radius:10px;transition:width .4s}
+.labo-card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 6px 32px rgba(15,76,129,.13);margin-bottom:18px;position:relative;overflow:hidden;}
+.labo-deco{position:absolute;top:-20px;right:-20px;opacity:.07;font-size:120px;pointer-events:none;}
+.word-given{text-align:center;font-size:1.7rem;font-weight:700;color:var(--blue);margin-bottom:6px;font-family:'Fredoka','Nunito',system-ui;}
+.word-label{text-align:center;font-size:.85rem;color:var(--slate);margin-bottom:18px;}
+.listen-btn{display:block;margin:0 auto 18px;background:var(--sky);color:var(--blue-dark);border:none;border-radius:20px;padding:8px 22px;cursor:pointer;font-size:1rem;min-height:48px;font-weight:700;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.opt-btn{background:var(--sky-light);border:3px solid var(--sky);border-radius:16px;padding:14px;cursor:pointer;font-size:1.15rem;font-weight:700;text-align:center;transition:all .15s;min-height:60px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka','Nunito',system-ui;}
+.opt-btn:hover{border-color:var(--orange);background:#fff7ed}
+.opt-btn.correct{background:#d1fae5;border-color:var(--success);color:#064e3b}
+.opt-btn.wrong{background:#fee2e2;border-color:#e53e3e;color:#7f1d1d}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+.verse-display{background:var(--sky-light);border-radius:16px;padding:16px;margin-bottom:14px;min-height:70px;font-size:1.1rem;line-height:1.7;border:2px dashed var(--sky);}
+.verse-line{margin:4px 0;font-family:'Fredoka','Nunito',system-ui}
+.verse-slot{display:inline-block;min-width:80px;border-bottom:2px solid var(--orange);padding:0 6px;color:var(--orange);font-weight:700;}
+.word-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.chip{background:var(--blue);color:#fff;padding:10px 18px;border-radius:20px;cursor:pointer;font-size:1rem;font-weight:700;border:none;min-height:48px;display:flex;align-items:center;font-family:'Fredoka','Nunito',system-ui;transition:opacity .15s,transform .15s;}
+.chip:hover{opacity:.85;transform:scale(1.05)}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.correct-chip{background:var(--success)}
+.poem-display{background:linear-gradient(135deg,#fffbea,#fff7ed);border-radius:18px;padding:20px;margin-bottom:16px;border:2px solid var(--gold);min-height:100px;}
+.poem-line{font-size:1.15rem;line-height:1.8;font-family:'Fredoka','Nunito',system-ui;color:var(--navy);}
+.poem-blank{display:inline-block;min-width:80px;border-bottom:3px solid var(--orange);color:var(--orange);font-weight:700;padding:0 6px;}
+.pair-badge{display:inline-block;background:var(--gold);color:var(--navy);padding:2px 10px;border-radius:12px;font-size:.8rem;font-weight:700;margin:2px 4px 2px 0;}
+.feedback-msg{text-align:center;font-size:1.1rem;font-weight:700;padding:12px;border-radius:14px;margin:12px 0;min-height:48px;}
+.feedback-msg.good{background:#d1fae5;color:#065f46}
+.feedback-msg.bad{background:#fee2e2;color:#7f1d1d}
+.next-btn{display:block;width:100%;background:var(--orange);color:#fff;border:none;border-radius:20px;padding:14px;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);margin-top:14px;font-family:'Fredoka','Nunito',system-ui;min-height:56px;transition:transform .1s,box-shadow .1s;}
+.next-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+#successScreen{text-align:center}
+.stars-row{font-size:3rem;margin:20px 0;letter-spacing:6px}
+.success-title{font-size:2rem;color:var(--blue);margin-bottom:8px}
+.success-sub{color:var(--slate);margin-bottom:24px;font-size:1.05rem}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:10px}
+.btn-secondary{background:var(--blue);color:#fff;border:none;padding:14px 28px;border-radius:20px;font-size:1.05rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);min-height:56px;font-family:'Fredoka','Nunito',system-ui;}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){#mainTitle{font-size:1.8rem}.opt-btn{font-size:1rem;padding:12px}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">&#128266;</button>
+</div>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+
+<div class="screen active" id="titleScreen">
+  <div class="mascot-wrap">
+    <svg width="160" height="180" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="10" y="150" width="140" height="14" rx="7" fill="#0f4c81"/>
+      <rect x="30" y="95" width="22" height="60" rx="11" fill="#7ec3ee" opacity=".7"/>
+      <rect x="30" y="130" width="22" height="25" rx="11" fill="#f97316" opacity=".85"/>
+      <rect x="68" y="80" width="22" height="74" rx="11" fill="#7ec3ee" opacity=".7"/>
+      <rect x="68" y="120" width="22" height="34" rx="11" fill="#ffd23f" opacity=".9"/>
+      <rect x="108" y="100" width="22" height="54" rx="11" fill="#7ec3ee" opacity=".7"/>
+      <rect x="108" y="125" width="22" height="29" rx="11" fill="#34c77b" opacity=".85"/>
+      <circle cx="41" cy="92" r="5" fill="#fff" opacity=".7"/>
+      <circle cx="79" cy="76" r="6" fill="#fff" opacity=".65"/>
+      <circle cx="119" cy="97" r="4" fill="#fff" opacity=".7"/>
+      <rect x="58" y="28" width="44" height="48" rx="14" fill="#0f4c81"/>
+      <rect x="62" y="8" width="36" height="34" rx="14" fill="#0f4c81"/>
+      <circle cx="74" cy="22" r="5" fill="white"/>
+      <circle cx="76" cy="22" r="2.5" fill="#ffd23f"/>
+      <circle cx="90" cy="22" r="5" fill="white"/>
+      <circle cx="92" cy="22" r="2.5" fill="#ffd23f"/>
+      <path d="M73 31 Q80 37 87 31" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <line x1="80" y1="8" x2="80" y2="0" stroke="#f97316" stroke-width="3"/>
+      <circle cx="80" cy="0" r="4" fill="#f97316"/>
+      <rect x="40" y="34" width="18" height="8" rx="4" fill="#0a3559"/>
+      <rect x="102" y="34" width="18" height="8" rx="4" fill="#0a3559"/>
+      <text x="24" y="52" font-size="18" fill="#f97316" opacity=".85">&#9834;</text>
+      <text x="112" y="52" font-size="18" fill="#ffd23f" opacity=".85">&#9835;</text>
+      <rect x="64" y="42" width="32" height="30" rx="8" fill="white" opacity=".15"/>
+      <text x="72" y="62" font-size="16" fill="white" opacity=".8">&#9889;</text>
+    </svg>
+  </div>
+  <h1 class="title-font" id="mainTitle"></h1>
+  <p id="subTitle"></p>
+  <button class="btn-play" onclick="startGame()" id="btnPlay"></button>
+  <br>
+  <button class="btn-parents" onclick="showParents()" id="btnParents"></button>
+  <div id="parentsGate" style="display:none">
+    <h3 id="gateTitle"></h3>
+    <p class="gate-question" id="gateQ"></p>
+    <input type="number" id="gateInput" min="0" max="999" aria-label="Reponse">
+    <div class="gate-error" id="gateError" role="alert"></div>
+    <button class="next-btn" style="margin-top:12px" onclick="checkGate()" id="btnGateOk"></button>
+    <div id="parentsInfo">
+      <h3 id="piTitle"></h3>
+      <p id="piText"></p>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="gameScreen">
+  <div class="game-header">
+    <span class="level-badge" id="levelBadge"></span>
+    <span class="score-badge" id="scoreBadge">&#11088; 0</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="labo-card" id="laboCard">
+    <div class="labo-deco">&#129514;</div>
+    <div id="cardContent"></div>
+  </div>
+  <div id="feedbackArea"></div>
+  <button class="next-btn" id="nextBtn" style="display:none" onclick="nextStep()"></button>
+</div>
+
+<div class="screen" id="successScreen">
+  <div class="stars-row" id="starsRow"></div>
+  <h2 class="title-font success-title" id="successTitle"></h2>
+  <p class="success-sub" id="successSub"></p>
+  <div class="btn-row">
+    <button class="btn-play" onclick="replayLevel()" id="btnReplay"></button>
+    <button class="btn-secondary" onclick="nextLevel()" id="btnNextLvl"></button>
+    <button class="btn-secondary" onclick="goHome()" id="btnHome"></button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    mainTitle:"La Fabrique de Rimes",
+    subTitle:"Un laboratoire magique pour explorer les rimes !",
+    btnPlay:"&#129514; Jouer !",
+    btnParents:"Pour les parents",
+    gateTitle:"Porte parentale",
+    gateQ_prefix:"Combien font ",
+    gateOk:"Valider",
+    gateError:"Oups ! Essaie encore.",
+    piTitle:"Informations parents",
+    piText:"La Fabrique de Rimes aide les enfants de 7 a 11 ans a developper leur conscience phonologique et leur creativite poetique. Le jeu comporte 3 niveaux : trouver des rimes, completer un vers, composer un petit poeme. Aucune donnee collectee. Aucune publicite. 100% hors-ligne.",
+    levelNames:["Cherche la rime","Complete le vers","Petit poeme"],
+    levelBadge:"Niveau",
+    wordGiven:"Mot donne :",
+    listenWord:"&#128266; Ecouter",
+    chooseRhyme:"Clique sur le(s) mot(s) qui riment !",
+    chooseVerse:"Choisis le bon mot pour completer le vers !",
+    choosePoem:"Complete le poeme !",
+    correct:"&#10003; Bravo ! C'est une rime !",
+    wrong:"Pas tout a fait... essaie encore !",
+    allFound:"&#127881; Toutes les rimes trouvees !",
+    verseOk:"&#127881; Super vers !",
+    poemOk:"&#127881; Magnifique poeme !",
+    next:"Suivant",
+    validate:"Valider",
+    successTitle:"Niveau reussi !",
+    successSub:"Tu es un vrai poete de laboratoire !",
+    replay:"Rejouer",
+    nextLvl:"Niveau suivant",
+    home:"&#127968; Accueil",
+    stars3:"Excellent !",
+    stars2:"Bien joue !",
+    stars1:"Continue !",
+    listenVerse:"&#128266; Ecouter le vers",
+    hint:"Indice : cherche le son final identique !",
+    rhymePairs:"Paires qui riment :"
+  },
+  en:{
+    mainTitle:"Rhyme Lab",
+    subTitle:"A magical lab to explore rhymes!",
+    btnPlay:"&#129514; Play!",
+    btnParents:"For parents",
+    gateTitle:"Parental gate",
+    gateQ_prefix:"What is ",
+    gateOk:"Confirm",
+    gateError:"Oops! Try again.",
+    piTitle:"Parent information",
+    piText:"Rhyme Lab helps children aged 7-11 develop phonological awareness and poetic creativity. The game has 3 levels: find rhymes, complete a verse, compose a short poem. No data collected. No ads. 100% offline.",
+    levelNames:["Find the Rhyme","Complete the Verse","Mini Poem"],
+    levelBadge:"Level",
+    wordGiven:"Given word:",
+    listenWord:"&#128266; Listen",
+    chooseRhyme:"Click the word(s) that rhyme!",
+    chooseVerse:"Choose the right word to complete the verse!",
+    choosePoem:"Complete the poem!",
+    correct:"&#10003; Great! That's a rhyme!",
+    wrong:"Not quite... try again!",
+    allFound:"&#127881; All rhymes found!",
+    verseOk:"&#127881; Great verse!",
+    poemOk:"&#127881; Beautiful poem!",
+    next:"Next",
+    validate:"Validate",
+    successTitle:"Level complete!",
+    successSub:"You're a true lab poet!",
+    replay:"Play again",
+    nextLvl:"Next level",
+    home:"&#127968; Home",
+    stars3:"Excellent!",
+    stars2:"Well done!",
+    stars1:"Keep going!",
+    listenVerse:"&#128266; Listen to verse",
+    hint:"Hint: look for the same ending sound!",
+    rhymePairs:"Rhyming pairs:"
+  }
+};
+
+var DATA_FR={
+  level1:[
+    {word:"chat",rhymes:["rat","plat","mat"],distractors:["chien","maison","soleil","fleur"]},
+    {word:"maison",rhymes:["chanson","saison","raison"],distractors:["chat","pont","foret","nuage"]},
+    {word:"soleil",rhymes:["oreille","abeille","merveille"],distractors:["lune","etoile","nuage","pluie"]},
+    {word:"loup",rhymes:["cou","genou","pou"],distractors:["chat","ours","lion","aigle"]},
+    {word:"nuit",rhymes:["pluie","bruit","fruit"],distractors:["jour","soleil","midi","matin"]},
+    {word:"fleur",rhymes:["coeur","soeur","peur"],distractors:["arbre","jardin","plante","herbe"]},
+    {word:"pain",rhymes:["main","train","bain"],distractors:["pomme","eau","lait","sucre"]},
+    {word:"beau",rhymes:["chapeau","gateau","chateau"],distractors:["laid","petit","rouge","grand"]},
+    {word:"vert",rhymes:["hiver","couvert","ouvert"],distractors:["rouge","bleu","jaune","noir"]},
+    {word:"temps",rhymes:["printemps","cent","vent"],distractors:["heure","minute","jour","nuit"]}
+  ],
+  level2:[
+    {
+      line1:"Dans le jardin fleuri",
+      line2:"Un petit oiseau [chante]",
+      blank:"chante",
+      chips:["chante","plante","vante","danse"],
+      correct:"chante",
+      hint:"Le son -ante rime avec -ante"
+    },
+    {
+      line1:"Le chat dort sur le toit",
+      line2:"Il reve de boire du [lait]",
+      blank:"lait",
+      chips:["lait","pain","froid","moi"],
+      correct:"lait",
+      hint:"-ait rime avec -oit"
+    },
+    {
+      line1:"La lune brille dans le ciel",
+      line2:"Comme une bougie sur un [autel]",
+      blank:"autel",
+      chips:["autel","miel","chateau","tour"],
+      correct:"autel",
+      hint:"-el et -iel sonnent pareil"
+    },
+    {
+      line1:"Au fond de la foret",
+      line2:"Un renard bien [discret]",
+      blank:"discret",
+      chips:["discret","cache","triste","secret"],
+      correct:"discret",
+      hint:"-et rime avec -et"
+    },
+    {
+      line1:"Le soleil se leve tot",
+      line2:"Dans le ciel il fait si [beau]",
+      blank:"beau",
+      chips:["beau","grand","chaud","haut"],
+      correct:"beau",
+      hint:"-aud et -eau et -aut sonnent pareil"
+    },
+    {
+      line1:"Il pleut sur les toits",
+      line2:"Les enfants chantent a la [fois]",
+      blank:"fois",
+      chips:["fois","nuit","heure","jour"],
+      correct:"fois",
+      hint:"-ois rime avec -oits"
+    }
+  ],
+  level3:[
+    {
+      title:"Le chat magique",
+      lines:["Un petit [chat] sur le tapis","Ronronne et joue toute la [nuit]","Il attrape les etoiles avec sa [patte]","Et s'endort doucement sur la [natte]"],
+      blanks:["chat","nuit","patte","natte"],
+      chips:["chat","nuit","patte","natte","chien","jour","main","table"],
+      pairs:[[0,1],[2,3]]
+    },
+    {
+      title:"La pluie et le soleil",
+      lines:["La pluie tombe sur les [toits]","Les grenouilles chantent a la [fois]","Puis le soleil brille de [nouveau]","Et les enfants sortent sous le [chapeau]"],
+      blanks:["toits","fois","nouveau","chapeau"],
+      chips:["toits","fois","nouveau","chapeau","maisons","nuit","vieux","bonnet"],
+      pairs:[[0,1],[2,3]]
+    },
+    {
+      title:"Mon ami le vent",
+      lines:["Le vent souffle dans les [arbres]","Et fait danser les [feuilles]","Il chante une chanson de [marbre]","Et repart apres qu'il [cueille]"],
+      blanks:["arbres","feuilles","marbre","cueille"],
+      chips:["arbres","feuilles","marbre","cueille","fleurs","pierre","branches","prend"],
+      pairs:[[0,2],[1,3]]
+    }
+  ]
+};
+
+var DATA_EN={
+  level1:[
+    {word:"cat",rhymes:["bat","hat","mat"],distractors:["dog","house","sun","flower"]},
+    {word:"night",rhymes:["light","bright","kite"],distractors:["day","dark","moon","star"]},
+    {word:"sun",rhymes:["fun","run","bun"],distractors:["rain","sky","cloud","moon"]},
+    {word:"tree",rhymes:["bee","free","see"],distractors:["flower","rock","bird","leaf"]},
+    {word:"rain",rhymes:["train","plain","grain"],distractors:["snow","sun","cloud","wind"]},
+    {word:"moon",rhymes:["spoon","tune","balloon"],distractors:["star","sun","night","sky"]},
+    {word:"cake",rhymes:["lake","snake","make"],distractors:["bread","juice","apple","pie"]},
+    {word:"blue",rhymes:["true","glue","flew"],distractors:["red","green","yellow","pink"]},
+    {word:"boat",rhymes:["coat","goat","float"],distractors:["car","plane","bike","ship"]},
+    {word:"bear",rhymes:["hair","share","stare"],distractors:["wolf","lion","tiger","fox"]}
+  ],
+  level2:[
+    {
+      line1:"The little cat sat on the mat",
+      line2:"And wore a silly orange [hat]",
+      blank:"hat",
+      chips:["hat","coat","bag","scarf"],
+      correct:"hat",
+      hint:"-at rhymes with -at"
+    },
+    {
+      line1:"The stars shine bright at night",
+      line2:"They fill the sky with silver [light]",
+      blank:"light",
+      chips:["light","dark","glow","blue"],
+      correct:"light",
+      hint:"-ight rhymes with -ight"
+    },
+    {
+      line1:"A little bee flew past the tree",
+      line2:"It buzzed along, happy and [free]",
+      blank:"free",
+      chips:["free","fast","sweet","small"],
+      correct:"free",
+      hint:"-ee rhymes with -ee"
+    },
+    {
+      line1:"The rain came tumbling down the lane",
+      line2:"And washed the window of the [train]",
+      blank:"train",
+      chips:["train","bus","road","hill"],
+      correct:"train",
+      hint:"-ain rhymes with -ane"
+    },
+    {
+      line1:"A big round cake sat by the lake",
+      line2:"A hungry fish tried hard to [take]",
+      blank:"take",
+      chips:["take","eat","swim","jump"],
+      correct:"take",
+      hint:"-ake rhymes with -ake"
+    },
+    {
+      line1:"The moon is round and glows at night",
+      line2:"It fills the sky with silver [light]",
+      blank:"light",
+      chips:["light","shine","cool","white"],
+      correct:"light",
+      hint:"-ight rhymes with -ight"
+    }
+  ],
+  level3:[
+    {
+      title:"The Magic Cat",
+      lines:["A little [cat] sat on my lap","And took a very long [nap]","It dreamed of birds and cheese and [cream]","What a wonderfully silly [dream]"],
+      blanks:["cat","nap","cream","dream"],
+      chips:["cat","nap","cream","dream","dog","sleep","milk","wish"],
+      pairs:[[0,1],[2,3]]
+    },
+    {
+      title:"Rain and Sun",
+      lines:["The rain comes falling from the [sky]","The little birds go flying [high]","Then sunshine breaks through every [cloud]","And children laugh and cheer out [loud]"],
+      blanks:["sky","high","cloud","loud"],
+      chips:["sky","high","cloud","loud","blue","fly","storm","proud"],
+      pairs:[[0,1],[2,3]]
+    },
+    {
+      title:"My Friend the Wind",
+      lines:["The wind blows through the [trees]","And dances with the [leaves]","It sings a gentle [song]","Then carries us [along]"],
+      blanks:["trees","leaves","song","along"],
+      chips:["trees","leaves","song","along","birds","flowers","tune","away"],
+      pairs:[[0,1],[2,3]]
+    }
+  ]
+};
+
+var lang="fr", muted=false, currentLevel=0, score=0, mistakes=0;
+var stepIndex=0, stepMax=0, phase="";
+var rhymeState={}, verseState={}, poemState={};
+var audioCtx=null;
+var STORAGE_KEY="pgrg_fabrique_rimes";
+
+function getData(){ return lang==="fr"?DATA_FR:DATA_EN; }
+function t(k){ return T[lang][k]||""; }
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}"); }catch(e){ return{}; }
+}
+function saveProgress(){
+  try{
+    var s=loadProgress();
+    s.highestLevel=Math.max(s.highestLevel||0,currentLevel);
+    s.totalScore=(s.totalScore||0)+score;
+    s.lang=lang;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,dur,type,vol){
+  if(muted)return;
+  type=type||"sine"; vol=vol||0.18;
+  try{
+    var ctx=getAudioCtx();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(); osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){ playTone(523,.1); setTimeout(function(){playTone(659,.1);},110); setTimeout(function(){playTone(784,.22);},220); }
+function playError(){ playTone(200,.3,"sawtooth",0.09); }
+function playClick(){ playTone(440,.07,"sine",0.09); }
+function playLevel(){ var f=[523,659,784,1047]; f.forEach(function(freq,i){ setTimeout(function(){ playTone(freq,.18); },i*140); }); }
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById("muteBtn").innerHTML=muted?"&#128263;":"&#128266;";
+}
+
+function speak(text){
+  if(muted||!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=lang==="fr"?"fr-FR":"en-US";
+  u.rate=0.85;
+  speechSynthesis.speak(u);
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById("btnFR").classList.toggle("active",l==="fr");
+  document.getElementById("btnEN").classList.toggle("active",l==="en");
+  document.documentElement.lang=l==="fr"?"fr":"en";
+  renderTitle();
+}
+function renderTitle(){
+  document.getElementById("mainTitle").innerHTML=t("mainTitle");
+  document.getElementById("subTitle").textContent=t("subTitle");
+  document.getElementById("btnPlay").innerHTML=t("btnPlay");
+  document.getElementById("btnParents").textContent=t("btnParents");
+  document.getElementById("gateTitle").textContent=t("gateTitle");
+  document.getElementById("btnGateOk").textContent=t("gateOk");
+}
+
+var gateAnswer=0;
+function showParents(){
+  var gate=document.getElementById("parentsGate");
+  gate.style.display=gate.style.display==="none"?"block":"none";
+  if(gate.style.display==="block"){
+    var a=Math.ceil(Math.random()*9)+1;
+    var b=Math.ceil(Math.random()*9)+1;
+    gateAnswer=a*b;
+    document.getElementById("gateQ").textContent=t("gateQ_prefix")+a+" x "+b+" ?";
+    document.getElementById("gateError").textContent="";
+    document.getElementById("parentsInfo").style.display="none";
+    document.getElementById("gateInput").value="";
+  }
+}
+function checkGate(){
+  var val=parseInt(document.getElementById("gateInput").value);
+  if(val===gateAnswer){
+    document.getElementById("parentsInfo").style.display="block";
+    document.getElementById("piTitle").textContent=t("piTitle");
+    document.getElementById("piText").textContent=t("piText");
+    document.getElementById("gateError").textContent="";
+  } else {
+    document.getElementById("gateError").textContent=t("gateError");
+    playError();
+  }
+}
+
+function startGame(){
+  playClick();
+  var saved=loadProgress();
+  currentLevel=saved.highestLevel||0;
+  if(currentLevel>2)currentLevel=0;
+  score=0; mistakes=0;
+  showScreen("gameScreen");
+  beginLevel(currentLevel);
+}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+  document.getElementById(id).classList.add("active");
+}
+function beginLevel(lvl){
+  currentLevel=lvl;
+  stepIndex=0; mistakes=0;
+  var d=getData();
+  if(lvl===0){ phase="rhyme"; stepMax=Math.min(6,d.level1.length); }
+  else if(lvl===1){ phase="verse"; stepMax=Math.min(4,d.level2.length); }
+  else { phase="poem"; stepMax=Math.min(3,d.level3.length); }
+  updateHeader();
+  renderStep();
+}
+function updateHeader(){
+  var names=t("levelNames");
+  document.getElementById("levelBadge").textContent=t("levelBadge")+" "+(currentLevel+1)+" - "+names[currentLevel];
+  document.getElementById("scoreBadge").innerHTML="&#11088; "+score;
+  var pct=stepMax>0?Math.round(stepIndex/stepMax*100):0;
+  document.getElementById("progressBar").style.width=pct+"%";
+}
+function nextStep(){
+  stepIndex++;
+  updateHeader();
+  if(stepIndex>=stepMax){ endLevel(); }
+  else { renderStep(); }
+}
+function endLevel(){
+  saveProgress();
+  playLevel();
+  showSuccessScreen();
+}
+
+function shuffle(arr){ return arr.slice().sort(function(){ return Math.random()-.5; }); }
+
+function renderStep(){
+  var d=getData();
+  document.getElementById("feedbackArea").innerHTML="";
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("nextBtn").onclick=nextStep;
+
+  if(phase==="rhyme"){ renderRhyme(d); }
+  else if(phase==="verse"){ renderVerse(d); }
+  else { renderPoem(d); }
+}
+
+// LEVEL 1 - RHYME
+function renderRhyme(d){
+  var item=d.level1[stepIndex%d.level1.length];
+  var allCorrect=shuffle(item.rhymes);
+  var allDistract=shuffle(item.distractors);
+  var correct2=allCorrect.slice(0,2);
+  var shown=shuffle(correct2.concat(allDistract.slice(0,2)));
+  rhymeState={ correctSet:{}, selected:{}, shown:shown, allCorrectInShown:correct2, word:item.word };
+  item.rhymes.forEach(function(r){ rhymeState.correctSet[r]=true; });
+
+  var html='<div class="word-given">'+item.word+'</div>';
+  html+='<div class="word-label">'+t("wordGiven")+'</div>';
+  html+='<button class="listen-btn" onclick="speak(\''+item.word+'\')">'+t("listenWord")+'</button>';
+  html+='<p style="text-align:center;color:var(--slate);margin-bottom:14px">'+t("chooseRhyme")+'</p>';
+  html+='<div class="options-grid" id="optGrid">';
+  shown.forEach(function(w,i){
+    html+='<button class="opt-btn" id="opt'+i+'" onclick="selectRhyme('+i+',\''+w+'\')">'+w+'</button>';
+  });
+  html+='</div>';
+  document.getElementById("cardContent").innerHTML=html;
+}
+function selectRhyme(idx,word){
+  playClick();
+  if(rhymeState.selected[word])return;
+  rhymeState.selected[word]=true;
+  var btn=document.getElementById("opt"+idx);
+  if(rhymeState.correctSet[word]){
+    btn.classList.add("correct");
+    playSuccess();
+    setAriaLive(t("correct"));
+    showFeedback(t("correct"),"good");
+    var allFound=rhymeState.allCorrectInShown.every(function(w){ return rhymeState.selected[w]; });
+    if(allFound){
+      setTimeout(function(){
+        showFeedback(t("allFound"),"good");
+        score++;
+        updateHeader();
+        var nb=document.getElementById("nextBtn");
+        nb.style.display="block";
+        nb.innerHTML=t("next");
+        nb.onclick=nextStep;
+        rhymeState.shown.forEach(function(_,i){
+          var b=document.getElementById("opt"+i);
+          if(b)b.disabled=true;
+        });
+      },500);
+    }
+  } else {
+    btn.classList.add("wrong");
+    playError();
+    mistakes++;
+    showFeedback(t("wrong")+" "+t("hint"),"bad");
+    setAriaLive(t("wrong"));
+    setTimeout(function(){ btn.classList.remove("wrong"); },1200);
+  }
+}
+
+// LEVEL 2 - VERSE
+function renderVerse(d){
+  var item=d.level2[stepIndex%d.level2.length];
+  verseState={ item:item, selected:null };
+  var chips=shuffle(item.chips);
+  var line2html=item.line2.replace("["+item.blank+"]","<span class='verse-slot' id='verseSlot'>___</span>");
+  var html='<p style="text-align:center;color:var(--slate);margin-bottom:10px">'+t("chooseVerse")+'</p>';
+  html+='<div class="verse-display">';
+  html+='<div class="verse-line">'+item.line1+'</div>';
+  html+='<div class="verse-line">'+line2html+'</div>';
+  html+='</div>';
+  html+='<button class="listen-btn" onclick="speakVerse()">'+t("listenVerse")+'</button>';
+  html+='<div class="word-chips" id="chipsArea">';
+  chips.forEach(function(w,i){
+    html+='<button class="chip" id="chip'+i+'" onclick="selectChip('+i+',\''+w+'\')">'+w+'</button>';
+  });
+  html+='</div>';
+  document.getElementById("cardContent").innerHTML=html;
+  verseState.chipsShuffled=chips;
+}
+function speakVerse(){
+  var item=verseState.item;
+  speak(item.line1+". "+item.line2.replace("["+item.blank+"]",""));
+}
+function selectChip(idx,word){
+  playClick();
+  verseState.selected=word;
+  var slot=document.getElementById("verseSlot");
+  if(slot){ slot.textContent=word; slot.style.color="var(--orange)"; }
+  document.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("used"); });
+  var c=document.getElementById("chip"+idx);
+  if(c) c.classList.add("used");
+  var nb=document.getElementById("nextBtn");
+  nb.style.display="block";
+  nb.innerHTML=t("validate");
+  nb.onclick=validateVerse;
+}
+function validateVerse(){
+  var item=verseState.item;
+  var sel=verseState.selected;
+  if(!sel)return;
+  if(sel===item.correct){
+    playSuccess();
+    showFeedback(t("verseOk"),"good");
+    score++;
+    updateHeader();
+    var nb=document.getElementById("nextBtn");
+    nb.innerHTML=t("next");
+    nb.onclick=nextStep;
+    var slot=document.getElementById("verseSlot");
+    if(slot){ slot.style.color="var(--success)"; }
+    speak(item.line1+". "+item.line2.replace("["+item.blank+"]",sel));
+    document.querySelectorAll(".chip").forEach(function(c){ c.disabled=true; });
+  } else {
+    playError();
+    mistakes++;
+    showFeedback(t("wrong")+" "+item.hint,"bad");
+    document.getElementById("nextBtn").style.display="none";
+    verseState.selected=null;
+    var slot=document.getElementById("verseSlot");
+    if(slot){ slot.textContent="___"; slot.style.color="var(--orange)"; }
+    document.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("used"); });
+  }
+}
+
+// LEVEL 3 - POEM
+function renderPoem(d){
+  var item=d.level3[stepIndex%d.level3.length];
+  poemState={ item:item, answers:[], currentBlank:0, chipsShuffled:[] };
+  for(var i=0;i<item.blanks.length;i++) poemState.answers.push(null);
+  var chips=shuffle(item.chips);
+  poemState.chipsShuffled=chips;
+  buildPoemHTML(item,chips);
+}
+function buildPoemHTML(item,chips){
+  var html='<h3 style="text-align:center;color:var(--blue);margin-bottom:14px;font-family:Fredoka,Nunito,system-ui">'+item.title+'</h3>';
+  html+='<p style="text-align:center;color:var(--slate);margin-bottom:10px">'+t("choosePoem")+'</p>';
+  html+='<div class="poem-display" id="poemDisplay">';
+  item.lines.forEach(function(line,li){
+    var blank=item.blanks[li];
+    var filled=poemState.answers[li];
+    var display=filled?filled:"___";
+    var col=filled?"var(--success)":"var(--orange)";
+    var borderCol=filled?"var(--success)":"var(--orange)";
+    html+='<div class="poem-line" id="pline'+li+'">'+line.replace("["+blank+"]","<span class='poem-blank' id='pblank"+li+"' style='color:"+col+";border-bottom-color:"+borderCol+"'>"+display+"</span>")+'</div>';
+  });
+  html+='</div>';
+  html+='<p style="font-size:.85rem;color:var(--slate);margin-bottom:6px">'+t("rhymePairs")+'</p>';
+  item.pairs.forEach(function(pair){
+    html+='<span class="pair-badge">'+item.blanks[pair[0]]+' / '+item.blanks[pair[1]]+'</span> ';
+  });
+  html+='<div class="word-chips" id="poemChips" style="margin-top:14px">';
+  chips.forEach(function(w,i){
+    var used=poemState.answers.indexOf(w)>=0;
+    html+='<button class="chip'+(used?" used":"")+'" id="pchip'+i+'" onclick="selectPoemChip('+i+',\''+w+'\')">'+w+'</button>';
+  });
+  html+='</div>';
+  document.getElementById("cardContent").innerHTML=html;
+  updatePoemValidateBtn();
+}
+function selectPoemChip(idx,word){
+  playClick();
+  var item=poemState.item;
+  var targetBlank=-1;
+  for(var i=0;i<item.blanks.length;i++){
+    if(!poemState.answers[i]){ targetBlank=i; break; }
+  }
+  if(targetBlank<0)return;
+  var c=document.getElementById("pchip"+idx);
+  if(c) c.classList.add("used");
+  poemState.answers[targetBlank]=word;
+  var slot=document.getElementById("pblank"+targetBlank);
+  if(slot){ slot.textContent=word; slot.style.color="var(--orange)"; slot.style.borderBottomColor="var(--orange)"; }
+  updatePoemValidateBtn();
+}
+function updatePoemValidateBtn(){
+  var allFilled=poemState.answers.every(function(a){ return a!==null; });
+  var nb=document.getElementById("nextBtn");
+  if(allFilled){
+    nb.style.display="block";
+    nb.innerHTML=t("validate");
+    nb.onclick=validatePoem;
+  } else {
+    nb.style.display="none";
+  }
+}
+function validatePoem(){
+  var item=poemState.item;
+  var allCorrect=true;
+  poemState.answers.forEach(function(a,i){ if(a!==item.blanks[i]) allCorrect=false; });
+  if(allCorrect){
+    playLevel();
+    showFeedback(t("poemOk"),"good");
+    score+=2;
+    updateHeader();
+    var nb=document.getElementById("nextBtn");
+    nb.innerHTML=t("next");
+    nb.onclick=nextStep;
+    item.blanks.forEach(function(_,i){
+      var slot=document.getElementById("pblank"+i);
+      if(slot){ slot.style.color="var(--success)"; slot.style.borderBottomColor="var(--success)"; }
+    });
+    var fullText=item.lines.map(function(l,i){ return l.replace("["+item.blanks[i]+"]",poemState.answers[i]); }).join(". ");
+    setTimeout(function(){ speak(fullText); },600);
+  } else {
+    playError();
+    mistakes++;
+    showFeedback(t("wrong"),"bad");
+    poemState.answers.forEach(function(a,i){
+      if(a!==item.blanks[i]){
+        poemState.answers[i]=null;
+        var slot=document.getElementById("pblank"+i);
+        if(slot){ slot.textContent="___"; slot.style.color="var(--orange)"; slot.style.borderBottomColor="var(--orange)"; }
+        document.querySelectorAll(".chip").forEach(function(c){
+          if(c.textContent===a) c.classList.remove("used");
+        });
+      }
+    });
+    document.getElementById("nextBtn").style.display="none";
+  }
+}
+
+function showSuccessScreen(){
+  showScreen("successScreen");
+  var stars=mistakes===0?3:mistakes<=2?2:1;
+  var starStr="";
+  for(var i=0;i<stars;i++) starStr+="&#11088;";
+  document.getElementById("starsRow").innerHTML=starStr;
+  document.getElementById("successTitle").textContent=t("successTitle");
+  var starMsg=stars===3?t("stars3"):stars===2?t("stars2"):t("stars1");
+  document.getElementById("successSub").textContent=starMsg+" - "+t("successSub");
+  document.getElementById("btnReplay").innerHTML=t("replay");
+  document.getElementById("btnNextLvl").innerHTML=t("nextLvl");
+  document.getElementById("btnHome").innerHTML=t("home");
+  document.getElementById("btnNextLvl").style.display=currentLevel<2?"inline-block":"none";
+}
+function replayLevel(){ score=0; mistakes=0; showScreen("gameScreen"); beginLevel(currentLevel); }
+function nextLevel(){
+  if(currentLevel<2){ score=0; mistakes=0; showScreen("gameScreen"); beginLevel(currentLevel+1); }
+  else goHome();
+}
+function goHome(){ showScreen("titleScreen"); }
+
+function showFeedback(msg,type){
+  document.getElementById("feedbackArea").innerHTML='<div class="feedback-msg '+type+'" role="status">'+msg+'</div>';
+}
+function setAriaLive(msg){
+  var el=document.getElementById("ariaLive");
+  el.textContent="";
+  setTimeout(function(){ el.textContent=msg; },50);
+}
+
+(function init(){
+  var saved=loadProgress();
+  var navLang=(navigator.language||"fr").toLowerCase();
+  lang=saved.lang||(navLang.startsWith("fr")?"fr":"en");
+  document.getElementById("btnFR").classList.toggle("active",lang==="fr");
+  document.getElementById("btnEN").classList.toggle("active",lang==="en");
+  document.documentElement.lang=lang==="fr"?"fr":"en";
+  renderTitle();
+})();
+</script>
+</body>
+</html>

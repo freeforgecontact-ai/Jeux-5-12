@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Le Jardin de la Gentillesse / Kindness Garden — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;--orange-dark:#ea580c;
+  --gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,#d4eeff 0%,#eaf6ff 50%,#d8f0e8 100%);
+  min-height:100vh;color:var(--navy);
+  display:flex;flex-direction:column;align-items:center;
+}
+.topbar{
+  width:100%;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;gap:8px;flex-wrap:wrap;
+}
+.topbar-left{display:flex;align-items:center;gap:8px;}
+.topbar-brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.topbar-right{display:flex;gap:6px;align-items:center;}
+.btn-lang,.btn-mute{
+  background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);
+  color:#fff;border-radius:10px;padding:5px 11px;font-size:0.9rem;cursor:pointer;
+  font-family:inherit;font-weight:700;min-width:48px;min-height:48px;
+  display:flex;align-items:center;justify-content:center;transition:background 0.2s;
+}
+.btn-lang:hover,.btn-mute:hover{background:rgba(255,255,255,0.32);}
+.btn-lang.active{background:var(--orange);border-color:var(--orange-dark);}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px 40px;width:100%;max-width:700px;margin:0 auto;}
+.screen.active{display:flex;}
+.title-mascot{margin:12px 0;}
+h1.game-title{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2.2rem;color:var(--blue);text-align:center;line-height:1.2;
+}
+.subtitle{color:var(--slate);font-size:1.05rem;text-align:center;margin:8px 0 20px;}
+.btn-primary{
+  background:var(--orange);color:#fff;border:none;border-radius:18px;
+  padding:14px 36px;font-size:1.2rem;font-weight:800;cursor:pointer;
+  font-family:inherit;box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform 0.1s,box-shadow 0.1s;min-height:54px;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{
+  background:var(--blue);color:#fff;border:none;border-radius:14px;
+  padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;
+  font-family:inherit;box-shadow:0 4px 0 var(--blue-dark);margin-top:12px;
+  min-height:48px;transition:transform 0.1s,box-shadow 0.1s;
+}
+.btn-secondary:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--blue-dark);}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.link-parents{
+  margin-top:10px;color:var(--slate);font-size:0.9rem;cursor:pointer;
+  text-decoration:underline;background:none;border:none;font-family:inherit;
+}
+.link-parents:hover{color:var(--blue);}
+.parental-box{
+  background:#fff;border-radius:20px;padding:28px 24px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:380px;width:100%;text-align:center;
+}
+.parental-box h2{color:var(--blue);margin-bottom:10px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.parental-box p{color:var(--slate);margin-bottom:16px;}
+.parental-input{
+  width:90px;font-size:1.4rem;text-align:center;border:2px solid var(--sky);
+  border-radius:10px;padding:8px;font-family:inherit;outline:none;
+}
+.parental-input:focus{border-color:var(--blue);}
+.parental-error{color:red;font-size:0.9rem;margin-top:6px;min-height:20px;}
+.parents-info{
+  background:#fff;border-radius:20px;padding:28px 24px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:420px;width:100%;
+}
+.parents-info h2{color:var(--blue);margin-bottom:10px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.parents-info p{color:var(--slate);line-height:1.6;margin-bottom:8px;}
+.level-badge{
+  background:var(--blue);color:#fff;border-radius:20px;padding:4px 14px;
+  font-size:0.85rem;font-weight:700;margin-bottom:6px;
+}
+.progress-bar-wrap{width:100%;max-width:480px;background:#c8e4f8;border-radius:20px;height:12px;margin-bottom:18px;}
+.progress-bar-fill{background:var(--success);height:100%;border-radius:20px;transition:width 0.4s;}
+.garden-wrap{
+  width:100%;max-width:480px;background:linear-gradient(180deg,#c8f0d8 0%,#a8e0b8 60%,#7ec87e 100%);
+  border-radius:22px;border:3px solid #5ab87a;padding:10px 10px 4px;
+  min-height:140px;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.garden-svg{width:100%;height:130px;display:block;}
+.garden-label{text-align:center;color:#2d6a4f;font-size:0.8rem;font-weight:700;margin-top:2px;}
+.situation-card{
+  background:#fff;border-radius:22px;padding:20px 18px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.08);width:100%;max-width:480px;
+  margin-bottom:18px;
+}
+.situation-icon{font-size:2.8rem;text-align:center;margin-bottom:8px;}
+.situation-text{font-size:1.05rem;color:var(--navy);line-height:1.5;text-align:center;}
+.choices-grid{width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px;}
+.choice-btn{
+  background:#fff;border:2.5px solid #c8e4f8;border-radius:16px;
+  padding:14px 16px;text-align:left;font-size:1rem;font-weight:600;
+  color:var(--navy);cursor:pointer;font-family:inherit;
+  transition:all 0.18s;min-height:54px;display:flex;align-items:center;gap:10px;
+}
+.choice-btn:hover:not(:disabled){border-color:var(--blue);background:#eaf6ff;transform:translateY(-1px);}
+.choice-btn.correct{background:#d4f7e8;border-color:var(--success);color:#155a3c;}
+.choice-btn.wrong{background:#fde8e8;border-color:#e05454;color:#7a1a1a;}
+.choice-btn:disabled{cursor:default;}
+.feedback-box{
+  width:100%;max-width:480px;border-radius:16px;padding:14px 18px;
+  font-size:1.0rem;font-weight:700;text-align:center;margin:10px 0;
+  opacity:0;transition:opacity 0.3s;
+}
+.feedback-box.show{opacity:1;}
+.feedback-box.pos{background:#d4f7e8;color:#155a3c;border:2px solid var(--success);}
+.feedback-box.neg{background:#fff3e0;color:#7a4100;border:2px solid #f97316;}
+.btn-next{margin-top:10px;}
+.success-title{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2rem;color:var(--orange);text-align:center;margin:10px 0 4px;
+}
+.stars-row{font-size:2.5rem;margin:8px 0;}
+.success-garden-wrap{
+  width:100%;max-width:480px;background:linear-gradient(180deg,#c8f0d8 0%,#a8e0b8 60%,#7ec87e 100%);
+  border-radius:22px;border:3px solid #5ab87a;padding:10px 10px 4px;
+  margin:16px 0;
+}
+.success-garden-svg{width:100%;height:160px;display:block;}
+.success-msg{color:var(--slate);text-align:center;font-size:1.05rem;margin-bottom:16px;line-height:1.5;}
+.success-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){
+  h1.game-title{font-size:1.6rem;}
+  .situation-text{font-size:0.97rem;}
+  .choice-btn{font-size:0.93rem;}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span class="topbar-brand">PGRG IA</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button class="btn-mute" id="btn-mute" onclick="toggleMute()" aria-label="Son">&#128266;</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE SCREEN -->
+<div class="screen active" id="screen-title">
+  <div class="title-mascot">
+    <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="65" cy="65" r="60" fill="#eaf6ff" stroke="#7ec3ee" stroke-width="3"/>
+      <ellipse cx="65" cy="88" rx="22" ry="18" fill="#f97316"/>
+      <circle cx="65" cy="58" r="22" fill="#fde8c8"/>
+      <circle cx="57" cy="55" r="3" fill="#0f172a"/>
+      <circle cx="73" cy="55" r="3" fill="#0f172a"/>
+      <circle cx="58.5" cy="53.5" r="1" fill="#fff"/>
+      <circle cx="74.5" cy="53.5" r="1" fill="#fff"/>
+      <path d="M57 63 Q65 71 73 63" stroke="#e05454" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M44 52 Q45 36 65 36 Q85 36 86 52" fill="#5a3200" stroke="none"/>
+      <line x1="43" y1="82" x2="30" y2="98" stroke="#f97316" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="28" cy="100" r="7" fill="#ffd23f"/>
+      <circle cx="28" cy="100" r="3.5" fill="#f97316"/>
+      <line x1="87" y1="82" x2="100" y2="94" stroke="#f97316" stroke-width="7" stroke-linecap="round"/>
+      <line x1="57" y1="104" x2="52" y2="122" stroke="#0f4c81" stroke-width="7" stroke-linecap="round"/>
+      <line x1="73" y1="104" x2="78" y2="122" stroke="#0f4c81" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="20" cy="60" r="5" fill="#34c77b"/>
+      <circle cx="20" cy="60" r="2.5" fill="#ffd23f"/>
+      <circle cx="110" cy="70" r="5" fill="#f97316"/>
+      <circle cx="110" cy="70" r="2.5" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <h1 class="game-title" id="t-title">Le Jardin de la Gentillesse</h1>
+  <p class="subtitle" id="t-subtitle">Fais pousser des fleurs en etant gentil !</p>
+  <button class="btn-primary" onclick="startGame()" id="t-play">&#127800; Jouer</button>
+  <button class="link-parents" onclick="showParentalGate()" id="t-parents">&#128106; Pour les parents</button>
+</div>
+
+<!-- PARENTAL GATE -->
+<div class="screen" id="screen-parental">
+  <div class="parental-box">
+    <h2 id="pg-title">Espace parents</h2>
+    <p id="pg-question-label">Resous ce calcul pour continuer :</p>
+    <p id="pg-question" style="font-size:1.4rem;font-weight:800;color:var(--blue);margin-bottom:10px;"></p>
+    <input class="parental-input" type="number" id="pg-input" min="0" max="200" aria-label="Reponse">
+    <div class="parental-error" id="pg-error"></div>
+    <br>
+    <button class="btn-primary" onclick="checkParental()" id="pg-validate" style="margin-top:10px;">&#10003; Valider</button>
+    <br>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="pg-back" style="margin-top:8px;">&larr; Retour</button>
+  </div>
+</div>
+
+<!-- PARENTS INFO -->
+<div class="screen" id="screen-parents-info">
+  <div class="parents-info">
+    <h2 id="pi-title">Informations parents</h2>
+    <p id="pi-p1"></p>
+    <p id="pi-p2"></p>
+    <p id="pi-p3"></p>
+    <p id="pi-p4"></p>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="pi-back" style="margin-top:14px;">&larr; Retour</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="screen-game">
+  <div class="level-badge" id="g-level-badge">Niveau 1</div>
+  <div class="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar-fill" id="g-progress" style="width:0%"></div>
+  </div>
+  <div class="garden-wrap">
+    <svg class="garden-svg" viewBox="0 0 480 130" xmlns="http://www.w3.org/2000/svg" id="garden-svg" aria-hidden="true">
+      <rect x="0" y="90" width="480" height="40" fill="#7ec87e"/>
+      <ellipse cx="60" cy="20" rx="34" ry="14" fill="rgba(255,255,255,0.6)"/>
+      <ellipse cx="85" cy="14" rx="22" ry="12" fill="rgba(255,255,255,0.5)"/>
+      <ellipse cx="380" cy="25" rx="30" ry="12" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="440" cy="22" r="16" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <div class="garden-label" id="g-garden-label">Mon jardin</div>
+  <div class="situation-card">
+    <div class="situation-icon" id="g-icon">&#127807;</div>
+    <div class="situation-text" id="g-situation"></div>
+  </div>
+  <div class="choices-grid" id="g-choices" role="group" aria-label="Choix"></div>
+  <div class="feedback-box" id="g-feedback" role="status"></div>
+  <button class="btn-primary btn-next" id="g-next-btn" onclick="nextSituation()" style="display:none;">Suivant &#10151;</button>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="screen" id="screen-success">
+  <div class="stars-row" id="s-stars">&#11088;&#11088;&#11088;</div>
+  <div class="success-title" id="s-title">Bravo !</div>
+  <div class="success-msg" id="s-msg"></div>
+  <div class="success-garden-wrap">
+    <svg class="success-garden-svg" viewBox="0 0 480 160" xmlns="http://www.w3.org/2000/svg" id="success-garden-svg" aria-hidden="true">
+      <rect x="0" y="110" width="480" height="50" fill="#7ec87e"/>
+      <ellipse cx="60" cy="25" rx="34" ry="14" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="440" cy="30" r="18" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <div class="success-btns">
+    <button class="btn-secondary" onclick="startGame()" id="s-replay">&#8617; Rejouer</button>
+    <button class="btn-primary" onclick="nextLevel()" id="s-next">Niveau suivant &#10151;</button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="s-home">&#127968; Accueil</button>
+  </div>
+</div>
+
+<!-- ALL DONE SCREEN -->
+<div class="screen" id="screen-alldone">
+  <div style="font-size:3rem;margin:10px 0;">&#127802;&#127800;&#127804;&#127803;&#127801;</div>
+  <div class="success-title" id="ad-title">Jardin complet !</div>
+  <div class="success-msg" id="ad-msg"></div>
+  <div class="success-garden-wrap">
+    <svg class="success-garden-svg" viewBox="0 0 480 160" xmlns="http://www.w3.org/2000/svg" id="alldone-garden-svg" aria-hidden="true">
+      <rect x="0" y="110" width="480" height="50" fill="#7ec87e"/>
+      <ellipse cx="60" cy="25" rx="34" ry="14" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="440" cy="30" r="18" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <div class="success-btns">
+    <button class="btn-primary" onclick="restartAll()" id="ad-restart">&#127807; Recommencer</button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="ad-home">&#127968; Accueil</button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    gameTitle: "Le Jardin de la Gentillesse",
+    subtitle: "Fais pousser des fleurs en etant gentil !",
+    play: "\u{1F338} Jouer",
+    parents: "\u{1F46A} Pour les parents",
+    pgTitle: "Espace parents",
+    pgQuestionLabel: "Resous ce calcul pour continuer :",
+    pgError: "Oups, reessaie !",
+    pgValidate: "✓ Valider",
+    pgBack: "← Retour",
+    piTitle: "Informations parents",
+    piP1: "\u{1F3AF} Competence visee : Empathie et habiletes sociales (partage, entraide, resolution de conflits).",
+    piP2: "\u{1F338} Votre enfant vit de petites situations sociales et choisit l'action bienveillante. Chaque bon choix fait pousser une fleur dans le jardin.",
+    piP3: "\u{1F512} Aucune donnee collectee. Aucune publicite. 100% hors-ligne. La progression est sauvegardee localement.",
+    piP4: "\u{1F4A1} Conseil : Apres avoir joue, parlez des situations avec votre enfant : Qu'aurais-tu fait ? Comment te serais-tu senti(e) ?",
+    piBack: "← Retour",
+    levelBadge: function(n){ return "Niveau " + n; },
+    gardenLabel: function(n){ return "Mon jardin : " + n + " fleur" + (n>1?"s":""); },
+    nextBtn: "Suivant ➡",
+    sTitle: function(n){ return "Bravo, Niveau " + n + " termine !"; },
+    sMsg: function(n){ return "Tu as plante " + n + " fleur" + (n>1?"s":"") + " dans ton jardin. Continue comme ca !"; },
+    sReplay: "↩ Rejouer",
+    sNext: "Niveau suivant ➡",
+    sHome: "\u{1F3E0} Accueil",
+    adTitle: "Jardin complet ! \u{1F33A}",
+    adMsg: "Felicitations ! Tu as plante toutes les fleurs de ton jardin de la gentillesse. Tu es un vrai champion de l'empathie !",
+    adRestart: "\u{1F331} Recommencer",
+    adHome: "\u{1F3E0} Accueil",
+    correct: function(msg){ return "✅ " + msg; },
+    wrong: function(msg){ return "\u{1F4A1} " + msg; },
+    mute: "\u{1F507}",
+    unmute: "\u{1F50A}"
+  },
+  en: {
+    gameTitle: "Kindness Garden",
+    subtitle: "Grow flowers by being kind!",
+    play: "\u{1F338} Play",
+    parents: "\u{1F46A} For Parents",
+    pgTitle: "Parent Area",
+    pgQuestionLabel: "Solve this problem to continue:",
+    pgError: "Oops, try again!",
+    pgValidate: "✓ Confirm",
+    pgBack: "← Back",
+    piTitle: "Parent Information",
+    piP1: "\u{1F3AF} Skills: Empathy and social skills (sharing, helping, conflict resolution).",
+    piP2: "\u{1F338} Your child experiences small social situations and chooses the kind action. Each good choice grows a flower in the garden.",
+    piP3: "\u{1F512} No data collected. No ads. 100% offline. Progress is saved locally.",
+    piP4: "\u{1F4A1} Tip: After playing, talk about the situations: What would you have done? How would you have felt?",
+    piBack: "← Back",
+    levelBadge: function(n){ return "Level " + n; },
+    gardenLabel: function(n){ return "My garden: " + n + " flower" + (n>1?"s":""); },
+    nextBtn: "Next ➡",
+    sTitle: function(n){ return "Well done, Level " + n + " complete!"; },
+    sMsg: function(n){ return "You planted " + n + " flower" + (n>1?"s":"") + " in your garden. Keep it up!"; },
+    sReplay: "↩ Play Again",
+    sNext: "Next Level ➡",
+    sHome: "\u{1F3E0} Home",
+    adTitle: "Full Garden! \u{1F33A}",
+    adMsg: "Congratulations! You planted all the flowers in your kindness garden. You are a true empathy champion!",
+    adRestart: "\u{1F331} Start Over",
+    adHome: "\u{1F3E0} Home",
+    correct: function(msg){ return "✅ " + msg; },
+    wrong: function(msg){ return "\u{1F4A1} " + msg; },
+    mute: "\u{1F507}",
+    unmute: "\u{1F50A}"
+  }
+};
+
+var SITUATIONS = {
+  fr: [
+    {level:1,icon:"\u{1F622}",text:"Ton ami Lucas est triste parce qu'il a perdu son crayon prefere. Que fais-tu ?",choices:[
+      {text:"Je lui propose de partager mon crayon.",correct:true,feedback:"Super ! Partager, c'est montrer qu'on tient a ses amis."},
+      {text:"Je continue a dessiner sans rien dire.",correct:false,feedback:"Lucas se sent seul. Un petit mot gentil peut tout changer !"},
+      {text:"Je me moque de lui.",correct:false,feedback:"Se moquer fait de la peine. La gentillesse, c'est plus agreable pour tout le monde."}
+    ]},
+    {level:1,icon:"\u{1F4DA}",text:"Emma a fait tomber tous ses livres dans le couloir. Que fais-tu ?",choices:[
+      {text:"J'enjambe les livres et je passe.",correct:false,feedback:"Emma aurait besoin d'un coup de main. La prochaine fois, on peut s'arreter."},
+      {text:"Je l'aide a ramasser ses livres.",correct:true,feedback:"Excellent ! Aider quelqu'un quand c'est difficile, c'est vraiment beau !"},
+      {text:"Je rigole et je m'en vais.",correct:false,feedback:"Se moquer quand quelqu'un a un probleme n'est pas gentil. Essaie de t'imaginer a sa place !"}
+    ]},
+    {level:1,icon:"\u{1F9E9}",text:"Il y a un seul puzzle et toi et Manon voulez tous les deux jouer avec. Que fais-tu ?",choices:[
+      {text:"Je prends le puzzle et je ne le donne pas.",correct:false,feedback:"Si tu gardes tout pour toi, Manon est triste. Le partage rend tout le monde heureux !"},
+      {text:"Je propose qu'on fasse le puzzle ensemble.",correct:true,feedback:"Bravo ! Jouer ensemble, c'est encore plus rigolo !"},
+      {text:"Je me cache avec le puzzle.",correct:false,feedback:"Se cacher n'aide pas. On peut trouver un accord qui convient aux deux !"}
+    ]},
+    {level:1,icon:"\u{1F34E}",text:"A la recreation, ton ami oublie son gouter. Tu as des biscuits. Que fais-tu ?",choices:[
+      {text:"Je mange tout sans rien dire.",correct:false,feedback:"Ton ami a faim ! Partager un peu de son gouter, c'est un geste de generosite."},
+      {text:"Je lui offre quelques biscuits.",correct:true,feedback:"Quelle generosite ! Partager, c'est une forme de gentillesse qui fait chaud au coeur."},
+      {text:"Je lui dis que c'est sa faute.",correct:false,feedback:"Blamer ne resout pas le probleme. La gentillesse, c'est etre la pour l'autre."}
+    ]},
+    {level:2,icon:"\u{1F620}",text:"Tom a pris ta place dans la file. Tu es en colere. Que fais-tu ?",choices:[
+      {text:"Je le pousse pour reprendre ma place.",correct:false,feedback:"Pousser peut blesser ! Il vaut mieux parler calmement pour resoudre le probleme."},
+      {text:"Je lui dis gentiment : Je pense que c'etait ma place.",correct:true,feedback:"Bravo ! Exprimer ses sentiments calmement, c'est la meilleure facon de resoudre un conflit."},
+      {text:"Je pleure sans rien dire.",correct:false,feedback:"Pleurer sans parler ne regle rien. Tu peux dire ce que tu ressens avec des mots !"}
+    ]},
+    {level:2,icon:"\u{1F3AE}",text:"Lea et toi voulez jouer a des jeux differents. Vous n'arrivez pas a vous decider. Que fais-tu ?",choices:[
+      {text:"Je decide tout seul et Lea n'a pas le choix.",correct:false,feedback:"Si tu decides seul, Lea n'est pas heureuse. Un bon accord convient aux deux !"},
+      {text:"On joue d'abord a son jeu, puis au mien.",correct:true,feedback:"Super idee ! Alterner les jeux, c'est une solution equitable pour tout le monde."},
+      {text:"Je pars jouer seul dans mon coin.",correct:false,feedback:"Partir sans chercher de solution ne resout rien. Parler ensemble, c'est mieux !"}
+    ]},
+    {level:2,icon:"\u{1F58D}",text:"Tu as utilise par erreur le feutre rouge de Chloe et il est maintenant sec. Que fais-tu ?",choices:[
+      {text:"Je cache le feutre et je fais semblant de rien.",correct:false,feedback:"Cacher une erreur est difficile. Dire la verite, c'est plus courageux et ca arrange tout."},
+      {text:"Je m'excuse et je lui propose d'utiliser mon feutre.",correct:true,feedback:"Bravo pour ton honnetete ! S'excuser et proposer une solution, c'est vraiment mature."},
+      {text:"Je dis que c'est Chloe qui l'a abime.",correct:false,feedback:"Mentir blesse la confiance. Dire la verite, meme quand c'est difficile, c'est tres courageux."}
+    ]},
+    {level:2,icon:"\u{1F3C3}",text:"Tu as gagne a la course et ton ami Theo est decu. Il ne veut plus jouer. Que fais-tu ?",choices:[
+      {text:"Je me vante d'avoir gagne.",correct:false,feedback:"Se vanter peut blesser l'ami qui a perdu. La victoire se partage avec respect !"},
+      {text:"Je dis a Theo qu'il court tres bien et je lui propose de rejouer.",correct:true,feedback:"C'est un vrai champion de la gentillesse ! Valoriser l'autre meme quand on gagne, c'est magnifique."},
+      {text:"Je m'en vais sans rien dire.",correct:false,feedback:"Partir sans rien dire laisse Theo seul avec sa deception. Un petit mot doux change tout !"}
+    ]},
+    {level:3,icon:"\u{1F195}",text:"Un nouvel eleve, Zack, est seul a la recreation. Il a l'air timide. Que fais-tu ?",choices:[
+      {text:"Je l'ignore car je ne le connais pas.",correct:false,feedback:"Imagine comme Zack se sent seul ! Faire le premier pas vers quelqu'un de nouveau, c'est tres courageux."},
+      {text:"Je vais lui parler et je l'invite a jouer avec nous.",correct:true,feedback:"Excellent ! Accueillir quelqu'un de nouveau avec gentillesse, c'est le plus beau cadeau qu'on puisse faire."},
+      {text:"Je le montre du doigt a mes amis.",correct:false,feedback:"Se moquer de quelqu'un peut le blesser profondement. La gentillesse, c'est traiter les autres comme on voudrait etre traite."}
+    ]},
+    {level:3,icon:"\u{1F628}",text:"Ta camarade Sara pleure. Tu ne sais pas pourquoi. Que fais-tu ?",choices:[
+      {text:"Je fais semblant de ne pas voir.",correct:false,feedback:"Sara a besoin d'aide. Remarquer la tristesse de l'autre, c'est deja un acte d'empathie important."},
+      {text:"Je m'approche doucement et je lui demande si ca va.",correct:true,feedback:"Bravo ! Remarquer et s'approcher avec douceur, c'est le coeur de l'empathie."},
+      {text:"Je ris car elle pleure pour rien.",correct:false,feedback:"On ne sait jamais ce que ressent vraiment l'autre. Toujours essayer de comprendre avant de juger."}
+    ]},
+    {level:3,icon:"\u{1F91D}",text:"Deux amis se disputent et ils te demandent de choisir un camp. Que fais-tu ?",choices:[
+      {text:"Je choisis le camp du plus populaire.",correct:false,feedback:"Choisir un camp peut blesser l'autre ami. Une vraie amitie aide les deux a se reconcilier."},
+      {text:"Je leur propose de parler ensemble pour trouver une solution.",correct:true,feedback:"Super ! Etre un mediateur, c'est aider ses amis a trouver la paix. C'est une grande sagesse !"},
+      {text:"Je me fache avec les deux et je pars.",correct:false,feedback:"Partir sans aider ne resout rien. Parfois, on peut aider ses amis a se retrouver !"}
+    ]},
+    {level:3,icon:"\u{1F327}",text:"Ton ami Paul a oublie son impermeable et il commence a pleuvoir. Tu n'as qu'un parapluie. Que fais-tu ?",choices:[
+      {text:"Je garde le parapluie pour moi tout seul.",correct:false,feedback:"Paul va etre tout mouille ! Partager, meme un peu, ca compte enormement."},
+      {text:"Je lui propose de partager le parapluie avec moi.",correct:true,feedback:"C'est tellement genereux ! Partager son confort avec un ami, c'est de la vraie gentillesse."},
+      {text:"Je lui dis qu'il aurait du penser a prendre le sien.",correct:false,feedback:"Ce n'est pas utile de blamer. L'important, c'est d'aider quand on peut !"}
+    ]}
+  ],
+  en: [
+    {level:1,icon:"\u{1F622}",text:"Your friend Lucas is sad because he lost his favourite pencil. What do you do?",choices:[
+      {text:"I offer to share my pencil with him.",correct:true,feedback:"Great! Sharing shows you care about your friends."},
+      {text:"I keep drawing without saying anything.",correct:false,feedback:"Lucas feels alone. A kind word can change everything!"},
+      {text:"I laugh at him.",correct:false,feedback:"Laughing at someone hurts. Kindness is better for everyone."}
+    ]},
+    {level:1,icon:"\u{1F4DA}",text:"Emma dropped all her books in the hallway. What do you do?",choices:[
+      {text:"I step over the books and walk past.",correct:false,feedback:"Emma could use some help! Next time, you can stop and help."},
+      {text:"I help her pick up her books.",correct:true,feedback:"Excellent! Helping someone when it is hard is truly wonderful!"},
+      {text:"I laugh and walk away.",correct:false,feedback:"Laughing when someone has a problem is not kind. Try to imagine how she feels!"}
+    ]},
+    {level:1,icon:"\u{1F9E9}",text:"There is only one puzzle and both you and Manon want to play with it. What do you do?",choices:[
+      {text:"I take the puzzle and do not share.",correct:false,feedback:"If you keep it all to yourself, Manon is sad. Sharing makes everyone happy!"},
+      {text:"I suggest we do the puzzle together.",correct:true,feedback:"Great! Playing together is even more fun!"},
+      {text:"I hide with the puzzle.",correct:false,feedback:"Hiding does not help. We can find a solution that works for both of us!"}
+    ]},
+    {level:1,icon:"\u{1F34E}",text:"At recess, your friend forgot their snack. You have biscuits. What do you do?",choices:[
+      {text:"I eat everything without saying anything.",correct:false,feedback:"Your friend is hungry! Sharing some snacks is a generous act."},
+      {text:"I offer them some biscuits.",correct:true,feedback:"How generous! Sharing is a form of kindness that warms the heart."},
+      {text:"I tell them it is their own fault.",correct:false,feedback:"Blaming does not help. Kindness means being there for each other."}
+    ]},
+    {level:2,icon:"\u{1F620}",text:"Tom cut in line in front of you. You are angry. What do you do?",choices:[
+      {text:"I push him to get my spot back.",correct:false,feedback:"Pushing can hurt! It is better to speak calmly to solve the problem."},
+      {text:"I say kindly: I think that was my spot.",correct:true,feedback:"Great! Expressing your feelings calmly is the best way to resolve conflict."},
+      {text:"I cry without saying anything.",correct:false,feedback:"Crying without talking does not solve anything. You can say how you feel with words!"}
+    ]},
+    {level:2,icon:"\u{1F3AE}",text:"You and Lea want to play different games and cannot decide. What do you do?",choices:[
+      {text:"I decide on my own and Lea has no choice.",correct:false,feedback:"If you decide alone, Lea is not happy. A good agreement works for everyone!"},
+      {text:"We play her game first, then mine.",correct:true,feedback:"Great idea! Taking turns is a fair solution for everyone."},
+      {text:"I go play alone in my corner.",correct:false,feedback:"Leaving without finding a solution does not help. Talking together is better!"}
+    ]},
+    {level:2,icon:"\u{1F58D}",text:"You accidentally used Chloe's red marker and now it is dry. What do you do?",choices:[
+      {text:"I hide the marker and pretend nothing happened.",correct:false,feedback:"Hiding a mistake is hard to live with. Telling the truth is braver and fixes everything."},
+      {text:"I apologise and offer to let her use my marker.",correct:true,feedback:"Well done for your honesty! Apologising and offering a solution is really mature."},
+      {text:"I say Chloe was the one who ruined it.",correct:false,feedback:"Lying breaks trust. Telling the truth, even when it is hard, is very brave."}
+    ]},
+    {level:2,icon:"\u{1F3C3}",text:"You won the race and your friend Theo is disappointed. He does not want to play anymore. What do you do?",choices:[
+      {text:"I boast about winning.",correct:false,feedback:"Boasting can hurt the friend who lost. Victory is shared with respect!"},
+      {text:"I tell Theo he runs really well and suggest playing again.",correct:true,feedback:"That is a true kindness champion! Encouraging others even when you win is wonderful."},
+      {text:"I leave without saying anything.",correct:false,feedback:"Leaving without a word leaves Theo alone with his disappointment. A kind word changes everything!"}
+    ]},
+    {level:3,icon:"\u{1F195}",text:"A new student, Zack, is alone at recess. He looks shy. What do you do?",choices:[
+      {text:"I ignore him because I do not know him.",correct:false,feedback:"Imagine how alone Zack feels! Taking the first step towards someone new takes real courage."},
+      {text:"I go talk to him and invite him to play with us.",correct:true,feedback:"Excellent! Welcoming someone new with kindness is the most beautiful gift you can give."},
+      {text:"I point him out to my friends.",correct:false,feedback:"Mocking someone can hurt them deeply. Kindness means treating others as you would like to be treated."}
+    ]},
+    {level:3,icon:"\u{1F628}",text:"Your classmate Sara is crying. You do not know why. What do you do?",choices:[
+      {text:"I pretend not to notice.",correct:false,feedback:"Sara needs help. Noticing someone else's sadness is already an important act of empathy."},
+      {text:"I gently go over and ask if she is okay.",correct:true,feedback:"Well done! Noticing and approaching gently is at the heart of empathy."},
+      {text:"I laugh because she is crying over nothing.",correct:false,feedback:"We never really know what someone else is feeling. Always try to understand before judging."}
+    ]},
+    {level:3,icon:"\u{1F91D}",text:"Two friends are arguing and ask you to choose a side. What do you do?",choices:[
+      {text:"I choose the side of the most popular one.",correct:false,feedback:"Choosing sides can hurt the other friend. True friendship helps both of them make up."},
+      {text:"I suggest they talk together to find a solution.",correct:true,feedback:"Great! Being a mediator means helping your friends find peace. That is real wisdom!"},
+      {text:"I get angry at both of them and leave.",correct:false,feedback:"Leaving without helping solves nothing. Sometimes you can help your friends reconnect!"}
+    ]},
+    {level:3,icon:"\u{1F327}",text:"Your friend Paul forgot his raincoat and it starts to rain. You only have one umbrella. What do you do?",choices:[
+      {text:"I keep the umbrella just for me.",correct:false,feedback:"Paul will get soaked! Sharing, even a little, counts for so much."},
+      {text:"I offer to share the umbrella with him.",correct:true,feedback:"That is so generous! Sharing your comfort with a friend is true kindness."},
+      {text:"I tell him he should have brought his own.",correct:false,feedback:"Blaming is not helpful. The important thing is to help when you can!"}
+    ]}
+  ]
+};
+
+var FLOWER_COLORS = [
+  {petals:"#f97316",center:"#ffd23f"},
+  {petals:"#34c77b",center:"#ffd23f"},
+  {petals:"#7ec3ee",center:"#fff"},
+  {petals:"#ffd23f",center:"#f97316"},
+  {petals:"#e879f9",center:"#ffd23f"},
+  {petals:"#f43f5e",center:"#ffd23f"},
+  {petals:"#a78bfa",center:"#ffd23f"},
+  {petals:"#34c77b",center:"#fff"},
+  {petals:"#ffd23f",center:"#34c77b"},
+  {petals:"#fb7185",center:"#fff"},
+  {petals:"#60a5fa",center:"#ffd23f"},
+  {petals:"#f97316",center:"#fff"}
+];
+
+var FLOWER_POSITIONS = [
+  {x:55, h:52},{x:135,h:60},{x:215,h:48},{x:295,h:64},{x:375,h:56},{x:435,h:46},
+  {x:95, h:70},{x:175,h:44},{x:255,h:66},{x:335,h:50},{x:415,h:58},{x:28, h:40}
+];
+
+var LS_KEY = 'pgrg_jardin_gentillesse';
+var lang = 'fr';
+var muted = false;
+var currentLevel = 1;
+var currentSituationIndex = 0;
+var flowerCount = 0;
+var totalSituations = 0;
+var currentSituation = null;
+var levelSituations = [];
+var answered = false;
+var wrongThisSituation = false;
+var currentScreenId = 'screen-title';
+var audioCtx = null;
+var pgA = 0, pgB = 0;
+
+function loadState() {
+  try {
+    var s = localStorage.getItem(LS_KEY);
+    if(s) {
+      var d = JSON.parse(s);
+      flowerCount = d.flowerCount || 0;
+      currentLevel = d.currentLevel || 1;
+    }
+  } catch(e){}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({flowerCount:flowerCount, currentLevel:currentLevel}));
+  } catch(e){}
+}
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btn-fr').classList.toggle('active', l==='fr');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  renderCurrentScreen();
+}
+
+function getAudio() {
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, dur, type, vol) {
+  if(muted) return;
+  dur = dur||0.15; type = type||'sine'; vol = vol||0.18;
+  try {
+    var ctx = getAudio();
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime);
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+  } catch(e){}
+}
+
+function playSuccess() {
+  if(muted) return;
+  [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.2,'sine',0.15);},i*100);});
+}
+
+function playWrong() { playTone(280,0.3,'sine',0.1); }
+
+function playFlower() {
+  if(muted) return;
+  [392,494,587].forEach(function(f,i){setTimeout(function(){playTone(f,0.18,'sine',0.12);},i*80);});
+}
+
+function playLevelUp() {
+  if(muted) return;
+  [523,659,784,987,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.25,'triangle',0.14);},i*90);});
+}
+
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('btn-mute').textContent = muted ? T[lang].mute : T[lang].unmute;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  currentScreenId = id;
+}
+
+function renderCurrentScreen() {
+  var t = T[lang];
+  document.getElementById('t-title').textContent = t.gameTitle;
+  document.getElementById('t-subtitle').textContent = t.subtitle;
+  document.getElementById('t-play').textContent = t.play;
+  document.getElementById('t-parents').textContent = t.parents;
+  document.getElementById('pg-title').textContent = t.pgTitle;
+  document.getElementById('pg-question-label').textContent = t.pgQuestionLabel;
+  document.getElementById('pg-validate').textContent = t.pgValidate;
+  document.getElementById('pg-back').textContent = t.pgBack;
+  document.getElementById('pi-title').textContent = t.piTitle;
+  document.getElementById('pi-p1').textContent = t.piP1;
+  document.getElementById('pi-p2').textContent = t.piP2;
+  document.getElementById('pi-p3').textContent = t.piP3;
+  document.getElementById('pi-p4').textContent = t.piP4;
+  document.getElementById('pi-back').textContent = t.piBack;
+  document.getElementById('btn-mute').textContent = muted ? t.mute : t.unmute;
+  document.getElementById('s-replay').textContent = t.sReplay;
+  document.getElementById('s-home').textContent = t.sHome;
+  document.getElementById('ad-restart').textContent = t.adRestart;
+  document.getElementById('ad-home').textContent = t.adHome;
+  document.getElementById('ad-title').textContent = t.adTitle;
+  document.getElementById('ad-msg').textContent = t.adMsg;
+  if(currentScreenId === 'screen-game' && currentSituation) {
+    renderSituation();
+    renderGarden('garden-svg', 90);
+  }
+}
+
+function buildFlowerSVG(x, height, colorIdx, groundY) {
+  var c = FLOWER_COLORS[colorIdx % FLOWER_COLORS.length];
+  var pc = c.petals, cc = c.center;
+  var r = 9, cr = 5;
+  var baseY = groundY;
+  var topY = baseY - height;
+  return '<line x1="'+x+'" y1="'+baseY+'" x2="'+x+'" y2="'+topY+'" stroke="#5a8a3a" stroke-width="3" stroke-linecap="round"/>'
+    +'<ellipse cx="'+(x-9)+'" cy="'+(topY+height*0.45)+'" rx="6" ry="3" fill="#6ec45a" transform="rotate(-30,'+(x-9)+','+(topY+height*0.45)+')"/>'
+    +'<ellipse cx="'+(x+9)+'" cy="'+(topY+height*0.3)+'" rx="6" ry="3" fill="#6ec45a" transform="rotate(30,'+(x+9)+','+(topY+height*0.3)+')"/>'
+    +'<ellipse cx="'+x+'" cy="'+(topY-r*0.9)+'" rx="'+(r*0.5)+'" ry="'+(r*0.9)+'" fill="'+pc+'"/>'
+    +'<ellipse cx="'+x+'" cy="'+(topY+r*0.9)+'" rx="'+(r*0.5)+'" ry="'+(r*0.9)+'" fill="'+pc+'"/>'
+    +'<ellipse cx="'+(x-r*0.9)+'" cy="'+topY+'" rx="'+(r*0.9)+'" ry="'+(r*0.5)+'" fill="'+pc+'"/>'
+    +'<ellipse cx="'+(x+r*0.9)+'" cy="'+topY+'" rx="'+(r*0.9)+'" ry="'+(r*0.5)+'" fill="'+pc+'"/>'
+    +'<ellipse cx="'+(x-r*0.65)+'" cy="'+(topY-r*0.65)+'" rx="'+(r*0.5)+'" ry="'+(r*0.85)+'" fill="'+pc+'" transform="rotate(-45,'+(x-r*0.65)+','+(topY-r*0.65)+')"/>'
+    +'<ellipse cx="'+(x+r*0.65)+'" cy="'+(topY-r*0.65)+'" rx="'+(r*0.5)+'" ry="'+(r*0.85)+'" fill="'+pc+'" transform="rotate(45,'+(x+r*0.65)+','+(topY-r*0.65)+')"/>'
+    +'<ellipse cx="'+(x-r*0.65)+'" cy="'+(topY+r*0.65)+'" rx="'+(r*0.5)+'" ry="'+(r*0.85)+'" fill="'+pc+'" transform="rotate(45,'+(x-r*0.65)+','+(topY+r*0.65)+')"/>'
+    +'<ellipse cx="'+(x+r*0.65)+'" cy="'+(topY+r*0.65)+'" rx="'+(r*0.5)+'" ry="'+(r*0.85)+'" fill="'+pc+'" transform="rotate(-45,'+(x+r*0.65)+','+(topY+r*0.65)+')"/>'
+    +'<circle cx="'+x+'" cy="'+topY+'" r="'+cr+'" fill="'+cc+'"/>';
+}
+
+function renderGarden(svgId, groundY) {
+  var svg = document.getElementById(svgId);
+  if(!svg) return;
+  svg.querySelectorAll('.fg').forEach(function(e){e.remove();});
+  for(var i=0; i<flowerCount && i<FLOWER_POSITIONS.length; i++) {
+    var pos = FLOWER_POSITIONS[i];
+    var g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.classList.add('fg');
+    g.innerHTML = buildFlowerSVG(pos.x, pos.h, i, groundY);
+    svg.appendChild(g);
+  }
+}
+
+function animateNewFlower() {
+  var svg = document.getElementById('garden-svg');
+  var groups = svg.querySelectorAll('.fg');
+  var last = groups[groups.length-1];
+  if(!last) return;
+  var idx = flowerCount - 1;
+  var cx = FLOWER_POSITIONS[idx] ? FLOWER_POSITIONS[idx].x : 240;
+  last.style.opacity = '0';
+  last.style.transform = 'scale(0.2)';
+  last.style.transformOrigin = cx+'px 90px';
+  last.style.transition = 'opacity 0.6s, transform 0.6s';
+  setTimeout(function(){
+    last.style.opacity = '1';
+    last.style.transform = 'scale(1)';
+  }, 50);
+}
+
+function showParentalGate() {
+  pgA = 2 + Math.floor(Math.random()*8);
+  pgB = 2 + Math.floor(Math.random()*8);
+  document.getElementById('pg-question').textContent = pgA + ' x ' + pgB + ' = ?';
+  document.getElementById('pg-input').value = '';
+  document.getElementById('pg-error').textContent = '';
+  showScreen('screen-parental');
+}
+
+function checkParental() {
+  var val = parseInt(document.getElementById('pg-input').value, 10);
+  if(val === pgA * pgB) {
+    showScreen('screen-parents-info');
+  } else {
+    document.getElementById('pg-error').textContent = T[lang].pgError;
+    playWrong();
+  }
+}
+
+function getLevelSituations(level) {
+  var all = SITUATIONS[lang].filter(function(s){return s.level===level;});
+  return all.sort(function(){return Math.random()-0.5;});
+}
+
+function startGame() {
+  currentLevel = Math.min(currentLevel, 3);
+  levelSituations = getLevelSituations(currentLevel);
+  currentSituationIndex = 0;
+  totalSituations = levelSituations.length;
+  answered = false;
+  wrongThisSituation = false;
+  showScreen('screen-game');
+  updateProgressBar();
+  loadSituation();
+  renderGarden('garden-svg', 90);
+}
+
+function loadSituation() {
+  answered = false;
+  wrongThisSituation = false;
+  if(currentSituationIndex >= levelSituations.length) {
+    showLevelSuccess();
+    return;
+  }
+  currentSituation = levelSituations[currentSituationIndex];
+  renderSituation();
+  updateProgressBar();
+}
+
+function renderSituation() {
+  var t = T[lang];
+  document.getElementById('g-level-badge').textContent = t.levelBadge(currentLevel);
+  document.getElementById('g-icon').textContent = currentSituation.icon;
+  document.getElementById('g-situation').textContent = currentSituation.text;
+  document.getElementById('g-garden-label').textContent = t.gardenLabel(flowerCount);
+  var grid = document.getElementById('g-choices');
+  grid.innerHTML = '';
+  var labels = ['A', 'B', 'C'];
+  currentSituation.choices.forEach(function(ch, i) {
+    var btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = '<span style="background:var(--blue);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;flex-shrink:0;">' + labels[i] + '</span> ' + ch.text;
+    btn.setAttribute('aria-label', ch.text);
+    (function(choice, button){
+      button.onclick = function(){ handleChoice(choice, button); };
+    })(ch, btn);
+    grid.appendChild(btn);
+  });
+  var fb = document.getElementById('g-feedback');
+  fb.textContent = '';
+  fb.className = 'feedback-box';
+  document.getElementById('g-next-btn').style.display = 'none';
+  document.getElementById('g-next-btn').textContent = t.nextBtn;
+}
+
+function handleChoice(choice, btn) {
+  if(answered) return;
+  answered = true;
+  document.querySelectorAll('#g-choices .choice-btn').forEach(function(b){b.disabled=true;});
+  var fb = document.getElementById('g-feedback');
+  if(choice.correct) {
+    btn.classList.add('correct');
+    fb.textContent = T[lang].correct(choice.feedback);
+    fb.className = 'feedback-box pos show';
+    setAriaLive(T[lang].correct(choice.feedback));
+    if(!wrongThisSituation && flowerCount < FLOWER_POSITIONS.length) {
+      flowerCount++;
+      saveState();
+      renderGarden('garden-svg', 90);
+      setTimeout(animateNewFlower, 50);
+      playFlower();
+      setTimeout(function(){playSuccess();}, 600);
+    } else {
+      playSuccess();
+    }
+    document.getElementById('g-garden-label').textContent = T[lang].gardenLabel(flowerCount);
+    document.getElementById('g-next-btn').style.display = '';
+  } else {
+    btn.classList.add('wrong');
+    wrongThisSituation = true;
+    fb.textContent = T[lang].wrong(choice.feedback);
+    fb.className = 'feedback-box neg show';
+    setAriaLive(T[lang].wrong(choice.feedback));
+    playWrong();
+    setTimeout(function(){
+      answered = false;
+      document.querySelectorAll('#g-choices .choice-btn').forEach(function(b){
+        if(!b.classList.contains('wrong')) b.disabled = false;
+      });
+      btn.disabled = true;
+    }, 1400);
+  }
+}
+
+function nextSituation() {
+  currentSituationIndex++;
+  updateProgressBar();
+  if(currentSituationIndex >= levelSituations.length) {
+    showLevelSuccess();
+  } else {
+    loadSituation();
+  }
+}
+
+function updateProgressBar() {
+  var pct = totalSituations > 0 ? Math.round((currentSituationIndex / totalSituations)*100) : 0;
+  var bar = document.getElementById('g-progress');
+  bar.style.width = pct + '%';
+  bar.parentElement.setAttribute('aria-valuenow', pct);
+}
+
+function showLevelSuccess() {
+  playLevelUp();
+  var t = T[lang];
+  document.getElementById('s-stars').textContent = currentLevel===1?'⭐':currentLevel===2?'⭐⭐':'⭐⭐⭐';
+  document.getElementById('s-title').textContent = t.sTitle(currentLevel);
+  document.getElementById('s-msg').textContent = t.sMsg(flowerCount);
+  document.getElementById('s-replay').textContent = t.sReplay;
+  document.getElementById('s-next').textContent = t.sNext;
+  document.getElementById('s-home').textContent = t.sHome;
+  document.getElementById('s-next').style.display = (currentLevel >= 3) ? 'none' : '';
+  renderGarden('success-garden-svg', 110);
+  showScreen('screen-success');
+}
+
+function nextLevel() {
+  if(currentLevel >= 3) {
+    showAllDone();
+    return;
+  }
+  currentLevel++;
+  saveState();
+  startGame();
+}
+
+function showAllDone() {
+  var t = T[lang];
+  document.getElementById('ad-title').textContent = t.adTitle;
+  document.getElementById('ad-msg').textContent = t.adMsg;
+  document.getElementById('ad-restart').textContent = t.adRestart;
+  document.getElementById('ad-home').textContent = t.adHome;
+  renderGarden('alldone-garden-svg', 110);
+  showScreen('screen-alldone');
+  playLevelUp();
+}
+
+function restartAll() {
+  flowerCount = 0;
+  currentLevel = 1;
+  saveState();
+  startGame();
+}
+
+function setAriaLive(msg) {
+  var el = document.getElementById('aria-live');
+  el.textContent = '';
+  setTimeout(function(){el.textContent = msg;}, 50);
+}
+
+document.getElementById('pg-input').addEventListener('keydown', function(e){
+  if(e.key==='Enter') checkParental();
+});
+
+function init() {
+  loadState();
+  var nav = navigator.language || 'fr';
+  lang = nav.startsWith('fr') ? 'fr' : 'en';
+  document.getElementById('btn-fr').classList.toggle('active', lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.documentElement.lang = lang;
+  renderCurrentScreen();
+  showScreen('screen-title');
+}
+
+init();
+</script>
+</body>
+</html>

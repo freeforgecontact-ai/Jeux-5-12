@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Le Labo des Petits Chimistes / Tiny Chemist Lab — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#c7e8ff 0%,#eaf6ff 60%,#ddf3ff 100%);min-height:100vh;color:var(--navy);}
+h1,h2,h3{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:10px;background:var(--blue);color:#fff;padding:8px 16px;flex-wrap:wrap;}
+#topbar img{height:34px;}
+#topbar .brand{font-family:'Fredoka','Nunito',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;flex:1;}
+.lang-btn{background:transparent;border:2px solid #fff;color:#fff;font-weight:700;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s;}
+.lang-btn.active,.lang-btn:hover{background:#fff;color:var(--blue);}
+#muteBtn{background:transparent;border:none;font-size:1.5rem;cursor:pointer;padding:4px 8px;border-radius:8px;}
+#muteBtn:hover{background:rgba(255,255,255,.2);}
+.screen{display:none;padding:20px 16px;max-width:720px;margin:0 auto;}
+.screen.active{display:block;}
+#titleScreen{text-align:center;}
+#titleScreen h1{font-size:2.2rem;color:var(--blue);margin:10px 0 6px;}
+#titleScreen .subtitle{color:var(--slate);font-size:1.1rem;margin-bottom:20px;}
+.mascot-wrap{margin:20px auto;width:180px;height:180px;}
+.btn-orange{background:var(--orange);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1.2rem;font-weight:700;border-radius:16px;padding:14px 36px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:48px;}
+.btn-orange:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-blue{background:var(--blue);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1rem;font-weight:700;border-radius:12px;padding:10px 24px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;min-height:48px;}
+.btn-blue:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.btn-ghost{background:transparent;border:2px solid var(--blue);color:var(--blue);font-family:'Nunito',sans-serif;font-size:.95rem;border-radius:10px;padding:8px 18px;cursor:pointer;min-height:48px;}
+#parentModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+#parentModal.open{display:flex;}
+#parentBox{background:#fff;border-radius:20px;padding:32px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+#parentBox h2{color:var(--blue);margin-bottom:12px;}
+#parentBox p{margin-bottom:16px;color:var(--slate);}
+#parentCalc{font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:12px;}
+#parentAnswer{border:2px solid var(--blue);border-radius:10px;padding:10px;font-size:1.2rem;width:100%;margin-bottom:10px;text-align:center;}
+#parentErr{color:#e00;min-height:20px;font-size:.9rem;margin-bottom:8px;}
+#parentInfo{display:none;text-align:left;font-size:.9rem;line-height:1.6;color:var(--slate);margin-top:12px;}
+#levelScreen h2{color:var(--blue);font-size:1.6rem;text-align:center;margin-bottom:8px;}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin:20px 0;}
+.level-card{background:#fff;border-radius:18px;padding:20px 24px;box-shadow:0 4px 16px rgba(15,76,129,.12);cursor:pointer;text-align:center;min-width:150px;flex:1;max-width:200px;border:3px solid transparent;transition:border .2s,transform .15s;}
+.level-card:hover{border-color:var(--orange);transform:translateY(-3px);}
+.level-card .lv-icon{font-size:2.5rem;display:block;margin-bottom:8px;}
+.level-card h3{color:var(--blue);font-size:1rem;}
+.level-card p{font-size:.82rem;color:var(--slate);margin-top:4px;}
+.level-card .badge{display:inline-block;background:var(--gold);border-radius:20px;font-size:.75rem;font-weight:700;padding:2px 10px;margin-top:8px;color:var(--navy);}
+#gameScreen h2{color:var(--blue);font-size:1.4rem;text-align:center;margin-bottom:6px;}
+.progress-bar-wrap{background:#dde8f5;border-radius:20px;height:12px;margin-bottom:16px;}
+.progress-bar{height:12px;background:var(--orange);border-radius:20px;transition:width .4s;}
+#labContainer{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(15,76,129,.13);padding:20px;margin-bottom:16px;}
+#questionText{font-size:1.1rem;color:var(--navy);margin-bottom:14px;text-align:center;font-weight:700;}
+#stateLabel{text-align:center;font-size:1rem;color:var(--slate);margin-bottom:4px;}
+#tempDisplay{text-align:center;font-size:1.4rem;font-weight:700;color:var(--blue);margin-bottom:10px;}
+#vizArea{display:flex;justify-content:center;margin-bottom:14px;}
+#vizSvg{width:200px;height:160px;}
+.controls-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+.ctrl-btn{background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;padding:10px 20px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;min-height:48px;}
+.ctrl-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.ctrl-btn.hot{background:var(--orange);box-shadow:0 4px 0 var(--orange-dark);}
+.ctrl-btn.cool{background:#38bdf8;box-shadow:0 4px 0 #0284c7;color:#fff;}
+.quiz-choices{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.choice-btn{background:var(--sky-light);border:2px solid var(--sky);color:var(--navy);border-radius:14px;padding:12px 18px;font-size:1rem;cursor:pointer;text-align:left;min-height:48px;transition:background .15s,border-color .15s;}
+.choice-btn:hover{background:#cfe8fa;border-color:var(--blue);}
+.choice-btn.correct{background:#d1fae5;border-color:var(--success);}
+.choice-btn.wrong{background:#fee2e2;border-color:#ef4444;}
+#explanation{background:#f0f9ff;border-left:4px solid var(--sky);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.92rem;color:var(--slate);display:none;}
+#feedbackMsg{text-align:center;font-size:1.1rem;font-weight:700;min-height:28px;margin:8px 0;transition:color .2s;}
+.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+#mixArea{display:flex;flex-direction:column;align-items:center;gap:14px;}
+#beakerWrap{position:relative;width:160px;height:180px;}
+#mixStatus{font-size:.95rem;color:var(--slate);text-align:center;}
+.ingredient-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.ing-btn{background:#e0f2fe;border:2px solid #7ec3ee;color:var(--navy);border-radius:12px;padding:10px 18px;font-size:.95rem;cursor:pointer;min-height:48px;}
+.ing-btn:hover{background:#bae6fd;border-color:var(--blue);}
+.ing-btn:disabled{opacity:.45;cursor:default;}
+#resultScreen{text-align:center;}
+#resultScreen h2{font-size:2rem;color:var(--blue);margin-bottom:10px;}
+#starsRow{font-size:2.8rem;margin:12px 0;}
+#resultMsg{font-size:1.1rem;color:var(--slate);margin-bottom:20px;}
+.score-badge{background:var(--gold);border-radius:16px;display:inline-block;padding:10px 28px;font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:20px;}
+#ariaLive{position:absolute;left:-9999px;top:0;}
+@media(max-width:480px){
+  #titleScreen h1{font-size:1.6rem;}
+  .mascot-wrap{width:130px;height:130px;}
+  .level-card{max-width:none;width:100%;}
+  #vizSvg{width:160px;height:130px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE -->
+<div id="titleScreen" class="screen active" role="main">
+  <div class="mascot-wrap">
+    <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" aria-label="Mascotte chimiste">
+      <ellipse cx="90" cy="140" rx="52" ry="38" fill="#e0f2fe" stroke="#7ec3ee" stroke-width="2"/>
+      <circle cx="90" cy="82" r="38" fill="#fde68a" stroke="#fbbf24" stroke-width="2"/>
+      <rect x="62" y="70" width="25" height="18" rx="7" fill="#bae6fd" stroke="#0ea5e9" stroke-width="2"/>
+      <rect x="93" y="70" width="25" height="18" rx="7" fill="#bae6fd" stroke="#0ea5e9" stroke-width="2"/>
+      <line x1="87" y1="79" x2="93" y2="79" stroke="#0ea5e9" stroke-width="2"/>
+      <circle cx="74" cy="79" r="5" fill="#fff"/><circle cx="105" cy="79" r="5" fill="#fff"/>
+      <circle cx="75" cy="80" r="3" fill="#1e40af"/><circle cx="106" cy="80" r="3" fill="#1e40af"/>
+      <path d="M74 100 Q90 114 106 100" stroke="#92400e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="90" cy="48" rx="34" ry="16" fill="#f59e0b"/>
+      <path d="M62 118 L80 108 L90 118 L100 108 L118 118" stroke="#cbd5e1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="90" cy="130" r="3" fill="#cbd5e1"/><circle cx="90" cy="145" r="3" fill="#cbd5e1"/>
+      <path d="M130 115 L136 130 Q140 140 134 148 Q128 155 120 152 Q112 149 112 140 Q112 133 118 130 L124 115 Z" fill="#a7f3d0" stroke="#059669" stroke-width="2"/>
+      <line x1="124" y1="115" x2="130" y2="115" stroke="#059669" stroke-width="2"/>
+      <circle cx="122" cy="145" r="3" fill="#fff" opacity=".7"/><circle cx="128" cy="138" r="2" fill="#fff" opacity=".7"/>
+    </svg>
+  </div>
+  <h1 id="titleH1">Le Labo des Petits Chimistes</h1>
+  <p class="subtitle" id="titleSub">Explore les etats de la matiere !</p>
+  <br>
+  <button class="btn-orange" onclick="goLevels()" id="btnPlay">Jouer !</button>
+  <br><br>
+  <button class="btn-ghost" onclick="openParent()" id="btnParent">Pour les parents</button>
+</div>
+
+<!-- LEVELS -->
+<div id="levelScreen" class="screen" role="main">
+  <h2 id="lvTitle">Choisis ton niveau</h2>
+  <div class="level-cards">
+    <div class="level-card" onclick="startLevel(1)" role="button" tabindex="0">
+      <span class="lv-icon">🔵</span>
+      <h3 id="lv1name">Etats de la matiere</h3>
+      <p id="lv1desc">Reconnais solide, liquide, gaz</p>
+      <span class="badge" id="lv1badge">Niveau 1</span>
+    </div>
+    <div class="level-card" onclick="startLevel(2)" role="button" tabindex="0">
+      <span class="lv-icon">🌡️</span>
+      <h3 id="lv2name">Changements d'etat</h3>
+      <p id="lv2desc">Chauffe et refroidis les substances</p>
+      <span class="badge" id="lv2badge">Niveau 2</span>
+    </div>
+    <div class="level-card" onclick="startLevel(3)" role="button" tabindex="0">
+      <span class="lv-icon">🍬</span>
+      <h3 id="lv3name">Melanges</h3>
+      <p id="lv3desc">Dissous du sucre, explore les melanges</p>
+      <span class="badge" id="lv3badge">Niveau 3</span>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:10px;">
+    <button class="btn-ghost" onclick="showScreen('titleScreen')" id="btnBackTitle">Retour</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="screen" role="main">
+  <h2 id="gameTitle">Niveau 1</h2>
+  <div class="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progression">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div id="labContainer">
+    <div id="questionText"></div>
+    <div id="vizSection">
+      <div id="stateLabel"></div>
+      <div id="tempDisplay"></div>
+      <div id="vizArea"><svg id="vizSvg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div class="controls-row" id="heatControls">
+        <button class="ctrl-btn cool" id="btnCool" onclick="doTemp(-10)" aria-label="Refroidir">❄️ <span id="coolLbl">Refroidir</span></button>
+        <button class="ctrl-btn hot" id="btnHeat" onclick="doTemp(+10)" aria-label="Chauffer">🔥 <span id="heatLbl">Chauffer</span></button>
+      </div>
+    </div>
+    <div id="quizSection" style="display:none;">
+      <div class="quiz-choices" id="choicesDiv"></div>
+      <div id="explanation"></div>
+    </div>
+    <div id="mixSection" style="display:none;">
+      <div id="mixArea">
+        <div id="beakerWrap"><svg id="beakerSvg" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg" width="160" height="180"></svg></div>
+        <div id="mixStatus"></div>
+        <div class="ingredient-btns" id="ingredientBtns"></div>
+      </div>
+    </div>
+    <div id="feedbackMsg" aria-live="assertive"></div>
+    <div class="btn-row" id="nextBtnRow" style="display:none;">
+      <button class="btn-orange" id="nextBtn" onclick="nextQuestion()"><span id="nextLbl">Suivant</span></button>
+    </div>
+  </div>
+  <div style="text-align:center;">
+    <button class="btn-ghost" onclick="showScreen('levelScreen')" id="btnQuit"><span id="quitLbl">Quitter</span></button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="resultScreen" class="screen" role="main">
+  <h2 id="resultTitle">Bravo !</h2>
+  <div id="starsRow">⭐⭐⭐</div>
+  <div class="score-badge" id="scoreBadge">10 / 10</div>
+  <p id="resultMsg"></p>
+  <div class="btn-row" style="justify-content:center;margin-top:20px;">
+    <button class="btn-orange" onclick="replayLevel()" id="btnReplay"><span id="replayLbl">Rejouer</span></button>
+    <button class="btn-blue" onclick="goLevels()" id="btnNextLv"><span id="nextLvLbl">Niveaux</span></button>
+    <button class="btn-ghost" onclick="showScreen('titleScreen')" id="btnHome2"><span id="homeLbl2">Accueil</span></button>
+  </div>
+</div>
+
+<!-- PARENT MODAL -->
+<div id="parentModal" role="dialog" aria-modal="true" aria-labelledby="parentTitle">
+  <div id="parentBox">
+    <h2 id="parentTitle">Pour les parents</h2>
+    <p id="parentGateMsg">Repondez a cette question pour continuer :</p>
+    <div id="parentCalc"></div>
+    <input id="parentAnswer" type="number" inputmode="numeric" aria-label="Reponse">
+    <div id="parentErr"></div>
+    <button class="btn-blue" onclick="checkParent()" id="btnParentOk">Valider</button>
+    <div id="parentInfo">
+      <strong id="pinfoTitle">A propos de ce jeu</strong><br>
+      <span id="pinfoText"></span>
+    </div>
+    <br>
+    <button class="btn-ghost" onclick="closeParent()" style="margin-top:10px;" id="btnParentClose">Fermer</button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    titleH1:"Le Labo des Petits Chimistes",titleSub:"Explore les etats de la matiere !",
+    btnPlay:"🧪 Jouer !",btnParent:"👨‍👩‍👧 Pour les parents",
+    lvTitle:"Choisis ton niveau",
+    lv1name:"Etats de la matiere",lv1desc:"Reconnais solide, liquide, gaz",lv1badge:"Niveau 1",
+    lv2name:"Changements d'etat",lv2desc:"Chauffe et refroidis les substances",lv2badge:"Niveau 2",
+    lv3name:"Melanges",lv3desc:"Dissous du sucre, explore les melanges",lv3badge:"Niveau 3",
+    btnBackTitle:"← Retour",solid:"Solide",liquid:"Liquide",gas:"Gaz",
+    coolLbl:"Refroidir",heatLbl:"Chauffer",quitLbl:"Quitter",nextLbl:"Suivant ➜",
+    resultTitle:"Bravo !",resultMsg_p:"Excellente experience ! Tu maitrises les etats de la matiere.",
+    replayLbl:"Rejouer",nextLvLbl:"Niveaux",homeLbl2:"Accueil",
+    parentGateMsg:"Repondez a cette question pour continuer :",
+    parentBtnOk:"Valider",parentBtnClose:"Fermer",parentErr:"Reponse incorrecte, reessayez.",
+    parentTitle:"👨‍👩‍👧 Pour les parents",pinfoTitle:"A propos de ce jeu",
+    pinfoText:"Ce jeu aide les enfants (8-12 ans) a explorer les etats de la matiere (solide, liquide, gaz) et les changements d'etat. Aucune donnee personnelle n'est collectee. Aucune publicite. Fonctionne hors-ligne.",
+    tempLbl:"Temperature :",stateIs:"Etat actuel :",
+    feedOk:["Super ! ✅","Exact ! 🎉","Bravo ! ⭐","Parfait ! 🏆","C'est ca ! 🔬"],
+    feedWrong:["Essaie encore… 🤔","Pas tout a fait ! Lis l'explication.","Presque ! Lis l'indice ci-dessous."],
+    dissolving:"Dissolution en cours…",dissolved:"Dissous ! Le sucre a disparu dans l'eau. 🍬",
+    notDissolve:"Ca ne se dissout pas facilement ! Melange heterogene.",
+    mixInstr:"Clique sur un ingredient pour l'ajouter a l'eau.",
+    addSugar:"Ajouter du sucre",addSand:"Ajouter du sable",addSalt:"Ajouter du sel",addOil:"Ajouter de l'huile",
+    stir:"Agiter 🌀",
+    gameTitle_1:"Niveau 1 — Etats de la matiere",gameTitle_2:"Niveau 2 — Changements d'etat",gameTitle_3:"Niveau 3 — Melanges",
+    tempUnit:"°C"
+  },
+  en:{
+    titleH1:"Tiny Chemist Lab",titleSub:"Explore states of matter!",
+    btnPlay:"🧪 Play!",btnParent:"👨‍👩‍👧 For Parents",
+    lvTitle:"Choose your level",
+    lv1name:"States of Matter",lv1desc:"Identify solid, liquid, gas",lv1badge:"Level 1",
+    lv2name:"State Changes",lv2desc:"Heat and cool substances",lv2badge:"Level 2",
+    lv3name:"Mixtures",lv3desc:"Dissolve sugar, explore mixtures",lv3badge:"Level 3",
+    btnBackTitle:"← Back",solid:"Solid",liquid:"Liquid",gas:"Gas",
+    coolLbl:"Cool Down",heatLbl:"Heat Up",quitLbl:"Quit",nextLbl:"Next ➜",
+    resultTitle:"Awesome!",resultMsg_p:"Great experiment! You've mastered states of matter.",
+    replayLbl:"Play Again",nextLvLbl:"Levels",homeLbl2:"Home",
+    parentGateMsg:"Answer this question to continue:",
+    parentBtnOk:"Confirm",parentBtnClose:"Close",parentErr:"Wrong answer, please try again.",
+    parentTitle:"👨‍👩‍👧 For Parents",pinfoTitle:"About this game",
+    pinfoText:"This game helps children (8-12) explore states of matter (solid, liquid, gas) and state changes. No personal data is collected. No ads. Works offline.",
+    tempLbl:"Temperature:",stateIs:"Current state:",
+    feedOk:["Great! ✅","Correct! 🎉","Well done! ⭐","Perfect! 🏆","That's right! 🔬"],
+    feedWrong:["Try again… 🤔","Not quite! Read the explanation.","Almost! See the hint below."],
+    dissolving:"Dissolving…",dissolved:"Dissolved! The sugar disappeared in the water. 🍬",
+    notDissolve:"That doesn't dissolve easily! Heterogeneous mixture.",
+    mixInstr:"Click an ingredient to add it to the water.",
+    addSugar:"Add sugar",addSand:"Add sand",addSalt:"Add salt",addOil:"Add oil",
+    stir:"Stir 🌀",
+    gameTitle_1:"Level 1 — States of Matter",gameTitle_2:"Level 2 — State Changes",gameTitle_3:"Level 3 — Mixtures",
+    tempUnit:"°C"
+  }
+};
+
+var lang='fr',muted=false,currentLevel=1,questions=[],qIndex=0,score=0;
+var currentTemp=0,currentSubstanceState='solid',answered=false,savedData={};
+var mixAdded=null,mixStirred=false;
+
+function t(k){return(T[lang]&&T[lang][k]!==undefined)?T[lang][k]:(T.fr[k]||k);}
+
+var audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.15;
+  try{var ac=getAudio(),osc=ac.createOscillator(),g=ac.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,ac.currentTime);
+  g.gain.setValueAtTime(vol,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+  osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(523,.12);setTimeout(function(){playTone(659,.12)},120);setTimeout(function(){playTone(784,.25)},240);}
+function playError(){playTone(200,.3,'sawtooth',.07);}
+function playClick(){playTone(660,.06,'sine',.1);}
+function playCool(){playTone(330,.18,'sine',.1);}
+function playHeat(){playTone(440,.18,'triangle',.12);}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+function setLang(l){
+  lang=l;document.documentElement.lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  applyTranslations();
+  if(document.getElementById('gameScreen').classList.contains('active'))renderCurrentQ();
+}
+
+function applyTranslations(){
+  var ids=['titleH1','titleSub','btnPlay','btnParent','lvTitle',
+    'lv1name','lv1desc','lv1badge','lv2name','lv2desc','lv2badge',
+    'lv3name','lv3desc','lv3badge','btnBackTitle','coolLbl','heatLbl',
+    'quitLbl','nextLbl','resultTitle','replayLbl','nextLvLbl','homeLbl2',
+    'parentGateMsg','parentTitle','pinfoTitle','pinfoText'];
+  ids.forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t(id);});
+  document.getElementById('btnParentOk').textContent=t('parentBtnOk');
+  document.getElementById('btnParentClose').textContent=t('parentBtnClose');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+var pA=0,pB=0;
+function openParent(){
+  playClick();
+  pA=Math.floor(Math.random()*9)+2;pB=Math.floor(Math.random()*9)+2;
+  document.getElementById('parentCalc').textContent=pA+' x '+pB+' = ?';
+  document.getElementById('parentAnswer').value='';
+  document.getElementById('parentErr').textContent='';
+  document.getElementById('parentInfo').style.display='none';
+  document.getElementById('parentModal').classList.add('open');
+  setTimeout(function(){document.getElementById('parentAnswer').focus();},100);
+}
+function closeParent(){document.getElementById('parentModal').classList.remove('open');}
+function checkParent(){
+  var v=parseInt(document.getElementById('parentAnswer').value);
+  if(v===pA*pB){
+    document.getElementById('parentInfo').style.display='block';
+    document.getElementById('parentErr').textContent='';
+    document.getElementById('pinfoText').textContent=t('pinfoText');
+    document.getElementById('pinfoTitle').textContent=t('pinfoTitle');
+    playSuccess();
+  }else{document.getElementById('parentErr').textContent=t('parentErr');playError();}
+}
+document.getElementById('parentAnswer').addEventListener('keydown',function(e){if(e.key==='Enter')checkParent();});
+document.getElementById('parentModal').addEventListener('click',function(e){if(e.target===document.getElementById('parentModal'))closeParent();});
+
+function goLevels(){playClick();loadSave();showScreen('levelScreen');}
+function loadSave(){try{savedData=JSON.parse(localStorage.getItem('pgrg_labo_chimistes')||'{}');}catch(e){savedData={};}}
+function saveProg(){try{localStorage.setItem('pgrg_labo_chimistes',JSON.stringify(savedData));}catch(e){}}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+
+function buildLevel1(){
+  var qs_fr=[
+    {q:"La glace dans ton verre — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:0,explain:"La glace est de l'eau a l'etat SOLIDE. Elle garde sa forme."},
+    {q:"L'eau dans un verre — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:1,explain:"L'eau est a l'etat LIQUIDE. Elle prend la forme du recipient."},
+    {q:"La vapeur qui sort d'une casserole — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:2,explain:"La vapeur d'eau est a l'etat GAZEUX. Elle s'echappe dans l'air !"},
+    {q:"Une brique — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:0,explain:"Une brique est un SOLIDE. Elle est dure et garde sa forme."},
+    {q:"Le jus d'orange — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:1,explain:"Le jus est un LIQUIDE. Il coule et prend la forme du verre."},
+    {q:"L'air que tu respires — quel est son etat ?",choices:["Solide","Liquide","Gaz"],correct:2,explain:"L'air est un melange de GAZ. On ne le voit pas mais il est partout !"},
+    {q:"Un glaçon — quel est son etat ?",choices:["Gaz","Liquide","Solide"],correct:2,explain:"Un glaçon est de l'eau a l'etat SOLIDE."},
+    {q:"De l'huile dans une poele — quel est son etat ?",choices:["Liquide","Solide","Gaz"],correct:0,explain:"L'huile est un LIQUIDE. Elle coule facilement."}
+  ];
+  var qs_en=[
+    {q:"Ice in your glass — what is its state?",choices:["Solid","Liquid","Gas"],correct:0,explain:"Ice is water in its SOLID state. It keeps its shape."},
+    {q:"Water in a glass — what is its state?",choices:["Solid","Liquid","Gas"],correct:1,explain:"Water is in its LIQUID state. It takes the shape of its container."},
+    {q:"Steam rising from a pot — what is its state?",choices:["Solid","Liquid","Gas"],correct:2,explain:"Steam is water in its GAS state. It escapes into the air!"},
+    {q:"A brick — what is its state?",choices:["Solid","Liquid","Gas"],correct:0,explain:"A brick is a SOLID. It is hard and keeps its shape."},
+    {q:"Orange juice in your glass — what is its state?",choices:["Solid","Liquid","Gas"],correct:1,explain:"Juice is a LIQUID. It flows and takes the shape of the glass."},
+    {q:"The air you breathe — what is its state?",choices:["Solid","Liquid","Gas"],correct:2,explain:"Air is a mixture of GASES. You can't see it but it's everywhere!"},
+    {q:"An ice cube — what is its state?",choices:["Gas","Liquid","Solid"],correct:2,explain:"An ice cube is water in its SOLID state."},
+    {q:"Oil in a pan — what is its state?",choices:["Liquid","Solid","Gas"],correct:0,explain:"Oil is a LIQUID. It flows easily."}
+  ];
+  return shuffle(lang==='en'?qs_en:qs_fr).slice(0,6).map(function(q){return Object.assign({type:'quiz'},q);});
+}
+
+function buildLevel2(){
+  var qs_fr=[
+    {type:'heat',q:"Chauffe la glace pour la transformer en eau !",startTemp:-15,targetState:'liquid',explain:"A 0°C, la glace fond et devient de l'eau liquide. C'est la FUSION !"},
+    {type:'quiz',q:"A quelle temperature l'eau bout-elle ?",choices:["50°C","100°C","200°C"],correct:1,explain:"L'eau bout a 100°C. Elle se transforme en vapeur : c'est la VAPORISATION."},
+    {type:'heat',q:"Chauffe l'eau pour la transformer en vapeur !",startTemp:20,targetState:'gas',explain:"A 100°C, l'eau bout et devient vapeur. C'est la VAPORISATION !"},
+    {type:'quiz',q:"Quand on refroidit la vapeur d'eau, elle redevient…",choices:["De la glace","De l'eau liquide","Rien"],correct:1,explain:"La vapeur refroidie devient de l'eau liquide. C'est la CONDENSATION."},
+    {type:'cool',q:"Refroidis l'eau pour la transformer en glace !",startTemp:20,targetState:'solid',explain:"En dessous de 0°C, l'eau se solidifie et devient glace. C'est la SOLIDIFICATION !"},
+    {type:'quiz',q:"Comment appelle-t-on le passage du solide au liquide ?",choices:["Solidification","Vaporisation","Fusion"],correct:2,explain:"Quand un solide fond pour devenir liquide, on appelle ca la FUSION."},
+    {type:'heat',q:"Defi : chauffe la glace jusqu'a la vapeur !",startTemp:-15,targetState:'gas',explain:"Bravo ! La glace fond a 0°C (fusion) puis l'eau bout a 100°C (vaporisation) !"}
+  ];
+  var qs_en=[
+    {type:'heat',q:"Heat the ice to turn it into water!",startTemp:-15,targetState:'liquid',explain:"At 0°C, ice melts and becomes liquid water. This is MELTING!"},
+    {type:'quiz',q:"At what temperature does water boil?",choices:["50°C","100°C","200°C"],correct:1,explain:"Water boils at 100°C. It then becomes steam: this is VAPORIZATION."},
+    {type:'heat',q:"Heat the water to turn it into steam!",startTemp:20,targetState:'gas',explain:"At 100°C, water boils and becomes steam. This is VAPORIZATION!"},
+    {type:'quiz',q:"When steam cools down, it becomes…",choices:["Ice","Liquid water","Nothing"],correct:1,explain:"Cooled steam becomes liquid water. This is CONDENSATION."},
+    {type:'cool',q:"Cool the water to turn it into ice!",startTemp:20,targetState:'solid',explain:"Below 0°C, water solidifies and becomes ice. This is SOLIDIFICATION!"},
+    {type:'quiz',q:"What is the term for the change from solid to liquid?",choices:["Solidification","Vaporization","Melting"],correct:2,explain:"When a solid melts to become liquid, it's called MELTING."},
+    {type:'heat',q:"Challenge: heat the ice all the way to steam!",startTemp:-15,targetState:'gas',explain:"Great! Ice melts at 0°C (melting) then water boils at 100°C (vaporization)!"}
+  ];
+  return (lang==='en'?qs_en:qs_fr).map(function(q){return Object.assign({},q);});
+}
+
+function buildLevel3(){
+  var qs_fr=[
+    {type:'mix',q:"Ajoute du sucre a l'eau et agite. Que se passe-t-il ?",mixTarget:'sugar',explain:"Le sucre se DISSOUT dans l'eau : on ne le voit plus mais il est encore la !"},
+    {type:'quiz',q:"Quand le sucre disparait dans l'eau, on dit qu'il…",choices:["Fond","Se dissout","S'evapore"],correct:1,explain:"Le sucre se DISSOUT dans l'eau. L'eau sucree est un melange homogene."},
+    {type:'mix',q:"Ajoute du sable a l'eau et agite. Que se passe-t-il ?",mixTarget:'sand',explain:"Le sable ne se dissout pas ! Il reste au fond. C'est un melange heterogene."},
+    {type:'quiz',q:"Qu'est-ce qu'un melange homogene ?",choices:["On voit les deux substances","On ne peut pas les distinguer","Les substances sont solides"],correct:1,explain:"Dans un melange homogene (ex : eau sucree), on ne distingue plus les elements."},
+    {type:'mix',q:"Ajoute du sel a l'eau et agite.",mixTarget:'salt',explain:"Le sel se dissout dans l'eau, comme le sucre. L'eau salee est utilisee pour cuisiner !"},
+    {type:'quiz',q:"L'huile se melange-t-elle a l'eau ?",choices:["Oui, completement","Non, elle flotte au-dessus","Oui, mais en chauffant seulement"],correct:1,explain:"L'huile et l'eau ne se melangent pas : l'huile flotte (elle est moins dense). Melange heterogene."},
+    {type:'mix',q:"Ajoute de l'huile a l'eau et agite.",mixTarget:'oil',explain:"L'huile et l'eau ne se melangent pas : l'huile flotte au-dessus ! Melange heterogene."}
+  ];
+  var qs_en=[
+    {type:'mix',q:"Add sugar to water and stir. What happens?",mixTarget:'sugar',explain:"Sugar DISSOLVES in water: you can't see it anymore but it's still there!"},
+    {type:'quiz',q:"When sugar disappears in water, we say it…",choices:["Melts","Dissolves","Evaporates"],correct:1,explain:"Sugar DISSOLVES in water. Sugar water is a homogeneous mixture."},
+    {type:'mix',q:"Add sand to water and stir. What happens?",mixTarget:'sand',explain:"Sand doesn't dissolve! It stays at the bottom. This is a heterogeneous mixture."},
+    {type:'quiz',q:"What is a homogeneous mixture?",choices:["You can see both substances","You can't tell them apart","The substances are solid"],correct:1,explain:"In a homogeneous mixture (e.g. sugar water), you can no longer tell the parts apart."},
+    {type:'mix',q:"Add salt to the water and stir.",mixTarget:'salt',explain:"Salt dissolves in water, just like sugar. Saltwater is used for cooking!"},
+    {type:'quiz',q:"Does oil mix with water?",choices:["Yes, completely","No, it floats on top","Yes, but only when heated"],correct:1,explain:"Oil and water don't mix: oil floats (it's less dense). Heterogeneous mixture."},
+    {type:'mix',q:"Add oil to water and stir.",mixTarget:'oil',explain:"Oil and water don't mix: oil floats on top! Heterogeneous mixture."}
+  ];
+  return (lang==='en'?qs_en:qs_fr).map(function(q){return Object.assign({},q);});
+}
+
+function buildQuestions(lv){
+  if(lv===1)return buildLevel1();
+  if(lv===2)return buildLevel2();
+  return buildLevel3();
+}
+
+function startLevel(lv){
+  playClick();currentLevel=lv;
+  questions=buildQuestions(lv);qIndex=0;score=0;answered=false;
+  document.getElementById('gameTitle').textContent=t('gameTitle_'+lv);
+  showScreen('gameScreen');renderCurrentQ();
+}
+function replayLevel(){playClick();startLevel(currentLevel);}
+
+function updateProgress(){
+  var pct=Math.round((qIndex/questions.length)*100);
+  var bar=document.getElementById('progressBar');
+  bar.style.width=pct+'%';
+  bar.parentElement.setAttribute('aria-valuenow',pct);
+}
+
+function renderCurrentQ(){
+  if(qIndex>=questions.length){showResult();return;}
+  var q=questions[qIndex];
+  updateProgress();answered=false;
+  document.getElementById('feedbackMsg').textContent='';
+  document.getElementById('nextBtnRow').style.display='none';
+  document.getElementById('questionText').textContent=q.q;
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('explanation').textContent='';
+  document.getElementById('vizSection').style.display='none';
+  document.getElementById('quizSection').style.display='none';
+  document.getElementById('mixSection').style.display='none';
+  document.getElementById('heatControls').style.display='none';
+  if(q.type==='quiz')renderQuiz(q);
+  else if(q.type==='heat'||q.type==='cool')renderHeat(q);
+  else if(q.type==='mix')renderMix(q);
+}
+
+function renderQuiz(q){
+  document.getElementById('quizSection').style.display='block';
+  var div=document.getElementById('choicesDiv');div.innerHTML='';
+  q.choices.forEach(function(c,i){
+    var btn=document.createElement('button');
+    btn.className='choice-btn';btn.textContent=c;btn.setAttribute('aria-label',c);
+    btn.onclick=function(){answerQuiz(i,q,btn);};
+    div.appendChild(btn);
+  });
+}
+function answerQuiz(i,q,btn){
+  if(answered)return;answered=true;
+  var correct=(i===q.correct);
+  var btns=document.querySelectorAll('.choice-btn');
+  btns.forEach(function(b,idx){
+    if(idx===q.correct)b.classList.add('correct');
+    else if(idx===i&&!correct)b.classList.add('wrong');
+    b.disabled=true;
+  });
+  var expl=document.getElementById('explanation');
+  expl.textContent=q.explain;expl.style.display='block';
+  if(correct){
+    score++;
+    var picks=t('feedOk');var msg=picks[Math.floor(Math.random()*picks.length)];
+    setFeed(msg,'var(--success)');playSuccess();
+  }else{
+    var picks2=t('feedWrong');var msg2=picks2[Math.floor(Math.random()*picks2.length)];
+    setFeed(msg2,'#e11d48');playError();
+  }
+  document.getElementById('nextBtnRow').style.display='flex';
+}
+
+function renderHeat(q){
+  document.getElementById('vizSection').style.display='block';
+  document.getElementById('heatControls').style.display='flex';
+  currentTemp=q.startTemp;currentSubstanceState=tempToState(currentTemp);
+  updateTempDisplay();drawSubstance(currentSubstanceState,currentTemp);
+  var bH=document.getElementById('btnHeat'),bC=document.getElementById('btnCool');
+  bH.style.opacity='1';bH.disabled=false;bC.style.opacity='1';bC.disabled=false;
+  if(q.type==='cool'){bH.style.opacity='0.3';bH.disabled=true;}
+  if(q.type==='heat'){bC.style.opacity='0.3';bC.disabled=true;}
+}
+function tempToState(temp){if(temp<0)return'solid';if(temp<100)return'liquid';return'gas';}
+function updateTempDisplay(){
+  document.getElementById('tempDisplay').textContent=t('tempLbl')+' '+currentTemp+t('tempUnit');
+  var s=tempToState(currentTemp);
+  var sStr=s==='solid'?t('solid'):s==='liquid'?t('liquid'):t('gas');
+  document.getElementById('stateLabel').textContent=t('stateIs')+' '+sStr;
+}
+function doTemp(delta){
+  if(answered)return;
+  currentTemp=Math.max(-30,Math.min(140,currentTemp+delta));
+  currentSubstanceState=tempToState(currentTemp);
+  updateTempDisplay();drawSubstance(currentSubstanceState,currentTemp);
+  if(delta>0)playHeat();else playCool();
+  var q=questions[qIndex];
+  if(currentSubstanceState===q.targetState){
+    answered=true;score++;
+    var picks=t('feedOk');var msg=picks[Math.floor(Math.random()*picks.length)];
+    setFeed(msg,'var(--success)');
+    var expl=document.getElementById('explanation');expl.textContent=q.explain;expl.style.display='block';
+    playSuccess();
+    document.getElementById('nextBtnRow').style.display='flex';
+    document.getElementById('btnHeat').disabled=true;document.getElementById('btnCool').disabled=true;
+  }
+}
+
+function svgNS(){return'http://www.w3.org/2000/svg';}
+function mkEl(tag,attrs){
+  var el=document.createElementNS(svgNS(),tag);
+  if(attrs)Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);});
+  return el;
+}
+function hexPts(cx,cy,r){
+  var pts=[];
+  for(var i=0;i<6;i++){var a=(Math.PI/3)*i-Math.PI/6;pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}
+  return pts.join(' ');
+}
+function addStop(g,offset,color){var s=mkEl('stop',{offset:offset,style:'stop-color:'+color});g.appendChild(s);}
+
+function drawSubstance(state,temp){
+  var svg=document.getElementById('vizSvg');svg.innerHTML='';
+  var defs=mkEl('defs');
+  var grad=mkEl('linearGradient',{id:'fg',x1:'0',y1:'0',x2:'0',y2:'1'});
+  if(state==='solid'){addStop(grad,'0%','#a5f3fc');addStop(grad,'100%','#67e8f9');}
+  else if(state==='liquid'){addStop(grad,'0%','#60a5fa');addStop(grad,'100%','#3b82f6');}
+  else{addStop(grad,'0%','#e0f2fe');addStop(grad,'100%','#bae6fd');}
+  defs.appendChild(grad);svg.appendChild(defs);
+  svg.appendChild(mkEl('path',{d:'M70 20 L70 70 L40 130 Q35 150 60 155 L140 155 Q165 150 160 130 L130 70 L130 20 Z',fill:'rgba(224,242,254,0.3)',stroke:'#0ea5e9','stroke-width':'3'}));
+  if(state==='solid')drawIce(svg,temp);
+  else if(state==='liquid')drawLiquid(svg,temp);
+  else drawSteam(svg,temp);
+  svg.appendChild(mkEl('rect',{x:'65',y:'10',width:'70',height:'18',rx:'6',fill:'rgba(224,242,254,0.5)',stroke:'#0ea5e9','stroke-width':'2.5'}));
+  svg.appendChild(mkEl('rect',{x:'75',y:'6',width:'50',height:'10',rx:'4',fill:'#7dd3fc',stroke:'#0ea5e9','stroke-width':'2'}));
+}
+function drawIce(svg,temp){
+  var cols=['#a5f3fc','#67e8f9','#bae6fd'];
+  var crys=[{cx:90,cy:110,r:22},{cx:70,cy:130,r:14},{cx:115,cy:125,r:17},{cx:85,cy:140,r:12},{cx:105,cy:140,r:10}];
+  crys.forEach(function(c,i){
+    svg.appendChild(mkEl('polygon',{points:hexPts(c.cx,c.cy,c.r),fill:cols[i%3],stroke:'#38bdf8','stroke-width':'1.5',opacity:'0.92'}));
+    svg.appendChild(mkEl('line',{x1:c.cx-c.r*.5,y1:c.cy,x2:c.cx+c.r*.5,y2:c.cy,stroke:'#fff','stroke-width':'1.5',opacity:'0.8'}));
+    svg.appendChild(mkEl('line',{x1:c.cx,y1:c.cy-c.r*.5,x2:c.cx,y2:c.cy+c.r*.5,stroke:'#fff','stroke-width':'1.5',opacity:'0.8'}));
+  });
+  for(var i=0;i<5;i++){var t2=mkEl('text',{x:60+i*18,y:85,'font-size':'14',fill:'#bae6fd','text-anchor':'middle'});t2.textContent='❄';svg.appendChild(t2);}
+}
+function drawLiquid(svg,temp){
+  svg.appendChild(mkEl('path',{d:'M48 105 Q60 95 90 100 Q120 95 142 105 L145 148 Q140 153 90 153 Q40 153 45 148 Z',fill:'url(#fg)',opacity:'0.88'}));
+  var nb=temp>80?8:temp>40?4:2;
+  for(var i=0;i<nb;i++){
+    var bx=58+Math.random()*74,by=110+Math.random()*35,br=2+Math.random()*4;
+    svg.appendChild(mkEl('circle',{cx:bx,cy:by,r:br,fill:'rgba(255,255,255,0.6)',stroke:'rgba(255,255,255,0.8)','stroke-width':'1'}));
+  }
+  svg.appendChild(mkEl('path',{d:'M50 105 Q70 98 90 103 Q110 108 142 103',fill:'none',stroke:'rgba(255,255,255,0.5)','stroke-width':'2'}));
+  if(temp>=90){
+    for(var j=0;j<3;j++){
+      var sx=70+j*20;
+      svg.appendChild(mkEl('path',{d:'M'+sx+' 75 Q'+(sx+8)+' 60 '+sx+' 47 Q'+(sx-8)+' 35 '+(sx+4)+' 25',fill:'none',stroke:'#bae6fd','stroke-width':'2.5',opacity:'0.6','stroke-linecap':'round'}));
+    }
+  }
+}
+function drawSteam(svg,temp){
+  var ws=[{x:65,a:6},{x:85,a:-7},{x:105,a:5},{x:125,a:-5},{x:75,a:8},{x:95,a:-6}];
+  ws.forEach(function(w,i){
+    var y0=145-i*5;
+    svg.appendChild(mkEl('path',{d:'M'+w.x+' '+y0+' Q'+(w.x+w.a*2)+' '+(y0-20)+' '+w.x+' '+(y0-40)+' Q'+(w.x-w.a)+' '+(y0-58)+' '+(w.x+w.a)+' '+(y0-72),fill:'none',stroke:'#e0f2fe','stroke-width':'3',opacity:'0.65','stroke-linecap':'round'}));
+  });
+  for(var i=0;i<5;i++)svg.appendChild(mkEl('circle',{cx:60+i*18,cy:148,r:4,fill:'rgba(186,230,253,0.6)',stroke:'#7dd3fc','stroke-width':'1'}));
+  svg.appendChild(mkEl('ellipse',{cx:'90',cy:'50',rx:'35',ry:'20',fill:'#e0f2fe',opacity:'0.7',stroke:'#bae6fd','stroke-width':'1.5'}));
+  svg.appendChild(mkEl('ellipse',{cx:'70',cy:'60',rx:'22',ry:'14',fill:'#e0f2fe',opacity:'0.7',stroke:'#bae6fd','stroke-width':'1'}));
+  svg.appendChild(mkEl('ellipse',{cx:'112',cy:'60',rx:'22',ry:'14',fill:'#e0f2fe',opacity:'0.7',stroke:'#bae6fd','stroke-width':'1'}));
+  var lbl=mkEl('text',{x:'90',y:'56','font-size':'11','text-anchor':'middle',fill:'#0369a1','font-weight':'700'});
+  lbl.textContent=lang==='fr'?'vapeur':'steam';svg.appendChild(lbl);
+}
+
+/* MIX */
+function renderMix(q){
+  document.getElementById('mixSection').style.display='block';
+  mixAdded=null;mixStirred=false;
+  drawBeaker('empty','');
+  document.getElementById('mixStatus').textContent=t('mixInstr');
+  var btns=document.getElementById('ingredientBtns');btns.innerHTML='';
+  var ings=[{key:'sugar',lk:'addSugar',d:true},{key:'sand',lk:'addSand',d:false},{key:'salt',lk:'addSalt',d:true},{key:'oil',lk:'addOil',d:false}];
+  ings.forEach(function(ing){
+    var btn=document.createElement('button');
+    btn.className='ing-btn';btn.textContent=t(ing.lk);btn.dataset.key=ing.key;
+    btn.onclick=function(){
+      if(answered||mixAdded)return;
+      mixAdded=ing;drawBeaker('added',ing.key);
+      document.getElementById('mixStatus').textContent=t('dissolving');
+      btns.querySelectorAll('.ing-btn').forEach(function(b){b.disabled=true;});
+      var sb=document.createElement('button');
+      sb.className='ctrl-btn';sb.textContent=t('stir');sb.style.marginTop='8px';
+      sb.onclick=function(){doStir(q,ing,sb);};
+      btns.appendChild(sb);playClick();
+    };
+    btns.appendChild(btn);
+  });
+}
+function doStir(q,ing,stirBtn){
+  if(mixStirred)return;mixStirred=true;stirBtn.disabled=true;
+  playHeat();
+  setTimeout(function(){
+    answered=true;score++;
+    if(ing.d){drawBeaker('dissolved',ing.key);document.getElementById('mixStatus').textContent=t('dissolved');}
+    else{drawBeaker('heterogeneous',ing.key);document.getElementById('mixStatus').textContent=t('notDissolve');}
+    var expl=document.getElementById('explanation');expl.textContent=q.explain;expl.style.display='block';
+    var picks=t('feedOk');setFeed(picks[Math.floor(Math.random()*picks.length)],'var(--success)');
+    playSuccess();document.getElementById('nextBtnRow').style.display='flex';
+  },900);
+}
+
+function mkEl2(tag,attrs){
+  var el=document.createElementNS(svgNS(),tag);
+  if(attrs)Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);});
+  return el;
+}
+function drawBeaker(state,ingredient){
+  var svg=document.getElementById('beakerSvg');svg.innerHTML='';
+  svg.appendChild(mkEl2('path',{d:'M30 20 L30 120 Q30 155 80 155 L80 155 Q130 155 130 120 L130 20 Z',fill:'rgba(224,242,254,0.25)',stroke:'#0ea5e9','stroke-width':'3'}));
+  svg.appendChild(mkEl2('path',{d:'M33 75 L33 120 Q33 148 80 148 Q127 148 127 120 L127 75 Z',fill:'#60a5fa',opacity:'0.45'}));
+  if(state==='added'){
+    if(ingredient==='sugar'||ingredient==='salt'){
+      for(var i=0;i<8;i++)svg.appendChild(mkEl2('rect',{x:45+i*10,y:72,width:6,height:6,rx:2,fill:ingredient==='salt'?'#f1f5f9':'#fef3c7',stroke:'#d97706','stroke-width':'1'}));
+    }else if(ingredient==='sand'){
+      svg.appendChild(mkEl2('ellipse',{cx:'80',cy:'145',rx:'38',ry:'7',fill:'#d97706',opacity:'0.7'}));
+    }else if(ingredient==='oil'){
+      svg.appendChild(mkEl2('path',{d:'M34 74 Q80 68 126 74 L126 83 Q80 77 34 83 Z',fill:'#fef08a',opacity:'0.85'}));
+    }
+  }else if(state==='dissolved'){
+    svg.appendChild(mkEl2('path',{d:'M33 75 L33 120 Q33 148 80 148 Q127 148 127 120 L127 75 Z',fill:ingredient==='salt'?'#a5f3fc':'#fde68a',opacity:'0.55'}));
+    for(var j=0;j<6;j++)svg.appendChild(mkEl2('circle',{cx:50+j*14,cy:100+Math.sin(j)*15,r:3,fill:'#fff',opacity:'0.7'}));
+    var tick=mkEl2('text',{x:'80',y:'55','font-size':'24','text-anchor':'middle',fill:'#34c77b'});tick.textContent='✓';svg.appendChild(tick);
+  }else if(state==='heterogeneous'){
+    if(ingredient==='sand'){
+      svg.appendChild(mkEl2('ellipse',{cx:'80',cy:'145',rx:'38',ry:'8',fill:'#92400e',opacity:'0.75'}));
+      var sl=mkEl2('text',{x:'80',y:'55','font-size':'10','text-anchor':'middle',fill:'#92400e'});
+      sl.textContent=lang==='fr'?'Sable au fond':'Sand at bottom';svg.appendChild(sl);
+    }else if(ingredient==='oil'){
+      svg.appendChild(mkEl2('path',{d:'M33 75 L33 120 Q33 148 80 148 Q127 148 127 120 L127 75 Z',fill:'#60a5fa',opacity:'0.45'}));
+      svg.appendChild(mkEl2('path',{d:'M34 74 Q80 67 126 74 L126 85 Q80 78 34 85 Z',fill:'#fef08a',opacity:'0.9'}));
+      var ot=mkEl2('text',{x:'80',y:'60','font-size':'10','text-anchor':'middle',fill:'#a16207'});
+      ot.textContent=lang==='fr'?'Huile (flotte)':'Oil (floats)';svg.appendChild(ot);
+    }
+  }
+  for(var m=0;m<4;m++){svg.appendChild(mkEl2('line',{x1:'125',y1:80+m*18,x2:'133',y2:80+m*18,stroke:'#0ea5e9','stroke-width':'2'}));}
+  svg.appendChild(mkEl2('path',{d:'M130 35 Q155 50 155 80 Q155 110 130 120',fill:'none',stroke:'#0ea5e9','stroke-width':'3','stroke-linecap':'round'}));
+}
+
+function nextQuestion(){playClick();qIndex++;renderCurrentQ();}
+
+function showResult(){
+  updateProgress();
+  var total=questions.length,pct=Math.round((score/total)*100);
+  var stars=pct>=90?3:pct>=60?2:1;
+  document.getElementById('starsRow').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('scoreBadge').textContent=score+' / '+total;
+  document.getElementById('resultTitle').textContent=t('resultTitle');
+  document.getElementById('resultMsg').textContent=t('resultMsg_p');
+  loadSave();if(!savedData.levels)savedData.levels={};
+  var prev=savedData.levels['lv'+currentLevel]||0;
+  savedData.levels['lv'+currentLevel]=Math.max(prev,stars);saveProg();
+  playSuccess();setTimeout(function(){playSuccess();},400);
+  showScreen('resultScreen');
+}
+
+function setFeed(msg,color){
+  var el=document.getElementById('feedbackMsg');el.textContent=msg;el.style.color=color;
+  var al=document.getElementById('ariaLive');al.textContent='';
+  setTimeout(function(){al.textContent=msg;},50);
+}
+
+document.querySelectorAll('.level-card').forEach(function(c){
+  c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click();}});
+});
+
+(function init(){
+  var nl=navigator.language||'fr';lang=nl.startsWith('en')?'en':'fr';
+  applyTranslations();
+  document.getElementById('btnFR').classList.toggle('active',lang==='fr');
+  document.getElementById('btnEN').classList.toggle('active',lang==='en');
+  loadSave();
+})();
+</script>
+</body>
+</html>

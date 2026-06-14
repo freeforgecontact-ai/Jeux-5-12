@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<meta name="description" content="65 jeux éducatifs gratuits pour enfants 5–12 ans, sans publicité, sans pistage, bilingue FR/EN. Par PGRG IA.">
+<title>PGRG IA — 65 jeux éducatifs gratuits pour enfants</title>
+<style>
+  :root{
+    --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a; --orange:#f97316; --orange-dark:#ea580c;
+    --gold:#ffd23f; --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569; --success:#34c77b; --cloud:#f8fafc;
+    --ft:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif; --fb:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:var(--fb); color:var(--navy); background:var(--sky-light); line-height:1.5; }
+  header{ background:linear-gradient(135deg,var(--blue),var(--blue-dark)); color:#fff; padding:14px 20px; position:sticky; top:0; z-index:5; box-shadow:0 2px 12px rgba(10,53,89,.25); }
+  .bar{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand img{ height:40px; }
+  .brand b{ font-family:var(--ft); font-size:1.25rem; font-weight:600; }
+  .lang button{ font-family:var(--fb); font-weight:700; background:rgba(255,255,255,.15); color:#fff; border:2px solid rgba(255,255,255,.5); border-radius:999px; padding:7px 13px; cursor:pointer; min-height:42px; }
+  .lang button.active{ background:var(--gold); color:var(--navy); border-color:var(--gold); }
+  .hero{ max-width:1180px; margin:0 auto; padding:30px 20px 6px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+  .hero-txt{ flex:1; min-width:280px; }
+  .hero h1{ font-family:var(--ft); font-size:clamp(1.8rem,5vw,2.8rem); color:var(--blue-dark); line-height:1.1; }
+  .hero p{ font-size:clamp(1rem,2.5vw,1.2rem); color:var(--slate); margin-top:10px; }
+  .hero img{ width:140px; height:auto; }
+  .badges{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .badge{ background:#fff; border:2px solid var(--sky); color:var(--blue-dark); border-radius:999px; padding:6px 13px; font-weight:700; font-size:.88rem; }
+  .badge.g{ background:var(--success); color:#fff; border-color:var(--success); }
+  .filters{ max-width:1180px; margin:14px auto 0; padding:0 20px; }
+  .filt-row{ display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .filt-row .lbl{ font-weight:800; color:var(--slate); min-width:62px; font-size:.9rem; }
+  .chip{ font-family:var(--fb); font-weight:700; background:#fff; color:var(--navy); border:2px solid var(--sky); border-radius:999px; padding:7px 13px; cursor:pointer; min-height:40px; font-size:.92rem; }
+  .chip.active{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .count{ max-width:1180px; margin:14px auto 0; padding:0 20px; font-weight:700; color:var(--slate); }
+  main{ max-width:1180px; margin:0 auto; padding:10px 20px 50px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+  .card{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 22px rgba(15,76,129,.1); border:2px solid #fff; transition:transform .12s, box-shadow .12s, border-color .12s; display:flex; flex-direction:column; }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 14px 30px rgba(15,76,129,.18); border-color:var(--sky); }
+  .card .top{ height:84px; display:flex; align-items:center; justify-content:center; font-size:2.9rem; background:linear-gradient(135deg,var(--sky-light),#d4ebfb); }
+  .card .body{ padding:12px 14px 16px; flex:1; display:flex; flex-direction:column; gap:7px; }
+  .card h3{ font-family:var(--ft); font-size:1.08rem; color:var(--blue-dark); line-height:1.15; }
+  .card .en{ color:var(--slate); font-weight:600; font-size:.84rem; }
+  .tags{ display:flex; gap:5px; flex-wrap:wrap; }
+  .tag{ font-size:.74rem; font-weight:700; padding:3px 9px; border-radius:999px; }
+  .tag.age{ background:var(--gold); color:var(--navy); }
+  .tag.subj{ background:var(--sky-light); color:var(--blue-dark); border:1px solid var(--sky); }
+  .card p.desc{ font-size:.88rem; color:var(--slate); flex:1; }
+  .play{ font-family:var(--ft); font-weight:600; font-size:1rem; text-align:center; text-decoration:none; background:var(--orange); color:#fff; border-radius:999px; padding:10px; box-shadow:0 4px 0 var(--orange-dark); }
+  .play:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--orange-dark); }
+  footer{ background:var(--blue-dark); color:#cbd5e1; padding:24px 20px; text-align:center; font-size:.9rem; }
+  footer a{ color:var(--gold); text-decoration:none; }
+  footer b{ color:#fff; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <img src="../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+      <b>PGRG IA · <span data-i="hdr">Jeux éducatifs</span></b>
+    </div>
+    <div class="lang">
+      <button id="fr" class="active" onclick="setLang('fr')">FR</button>
+      <button id="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-txt">
+    <h1 data-i="h1">65 jeux qui rendent les enfants plus intelligents.</h1>
+    <p data-i="sub">100 % gratuits · sans publicité · sans pistage · bilingue · sur ordinateur et mobile. Pour les 5 à 12 ans.</p>
+    <div class="badges">
+      <span class="badge g" data-i="b1">✓ 100 % gratuit</span>
+      <span class="badge" data-i="b2">🛡️ Sans pub</span>
+      <span class="badge" data-i="b3">🔒 Sans pistage</span>
+      <span class="badge" data-i="b4">🌍 FR + EN</span>
+      <span class="badge" data-i="b5">📱 Hors-ligne</span>
+    </div>
+  </div>
+  <img src="../brand/mascotte-pgrg.png" alt="Mascotte PGRG" onerror="this.style.display='none'">
+</section>
+
+<div class="filters">
+  <div class="filt-row"><span class="lbl" data-i="ageLbl">Âge</span><span id="ageFilters"></span></div>
+  <div class="filt-row"><span class="lbl" data-i="subjLbl">Matière</span><span id="subjFilters"></span></div>
+</div>
+<p class="count" id="count"></p>
+
+<main><div class="grid" id="grid"></div></main>
+
+<footer>
+  <p data-i="f1">Fait avec 💛 — <b>PGRG IA</b>, une division de <a href="https://pgrg.ca" target="_blank" rel="noopener">PGRG.ca</a> · Trois-Rivières, Québec.</p>
+  <p data-i="f2" style="margin-top:6px">Aucune publicité. Aucune donnée collectée. 100 % gratuit, pour toujours.</p>
+</footer>
+
+<script>
+const GAMES=[
+{slug:"01-course-aux-nombres",icon:"🔢",fr:"Course aux Nombres",en:"Number Dash",age:"5–7",bands:["5-7"],subj:"maths",dFr:"Additionne et soustrais pour avancer.",dEn:"Add and subtract to move ahead."},
+{slug:"02-pizzeria-fractions",icon:"🍕",fr:"La Pizzeria des Fractions",en:"Fraction Pizzeria",age:"8–11",bands:["8-10","11-12"],subj:"maths",dFr:"Sers les bonnes parts : les fractions !",dEn:"Serve the right slices: fractions!"},
+{slug:"03-architecte-formes",icon:"📐",fr:"Architecte des Formes",en:"Shape Architect",age:"6–10",bands:["5-7","8-10"],subj:"maths",dFr:"Construis avec les formes géométriques.",dEn:"Build with geometric shapes."},
+{slug:"04-detective-motifs",icon:"🔍",fr:"Détective des Motifs",en:"Pattern Detective",age:"5–8",bands:["5-7","8-10"],subj:"logique",dFr:"Devine ce qui vient après.",dEn:"Guess what comes next."},
+{slug:"05-multiplication-galaxie",icon:"🚀",fr:"Multiplication Galaxie",en:"Times Table Galaxy",age:"8–11",bands:["8-10","11-12"],subj:"maths",dFr:"Maîtrise les tables dans l'espace.",dEn:"Master times tables in space."},
+{slug:"06-balance-magique",icon:"⚖️",fr:"La Balance Magique",en:"Magic Balance",age:"9–12",bands:["8-10","11-12"],subj:"maths",dFr:"Équilibre et trouve l'inconnue.",dEn:"Balance it and find the unknown."},
+{slug:"07-tangram-aventure",icon:"🧩",fr:"Tangram Aventure",en:"Tangram Quest",age:"6–10",bands:["5-7","8-10"],subj:"maths",dFr:"Reconstitue les silhouettes.",dEn:"Rebuild the silhouettes."},
+{slug:"08-sudoku-petits",icon:"🔲",fr:"Sudoku des Petits",en:"Picture Sudoku",age:"7–12",bands:["5-7","8-10","11-12"],subj:"logique",dFr:"Remplis la grille par déduction.",dEn:"Fill the grid by deduction."},
+{slug:"09-marchand-monnaie",icon:"🪙",fr:"Marchand & Monnaie",en:"Coin Market",age:"7–11",bands:["5-7","8-10","11-12"],subj:"maths",dFr:"Encaisse et rends la monnaie.",dEn:"Take payment, give change."},
+{slug:"10-labyrinthe-calculs",icon:"🧭",fr:"Labyrinthe des Calculs",en:"Math Maze",age:"8–12",bands:["8-10","11-12"],subj:"maths",dFr:"Calcule pour ouvrir les portes.",dEn:"Solve to open the doors."},
+{slug:"11-horloge-heros",icon:"🕐",fr:"L'Horloge Héros",en:"Clock Hero",age:"6–9",bands:["5-7","8-10"],subj:"maths",dFr:"Apprends à lire l'heure.",dEn:"Learn to tell the time."},
+{slug:"12-estimation-express",icon:"🎯",fr:"Estimation Express",en:"Estimation Express",age:"8–12",bands:["8-10","11-12"],subj:"maths",dFr:"Estime vite, vérifie ensuite.",dEn:"Estimate fast, then check."},
+{slug:"13-code-secret-nombres",icon:"🔐",fr:"Le Code Secret",en:"Number Code",age:"10–12",bands:["8-10","11-12"],subj:"logique",dFr:"Déduis le code secret.",dEn:"Crack the secret code."},
+{slug:"14-usine-syllabes",icon:"🔤",fr:"L'Usine à Syllabes",en:"Syllable Factory",age:"5–7",bands:["5-7"],subj:"lecture",dFr:"Assemble les syllabes pour lire.",dEn:"Build syllables to read."},
+{slug:"15-peche-aux-mots",icon:"🎣",fr:"La Pêche aux Mots",en:"Word Fishing",age:"5–8",bands:["5-7","8-10"],subj:"lecture",dFr:"Pêche le bon mot.",dEn:"Fish the right word."},
+{slug:"16-chasse-aux-sons",icon:"👂",fr:"La Chasse aux Sons",en:"Sound Hunt",age:"5–7",bands:["5-7"],subj:"lecture",dFr:"Attrape les bons sons.",dEn:"Catch the right sounds."},
+{slug:"17-construis-ta-phrase",icon:"🧱",fr:"Construis ta Phrase",en:"Sentence Builder",age:"7–10",bands:["5-7","8-10"],subj:"lecture",dFr:"Mets les mots dans l'ordre.",dEn:"Put the words in order."},
+{slug:"18-mystere-orthographe",icon:"🕵️",fr:"Le Mystère de l'Orthographe",en:"Spelling Mystery",age:"8–12",bands:["8-10","11-12"],subj:"lecture",dFr:"Corrige les fautes cachées.",dEn:"Fix the hidden mistakes."},
+{slug:"19-conjugaison-quete",icon:"⚔️",fr:"Conjugaison Quête",en:"Verb Quest",age:"9–12",bands:["8-10","11-12"],subj:"lecture",dFr:"Conjugue pour avancer.",dEn:"Conjugate to advance."},
+{slug:"20-rebus-charades",icon:"🎭",fr:"Rébus & Charades",en:"Riddle Rumble",age:"8–12",bands:["8-10","11-12"],subj:"lecture",dFr:"Décode rébus et devinettes.",dEn:"Decode rebuses and riddles."},
+{slug:"21-atelier-histoires",icon:"📖",fr:"L'Atelier d'Histoires",en:"Story Workshop",age:"8–12",bands:["8-10","11-12"],subj:"lecture",dFr:"Invente ta propre histoire.",dEn:"Create your own story."},
+{slug:"22-synonymes-arene",icon:"💬",fr:"Synonymes Arène",en:"Synonym Arena",age:"9–12",bands:["8-10","11-12"],subj:"lecture",dFr:"Trouve le synonyme juste.",dEn:"Find the right synonym."},
+{slug:"23-fabrique-rimes",icon:"🎵",fr:"La Fabrique de Rimes",en:"Rhyme Lab",age:"7–11",bands:["5-7","8-10","11-12"],subj:"lecture",dFr:"Joue avec les rimes.",dEn:"Play with rhymes."},
+{slug:"24-first-words",icon:"🅰️",fr:"Premiers Mots Anglais",en:"First Words",age:"5–8",bands:["5-7","8-10"],subj:"anglais",dFr:"Tes premiers mots en anglais.",dEn:"Your first words in English."},
+{slug:"25-color-shape-safari",icon:"🦁",fr:"Color & Shape Safari",en:"Color & Shape Safari",age:"5–7",bands:["5-7"],subj:"anglais",dFr:"Couleurs et formes en anglais.",dEn:"Colors and shapes in English."},
+{slug:"26-english-phrase-builder",icon:"🗣️",fr:"English Phrase Builder",en:"English Phrase Builder",age:"8–12",bands:["8-10","11-12"],subj:"anglais",dFr:"Construis des phrases anglaises.",dEn:"Build English sentences."},
+{slug:"27-listen-and-match",icon:"🎧",fr:"Écoute & Associe",en:"Listen & Match",age:"7–11",bands:["5-7","8-10","11-12"],subj:"anglais",dFr:"Écoute l'anglais, trouve l'image.",dEn:"Hear English, find the picture."},
+{slug:"28-animal-sounds-world",icon:"🐮",fr:"Animal Sounds World",en:"Animal Sounds World",age:"5–8",bands:["5-7","8-10"],subj:"anglais",dFr:"Les animaux en anglais.",dEn:"Animals in English."},
+{slug:"29-petit-jardinier",icon:"🌱",fr:"Le Petit Jardinier",en:"Tiny Gardener",age:"5–9",bands:["5-7","8-10"],subj:"sciences",dFr:"Fais pousser tes plantes.",dEn:"Grow your plants."},
+{slug:"30-corps-humain",icon:"🫀",fr:"Le Corps Humain",en:"Body Explorer",age:"7–12",bands:["5-7","8-10","11-12"],subj:"sciences",dFr:"Explore le corps humain.",dEn:"Explore the human body."},
+{slug:"31-systeme-solaire",icon:"🪐",fr:"Le Système Solaire",en:"Solar System Voyage",age:"6–11",bands:["5-7","8-10","11-12"],subj:"sciences",dFr:"Voyage entre les planètes.",dEn:"Travel between planets."},
+{slug:"32-cycle-eau",icon:"💧",fr:"Le Cycle de l'Eau",en:"Water Cycle",age:"6–10",bands:["5-7","8-10"],subj:"sciences",dFr:"Suis la goutte d'eau.",dEn:"Follow the water drop."},
+{slug:"33-labo-chimistes",icon:"🧪",fr:"Le Labo des Chimistes",en:"Tiny Chemist Lab",age:"8–12",bands:["8-10","11-12"],subj:"sciences",dFr:"Solide, liquide ou gaz ?",dEn:"Solid, liquid or gas?"},
+{slug:"34-chaine-alimentaire",icon:"🦊",fr:"La Chaîne Alimentaire",en:"Food Web",age:"8–12",bands:["8-10","11-12"],subj:"sciences",dFr:"Qui mange qui ?",dEn:"Who eats whom?"},
+{slug:"35-meteo-master",icon:"⛅",fr:"Météo Master",en:"Weather Master",age:"6–10",bands:["5-7","8-10"],subj:"sciences",dFr:"Apprends la météo.",dEn:"Learn the weather."},
+{slug:"36-eco-heros-tri",icon:"♻️",fr:"Éco-Héros : le Tri",en:"Eco Hero: Sorting",age:"5–10",bands:["5-7","8-10"],subj:"sciences",dFr:"Trie et sauve la planète.",dEn:"Sort and save the planet."},
+{slug:"37-machines-simples",icon:"⚙️",fr:"Machines Simples",en:"Simple Machines",age:"9–12",bands:["8-10","11-12"],subj:"sciences",dFr:"Leviers, poulies et roues.",dEn:"Levers, pulleys and wheels."},
+{slug:"38-aquarium-virtuel",icon:"🐠",fr:"L'Aquarium Virtuel",en:"Virtual Aquarium",age:"6–11",bands:["5-7","8-10","11-12"],subj:"sciences",dFr:"Découvre la vie marine.",dEn:"Discover marine life."},
+{slug:"39-dino-paleo",icon:"🦕",fr:"Dino Paléo",en:"Dino Dig",age:"6–11",bands:["5-7","8-10","11-12"],subj:"sciences",dFr:"Déterre les dinosaures.",dEn:"Dig up the dinosaurs."},
+{slug:"40-tour-du-monde",icon:"🌍",fr:"Tour du Monde",en:"World Tour",age:"8–12",bands:["8-10","11-12"],subj:"geo",dFr:"Pays et capitales.",dEn:"Countries and capitals."},
+{slug:"41-drapeaux-monde",icon:"🚩",fr:"Drapeaux du Monde",en:"Flags of the World",age:"7–12",bands:["5-7","8-10","11-12"],subj:"geo",dFr:"Reconnais les drapeaux.",dEn:"Recognize the flags."},
+{slug:"42-machine-temps",icon:"⏳",fr:"La Machine à Voyager",en:"Time Machine",age:"9–12",bands:["8-10","11-12"],subj:"geo",dFr:"Remets l'histoire en ordre.",dEn:"Put history in order."},
+{slug:"43-monuments-monde",icon:"🗽",fr:"Monuments du Monde",en:"World Landmarks",age:"7–12",bands:["5-7","8-10","11-12"],subj:"geo",dFr:"Découvre les monuments.",dEn:"Discover famous landmarks."},
+{slug:"44-explorateur-cultures",icon:"🌐",fr:"Explorateur des Cultures",en:"Culture Explorer",age:"7–12",bands:["5-7","8-10","11-12"],subj:"geo",dFr:"Voyage dans les cultures.",dEn:"Travel through cultures."},
+{slug:"45-mon-pays",icon:"🍁",fr:"Mon Pays",en:"My Country",age:"8–12",bands:["8-10","11-12"],subj:"geo",dFr:"Le Québec et le Canada.",dEn:"Quebec and Canada."},
+{slug:"46-robot-codeur",icon:"🤖",fr:"Robot Codeur",en:"Code-a-Robot",age:"6–11",bands:["5-7","8-10","11-12"],subj:"logique",dFr:"Programme le robot.",dEn:"Program the robot."},
+{slug:"47-algo-jardin",icon:"🌻",fr:"Algo Jardin",en:"Algo Garden",age:"7–11",bands:["5-7","8-10","11-12"],subj:"logique",dFr:"Boucles et conditions.",dEn:"Loops and conditions."},
+{slug:"48-pixel-coordonnees",icon:"📊",fr:"Pixel Coordonnées",en:"Grid Pixel",age:"7–12",bands:["5-7","8-10","11-12"],subj:"logique",dFr:"Trouve les bonnes cases.",dEn:"Find the right cells."},
+{slug:"49-circuit-logique",icon:"💡",fr:"Circuit Logique",en:"Logic Circuit",age:"10–12",bands:["8-10","11-12"],subj:"logique",dFr:"Portes ET, OU, NON.",dEn:"AND, OR, NOT gates."},
+{slug:"50-debogue-robot",icon:"🐞",fr:"Débogue le Robot",en:"Debug the Bot",age:"9–12",bands:["8-10","11-12"],subj:"logique",dFr:"Trouve et corrige le bug.",dEn:"Find and fix the bug."},
+{slug:"51-memory-animaux",icon:"🐾",fr:"Memory des Animaux",en:"Animal Memory",age:"5–8",bands:["5-7","8-10"],subj:"memoire",dFr:"Retrouve les paires.",dEn:"Find the matching pairs."},
+{slug:"52-simon-melodie",icon:"🎶",fr:"Simon Mélodie",en:"Melody Simon",age:"5–10",bands:["5-7","8-10"],subj:"memoire",dFr:"Répète la séquence.",dEn:"Repeat the sequence."},
+{slug:"53-cherche-trouve",icon:"🔎",fr:"Cherche & Trouve",en:"Seek & Find",age:"5–9",bands:["5-7","8-10"],subj:"memoire",dFr:"Trouve les objets cachés.",dEn:"Find the hidden objects."},
+{slug:"54-stroop-junior",icon:"🌈",fr:"Stroop Junior",en:"Focus Flash",age:"8–12",bands:["8-10","11-12"],subj:"memoire",dFr:"La couleur, pas le mot !",dEn:"The color, not the word!"},
+{slug:"55-reflexe-eclair",icon:"⚡",fr:"Réflexe Éclair",en:"Lightning Reflex",age:"6–11",bands:["5-7","8-10","11-12"],subj:"memoire",dFr:"Touche vite les bonnes cibles.",dEn:"Tap the right targets fast."},
+{slug:"56-studio-dessin",icon:"🖍️",fr:"Studio de Dessin",en:"Magic Draw Studio",age:"5–10",bands:["5-7","8-10"],subj:"arts",dFr:"Dessine et colorie.",dEn:"Draw and color."},
+{slug:"57-compositeur-herbe",icon:"🎹",fr:"Compositeur en Herbe",en:"Little Composer",age:"6–12",bands:["5-7","8-10","11-12"],subj:"arts",dFr:"Compose ta mélodie.",dEn:"Compose your melody."},
+{slug:"58-mandalas-symetrie",icon:"🌸",fr:"Mandalas & Symétrie",en:"Symmetry Mandalas",age:"5–10",bands:["5-7","8-10"],subj:"arts",dFr:"Crée de jolis mandalas.",dEn:"Create pretty mandalas."},
+{slug:"59-mix-couleurs",icon:"🎨",fr:"Mix Couleurs",en:"Color Mixer",age:"5–9",bands:["5-7","8-10"],subj:"arts",dFr:"Mélange les couleurs.",dEn:"Mix the colors."},
+{slug:"60-atelier-pixel-art",icon:"👾",fr:"Atelier Pixel Art",en:"Pixel Art Studio",age:"8–12",bands:["8-10","11-12"],subj:"arts",dFr:"Crée des images pixel.",dEn:"Create pixel images."},
+{slug:"61-roue-emotions",icon:"😊",fr:"La Roue des Émotions",en:"Emotion Wheel",age:"5–9",bands:["5-7","8-10"],subj:"vie",dFr:"Reconnais les émotions.",dEn:"Recognize emotions."},
+{slug:"62-petit-chef",icon:"👨‍🍳",fr:"Petit Chef",en:"Little Chef",age:"6–11",bands:["5-7","8-10","11-12"],subj:"vie",dFr:"Suis la recette.",dEn:"Follow the recipe."},
+{slug:"63-budget-junior",icon:"💰",fr:"Budget Junior",en:"Junior Budget",age:"9–12",bands:["8-10","11-12"],subj:"vie",dFr:"Gère ton argent de poche.",dEn:"Manage your pocket money."},
+{slug:"64-heros-securite",icon:"🦺",fr:"Héros de la Sécurité",en:"Safety Hero",age:"5–9",bands:["5-7","8-10"],subj:"vie",dFr:"Apprends les bons réflexes.",dEn:"Learn to stay safe."},
+{slug:"65-jardin-gentillesse",icon:"🌷",fr:"Le Jardin de la Gentillesse",en:"Kindness Garden",age:"6–10",bands:["5-7","8-10"],subj:"vie",dFr:"Fais pousser la gentillesse.",dEn:"Grow kindness."}
+];
+const AGES=[{k:"all",fr:"Tous",en:"All"},{k:"5-7",fr:"5–7",en:"5–7"},{k:"8-10",fr:"8–10",en:"8–10"},{k:"11-12",fr:"11–12",en:"11–12"}];
+const SUBJ=[{k:"all",fr:"Toutes",en:"All"},{k:"maths",fr:"Maths",en:"Maths"},{k:"lecture",fr:"Lecture",en:"Reading"},{k:"anglais",fr:"Anglais",en:"English"},{k:"sciences",fr:"Sciences",en:"Science"},{k:"geo",fr:"Géo & Histoire",en:"Geo & History"},{k:"logique",fr:"Logique & Code",en:"Logic & Code"},{k:"memoire",fr:"Mémoire",en:"Memory"},{k:"arts",fr:"Arts",en:"Arts"},{k:"vie",fr:"Vie & Émotions",en:"Life & Emotions"}];
+const SUBJLBL={maths:{fr:"Maths",en:"Maths"},lecture:{fr:"Lecture",en:"Reading"},anglais:{fr:"Anglais",en:"English"},sciences:{fr:"Sciences",en:"Science"},geo:{fr:"Géo",en:"Geo"},logique:{fr:"Logique",en:"Logic"},memoire:{fr:"Mémoire",en:"Memory"},arts:{fr:"Arts",en:"Arts"},vie:{fr:"Vie",en:"Life"}};
+const T={
+  fr:{hdr:"Jeux éducatifs",h1:"65 jeux qui rendent les enfants plus intelligents.",sub:"100 % gratuits · sans publicité · sans pistage · bilingue · sur ordinateur et mobile. Pour les 5 à 12 ans.",b1:"✓ 100 % gratuit",b2:"🛡️ Sans pub",b3:"🔒 Sans pistage",b4:"🌍 FR + EN",b5:"📱 Hors-ligne",ageLbl:"Âge",subjLbl:"Matière",f1:'Fait avec 💛 — PGRG IA, une division de PGRG.ca · Trois-Rivières, Québec.',f2:"Aucune publicité. Aucune donnée collectée. 100 % gratuit, pour toujours.",play:"Jouer ▶",count:n=>`${n} jeu${n>1?"x":""} affiché${n>1?"s":""} sur 65`,yrs:"ans"},
+  en:{hdr:"Educational games",h1:"65 games that make kids smarter.",sub:"100% free · no ads · no tracking · bilingual · on desktop and mobile. For ages 5 to 12.",b1:"✓ 100% free",b2:"🛡️ No ads",b3:"🔒 No tracking",b4:"🌍 FR + EN",b5:"📱 Offline",ageLbl:"Age",subjLbl:"Subject",f1:'Made with 💛 — PGRG IA, a division of PGRG.ca · Trois-Rivières, Québec.',f2:"No ads. No data collected. 100% free, forever.",play:"Play ▶",count:n=>`${n} of 65 games shown`,yrs:"yrs"}
+};
+let lang=(navigator.language||"fr").toLowerCase().startsWith("en")?"en":"fr";
+let curAge="all", curSubj="all";
+function chips(arr,box,cur,cb){
+  box.innerHTML="";
+  arr.forEach(o=>{ const b=document.createElement("button"); b.className="chip"+(o.k===cur?" active":""); b.textContent=lang==="fr"?o.fr:o.en; b.onclick=()=>cb(o.k); box.appendChild(b); });
+}
+function render(){
+  const list=GAMES.filter(x=>(curAge==="all"||x.bands.includes(curAge)) && (curSubj==="all"||x.subj===curSubj));
+  document.getElementById("count").textContent=T[lang].count(list.length);
+  const g=document.getElementById("grid"); g.innerHTML="";
+  list.forEach(x=>{
+    const c=document.createElement("div"); c.className="card";
+    c.innerHTML=`<div class="top">${x.icon}</div><div class="body">
+      <h3>${lang==="fr"?x.fr:x.en}</h3>
+      <div class="en">${lang==="fr"?x.en:x.fr}</div>
+      <div class="tags"><span class="tag age">${x.age} ${T[lang].yrs}</span><span class="tag subj">${SUBJLBL[x.subj][lang]}</span></div>
+      <p class="desc">${lang==="fr"?x.dFr:x.dEn}</p>
+      <a class="play" href="../games/${x.slug}/index.html">${T[lang].play}</a>
+    </div>`;
+    g.appendChild(c);
+  });
+}
+function applyI18n(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i]").forEach(el=>{ const k=el.getAttribute("data-i"); if(T[lang][k]!==undefined && typeof T[lang][k]==="string") el.textContent=T[lang][k]; });
+  document.getElementById("fr").classList.toggle("active",lang==="fr");
+  document.getElementById("en").classList.toggle("active",lang==="en");
+  chips(AGES,document.getElementById("ageFilters"),curAge,setAge);
+  chips(SUBJ,document.getElementById("subjFilters"),curSubj,setSubj);
+  render();
+}
+function setLang(l){ lang=l; applyI18n(); }
+function setAge(k){ curAge=k; applyI18n(); }
+function setSubj(k){ curSubj=k; applyI18n(); }
+applyI18n();
+</script>
+</body>
+</html>

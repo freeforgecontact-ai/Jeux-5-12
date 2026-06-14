@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f4c81">
+<title>Course aux Nombres — Number Dash | PGRG IA</title>
+<style>
+  :root{
+    --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a; --orange:#f97316; --orange-dark:#ea580c;
+    --gold:#ffd23f; --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569; --success:#34c77b;
+    --font-title:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+    --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font-body); color:var(--navy);
+    background:radial-gradient(circle at 50% 18%, #eaf6ff 0%, #d4ebfb 60%, #bcd8ee 100%);
+    min-height:100dvh; display:flex; align-items:center; justify-content:center; overflow:hidden; text-align:center;
+    user-select:none;
+  }
+  .app{ width:100%; max-width:640px; height:100dvh; max-height:760px; padding:18px; display:flex; flex-direction:column; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .brand{ display:flex; align-items:center; gap:8px; }
+  .brand img{ height:34px; width:auto; }
+  .brand .bt{ font-family:var(--font-title); font-weight:600; color:var(--blue); font-size:1rem; }
+  .tools{ display:flex; gap:8px; }
+  .icon-btn{ font-size:1.1rem; background:#fff; border:3px solid var(--sky); color:var(--navy);
+    width:46px; height:46px; border-radius:50%; cursor:pointer; display:grid; place-items:center; }
+  .icon-btn.active{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .lang{ display:flex; gap:6px; }
+  .lang button{ font-family:var(--font-body); font-weight:700; background:#fff; border:3px solid var(--sky);
+    color:var(--navy); border-radius:999px; padding:6px 12px; cursor:pointer; min-height:44px; }
+  .lang button.active{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .screen{ flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+  .screen.active{ display:flex; }
+  h1{ font-family:var(--font-title); font-size:clamp(2rem,8vw,3rem); color:var(--blue-dark); line-height:1.05; }
+  .tagline{ font-size:clamp(1rem,4vw,1.2rem); color:var(--slate); }
+  .mascot{ width:120px;height:120px; animation:bob 3s ease-in-out infinite; }
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .btn{ font-family:var(--font-title); font-weight:600; font-size:clamp(1.2rem,5vw,1.6rem);
+    background:var(--orange); color:#fff; border:none; border-radius:999px; padding:15px 44px;
+    cursor:pointer; box-shadow:0 5px 0 var(--orange-dark); transition:transform .08s,box-shadow .08s; min-height:48px; }
+  .btn:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--orange-dark); }
+  .btn.blue{ background:var(--blue); box-shadow:0 5px 0 var(--blue-dark); }
+  .link{ background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;font-family:var(--font-body);font-size:.95rem;padding:8px;min-height:44px;}
+  /* Game */
+  .level-pill{ font-family:var(--font-title); background:var(--gold); color:var(--navy); padding:6px 16px; border-radius:999px; font-weight:600; }
+  .track{ position:relative; width:100%; max-width:520px; height:64px; background:#fff; border-radius:999px;
+    border:4px solid var(--sky); margin:6px 0 2px; box-shadow:inset 0 2px 6px rgba(15,76,129,.08); }
+  .fill{ position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#bfe3fb,#7ec3ee); border-radius:999px; width:0%; transition:width .35s ease; }
+  .runner{ position:absolute; top:50%; left:0%; width:54px; height:54px; transform:translate(-50%,-50%);
+    transition:left .35s cubic-bezier(.34,1.56,.64,1); z-index:2; }
+  .runner.hop{ animation:hop .4s ease; }
+  @keyframes hop{0%,100%{transform:translate(-50%,-50%)}40%{transform:translate(-50%,-95%)}}
+  .flag{ position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:1.7rem; }
+  .question{ font-family:var(--font-title); font-size:clamp(2.4rem,12vw,4rem); color:var(--blue-dark); font-weight:600; }
+  .instr{ color:var(--slate); font-size:1.05rem; min-height:1.4em; }
+  .choices{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+  .choice{ font-family:var(--font-title); font-size:clamp(1.6rem,7vw,2.4rem); font-weight:600;
+    width:96px; height:96px; border-radius:24px; border:none; cursor:pointer; color:#fff;
+    background:var(--blue); box-shadow:0 6px 0 var(--blue-dark); transition:transform .08s,box-shadow .08s; }
+  .choice:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--blue-dark); }
+  .choice.good{ background:var(--success); box-shadow:0 6px 0 #228b56; animation:pop .35s; }
+  .choice.bad{ background:var(--orange); box-shadow:0 6px 0 var(--orange-dark); animation:shake .35s; }
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  .stars{ font-size:2.4rem; letter-spacing:6px; color:var(--gold); }
+  .feedback{ font-family:var(--font-title); font-size:1.3rem; min-height:1.5em; color:var(--success); }
+  /* Modal parents */
+  .modal{ position:fixed; inset:0; background:rgba(10,53,89,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:10; }
+  .modal.show{ display:flex; }
+  .modal .box{ background:#fff; border-radius:20px; padding:24px; max-width:420px; width:100%; }
+  .modal h3{ font-family:var(--font-title); color:var(--blue-dark); margin-bottom:10px; }
+  .modal p{ color:var(--slate); margin:8px 0; line-height:1.5; }
+  .modal input{ font-size:1.2rem; padding:10px; width:120px; text-align:center; border:3px solid var(--sky); border-radius:12px; }
+  .sr{ position:absolute; width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+      <span class="bt">PGRG&nbsp;IA</span>
+    </div>
+    <div class="tools">
+      <div class="lang" role="group" aria-label="Langue / Language">
+        <button id="fr" class="active" onclick="setLang('fr')">FR</button>
+        <button id="en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="icon-btn active" id="snd" onclick="toggleSound()" aria-label="Son">🔊</button>
+    </div>
+  </div>
+
+  <!-- TITRE -->
+  <section class="screen active" id="s-title">
+    <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+      <ellipse cx="60" cy="104" rx="30" ry="6" fill="rgba(10,53,89,.12)"/>
+      <rect x="28" y="34" width="64" height="62" rx="26" fill="#0f4c81"/>
+      <rect x="36" y="42" width="48" height="42" rx="20" fill="#7ec3ee"/>
+      <circle cx="50" cy="60" r="7" fill="#fff"/><circle cx="51" cy="61" r="3.5" fill="#0f172a"/>
+      <circle cx="70" cy="60" r="7" fill="#fff"/><circle cx="71" cy="61" r="3.5" fill="#0f172a"/>
+      <path d="M50 74 q10 9 20 0" stroke="#0a3559" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="24" r="6" fill="#ffd23f"/><rect x="58" y="28" width="4" height="8" fill="#ea580c"/>
+    </svg>
+    <h1 data-i18n="title">Course aux Nombres</h1>
+    <p class="tagline" data-i18n="tagline">Additionne et avance avec Pip !</p>
+    <button class="btn" data-i18n="play" onclick="startGame()">Jouer</button>
+    <button class="link" data-i18n="parents" onclick="openGate()">Pour les parents</button>
+  </section>
+
+  <!-- JEU -->
+  <section class="screen" id="s-game">
+    <span class="level-pill"><span data-i18n="level">Niveau</span> <span id="lvl">1</span></span>
+    <div class="track">
+      <div class="fill" id="fill"></div>
+      <div class="flag">🏁</div>
+      <svg class="runner" id="runner" viewBox="0 0 60 60" aria-hidden="true">
+        <rect x="12" y="16" width="36" height="34" rx="15" fill="#f97316"/>
+        <circle cx="24" cy="30" r="4.5" fill="#fff"/><circle cx="25" cy="31" r="2.2" fill="#0f172a"/>
+        <circle cx="38" cy="30" r="4.5" fill="#fff"/><circle cx="39" cy="31" r="2.2" fill="#0f172a"/>
+        <path d="M24 40 q6 5 12 0" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="instr" id="instr" data-i18n="instr">Combien ça fait ?</p>
+    <div class="question" id="question" aria-live="polite">3 + 2</div>
+    <div class="choices" id="choices"></div>
+    <p class="feedback" id="feedback" aria-live="polite"></p>
+  </section>
+
+  <!-- VICTOIRE -->
+  <section class="screen" id="s-win">
+    <div class="stars" id="winstars">★</div>
+    <h1 data-i18n="win" style="font-size:clamp(1.6rem,7vw,2.4rem)">Bravo !</h1>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <button class="btn blue" data-i18n="replay" onclick="startGame()">Rejouer</button>
+      <button class="btn" id="nextBtn" data-i18n="next" onclick="nextLevel()">Niveau suivant</button>
+    </div>
+    <button class="link" data-i18n="backTitle" onclick="show('s-title')">Accueil</button>
+  </section>
+</div>
+
+<!-- Porte parentale -->
+<div class="modal" id="gate">
+  <div class="box">
+    <h3 data-i18n="gateTitle">Espace parents</h3>
+    <p id="gateQ" data-i18n="gateQ">Pour confirmer : combien font 6 × 3 ?</p>
+    <p><input id="gateA" type="number" inputmode="numeric" aria-label="réponse"> </p>
+    <p id="gateMsg" style="color:var(--orange);min-height:1.2em"></p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+      <button class="btn blue" data-i18n="gateOk" onclick="checkGate()">Valider</button>
+      <button class="link" data-i18n="back" onclick="closeGate()">Fermer</button>
+    </div>
+    <div id="parentInfo" style="display:none;margin-top:14px;border-top:1px solid #e2e8f0;padding-top:12px">
+      <p data-i18n="parentInfo"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- i18n ---------- */
+const T={
+ fr:{title:"Course aux Nombres",tagline:"Additionne et avance avec Pip !",play:"Jouer",parents:"Pour les parents",
+   level:"Niveau",instr:"Touche la bonne réponse !",again:"Essaie encore, presque !",good:"Bravo !",
+   win:"Bravo ! Tu gagnes une étoile !",replay:"Rejouer",next:"Niveau suivant",backTitle:"Accueil",
+   gateTitle:"Espace parents",gateQ:"Pour confirmer : combien font 6 × 3 ?",gateOk:"Valider",back:"Fermer",
+   gateBad:"Pas tout à fait…",parentInfo:"Ce jeu entraîne l'addition et la soustraction (sens du nombre) pour les 5–7 ans. Difficulté progressive en 3 niveaux. Aucune donnée collectée, aucune publicité. La progression reste sur cet appareil."},
+ en:{title:"Number Dash",tagline:"Add up and move with Pip!",play:"Play",parents:"For parents",
+   level:"Level",instr:"Tap the correct answer!",again:"Try again, almost!",good:"Great!",
+   win:"Well done! You earned a star!",replay:"Replay",next:"Next level",backTitle:"Home",
+   gateTitle:"Parents' area",gateQ:"To confirm: what is 6 × 3?",gateOk:"Confirm",back:"Close",
+   gateBad:"Not quite…",parentInfo:"This game practises addition and subtraction (number sense) for ages 5–7, with 3 progressive levels. No data collected, no ads. Progress stays on this device."}
+};
+let lang = (navigator.language||"fr").toLowerCase().startsWith("en")?"en":"fr";
+function applyI18n(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); if(T[lang][k]!==undefined) el.textContent=T[lang][k]; });
+  fr.classList.toggle("active",lang==="fr"); en.classList.toggle("active",lang==="en");
+}
+function setLang(l){ lang=l; applyI18n(); if(curScreen==="s-game") renderQuestion(); }
+
+/* ---------- son (WebAudio, sans fichier) ---------- */
+let sound=true, AC=null;
+function beep(freq,dur,type){ if(!sound)return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(),g=AC.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(AC.destination);
+  g.gain.setValueAtTime(0.0001,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.18,AC.currentTime+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+dur); o.start(); o.stop(AC.currentTime+dur);}catch(e){} }
+const sOk=()=>{beep(660,0.12);setTimeout(()=>beep(880,0.16),90);};
+const sNo=()=>beep(190,0.18,"triangle");
+const sWin=()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.22),i*120));
+function toggleSound(){ sound=!sound; snd.textContent=sound?"🔊":"🔇"; snd.classList.toggle("active",sound); }
+
+/* ---------- jeu ---------- */
+const GOAL=6; let level=1, pos=0, current=null, curScreen="s-title";
+let transitioning=false; /* garde : empêche les clics pendant la transition */
+const SAVE="pgrg_numberdash_maxlevel";
+function show(id){ curScreen=id; document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function genQuestion(lv){
+  let a,b,op,ans;
+  if(lv===1){ a=rnd(1,6); b=rnd(1,Math.min(6,10-a)); op="+"; ans=a+b; }
+  else if(lv===2){ a=rnd(3,10); b=rnd(1,a-1); op="−"; ans=a-b; }
+  else { if(Math.random()<0.5){ a=rnd(5,12); b=rnd(3,8); op="+"; ans=a+b; } else { a=rnd(8,20); b=rnd(2,7); op="−"; ans=a-b; } }
+  const set=new Set([ans]); while(set.size<3){ const d=ans+rnd(-3,3); if(d>=0 && d!==ans) set.add(d); }
+  return {text:a+" "+op+" "+b, answer:ans, choices:[...set].sort(()=>Math.random()-0.5)};
+}
+function startGame(){ pos=0; transitioning=false; updateTrack(); show("s-game"); document.getElementById("lvl").textContent=level; renderQuestion(); }
+function renderQuestion(){
+  current=current||genQuestion(level);
+  transitioning=false;
+  document.getElementById("instr").textContent=T[lang].instr;
+  document.getElementById("question").textContent=current.text+" = ?";
+  document.getElementById("feedback").textContent="";
+  const box=document.getElementById("choices"); box.innerHTML="";
+  current.choices.forEach(v=>{
+    const b=document.createElement("button"); b.className="choice"; b.textContent=v; b.setAttribute("aria-label",v);
+    b.onclick=()=>choose(v,b); box.appendChild(b);
+  });
+}
+function choose(v,btn){
+  /* garde : ignorer tout clic pendant une transition ou si la question est absente */
+  if(transitioning || current===null || current===undefined) return;
+  if(v===current.answer){
+    transitioning=true;
+    btn.classList.add("good"); sOk();
+    document.getElementById("feedback").textContent=T[lang].good;
+    pos++; current=null;
+    const runner=document.getElementById("runner"); runner.classList.add("hop"); setTimeout(()=>runner.classList.remove("hop"),400);
+    updateTrack();
+    setTimeout(()=>{ if(pos>=GOAL) win(); else renderQuestion(); }, 620);
+  } else {
+    btn.classList.add("bad"); sNo();
+    document.getElementById("feedback").style.color="var(--orange)";
+    document.getElementById("feedback").textContent=T[lang].again;
+    setTimeout(()=>{ btn.classList.remove("bad"); document.getElementById("feedback").style.color="var(--success)"; document.getElementById("feedback").textContent=""; },500);
+  }
+}
+function updateTrack(){
+  const pct=Math.min(100,(pos/GOAL)*100);
+  document.getElementById("fill").style.width=pct+"%";
+  document.getElementById("runner").style.left=pct+"%";
+}
+function win(){
+  sWin();
+  const max=Math.max(level, parseInt(localStorage.getItem(SAVE)||"1",10));
+  try{ localStorage.setItem(SAVE, String(Math.min(3, level+ (level<3?1:0)))); }catch(e){}
+  document.getElementById("winstars").textContent="★".repeat(level);
+  document.getElementById("nextBtn").style.display = level<3 ? "" : "none";
+  show("s-win");
+}
+function nextLevel(){ if(level<3) level++; startGame(); }
+
+/* ---------- porte parentale ---------- */
+let gateAns=18;
+function openGate(){
+  const x=rnd(3,9), y=rnd(2,6); gateAns=x*y;
+  document.getElementById("gateQ").textContent=(lang==="fr"?`Pour confirmer : combien font ${x} × ${y} ?`:`To confirm: what is ${x} × ${y}?`);
+  document.getElementById("gateA").value=""; document.getElementById("gateMsg").textContent=""; document.getElementById("parentInfo").style.display="none";
+  document.getElementById("gate").classList.add("show");
+}
+function checkGate(){
+  if(parseInt(document.getElementById("gateA").value,10)===gateAns){ document.getElementById("parentInfo").style.display="block"; document.getElementById("gateMsg").textContent=""; }
+  else { document.getElementById("gateMsg").textContent=T[lang].gateBad; }
+}
+function closeGate(){ document.getElementById("gate").classList.remove("show"); }
+
+applyI18n();
+if(parseInt(localStorage.getItem(SAVE)||"1",10)>1){ level=parseInt(localStorage.getItem(SAVE),10); }
+</script>
+</body>
+</html>

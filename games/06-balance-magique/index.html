@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Balance Magique / Magic Balance — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;--orange-dark:#ea580c;
+  --gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#d4ecff 100%);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+h1,h2,h3,.title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);color:#fff;position:sticky;top:0;z-index:100;min-height:52px}
+#topbar .brand{display:flex;align-items:center;gap:8px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.5px;flex:1}
+#topbar .brand img{height:34px}
+.lang-btn{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);color:#fff;border-radius:8px;padding:5px 12px;font-size:.9rem;cursor:pointer;font-weight:700;transition:background .2s;min-width:48px;min-height:48px}
+.lang-btn.active{background:var(--orange);border-color:var(--orange)}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,0.3)}
+#muteBtn{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);color:#fff;border-radius:8px;padding:5px 10px;font-size:1.3rem;cursor:pointer;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#muteBtn:hover{background:rgba(255,255,255,0.3)}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px 40px;max-width:700px;margin:0 auto;width:100%}
+.screen.active{display:flex}
+#titleMascot{margin:20px auto;display:block}
+#gameTitle{font-size:2.4rem;color:var(--blue);text-align:center;margin:10px 0 4px}
+#gameSubtitle{color:var(--slate);text-align:center;font-size:1.1rem;margin-bottom:24px}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:16px 48px;font-size:1.4rem;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:64px;margin:8px}
+.btn-play:active{transform:translateY(4px);box-shadow:0 1px 0 var(--orange-dark)}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-size:1rem;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;min-height:48px;margin:8px;font-family:'Nunito',system-ui,sans-serif;font-weight:700}
+.btn-secondary:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blue-dark)}
+#parentGate{position:fixed;inset:0;background:rgba(15,76,129,0.7);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+#parentGate.open{display:flex}
+#gateBox{background:#fff;border-radius:20px;padding:30px 28px;max-width:380px;width:100%;text-align:center}
+#gateBox h2{color:var(--blue);font-size:1.4rem;margin-bottom:12px}
+#gateBox p{color:var(--slate);margin-bottom:16px;font-size:.95rem}
+#gateInput{border:2px solid var(--sky);border-radius:10px;padding:10px 16px;font-size:1.2rem;width:100px;text-align:center;margin:8px 0}
+#gateError{color:#e55;font-size:.9rem;min-height:20px;margin:4px 0}
+#parentInfo{display:none;text-align:left}
+#parentInfo h3{color:var(--blue);margin-bottom:8px}
+#parentInfo p{color:var(--slate);font-size:.92rem;margin-bottom:8px}
+#levelBadge{background:var(--blue);color:#fff;border-radius:20px;padding:6px 20px;font-weight:700;font-size:.95rem;margin-bottom:8px}
+#scoreBar{display:flex;gap:16px;align-items:center;margin-bottom:12px;font-weight:700;color:var(--blue);font-size:1rem}
+#questionText{font-size:1.3rem;color:var(--navy);text-align:center;margin:8px 0 12px;font-weight:700;min-height:36px}
+#balanceWrap{width:100%;max-width:500px;margin:0 auto 16px;position:relative}
+#balanceSvg{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.12))}
+#eqDisplay{font-size:1.6rem;text-align:center;color:var(--navy);font-weight:700;margin:4px 0 16px;letter-spacing:1px;min-height:38px}
+#eqDisplay .unknown{color:var(--orange);background:rgba(249,115,22,.12);border-radius:8px;padding:2px 10px}
+#answerZone{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:440px}
+#choiceGrid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.choice-btn{background:#fff;border:2.5px solid var(--sky);border-radius:14px;padding:12px 20px;font-size:1.4rem;font-weight:700;color:var(--navy);cursor:pointer;min-width:64px;min-height:56px;transition:all .15s;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+.choice-btn:hover{background:var(--sky-light);border-color:var(--blue);transform:translateY(-2px)}
+.choice-btn.correct{background:var(--success);color:#fff;border-color:var(--success)}
+.choice-btn.wrong{background:#ff6b6b;color:#fff;border-color:#e55}
+#stepperZone{display:flex;align-items:center;gap:14px;margin:4px 0}
+.step-btn{background:var(--blue);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:1.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;font-weight:700}
+.step-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--blue-dark)}
+#stepValue{font-size:2rem;font-weight:700;color:var(--orange);min-width:60px;text-align:center;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#confirmBtn{background:var(--orange);color:#fff;border:none;border-radius:14px;padding:12px 32px;font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:52px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#confirmBtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--orange-dark)}
+#feedback{min-height:36px;font-size:1.1rem;font-weight:700;text-align:center;margin:8px 0;transition:opacity .3s}
+#feedback.ok{color:var(--success)}
+#feedback.bad{color:#e55}
+#progressWrap{width:100%;max-width:380px;background:rgba(0,0,0,.1);border-radius:20px;height:12px;margin:8px 0}
+#progressBar{height:12px;border-radius:20px;background:linear-gradient(90deg,var(--sky),var(--blue));transition:width .4s}
+.stars-row{display:flex;gap:8px;justify-content:center;font-size:2.5rem;margin:12px 0}
+#winTitle{font-size:2rem;color:var(--blue);margin:12px 0 4px;text-align:center}
+#winMsg{color:var(--slate);text-align:center;margin-bottom:16px;font-size:1.05rem}
+#winBtns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media(max-width:480px){
+  #gameTitle{font-size:1.8rem}
+  .choice-btn{font-size:1.2rem;min-width:56px}
+  #eqDisplay{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">&#128266;</button>
+</div>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+<div id="parentGate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <div id="gateBox">
+    <h2 id="gateTitle">&#128106; <span data-t="parentTitle"></span></h2>
+    <p data-t="parentQ"></p>
+    <div id="gateMath" style="font-size:1.3rem;font-weight:700;color:var(--blue);margin:10px 0"></div>
+    <input id="gateInput" type="number" min="0" max="99" inputmode="numeric" aria-label="Reponse">
+    <br>
+    <button class="btn-secondary" onclick="checkGate()" style="margin-top:8px" data-t="validate"></button>
+    <div id="gateError"></div>
+    <div id="parentInfo">
+      <hr style="margin:16px 0;border-color:#eee">
+      <h3 data-t="parentInfoTitle"></h3>
+      <p data-t="parentInfoText"></p>
+      <p data-t="parentInfoData"></p>
+      <button class="btn-secondary" onclick="closeGate()" style="margin-top:12px" data-t="close"></button>
+    </div>
+  </div>
+</div>
+<div id="screenTitle" class="screen active">
+  <svg id="titleMascot" width="160" height="160" viewBox="0 0 160 160" aria-label="Mascotte hibou magicien">
+    <ellipse cx="80" cy="92" rx="38" ry="42" fill="#7ec3ee"/>
+    <ellipse cx="80" cy="90" rx="32" ry="36" fill="#eaf6ff"/>
+    <ellipse cx="44" cy="102" rx="22" ry="12" fill="#0f4c81" transform="rotate(-20,44,102)"/>
+    <ellipse cx="116" cy="102" rx="22" ry="12" fill="#0f4c81" transform="rotate(20,116,102)"/>
+    <ellipse cx="80" cy="102" rx="20" ry="22" fill="#fff"/>
+    <ellipse cx="80" cy="60" rx="30" ry="7" fill="#0a3559"/>
+    <polygon points="80,12 60,60 100,60" fill="#0f4c81"/>
+    <ellipse cx="80" cy="60" rx="30" ry="7" fill="#0a3559"/>
+    <text x="80" y="46" text-anchor="middle" font-size="11" fill="#ffd23f" font-family="sans-serif">&#9733; &#9733;</text>
+    <circle cx="68" cy="88" r="11" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+    <circle cx="92" cy="88" r="11" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+    <circle cx="70" cy="89" r="5" fill="#0f172a"/>
+    <circle cx="94" cy="89" r="5" fill="#0f172a"/>
+    <circle cx="71.5" cy="87.5" r="2" fill="#fff"/>
+    <circle cx="95.5" cy="87.5" r="2" fill="#fff"/>
+    <polygon points="80,96 76,102 84,102" fill="#f97316"/>
+    <ellipse cx="68" cy="133" rx="10" ry="5" fill="#f97316"/>
+    <ellipse cx="92" cy="133" rx="10" ry="5" fill="#f97316"/>
+    <line x1="56" y1="122" x2="104" y2="122" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/>
+    <line x1="80" y1="110" x2="80" y2="122" stroke="#0f4c81" stroke-width="3"/>
+    <rect x="50" y="122" width="12" height="7" rx="3" fill="#ffd23f"/>
+    <rect x="98" y="122" width="12" height="7" rx="3" fill="#f97316"/>
+    <text x="56" y="129" text-anchor="middle" font-size="9" fill="#0f172a" font-weight="bold">3</text>
+    <text x="104" y="129" text-anchor="middle" font-size="9" fill="#fff" font-weight="bold">?</text>
+  </svg>
+  <h1 id="gameTitle" class="title" data-t="gameTitle"></h1>
+  <p id="gameSubtitle" data-t="gameSubtitle"></p>
+  <button class="btn-play" onclick="startGame()" data-t="play"></button>
+  <button class="btn-secondary" onclick="openGate()" data-t="parents" style="margin-top:16px;font-size:.95rem"></button>
+</div>
+<div id="screenGame" class="screen">
+  <div id="levelBadge">Niveau 1</div>
+  <div id="scoreBar">
+    <span>&#11088; <span id="scoreVal">0</span></span>
+    <span>&#10067; <span id="qNum">1</span>/5</span>
+  </div>
+  <div id="progressWrap" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+    <div id="progressBar" style="width:0%"></div>
+  </div>
+  <div id="questionText" aria-live="polite"></div>
+  <div id="balanceWrap">
+    <svg id="balanceSvg" viewBox="0 0 500 290" xmlns="http://www.w3.org/2000/svg">
+      <rect x="235" y="248" width="30" height="32" rx="5" fill="#0a3559"/>
+      <rect x="210" y="275" width="80" height="13" rx="6" fill="#0f4c81"/>
+      <circle cx="250" cy="246" r="11" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+      <g id="beamGroup" style="transform-origin:250px 246px;transition:transform .7s cubic-bezier(.4,1.5,.6,1)">
+        <rect x="88" y="240" width="324" height="12" rx="6" fill="#0f4c81"/>
+        <line x1="130" y1="246" x2="130" y2="182" stroke="#475569" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="370" y1="246" x2="370" y2="182" stroke="#475569" stroke-width="2" stroke-dasharray="4,3"/>
+        <g id="panLeftGroup">
+          <ellipse id="panLeft" cx="130" cy="182" rx="56" ry="14" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/>
+          <g id="leftWeights"></g>
+        </g>
+        <g id="panRightGroup">
+          <ellipse id="panRight" cx="370" cy="182" rx="56" ry="14" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/>
+          <g id="rightWeights"></g>
+        </g>
+      </g>
+      <text x="38" y="55" font-size="22" opacity=".25">&#10024;</text>
+      <text x="448" y="75" font-size="18" opacity=".25">&#11088;</text>
+      <text x="30" y="200" font-size="16" opacity=".2">&#10024;</text>
+      <text x="460" y="220" font-size="16" opacity=".2">&#10024;</text>
+    </svg>
+  </div>
+  <div id="eqDisplay" aria-live="polite"></div>
+  <div id="answerZone">
+    <div id="choiceGrid" role="group" aria-label="Choix de reponse"></div>
+    <div id="stepperZone" style="display:none">
+      <button class="step-btn" id="btnMinus" onclick="stepAnswer(-1)" aria-label="Moins">&#8722;</button>
+      <div id="stepValue">0</div>
+      <button class="step-btn" id="btnPlus" onclick="stepAnswer(1)" aria-label="Plus">+</button>
+    </div>
+    <button id="confirmBtn" style="display:none" onclick="confirmStepper()" data-t="validate"></button>
+  </div>
+  <div id="feedback" role="status"></div>
+  <button class="btn-secondary" onclick="goHome()" data-t="home" style="margin-top:20px;font-size:.9rem"></button>
+</div>
+<div id="screenWin" class="screen">
+  <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Trophee">
+    <polygon points="60,10 73,44 110,44 80,66 91,102 60,80 29,102 40,66 10,44 47,44" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+    <circle cx="60" cy="60" r="20" fill="#f97316" opacity=".3"/>
+    <text x="60" y="68" text-anchor="middle" font-size="24" fill="#fff" font-weight="bold">&#9733;</text>
+  </svg>
+  <h2 id="winTitle" class="title" data-t="winTitle"></h2>
+  <div class="stars-row" id="winStars"></div>
+  <p id="winMsg" data-t="winMsg"></p>
+  <div id="winBtns">
+    <button class="btn-play" onclick="replayLevel()" data-t="replay"></button>
+    <button class="btn-play" onclick="nextLevel()" id="btnNextLvl" data-t="nextLevel" style="background:var(--success);box-shadow:0 5px 0 #27a862"></button>
+    <button class="btn-secondary" onclick="goHome()" data-t="home"></button>
+  </div>
+</div>
+<script>
+var T={
+  fr:{
+    gameTitle:"La Balance Magique",
+    gameSubtitle:"Trouve la valeur mystere pour equilibrer !",
+    play:"▶ Jouer",
+    parents:"👨‍👩‍👧 Pour les parents",
+    parentTitle:"Espace parents",
+    parentQ:"Resous ce petit calcul pour acceder a l espace parents :",
+    validate:"Valider",
+    gateError:"Oups, ce n est pas ca !",
+    parentInfoTitle:"Competence visee",
+    parentInfoText:"Ce jeu aide les enfants (9-12 ans) a comprendre les equations et la pre-algebre : trouver la valeur inconnue pour equilibrer une balance. Trois niveaux progressifs : addition simple (? + a = b), combinaisons et soustraction, puis multiplication.",
+    parentInfoData:"Aucune donnee personnelle n est collectee. La progression est sauvegardee localement sur votre appareil. Aucune publicite.",
+    close:"Fermer",
+    home:"🏠 Accueil",
+    level:"Niveau",
+    questionN1:"Quel poids manquant equilibre la balance ?",
+    questionN2:"Quel poids manquant equilibre la balance ?",
+    questionN3:"Combien vaut ? pour equilibrer (2 x ? = total) ?",
+    correct:["Excellent ! 🎉","Bravo ! ⭐","Super ! 🌟","Parfait ! 🏆","Genial ! ✨"],
+    wrong:["Essaie encore 💪","Presque ! Courage 🙂","Pas tout a fait, reessaie !"],
+    winTitle:"Niveau reussi !",
+    winMsg:"Tu as equilibre toutes les balances !",
+    replay:"🔄 Rejouer",
+    nextLevel:"→ Niveau suivant",
+    balanced:"La balance est equilibree !",
+    tooHeavyLeft:"Le plateau gauche est trop lourd",
+    tooHeavyRight:"Le plateau droit est trop lourd"
+  },
+  en:{
+    gameTitle:"Magic Balance",
+    gameSubtitle:"Find the mystery weight to balance the scale!",
+    play:"▶ Play",
+    parents:"👨‍👩‍👧 For parents",
+    parentTitle:"Parents area",
+    parentQ:"Solve this quick calculation to access the parents area:",
+    validate:"Confirm",
+    gateError:"Oops, that is not right!",
+    parentInfoTitle:"Learning objective",
+    parentInfoText:"This game helps children (ages 9-12) understand equations and pre-algebra: finding the unknown value to balance a scale. Three progressive levels: simple addition (? + a = b), combinations and subtraction, then multiplication.",
+    parentInfoData:"No personal data is collected. Progress is saved locally on your device. No advertising.",
+    close:"Close",
+    home:"🏠 Home",
+    level:"Level",
+    questionN1:"What missing weight balances the scale?",
+    questionN2:"What missing weight balances the scale?",
+    questionN3:"What is ? so that 2 x ? equals the right side?",
+    correct:["Excellent! 🎉","Great job! ⭐","Super! 🌟","Perfect! 🏆","Amazing! ✨"],
+    wrong:["Try again 💪","Almost! Keep going 🙂","Not quite, try again!"],
+    winTitle:"Level complete!",
+    winMsg:"You balanced all the scales!",
+    replay:"🔄 Play again",
+    nextLevel:"→ Next level",
+    balanced:"The scale is balanced!",
+    tooHeavyLeft:"The left pan is too heavy",
+    tooHeavyRight:"The right pan is too heavy"
+  }
+};
+
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+function tr(k){return T[lang][k]||k;}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  applyTranslations();
+  if(currentScreen==='game') renderQuestion();
+  if(currentScreen==='win') renderWin();
+}
+
+function applyTranslations(){
+  document.querySelectorAll('[data-t]').forEach(function(el){
+    var k=el.getAttribute('data-t');
+    if(T[lang][k]) el.textContent=T[lang][k];
+  });
+  document.getElementById('levelBadge').textContent=tr('level')+' '+(currentLevel+1);
+  updateEqDisplay();
+}
+
+var muted=false;
+var audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  type=type||'sine';vol=vol||0.18;
+  if(muted)return;
+  try{
+    var ac=getAudio();
+    var o=ac.createOscillator();var g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    o.start();o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+function playCorrect(){playTone(523,.1);setTimeout(function(){playTone(659,.1);},110);setTimeout(function(){playTone(784,.25);},220);}
+function playWrong(){playTone(220,.15,'sawtooth',.12);setTimeout(function(){playTone(180,.2,'sawtooth',.1);},160);}
+function playBalance(){playTone(440,.08);setTimeout(function(){playTone(550,.08);},90);setTimeout(function(){playTone(660,.15);},180);setTimeout(function(){playTone(880,.3);},270);}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+var gateA=0,gateB=0;
+function openGate(){
+  gateA=rng(2,9);gateB=rng(2,9);
+  document.getElementById('gateMath').textContent=gateA+' x '+gateB+' = ?';
+  document.getElementById('gateInput').value='';
+  document.getElementById('gateError').textContent='';
+  document.getElementById('parentInfo').style.display='none';
+  document.getElementById('parentGate').classList.add('open');
+  setTimeout(function(){document.getElementById('gateInput').focus();},100);
+}
+function checkGate(){
+  var v=parseInt(document.getElementById('gateInput').value);
+  if(v===gateA*gateB){
+    document.getElementById('parentInfo').style.display='block';
+    document.getElementById('gateError').textContent='';
+    applyTranslations();
+  } else {
+    document.getElementById('gateError').textContent=tr('gateError');
+    playWrong();
+  }
+}
+function closeGate(){document.getElementById('parentGate').classList.remove('open');}
+document.getElementById('gateInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+
+var LS_KEY='pgrg_balance_magique';
+var save={level:0,score:0,bestStars:[0,0,0]};
+try{var _d=JSON.parse(localStorage.getItem(LS_KEY));if(_d&&typeof _d==='object')Object.assign(save,_d);}catch(e){}
+function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify(save));}catch(e){}}
+
+var currentLevel=0;
+var currentScreen='title';
+var questions=[];
+var qIndex=0;
+var sessionScore=0;
+var wrongCount=0;
+var currentAnswer=0;
+var stepperVal=0;
+var answerLocked=false;
+
+function rng(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+function makeN1(){
+  var b=rng(4,15);
+  var a=rng(1,b-1);
+  var unk=b-a;
+  return{leftWeights:[{v:a,known:true},{v:unk,known:false}],rightWeights:[{v:b,known:true}],unknown:unk};
+}
+
+function makeN2(){
+  var type=rng(0,1);
+  if(type===0){
+    var a=rng(2,8),b=rng(1,6),c=rng(1,6);
+    var total=b+c;
+    if(total<=a||total-a<1||total-a>20) return makeN2();
+    var unk=total-a;
+    return{leftWeights:[{v:a,known:true},{v:unk,known:false}],rightWeights:[{v:b,known:true},{v:c,known:true}],unknown:unk};
+  } else {
+    var aa=rng(2,7),bb=rng(2,9);
+    var unk2=bb+aa;
+    return{leftWeights:[{v:unk2,known:false}],rightWeights:[{v:bb,known:true},{v:aa,known:true}],unknown:unk2,subtractMode:true,subtractA:aa,subtractB:bb};
+  }
+}
+
+function makeN3(){
+  var unk=rng(2,12);
+  var b=unk*2;
+  return{leftWeights:[{v:unk,known:false},{v:unk,known:false}],rightWeights:[{v:b,known:true}],unknown:unk,multiMode:true};
+}
+
+var generators=[makeN1,makeN2,makeN3];
+var qPerLevel=5;
+
+function genQuestions(level){
+  var gen=generators[Math.min(level,2)];
+  var qs=[];var tries=0;
+  while(qs.length<qPerLevel&&tries<300){
+    tries++;
+    var q=gen();
+    var dup=false;
+    for(var i=0;i<qs.length;i++){if(qs[i].unknown===q.unknown)dup=true;}
+    if(!dup) qs.push(q);
+  }
+  return qs;
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  currentScreen=id.replace('screen','').toLowerCase();
+}
+function goHome(){showScreen('screenTitle');applyTranslations();}
+
+function startGame(level){
+  currentLevel=(level!==undefined)?level:save.level;
+  sessionScore=0;qIndex=0;wrongCount=0;
+  questions=genQuestions(currentLevel);
+  showScreen('screenGame');
+  applyTranslations();
+  renderQuestion();
+}
+function replayLevel(){startGame(currentLevel);}
+function nextLevel(){
+  var nl=currentLevel+1;
+  save.level=Math.max(save.level,Math.min(nl,2));
+  persist();
+  startGame(Math.min(nl,2));
+}
+
+function updateEqDisplay(){
+  if(!questions.length||qIndex>=questions.length)return;
+  var q=questions[qIndex];
+  var el=document.getElementById('eqDisplay');
+  if(!q)return;
+  var leftParts,rightParts;
+  if(q.subtractMode){
+    leftParts='<span class="unknown">&#10067;</span> &minus; '+q.subtractA;
+    rightParts=''+q.subtractB;
+  } else if(q.multiMode){
+    leftParts='2 &times; <span class="unknown">&#10067;</span>';
+    rightParts=''+q.rightWeights[0].v;
+  } else {
+    leftParts=q.leftWeights.map(function(w){return w.known?w.v:'<span class="unknown">&#10067;</span>';}).join(' + ');
+    rightParts=q.rightWeights.map(function(w){return w.known?w.v:'<span class="unknown">&#10067;</span>';}).join(' + ');
+  }
+  el.innerHTML=leftParts+' &nbsp;=&nbsp; '+rightParts;
+}
+
+var WEIGHT_COLORS=['#f97316','#0f4c81','#34c77b','#7c3aed','#0891b2','#dc2626','#ca8a04'];
+function weightColor(v){return WEIGHT_COLORS[v%WEIGHT_COLORS.length];}
+
+function renderWeights(groupId,weights,panCx,panCy){
+  var g=document.getElementById(groupId);
+  g.innerHTML='';
+  var total=weights.length;
+  var spacing=44;
+  var startX=panCx-(total-1)*spacing/2;
+  weights.forEach(function(w,i){
+    var cx=startX+i*spacing;
+    var cy=panCy-24;
+    var col=w.known?weightColor(w.v):'#f97316';
+    var ns='http://www.w3.org/2000/svg';
+    var rect=document.createElementNS(ns,'rect');
+    rect.setAttribute('x',cx-17);rect.setAttribute('y',cy-18);
+    rect.setAttribute('width',34);rect.setAttribute('height',30);
+    rect.setAttribute('rx',8);rect.setAttribute('fill',col);
+    rect.setAttribute('stroke','rgba(0,0,0,.18)');rect.setAttribute('stroke-width','1.5');
+    g.appendChild(rect);
+    var handle=document.createElementNS(ns,'rect');
+    handle.setAttribute('x',cx-6);handle.setAttribute('y',cy-26);
+    handle.setAttribute('width',12);handle.setAttribute('height',10);
+    handle.setAttribute('rx',4);handle.setAttribute('fill',col);
+    handle.setAttribute('stroke','rgba(0,0,0,.15)');handle.setAttribute('stroke-width','1');
+    g.appendChild(handle);
+    var txt=document.createElementNS(ns,'text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy-1);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('dominant-baseline','middle');
+    txt.setAttribute('font-size',w.known?'13':'16');
+    txt.setAttribute('font-weight','bold');
+    txt.setAttribute('fill','#fff');
+    txt.setAttribute('font-family',"'Fredoka','Baloo 2','Nunito',system-ui,sans-serif");
+    txt.textContent=w.known?w.v:'?';
+    g.appendChild(txt);
+  });
+}
+
+function updateBalance(tiltDeg,showWeights){
+  var q=questions[qIndex];
+  if(!q)return;
+  var beam=document.getElementById('beamGroup');
+  beam.style.transform='rotate('+tiltDeg+'deg)';
+  if(showWeights){
+    renderWeights('leftWeights',q.leftWeights,130,182);
+    renderWeights('rightWeights',q.rightWeights,370,182);
+  }
+}
+
+function calcTilt(leftSum,rightSum){
+  var diff=leftSum-rightSum;
+  var maxTilt=18;
+  return Math.max(-maxTilt,Math.min(maxTilt,diff*1.6));
+}
+
+function generateOptions(correct,minV,maxV){
+  var opts={};opts[correct]=true;
+  var tries=0;
+  while(Object.keys(opts).length<4&&tries<200){
+    tries++;
+    var delta=rng(1,5)*(Math.random()<.5?1:-1);
+    var v=correct+delta;
+    if(v>=minV&&v<=maxV) opts[v]=true;
+  }
+  while(Object.keys(opts).length<4){
+    var v2=rng(minV,maxV);opts[v2]=true;
+  }
+  var arr=Object.keys(opts).map(Number).slice(0,4);
+  return shuffle(arr);
+}
+
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=a[i];a[i]=a[j];a[j]=tmp;
+  }
+  return a;
+}
+
+function renderQuestion(){
+  answerLocked=false;wrongCount=0;
+  var q=questions[qIndex];
+  currentAnswer=q.unknown;stepperVal=0;
+  document.getElementById('levelBadge').textContent=tr('level')+' '+(currentLevel+1);
+  document.getElementById('qNum').textContent=qIndex+1;
+  document.getElementById('scoreVal').textContent=sessionScore;
+  var pct=Math.round((qIndex/qPerLevel)*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressWrap').setAttribute('aria-valuenow',qIndex);
+  var qKey='questionN'+(currentLevel===0?'1':currentLevel===1?'2':'3');
+  document.getElementById('questionText').textContent=tr(qKey);
+  updateEqDisplay();
+  var rightSum=q.rightWeights.reduce(function(s,w){return s+w.v;},0);
+  var dummyLeft=q.leftWeights.reduce(function(s,w){return s+(w.known?w.v:Math.max(q.unknown-3,1));},0);
+  var initialTilt=calcTilt(dummyLeft,rightSum);
+  updateBalance(initialTilt,true);
+  var fb=document.getElementById('feedback');
+  fb.textContent='';fb.className='';
+  buildAnswerUI(q);
+}
+
+function buildAnswerUI(q){
+  var choiceGrid=document.getElementById('choiceGrid');
+  var stepperZone=document.getElementById('stepperZone');
+  var confirmBtn=document.getElementById('confirmBtn');
+  choiceGrid.innerHTML='';
+  if(currentLevel<2){
+    stepperZone.style.display='none';
+    confirmBtn.style.display='none';
+    choiceGrid.style.display='flex';
+    var correct=q.unknown;
+    var opts=generateOptions(correct,1,25);
+    opts.forEach(function(opt){
+      var btn=document.createElement('button');
+      btn.className='choice-btn';
+      btn.textContent=opt;
+      btn.setAttribute('aria-label',(lang==='fr'?'Reponse ':'Answer ')+opt);
+      btn.onclick=(function(b,o){return function(){selectChoice(b,o,correct);};})(btn,opt);
+      choiceGrid.appendChild(btn);
+    });
+  } else {
+    choiceGrid.style.display='none';
+    stepperZone.style.display='flex';
+    confirmBtn.style.display='inline-flex';
+    confirmBtn.textContent=tr('validate');
+    stepperVal=0;
+    document.getElementById('stepValue').textContent=stepperVal;
+    var rightSum=q.rightWeights.reduce(function(s,w){return s+w.v;},0);
+    updateBalance(-12,true);
+  }
+}
+
+function selectChoice(btn,val,correct){
+  if(answerLocked)return;
+  var q=questions[qIndex];
+  var leftSum=q.leftWeights.reduce(function(s,w){return s+(w.known?w.v:val);},0);
+  var rightSum=q.rightWeights.reduce(function(s,w){return s+w.v;},0);
+  if(val===correct){
+    answerLocked=true;
+    btn.classList.add('correct');
+    showFeedback(true);
+    document.getElementById('beamGroup').style.transform='rotate(0deg)';
+    playBalance();
+    var pts=wrongCount===0?3:wrongCount===1?2:1;
+    sessionScore+=pts;
+    document.getElementById('scoreVal').textContent=sessionScore;
+    setTimeout(advanceQ,1500);
+  } else {
+    wrongCount++;
+    btn.classList.add('wrong');
+    btn.disabled=true;
+    showFeedback(false);
+    playWrong();
+    var tilt=calcTilt(leftSum,rightSum);
+    if(Math.abs(tilt)<3) tilt=val>correct?-8:8;
+    document.getElementById('beamGroup').style.transform='rotate('+tilt+'deg)';
+    setTimeout(function(){btn.classList.remove('wrong');},700);
+  }
+}
+
+function stepAnswer(delta){
+  if(answerLocked)return;
+  var q=questions[qIndex];
+  var maxV=q.unknown*3+5;
+  stepperVal=Math.max(0,Math.min(maxV,stepperVal+delta));
+  document.getElementById('stepValue').textContent=stepperVal;
+  var leftSum=q.leftWeights.reduce(function(s,w){return s+(w.known?w.v:stepperVal);},0);
+  var rightSum=q.rightWeights.reduce(function(s,w){return s+w.v;},0);
+  var tilt=calcTilt(leftSum,rightSum);
+  document.getElementById('beamGroup').style.transform='rotate('+tilt+'deg)';
+  var diff=leftSum-rightSum;
+  var ariaMsg='';
+  if(Math.abs(diff)<0.5) ariaMsg=tr('balanced');
+  else if(diff>0) ariaMsg=tr('tooHeavyLeft');
+  else ariaMsg=tr('tooHeavyRight');
+  document.getElementById('ariaLive').textContent=ariaMsg;
+}
+
+function confirmStepper(){
+  if(answerLocked)return;
+  var q=questions[qIndex];
+  if(stepperVal===q.unknown){
+    answerLocked=true;
+    showFeedback(true);
+    document.getElementById('beamGroup').style.transform='rotate(0deg)';
+    playBalance();
+    var pts=wrongCount===0?3:wrongCount===1?2:1;
+    sessionScore+=pts;
+    document.getElementById('scoreVal').textContent=sessionScore;
+    setTimeout(advanceQ,1500);
+  } else {
+    wrongCount++;
+    showFeedback(false);
+    playWrong();
+    var leftSum=q.leftWeights.reduce(function(s,w){return s+(w.known?w.v:stepperVal);},0);
+    var rightSum=q.rightWeights.reduce(function(s,w){return s+w.v;},0);
+    var tilt=calcTilt(leftSum,rightSum);
+    document.getElementById('beamGroup').style.transform='rotate('+tilt+'deg)';
+  }
+}
+
+function showFeedback(ok){
+  var fb=document.getElementById('feedback');
+  var arr=ok?tr('correct'):tr('wrong');
+  var msg=arr[Math.floor(Math.random()*arr.length)];
+  fb.textContent=msg;
+  fb.className=ok?'ok':'bad';
+  document.getElementById('ariaLive').textContent=msg;
+}
+
+function advanceQ(){
+  qIndex++;
+  if(qIndex>=qPerLevel){
+    var stars=sessionScore>=qPerLevel*3?3:sessionScore>=qPerLevel*2?2:1;
+    if(!save.bestStars) save.bestStars=[0,0,0];
+    save.bestStars[currentLevel]=Math.max(save.bestStars[currentLevel]||0,stars);
+    save.score=Math.max(save.score||0,sessionScore);
+    persist();
+    renderWin(stars);
+  } else {
+    renderQuestion();
+  }
+}
+
+function renderWin(stars){
+  showScreen('screenWin');
+  if(stars===undefined) stars=1;
+  document.getElementById('winTitle').textContent=tr('winTitle');
+  document.getElementById('winMsg').textContent=tr('winMsg');
+  var starsEl=document.getElementById('winStars');
+  starsEl.innerHTML='';
+  for(var i=0;i<3;i++){
+    var s=document.createElement('span');
+    s.textContent=i<stars?'⭐':'☆';
+    if(i<stars) s.style.filter='drop-shadow(0 0 6px gold)';
+    starsEl.appendChild(s);
+  }
+  document.getElementById('btnNextLvl').style.display=(currentLevel>=2)?'none':'';
+  playBalance();
+}
+
+document.addEventListener('keydown',function(e){
+  if(currentScreen==='game'&&currentLevel===2&&!answerLocked){
+    if(e.key==='ArrowUp'||e.key==='+') stepAnswer(1);
+    if(e.key==='ArrowDown'||e.key==='-') stepAnswer(-1);
+    if(e.key==='Enter') confirmStepper();
+  }
+});
+
+setLang(lang);
+applyTranslations();
+</script>
+</body>
+</html>

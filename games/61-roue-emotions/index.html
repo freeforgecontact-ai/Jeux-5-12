@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Roue des Émotions / Emotion Wheel – PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c;
+  --gold:#ffd23f; --sky:#7ec3ee; --sky-light:#eaf6ff;
+  --slate:#475569; --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,var(--sky-light) 0%,#d4eeff 100%);
+  min-height:100vh; color:var(--navy); overflow-x:hidden;
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--blue); color:#fff; padding:8px 16px; flex-wrap:wrap; gap:8px;
+}
+#topbar-left{display:flex;align-items:center;gap:10px}
+#topbar-left img{height:34px}
+#topbar-brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;color:#fff}
+#topbar-right{display:flex;gap:8px;align-items:center}
+.lang-btn{
+  background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.5);
+  color:#fff; padding:4px 12px; border-radius:20px; cursor:pointer;
+  font-size:0.9rem; font-weight:700; transition:background 0.2s;
+  min-width:48px; min-height:36px;
+}
+.lang-btn.active{background:var(--orange);border-color:var(--orange-dark)}
+.lang-btn:hover{background:rgba(255,255,255,0.3)}
+#mute-btn{
+  background:none; border:none; font-size:1.4rem; cursor:pointer;
+  min-width:48px; min-height:48px; display:flex; align-items:center; justify-content:center;
+}
+.screen{display:none; padding:16px; max-width:760px; margin:0 auto}
+.screen.active{display:block}
+#title-screen{text-align:center;padding:24px 16px}
+#mascot-wrap{margin:0 auto 16px;width:160px;height:160px}
+#game-title{font-size:2rem;color:var(--blue);margin-bottom:6px}
+#game-subtitle{font-size:1.05rem;color:var(--slate);margin-bottom:28px}
+.btn-main{
+  display:inline-block; background:var(--orange); color:#fff;
+  font-size:1.2rem; font-weight:700; font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  padding:14px 40px; border-radius:50px; border:none; cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark); transition:transform 0.1s,box-shadow 0.1s;
+  min-height:56px; text-decoration:none;
+}
+.btn-main:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{
+  display:inline-block; background:var(--blue); color:#fff;
+  font-size:1rem; font-weight:700; font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  padding:10px 28px; border-radius:50px; border:none; cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark); transition:transform 0.1s,box-shadow 0.1s;
+  min-height:48px; text-decoration:none; margin-top:12px;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+#parents-link{margin-top:20px;display:block}
+#parents-link button{
+  background:none;border:none;color:var(--blue);font-size:0.9rem;
+  cursor:pointer;text-decoration:underline;min-height:44px;
+}
+#gate-screen{text-align:center;padding:32px 16px}
+#gate-question{font-size:1.5rem;margin:16px 0;font-weight:700}
+#gate-input{
+  font-size:1.4rem;padding:10px 16px;border:2px solid var(--blue);
+  border-radius:12px;width:100px;text-align:center;outline:none;
+}
+#gate-err{color:#e53;margin-top:8px;min-height:24px}
+#gate-info{
+  background:#fff; border-radius:16px; padding:20px;
+  margin-top:16px; text-align:left; line-height:1.7;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+#game-screen{padding:16px}
+#progress-bar-wrap{
+  background:rgba(255,255,255,0.6); border-radius:20px;
+  height:12px; width:100%; margin-bottom:12px; overflow:hidden;
+}
+#progress-bar{
+  height:100%; background:var(--success);
+  border-radius:20px; transition:width 0.4s;
+}
+#level-label{
+  text-align:center; font-size:0.85rem; color:var(--slate);
+  margin-bottom:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+}
+#question-card{
+  background:#fff; border-radius:24px; padding:20px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.1); margin-bottom:16px;
+  min-height:200px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+}
+#face-svg-wrap{margin-bottom:12px}
+#situation-text{
+  font-size:1.05rem; color:var(--navy); line-height:1.6;
+  max-width:500px; margin:0 auto 12px;
+}
+#question-prompt{
+  font-size:1.1rem; font-weight:700; color:var(--blue); margin-bottom:4px;
+}
+#options-grid{
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:12px; margin-bottom:16px;
+}
+@media(min-width:500px){#options-grid{grid-template-columns:repeat(3,1fr)}}
+.option-btn{
+  background:#fff; border:3px solid var(--sky);
+  border-radius:18px; padding:10px 8px; cursor:pointer;
+  font-size:0.95rem; font-weight:700; color:var(--navy);
+  transition:transform 0.15s,border-color 0.15s,background 0.15s;
+  min-height:64px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px;
+}
+.option-btn:hover{border-color:var(--orange);background:var(--sky-light)}
+.option-btn.correct{border-color:var(--success);background:#d4f7e7}
+.option-btn.wrong{border-color:#e53;background:#ffe5e5}
+.option-emoji{font-size:1.6rem}
+#feedback-box{
+  background:#fff; border-radius:20px; padding:16px;
+  text-align:center; margin-bottom:16px; display:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+#feedback-icon{font-size:2rem;margin-bottom:6px}
+#feedback-msg{font-size:1rem;color:var(--navy);line-height:1.5}
+#feedback-tip{
+  font-size:0.92rem; color:var(--slate); margin-top:8px;
+  padding-top:8px; border-top:1px solid #e5e7eb; font-style:italic;
+}
+#strategy-wrap{display:none;margin-top:12px}
+.strategy-card{
+  background:linear-gradient(135deg,#e0f2fe,#dbeafe);
+  border-radius:20px; padding:16px; margin-bottom:10px;
+  display:flex; align-items:center; gap:12px;
+  border:2px solid #93c5fd;
+}
+.strategy-icon{font-size:2rem;flex-shrink:0}
+.strategy-text{font-size:0.92rem;color:var(--navy);line-height:1.5}
+#success-screen{text-align:center;padding:24px 16px}
+#stars-wrap{font-size:3rem;margin:10px 0 20px;letter-spacing:4px}
+#success-msg{font-size:1.2rem;color:var(--navy);margin-bottom:20px;line-height:1.5}
+#success-level-info{font-size:0.95rem;color:var(--slate);margin-bottom:24px}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes pop{0%{transform:scale(0.8);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.anim-pulse{animation:pulse 0.6s ease}
+.anim-shake{animation:shake 0.4s ease}
+.anim-pop{animation:pop 0.35s ease}
+#score-display{
+  position:fixed;top:60px;right:12px;
+  background:var(--gold); color:var(--navy);
+  border-radius:50px; padding:4px 14px;
+  font-weight:700; font-size:0.95rem;
+  box-shadow:0 3px 8px rgba(0,0,0,0.15);
+  z-index:10;
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span id="topbar-brand">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+  </div>
+</div>
+
+<div id="score-display" aria-live="polite">⭐ 0</div>
+<div aria-live="polite" id="aria-announce" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
+
+<div id="title-screen" class="screen active">
+  <div id="mascot-wrap">
+    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" width="160" height="160" aria-hidden="true">
+      <line x1="80" y1="10" x2="80" y2="30" stroke="#ffd23f" stroke-width="6" stroke-linecap="round"/>
+      <line x1="80" y1="130" x2="80" y2="150" stroke="#f97316" stroke-width="6" stroke-linecap="round"/>
+      <line x1="10" y1="80" x2="30" y2="80" stroke="#34c77b" stroke-width="6" stroke-linecap="round"/>
+      <line x1="130" y1="80" x2="150" y2="80" stroke="#7ec3ee" stroke-width="6" stroke-linecap="round"/>
+      <line x1="27" y1="27" x2="42" y2="42" stroke="#f97316" stroke-width="6" stroke-linecap="round"/>
+      <line x1="118" y1="118" x2="133" y2="133" stroke="#ffd23f" stroke-width="6" stroke-linecap="round"/>
+      <line x1="133" y1="27" x2="118" y2="42" stroke="#34c77b" stroke-width="6" stroke-linecap="round"/>
+      <line x1="27" y1="133" x2="42" y2="118" stroke="#7ec3ee" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="80" cy="80" r="42" fill="#ffd23f" stroke="#f97316" stroke-width="4"/>
+      <ellipse cx="68" cy="72" rx="6" ry="7" fill="#0f4c81"/>
+      <ellipse cx="92" cy="72" rx="6" ry="7" fill="#0f4c81"/>
+      <circle cx="71" cy="69" r="2" fill="#fff"/>
+      <circle cx="95" cy="69" r="2" fill="#fff"/>
+      <path d="M62 90 Q80 106 98 90" fill="none" stroke="#0f4c81" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="60" cy="86" rx="8" ry="5" fill="#f97316" opacity="0.45"/>
+      <ellipse cx="100" cy="86" rx="8" ry="5" fill="#f97316" opacity="0.45"/>
+    </svg>
+  </div>
+  <h1 id="game-title" class="title-font"></h1>
+  <p id="game-subtitle"></p>
+  <br>
+  <button class="btn-main" onclick="startGame()" id="play-btn"></button>
+  <div id="parents-link"><button onclick="openGate()" id="parents-btn"></button></div>
+</div>
+
+<div id="gate-screen" class="screen">
+  <h2 class="title-font" id="gate-title" style="color:var(--blue);margin-bottom:12px"></h2>
+  <p id="gate-intro" style="margin-bottom:16px;color:var(--slate)"></p>
+  <div id="gate-question" aria-live="polite"></div>
+  <input type="number" id="gate-input" placeholder="?" aria-label="Réponse">
+  <br><br>
+  <button class="btn-main" onclick="checkGate()" id="gate-check-btn"></button>
+  <p id="gate-err" aria-live="polite"></p>
+  <div id="gate-info" style="display:none">
+    <h3 id="info-title" style="color:var(--blue);margin-bottom:10px"></h3>
+    <p id="info-text"></p>
+  </div>
+  <br>
+  <button class="btn-secondary" onclick="showScreen('title-screen')" id="gate-back-btn"></button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div id="level-label"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="question-card">
+    <div id="face-svg-wrap"></div>
+    <p id="situation-text"></p>
+    <p id="question-prompt"></p>
+  </div>
+  <div id="options-grid" role="group" aria-label="Choix"></div>
+  <div id="feedback-box" aria-live="assertive">
+    <div id="feedback-icon"></div>
+    <div id="feedback-msg"></div>
+    <div id="feedback-tip"></div>
+  </div>
+  <div id="strategy-wrap"></div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn-main" id="next-btn" onclick="nextQuestion()" style="display:none"></button>
+  </div>
+</div>
+
+<div id="success-screen" class="screen">
+  <h2 class="title-font" id="success-title" style="color:var(--blue);font-size:1.8rem;margin-bottom:8px"></h2>
+  <div id="stars-wrap"></div>
+  <p id="success-msg"></p>
+  <p id="success-level-info"></p>
+  <div class="success-btns">
+    <button class="btn-main" onclick="replayLevel()" id="btn-replay"></button>
+    <button class="btn-secondary" onclick="nextLevel()" id="btn-next-level" style="display:none"></button>
+    <button class="btn-secondary" onclick="showScreen('title-screen')" id="btn-home"></button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    gameTitle:"La Roue des Emotions",
+    gameSubtitle:"Apprends a reconnaitre et apprivoiser tes emotions ! 🌈",
+    playBtn:"Jouer !",
+    parentsBtn:"👨‍👩‍👧 Pour les parents",
+    gateTitle:"Porte Parentale",
+    gateIntro:"Résolvez ce petit calcul pour accéder aux infos parents.",
+    gateCheckBtn:"Valider",
+    gateBackBtn:"← Retour",
+    gateErr:"Ce n'est pas la bonne réponse. Essayez encore !",
+    gateQuestion:function(a,b){return"Combien font "+a+" × "+b+" ?"},
+    infoTitle:"À propos de ce jeu",
+    infoText:"La Roue des Emotions aide les enfants (5-9 ans) à reconnaitre et nommer leurs emotions, à les relier à des situations de la vie quotidienne, et à découvrir de petites stratégies pour se calmer. Aucune donnée n'est collectée. Aucune publicité. Aucune connexion internet requise. Les progrès sont enregistrés localement sur cet appareil.",
+    levelNames:["Niveau 1 — Je reconnais les emotions","Niveau 2 — Je relie aux situations","Niveau 3 — Je me calme"],
+    question0:"Quelle emotion voit-on sur ce visage ?",
+    question1:"Comment te sentirais-tu dans cette situation ?",
+    question2:"Quelle emotion ressentirais-tu et que faire pour te calmer ?",
+    feedbackCorrect:["Super ! 🌟","Bravo ! ✨","Excellent ! 💛","C'est ça ! 🎉","Bien joué ! 🌈"],
+    feedbackWrong:["Presque ! Essaie encore 💪","Pas tout à fait, mais tu y arrives !","Continue d'essayer ! 🌟"],
+    allEmotionsOk:"Toutes les emotions sont normales et importantes. Aucune n'est mauvaise ! 💛",
+    strategyTitle:"Petites stratégies douces 🌿",
+    nextBtn:"Suivant →",
+    successTitle:"Bravo !",
+    successMsg:function(s,t){return"Tu as bien répondu à "+s+" question"+(s>1?"s":"")+" sur "+t+" !"},
+    levelUp:"Tu passes au niveau suivant ! 🚀",
+    levelDone:"Tu as terminé tous les niveaux ! Tu es un champion des emotions ! 🏆",
+    replayBtn:"Rejouer",
+    nextLevelBtn:"Niveau suivant →",
+    homeBtn:"🏠 Accueil",
+    scoreLabel:function(n){return"⭐ "+n},
+    emotions:{
+      joie:{name:"Joie",emoji:"😊"},
+      tristesse:{name:"Tristesse",emoji:"😢"},
+      colere:{name:"Colère",emoji:"😠"},
+      peur:{name:"Peur",emoji:"😨"},
+      surprise:{name:"Surprise",emoji:"😲"},
+      calme:{name:"Calme",emoji:"😌"}
+    }
+  },
+  en:{
+    gameTitle:"The Emotion Wheel",
+    gameSubtitle:"Learn to recognize and embrace your emotions! 🌈",
+    playBtn:"Play!",
+    parentsBtn:"👨‍👩‍👧 For Parents",
+    gateTitle:"Parental Gate",
+    gateIntro:"Solve this little calculation to access parent info.",
+    gateCheckBtn:"Confirm",
+    gateBackBtn:"← Back",
+    gateErr:"That's not the right answer. Try again!",
+    gateQuestion:function(a,b){return"What is "+a+" × "+b+"?"},
+    infoTitle:"About this game",
+    infoText:"The Emotion Wheel helps children (ages 5-9) recognize and name their emotions, connect them to everyday situations, and discover gentle strategies to calm down. No data is collected. No advertising. No internet connection required. Progress is stored locally on this device.",
+    levelNames:["Level 1 — I recognize emotions","Level 2 — I connect to situations","Level 3 — I calm down"],
+    question0:"What emotion do you see on this face?",
+    question1:"How would you feel in this situation?",
+    question2:"What emotion is shown, and how can you calm down?",
+    feedbackCorrect:["Great! 🌟","Brilliant! ✨","Excellent! 💛","That's right! 🎉","Well done! 🌈"],
+    feedbackWrong:["Almost! Try again 💪","Not quite, but you're getting there!","Keep trying! 🌟"],
+    allEmotionsOk:"All emotions are normal and important. None of them are bad! 💛",
+    strategyTitle:"Gentle strategies 🌿",
+    nextBtn:"Next →",
+    successTitle:"Well done!",
+    successMsg:function(s,t){return"You answered "+s+" question"+(s>1?"s":"")+" out of "+t+" correctly!"},
+    levelUp:"You move on to the next level! 🚀",
+    levelDone:"You've completed all levels! You're an emotion champion! 🏆",
+    replayBtn:"Play Again",
+    nextLevelBtn:"Next Level →",
+    homeBtn:"🏠 Home",
+    scoreLabel:function(n){return"⭐ "+n},
+    emotions:{
+      joie:{name:"Joy",emoji:"😊"},
+      tristesse:{name:"Sadness",emoji:"😢"},
+      colere:{name:"Anger",emoji:"😠"},
+      peur:{name:"Fear",emoji:"😨"},
+      surprise:{name:"Surprise",emoji:"😲"},
+      calme:{name:"Calm",emoji:"😌"}
+    }
+  }
+};
+
+var FACES={
+  joie:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#ffd23f" stroke="#f97316" stroke-width="3"/><ellipse cx="43" cy="50" rx="8" ry="9" fill="#0f4c81"/><ellipse cx="77" cy="50" rx="8" ry="9" fill="#0f4c81"/><circle cx="46" cy="47" r="3" fill="#fff"/><circle cx="80" cy="47" r="3" fill="#fff"/><path d="M36 72 Q60 92 84 72" fill="none" stroke="#0f4c81" stroke-width="5" stroke-linecap="round"/><ellipse cx="36" cy="68" rx="9" ry="6" fill="#f97316" opacity="0.4"/><ellipse cx="84" cy="68" rx="9" ry="6" fill="#f97316" opacity="0.4"/></svg>',
+  tristesse:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#7ec3ee" stroke="#0f4c81" stroke-width="3"/><ellipse cx="43" cy="52" rx="7" ry="8" fill="#0f4c81"/><ellipse cx="77" cy="52" rx="7" ry="8" fill="#0f4c81"/><circle cx="46" cy="49" r="2.5" fill="#fff"/><circle cx="80" cy="49" r="2.5" fill="#fff"/><path d="M34 40 Q43 36 52 40" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/><path d="M68 40 Q77 36 86 40" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/><path d="M40 80 Q60 68 80 80" fill="none" stroke="#0f4c81" stroke-width="4" stroke-linecap="round"/><ellipse cx="76" cy="68" rx="4" ry="5" fill="#0f4c81" opacity="0.5"/><path d="M76 73 Q74 78 76 80 Q78 78 76 73" fill="#0f4c81" opacity="0.5"/></svg>',
+  colere:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#f87171" stroke="#dc2626" stroke-width="3"/><ellipse cx="43" cy="52" rx="8" ry="9" fill="#0f172a"/><ellipse cx="77" cy="52" rx="8" ry="9" fill="#0f172a"/><circle cx="46" cy="49" r="2.5" fill="#fff"/><circle cx="80" cy="49" r="2.5" fill="#fff"/><path d="M30 38 Q43 44 52 40" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/><path d="M68 40 Q77 44 90 38" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/><path d="M40 80 Q60 68 80 80" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/><path d="M22 25 Q26 20 30 25" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/><path d="M90 25 Q94 20 98 25" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/></svg>',
+  peur:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#c4b5fd" stroke="#7c3aed" stroke-width="3"/><ellipse cx="43" cy="52" rx="11" ry="13" fill="#fff" stroke="#0f4c81" stroke-width="2"/><ellipse cx="77" cy="52" rx="11" ry="13" fill="#fff" stroke="#0f4c81" stroke-width="2"/><ellipse cx="43" cy="54" rx="7" ry="8" fill="#0f172a"/><ellipse cx="77" cy="54" rx="7" ry="8" fill="#0f172a"/><circle cx="46" cy="51" r="2.5" fill="#fff"/><circle cx="80" cy="51" r="2.5" fill="#fff"/><path d="M33 36 Q43 30 53 36" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/><path d="M67 36 Q77 30 87 36" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/><ellipse cx="60" cy="80" rx="14" ry="9" fill="#0f172a"/><ellipse cx="60" cy="78" rx="11" ry="6" fill="#7c3aed" opacity="0.4"/></svg>',
+  surprise:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/><path d="M33 34 Q43 26 53 34" fill="none" stroke="#0f4c81" stroke-width="3.5" stroke-linecap="round"/><path d="M67 34 Q77 26 87 34" fill="none" stroke="#0f4c81" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="43" cy="50" rx="10" ry="11" fill="#fff" stroke="#0f4c81" stroke-width="2"/><ellipse cx="77" cy="50" rx="10" ry="11" fill="#fff" stroke="#0f4c81" stroke-width="2"/><circle cx="43" cy="51" r="6" fill="#0f172a"/><circle cx="77" cy="51" r="6" fill="#0f172a"/><circle cx="45" cy="48" r="2" fill="#fff"/><circle cx="79" cy="48" r="2" fill="#fff"/><ellipse cx="60" cy="80" rx="13" ry="11" fill="#0f172a"/><ellipse cx="60" cy="79" rx="9" ry="7" fill="#fbbf24" opacity="0.35"/></svg>',
+  calme:'<svg viewBox="0 0 120 120" width="110" height="110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#a7f3d0" stroke="#34c77b" stroke-width="3"/><path d="M34 50 Q43 44 52 50" fill="none" stroke="#0f4c81" stroke-width="4" stroke-linecap="round"/><path d="M68 50 Q77 44 86 50" fill="none" stroke="#0f4c81" stroke-width="4" stroke-linecap="round"/><path d="M44 74 Q60 84 76 74" fill="none" stroke="#0f4c81" stroke-width="4" stroke-linecap="round"/><ellipse cx="37" cy="65" rx="7" ry="5" fill="#34c77b" opacity="0.35"/><ellipse cx="83" cy="65" rx="7" ry="5" fill="#34c77b" opacity="0.35"/></svg>'
+};
+
+var EMOTION_KEYS=["joie","tristesse","colere","peur","surprise","calme"];
+
+var QUESTIONS_FR=[
+  {level:0,type:"face",emotion:"joie"},
+  {level:0,type:"face",emotion:"tristesse"},
+  {level:0,type:"face",emotion:"colere"},
+  {level:0,type:"face",emotion:"peur"},
+  {level:0,type:"face",emotion:"surprise"},
+  {level:0,type:"face",emotion:"calme"},
+  {level:1,type:"situation",emotion:"joie",situation:"Tu ouvres ton cadeau d'anniversaire et c'est exactement ce que tu voulais !"},
+  {level:1,type:"situation",emotion:"tristesse",situation:"Ton meilleur ami déménage loin et tu ne le verras plus souvent."},
+  {level:1,type:"situation",emotion:"colere",situation:"Tu joues avec tes cubes et ton petit frère les renverse exprès."},
+  {level:1,type:"situation",emotion:"peur",situation:"La nuit, tu entends un bruit bizarre dans ta chambre."},
+  {level:1,type:"situation",emotion:"surprise",situation:"Tu rentres à la maison et tous tes amis crient SURPRISE pour ton anniversaire !"},
+  {level:1,type:"situation",emotion:"calme",situation:"Tu lis tranquillement ton livre préféré, confortablement installé dans ton lit."},
+  {level:1,type:"situation",emotion:"tristesse",situation:"Tu perds ton jouet préféré et tu ne le retrouves nulle part."},
+  {level:1,type:"situation",emotion:"joie",situation:"Ta maman te dit qu'on part ce week-end au parc d'attractions !"},
+  {level:2,type:"strategy",emotion:"colere",situation:"Tu as essayé plusieurs fois de faire ton puzzle mais ça ne marche pas. Tu te sens de plus en plus énervé.",strategies:[{icon:"🌬️",text:"Souffle doucement 3 fois comme si tu éteignais des bougies."},{icon:"🚶",text:"Fais une petite pause et reviens quand tu te sens mieux."},{icon:"💬",text:"Dis à quelqu'un ce que tu ressens."}]},
+  {level:2,type:"strategy",emotion:"peur",situation:"Tu dois aller chez le médecin et tu as très peur des piqûres.",strategies:[{icon:"🤗",text:"Demande un câlin à maman ou papa, ça aide beaucoup !"},{icon:"🌬️",text:"Respire lentement et profondément."},{icon:"💭",text:"Pense à quelque chose de joyeux pendant la piqûre."}]},
+  {level:2,type:"strategy",emotion:"tristesse",situation:"Tu pensais que ton meilleur ami allait jouer avec toi, mais il a choisi quelqu'un d'autre.",strategies:[{icon:"💬",text:"Parle à quelqu'un de confiance de ce que tu ressens."},{icon:"🎨",text:"Dessine ou colorie ce que tu ressens pour l'exprimer."},{icon:"🤗",text:"Demande un câlin à quelqu'un que tu aimes."}]},
+  {level:2,type:"strategy",emotion:"joie",situation:"Tu viens d'apprendre que tu as eu la meilleure note de la classe en dictée !",strategies:[{icon:"🥳",text:"Célèbre avec ta famille et tes amis, partage ta joie !"},{icon:"💛",text:"Dis merci et sois fier(e) de toi !"},{icon:"🌟",text:"Note ce moment heureux dans ton journal."}]},
+  {level:2,type:"strategy",emotion:"surprise",situation:"On t'annonce que tu vas avoir un petit frère ou une petite soeur !",strategies:[{icon:"💬",text:"Pose des questions pour en savoir plus."},{icon:"🌈",text:"Partage tes sentiments mêlés — c'est tout à fait normal !"},{icon:"🎨",text:"Dessine comment tu imagines votre nouvelle vie ensemble."}]},
+  {level:2,type:"strategy",emotion:"calme",situation:"Tu te sens paisible et détendu après une bonne journée.",strategies:[{icon:"🌬️",text:"Profite de ce moment calme, respire doucement."},{icon:"✨",text:"Pense à ce qui a rendu ta journée belle."},{icon:"💛",text:"C'est le bon moment pour faire quelque chose que tu aimes."}]},
+  {level:2,type:"strategy",emotion:"colere",situation:"Quelqu'un t'a dit quelque chose de blessant à l'école et tu te sens très en colère.",strategies:[{icon:"🛑",text:"Stop ! Compte jusqu'à 5 avant de réagir."},{icon:"💬",text:"Explique calmement à un adulte ce qui s'est passé."},{icon:"🌬️",text:"Souffle fort pour relâcher la tension."}]},
+  {level:2,type:"strategy",emotion:"peur",situation:"Tu dois faire une présentation devant toute la classe et tu es très nerveux.",strategies:[{icon:"🌬️",text:"Respire profondément 3 fois avant de commencer."},{icon:"💪",text:"Rappelle-toi : tu t'es entraîné(e) et tu es prêt(e) !"},{icon:"😊",text:"Souris ! Ça t'aide à te sentir plus confiant(e)."}]}
+];
+
+var QUESTIONS_EN=[
+  {level:0,type:"face",emotion:"joie"},
+  {level:0,type:"face",emotion:"tristesse"},
+  {level:0,type:"face",emotion:"colere"},
+  {level:0,type:"face",emotion:"peur"},
+  {level:0,type:"face",emotion:"surprise"},
+  {level:0,type:"face",emotion:"calme"},
+  {level:1,type:"situation",emotion:"joie",situation:"You open your birthday present and it's exactly what you wanted!"},
+  {level:1,type:"situation",emotion:"tristesse",situation:"Your best friend is moving far away and you won't see them as often."},
+  {level:1,type:"situation",emotion:"colere",situation:"You're playing with your blocks and your little sibling knocks them down on purpose."},
+  {level:1,type:"situation",emotion:"peur",situation:"At night, you hear a strange noise in your room."},
+  {level:1,type:"situation",emotion:"surprise",situation:"You come home and all your friends shout SURPRISE for your birthday!"},
+  {level:1,type:"situation",emotion:"calme",situation:"You're quietly reading your favorite book, comfortable in your bed."},
+  {level:1,type:"situation",emotion:"tristesse",situation:"You lose your favorite toy and can't find it anywhere."},
+  {level:1,type:"situation",emotion:"joie",situation:"Your mom tells you that you're going to an amusement park this weekend!"},
+  {level:2,type:"strategy",emotion:"colere",situation:"You've tried many times to complete your puzzle but it's not working. You feel more and more frustrated.",strategies:[{icon:"🌬️",text:"Blow gently 3 times like you're blowing out candles."},{icon:"🚶",text:"Take a small break and come back when you feel better."},{icon:"💬",text:"Tell someone how you're feeling."}]},
+  {level:2,type:"strategy",emotion:"peur",situation:"You have to go to the doctor and you're very afraid of the shot.",strategies:[{icon:"🤗",text:"Ask for a hug from mom or dad — it helps a lot!"},{icon:"🌬️",text:"Breathe slowly and deeply."},{icon:"💭",text:"Think of something joyful during the shot."}]},
+  {level:2,type:"strategy",emotion:"tristesse",situation:"You thought your best friend was going to play with you, but they chose someone else.",strategies:[{icon:"💬",text:"Talk to someone you trust about how you feel."},{icon:"🎨",text:"Draw or color what you feel to express it."},{icon:"🤗",text:"Ask for a hug from someone you love."}]},
+  {level:2,type:"strategy",emotion:"joie",situation:"You just found out you got the best grade in class on your spelling test!",strategies:[{icon:"🥳",text:"Celebrate with family and friends — share your joy!"},{icon:"💛",text:"Say thank you and be proud of yourself!"},{icon:"🌟",text:"Write this happy moment in your journal."}]},
+  {level:2,type:"strategy",emotion:"surprise",situation:"You find out you're going to have a little brother or sister!",strategies:[{icon:"💬",text:"Ask questions to learn more about it."},{icon:"🌈",text:"Share your mixed feelings — that's totally normal!"},{icon:"🎨",text:"Draw how you imagine your new life together."}]},
+  {level:2,type:"strategy",emotion:"calme",situation:"You feel peaceful and relaxed after a great day.",strategies:[{icon:"🌬️",text:"Enjoy this calm moment, breathe gently."},{icon:"✨",text:"Think about what made your day so nice."},{icon:"💛",text:"This is a great time to do something you enjoy."}]},
+  {level:2,type:"strategy",emotion:"colere",situation:"Someone said something hurtful to you at school and you feel very angry.",strategies:[{icon:"🛑",text:"Stop! Count to 5 before reacting."},{icon:"💬",text:"Calmly explain to an adult what happened."},{icon:"🌬️",text:"Blow hard to release the tension."}]},
+  {level:2,type:"strategy",emotion:"peur",situation:"You have to give a presentation in front of the whole class and you're very nervous.",strategies:[{icon:"🌬️",text:"Take 3 deep breaths before you start."},{icon:"💪",text:"Remember: you practiced and you're ready!"},{icon:"😊",text:"Smile! It helps you feel more confident."}]}
+];
+
+var STORAGE_KEY="pgrg_roue_emotions";
+var lang=navigator.language.startsWith("en")?"en":"fr";
+var muted=false;
+var audioCtx=null;
+var state={currentLevel:0,score:0,highScore:0,levelProgress:[0,0,0]};
+var MAX_LEVELS=3;
+var currentQuestions=[];
+var currentQIdx=0;
+var answered=false;
+var sessionScore=0;
+var sessionTotal=0;
+var gateA=0,gateB=0;
+var currentScreenId="title-screen";
+
+function loadState(){
+  try{
+    var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+    if(s.highScore)state.highScore=s.highScore;
+    if(s.currentLevel!=null)state.currentLevel=Math.min(s.currentLevel,MAX_LEVELS-1);
+    if(s.score)state.score=s.score;
+    if(s.levelProgress)state.levelProgress=s.levelProgress;
+  }catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}
+}
+
+function tl(key){return T[lang][key]}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById("btn-fr").classList.toggle("active",l==="fr");
+  document.getElementById("btn-en").classList.toggle("active",l==="en");
+  renderCurrentScreen();
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active")});
+  document.getElementById(id).classList.add("active");
+  currentScreenId=id;
+  renderCurrentScreen();
+}
+
+function renderCurrentScreen(){
+  if(currentScreenId==="title-screen")renderTitle();
+  else if(currentScreenId==="gate-screen")renderGate();
+  else if(currentScreenId==="game-screen")renderGameUI();
+  else if(currentScreenId==="success-screen")renderSuccess();
+}
+
+function renderTitle(){
+  document.getElementById("game-title").textContent=tl("gameTitle");
+  document.getElementById("game-subtitle").textContent=tl("gameSubtitle");
+  document.getElementById("play-btn").textContent=tl("playBtn");
+  document.getElementById("parents-btn").textContent=tl("parentsBtn");
+  updateScore();
+}
+
+function openGate(){
+  gateA=Math.floor(Math.random()*7)+2;
+  gateB=Math.floor(Math.random()*7)+2;
+  document.getElementById("gate-info").style.display="none";
+  document.getElementById("gate-input").value="";
+  document.getElementById("gate-err").textContent="";
+  showScreen("gate-screen");
+}
+
+function renderGate(){
+  document.getElementById("gate-title").textContent=tl("gateTitle");
+  document.getElementById("gate-intro").textContent=tl("gateIntro");
+  document.getElementById("gate-question").textContent=tl("gateQuestion")(gateA,gateB);
+  document.getElementById("gate-check-btn").textContent=tl("gateCheckBtn");
+  document.getElementById("gate-back-btn").textContent=tl("gateBackBtn");
+  document.getElementById("info-title").textContent=tl("infoTitle");
+  document.getElementById("info-text").textContent=tl("infoText");
+}
+
+function checkGate(){
+  var val=parseInt(document.getElementById("gate-input").value);
+  if(val===gateA*gateB){
+    document.getElementById("gate-info").style.display="block";
+    document.getElementById("gate-err").textContent="";
+  } else {
+    document.getElementById("gate-err").textContent=tl("gateErr");
+    playSound("wrong");
+  }
+}
+
+function getAudioCtx(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type){
+  if(muted)return;
+  try{
+    var ctx=getAudioCtx();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(type==="correct"){
+      osc.frequency.setValueAtTime(523,ctx.currentTime);
+      osc.frequency.setValueAtTime(659,ctx.currentTime+0.1);
+      osc.frequency.setValueAtTime(784,ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.5);
+    } else if(type==="wrong"){
+      osc.frequency.setValueAtTime(300,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+0.15);
+      gain.gain.setValueAtTime(0.12,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.35);
+    } else if(type==="success"){
+      [523,659,784,1047].forEach(function(f,i){
+        var o=ctx.createOscillator();
+        var g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=f;
+        g.gain.setValueAtTime(0.14,ctx.currentTime+i*0.12);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.12+0.3);
+        o.start(ctx.currentTime+i*0.12);
+        o.stop(ctx.currentTime+i*0.12+0.3);
+      });
+    }
+  }catch(e){}
+}
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById("mute-btn").textContent=muted?"🔇":"🔊";
+}
+
+function startGame(){
+  loadState();
+  sessionScore=0;
+  sessionTotal=0;
+  currentQIdx=0;
+  answered=false;
+  buildQuestionSet();
+  showScreen("game-screen");
+  renderQuestion();
+}
+
+function buildQuestionSet(){
+  var lvl=state.currentLevel;
+  var pool=(lang==="en"?QUESTIONS_EN:QUESTIONS_FR).filter(function(q){return q.level===lvl});
+  currentQuestions=pool.slice().sort(function(){return Math.random()-0.5});
+}
+
+function renderQuestion(){
+  if(currentQIdx>=currentQuestions.length){endLevel();return;}
+  answered=false;
+  var q=currentQuestions[currentQIdx];
+  sessionTotal++;
+
+  var pct=Math.round((currentQIdx/currentQuestions.length)*100);
+  document.getElementById("progress-bar").style.width=pct+"%";
+
+  document.getElementById("level-label").textContent=tl("levelNames")[state.currentLevel];
+
+  var faceWrap=document.getElementById("face-svg-wrap");
+  faceWrap.innerHTML=FACES[q.emotion];
+  faceWrap.style.animation="none";
+  void faceWrap.offsetWidth;
+  faceWrap.style.animation="pop 0.35s ease";
+
+  var sitEl=document.getElementById("situation-text");
+  sitEl.textContent=(q.type==="face")?"":q.situation;
+
+  var promptKeys=["question0","question1","question2"];
+  document.getElementById("question-prompt").textContent=tl(promptKeys[q.level]);
+
+  var grid=document.getElementById("options-grid");
+  grid.innerHTML="";
+  var opts=EMOTION_KEYS.slice().sort(function(){return Math.random()-0.5});
+  opts.forEach(function(ek){
+    var em=T[lang].emotions[ek];
+    var btn=document.createElement("button");
+    btn.className="option-btn";
+    btn.setAttribute("aria-label",em.name);
+    btn.innerHTML='<span class="option-emoji">'+em.emoji+'</span><span>'+em.name+'</span>';
+    btn.onclick=function(){checkAnswer(ek,q,btn)};
+    grid.appendChild(btn);
+  });
+
+  document.getElementById("feedback-box").style.display="none";
+  document.getElementById("next-btn").style.display="none";
+  document.getElementById("strategy-wrap").style.display="none";
+  document.getElementById("strategy-wrap").innerHTML="";
+
+  renderGameUI();
+}
+
+function renderGameUI(){
+  document.getElementById("next-btn").textContent=tl("nextBtn");
+}
+
+function checkAnswer(chosen,q,btn){
+  if(answered)return;
+  answered=true;
+
+  var correct=chosen===q.emotion;
+  var em=T[lang].emotions[q.emotion];
+
+  document.querySelectorAll(".option-btn").forEach(function(b){
+    var lbl=b.getAttribute("aria-label");
+    var isCorrect=false;
+    EMOTION_KEYS.forEach(function(k){if(T[lang].emotions[k].name===lbl&&k===q.emotion)isCorrect=true});
+    if(isCorrect){
+      b.classList.add("correct");
+    } else if(b===btn&&!correct){
+      b.classList.add("wrong");
+      b.style.animation="shake 0.4s ease";
+    }
+    b.disabled=true;
+  });
+
+  if(correct){
+    sessionScore++;
+    state.score++;
+    playSound("correct");
+    announce(tl("feedbackCorrect")[Math.floor(Math.random()*tl("feedbackCorrect").length)]);
+  } else {
+    playSound("wrong");
+  }
+
+  updateScore();
+
+  var fb=document.getElementById("feedback-box");
+  fb.style.display="block";
+  document.getElementById("feedback-icon").textContent=correct?"🌟":"💛";
+  var msgs=correct?tl("feedbackCorrect"):tl("feedbackWrong");
+  var extra=correct?"":" "+em.emoji+" "+em.name+".";
+  document.getElementById("feedback-msg").textContent=msgs[Math.floor(Math.random()*msgs.length)]+extra;
+  document.getElementById("feedback-tip").textContent=tl("allEmotionsOk");
+
+  if(q.type==="strategy"&&q.strategies){
+    var sw=document.getElementById("strategy-wrap");
+    sw.style.display="block";
+    var h3=document.createElement("h3");
+    h3.style.cssText="color:var(--blue);margin-bottom:8px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif";
+    h3.textContent=tl("strategyTitle");
+    sw.appendChild(h3);
+    q.strategies.forEach(function(s){
+      var card=document.createElement("div");
+      card.className="strategy-card";
+      card.innerHTML='<span class="strategy-icon">'+s.icon+'</span><p class="strategy-text">'+s.text+'</p>';
+      sw.appendChild(card);
+    });
+  }
+
+  document.getElementById("next-btn").style.display="inline-block";
+  saveState();
+}
+
+function nextQuestion(){
+  currentQIdx++;
+  renderQuestion();
+}
+
+function endLevel(){
+  document.getElementById("progress-bar").style.width="100%";
+  playSound("success");
+  state.levelProgress[state.currentLevel]=Math.max(state.levelProgress[state.currentLevel]||0,sessionScore);
+  var totalAll=state.levelProgress.reduce(function(a,b){return a+(b||0)},0);
+  if(totalAll>state.highScore)state.highScore=totalAll;
+  saveState();
+  showScreen("success-screen");
+}
+
+function renderSuccess(){
+  document.getElementById("success-title").textContent=tl("successTitle");
+  var total=currentQuestions.length;
+  var stars=sessionScore>=total?"⭐⭐⭐":sessionScore>=Math.ceil(total*0.6)?"⭐⭐":"⭐";
+  document.getElementById("stars-wrap").textContent=stars;
+  document.getElementById("success-msg").textContent=tl("successMsg")(sessionScore,total);
+  var hasNext=state.currentLevel<MAX_LEVELS-1;
+  document.getElementById("success-level-info").textContent=hasNext?tl("levelUp"):tl("levelDone");
+  document.getElementById("btn-replay").textContent=tl("replayBtn");
+  document.getElementById("btn-home").textContent=tl("homeBtn");
+  var nb=document.getElementById("btn-next-level");
+  nb.textContent=tl("nextLevelBtn");
+  nb.style.display=hasNext?"inline-block":"none";
+}
+
+function replayLevel(){
+  sessionScore=0;sessionTotal=0;currentQIdx=0;answered=false;
+  buildQuestionSet();
+  showScreen("game-screen");
+  renderQuestion();
+}
+
+function nextLevel(){
+  if(state.currentLevel<MAX_LEVELS-1){state.currentLevel++;saveState();}
+  sessionScore=0;sessionTotal=0;currentQIdx=0;answered=false;
+  buildQuestionSet();
+  showScreen("game-screen");
+  renderQuestion();
+}
+
+function updateScore(){
+  document.getElementById("score-display").textContent=tl("scoreLabel")(state.score);
+}
+
+function announce(msg){
+  var el=document.getElementById("aria-announce");
+  el.textContent="";
+  setTimeout(function(){el.textContent=msg},50);
+}
+
+loadState();
+updateScore();
+renderTitle();
+</script>
+</body>
+</html>

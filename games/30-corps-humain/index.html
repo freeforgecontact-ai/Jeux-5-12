@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Explorateur du Corps Humain / Body Explorer — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,#eaf6ff 0%,#dbeafe 60%,#e0f2fe 100%);
+  min-height:100vh;color:var(--navy);
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px #0003;}
+#topbar img{height:34px;}
+#topbar .brand{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;color:#fff;margin-right:auto;}
+.lang-btn{background:transparent;border:2px solid #fff;color:#fff;border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;cursor:pointer;min-width:40px;min-height:36px;transition:background .2s;}
+.lang-btn.active,.lang-btn:hover{background:var(--orange);border-color:var(--orange);}
+#muteBtn{background:transparent;border:none;font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:8px;min-width:44px;min-height:44px;}
+#muteBtn:hover{background:#ffffff22;}
+.screen{display:none;padding:20px 16px 40px;}
+.screen.active{display:block;}
+#titleScreen{text-align:center;}
+#titleScreen h1{font-size:clamp(1.8rem,6vw,2.6rem);color:var(--blue);margin-bottom:4px;}
+#titleScreen .sub{font-size:1.1rem;color:var(--slate);margin-bottom:20px;}
+#mascot-area{margin:10px auto 20px;max-width:220px;}
+.btn-play{display:inline-block;background:var(--orange);color:#fff;font-family:'Fredoka',system-ui,sans-serif;font-size:1.5rem;font-weight:700;padding:14px 40px;border:none;border-radius:50px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;margin:8px;}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{display:inline-block;background:var(--blue);color:#fff;font-family:'Fredoka',system-ui,sans-serif;font-size:1rem;font-weight:700;padding:10px 24px;border:none;border-radius:50px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s;min-height:48px;margin:8px;}
+.btn-secondary:hover{transform:translateY(-1px);}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--blue-dark);}
+#levelScreen{text-align:center;}
+#levelScreen h2{font-size:1.8rem;color:var(--blue);margin-bottom:8px;}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:16px;}
+.level-card{background:#fff;border-radius:20px;padding:20px;width:180px;cursor:pointer;border:3px solid var(--sky);box-shadow:0 4px 12px #0001;transition:transform .15s,box-shadow .15s;text-align:center;}
+.level-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px #0002;}
+.level-card .icon{font-size:2.5rem;margin-bottom:8px;}
+.level-card h3{font-size:1rem;color:var(--blue);}
+.level-card p{font-size:.8rem;color:var(--slate);margin-top:4px;}
+.level-card.locked{opacity:.55;cursor:not-allowed;}
+.level-card .badge{display:inline-block;background:var(--success);color:#fff;border-radius:50px;font-size:.7rem;padding:2px 8px;margin-top:6px;}
+#gameScreen{max-width:900px;margin:0 auto;}
+#gameHeader{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+#gameHeader h2{font-size:1.3rem;color:var(--blue);flex:1;}
+#scoreDisplay{background:var(--blue);color:var(--gold);font-weight:700;border-radius:50px;padding:6px 16px;font-size:.95rem;}
+#progressBar{width:100%;height:10px;background:#d1e8ff;border-radius:50px;margin-bottom:14px;}
+#progressFill{height:100%;background:var(--success);border-radius:50px;transition:width .5s;}
+#organGame{display:none;}
+#bodyArea{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:center;}
+#bodySvgWrap{position:relative;flex-shrink:0;width:min(280px,80vw);}
+#bodySvgWrap svg{width:100%;height:auto;display:block;}
+.drop-zone{position:absolute;border-radius:50%;border:3px dashed var(--blue);background:#7ec3ee33;cursor:default;transition:background .2s,border-color .2s;}
+.drop-zone.hover{background:#f9731644;border-color:var(--orange);}
+.drop-zone.correct{background:#34c77b44;border-color:var(--success);border-style:solid;}
+.drop-zone.wrong{background:#f9731644;border-color:#ef4444;border-style:solid;animation:shake .3s;}
+#organBank{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;padding:12px;background:#fff;border-radius:16px;border:2px solid var(--sky);max-width:260px;}
+.organ-chip{display:flex;align-items:center;gap:6px;background:var(--sky-light);border:2px solid var(--sky);border-radius:12px;padding:8px 12px;cursor:grab;font-weight:700;font-size:.9rem;user-select:none;touch-action:none;min-height:48px;transition:transform .15s,box-shadow .15s;}
+.organ-chip:hover{transform:scale(1.05);box-shadow:0 4px 12px #0002;}
+.organ-chip.dragging{opacity:.5;cursor:grabbing;}
+.organ-chip.placed{opacity:.4;pointer-events:none;}
+#quizGame{display:none;}
+.quiz-card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 16px #0001;margin-bottom:16px;text-align:center;}
+.quiz-card .organ-emoji{font-size:3.5rem;margin-bottom:8px;}
+.quiz-card .question{font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.quiz-opt{background:var(--sky-light);border:2px solid var(--sky);border-radius:14px;padding:12px 8px;font-size:.95rem;font-weight:600;cursor:pointer;min-height:56px;transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;text-align:center;}
+.quiz-opt:hover{background:#dbeafe;transform:scale(1.02);}
+.quiz-opt.correct{background:#d1fae5;border-color:var(--success);}
+.quiz-opt.wrong{background:#fee2e2;border-color:#ef4444;}
+#systemGame{display:none;}
+.system-card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 16px #0001;margin-bottom:14px;}
+.system-card h3{font-size:1.1rem;color:var(--blue);margin-bottom:10px;}
+.organ-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.organ-tag{background:var(--sky-light);border:2px solid var(--sky);border-radius:50px;padding:6px 14px;font-size:.9rem;font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center;transition:background .15s;}
+.system-targets{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.sys-drop{border:3px dashed;border-radius:16px;padding:10px 14px;min-width:130px;min-height:60px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .2s;text-align:center;}
+#feedbackToast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;border-radius:16px;padding:14px 24px;font-size:1rem;font-weight:700;text-align:center;max-width:360px;transition:transform .35s cubic-bezier(.23,1,.32,1),opacity .35s;opacity:0;z-index:200;pointer-events:none;box-shadow:0 8px 32px #0004;}
+#feedbackToast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#feedbackToast.success{background:var(--success);}
+#feedbackToast.error{background:#ef4444;}
+#infoPanel{background:linear-gradient(135deg,#fff 0%,#eaf6ff 100%);border:2px solid var(--sky);border-radius:16px;padding:16px;margin-bottom:14px;display:none;animation:fadeIn .4s;}
+#infoPanel .info-emoji{font-size:2rem;margin-bottom:4px;}
+#infoPanel .info-title{font-weight:700;color:var(--blue);margin-bottom:4px;}
+#infoPanel p{font-size:.9rem;color:var(--slate);}
+#successScreen{text-align:center;padding:30px 16px;}
+#successScreen h2{font-size:2rem;color:var(--blue);margin-bottom:8px;}
+.stars{font-size:2.5rem;margin:12px 0;}
+.success-msg{font-size:1.1rem;color:var(--slate);margin-bottom:24px;}
+#successScreen .btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+#parentGate{position:fixed;inset:0;background:#0009;z-index:300;display:none;align-items:center;justify-content:center;}
+#parentGate.open{display:flex;}
+#parentBox{background:#fff;border-radius:24px;padding:28px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px #0005;}
+#parentBox h3{font-size:1.3rem;color:var(--blue);margin-bottom:8px;}
+#parentBox p{font-size:.9rem;color:var(--slate);margin-bottom:14px;}
+#parentBox .math-q{font-size:1.8rem;font-weight:700;color:var(--navy);margin:10px 0;}
+#parentBox input{border:2px solid var(--sky);border-radius:10px;padding:8px 14px;font-size:1.1rem;width:80px;text-align:center;}
+#parentBox .err{color:#ef4444;font-size:.85rem;margin-top:6px;min-height:20px;}
+#parentInfo{display:none;margin-top:14px;text-align:left;background:var(--sky-light);border-radius:12px;padding:14px;font-size:.88rem;color:var(--slate);}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px)};}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pop{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
+.pop{animation:pop .35s ease;}
+@media(max-width:540px){.quiz-options{grid-template-columns:1fr;}#bodyArea{flex-direction:column;align-items:center;}#organBank{max-width:90vw;}}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Muet / Mute">&#x1F50A;</button>
+</div>
+<div id="titleScreen" class="screen active" role="main">
+  <div id="mascot-area" aria-hidden="true"></div>
+  <h1 id="t-title"></h1>
+  <p class="sub" id="t-sub"></p>
+  <br>
+  <button class="btn-play" onclick="showLevels()" id="t-play"></button>
+  <br><br>
+  <button class="btn-secondary" onclick="openParents()" id="t-parents"></button>
+</div>
+<div id="levelScreen" class="screen" role="main">
+  <h2 id="ls-title"></h2>
+  <p id="ls-sub" style="color:var(--slate);margin-bottom:4px;"></p>
+  <div class="level-cards" id="levelCards"></div>
+  <br>
+  <button class="btn-secondary" onclick="showScreen('titleScreen')" id="ls-back"></button>
+</div>
+<div id="gameScreen" class="screen" role="main">
+  <div id="gameHeader">
+    <h2 id="gh-title"></h2>
+    <span id="scoreDisplay">&#x2B50; <span id="scoreVal">0</span></span>
+  </div>
+  <div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="progressFill" style="width:0%"></div>
+  </div>
+  <div id="infoPanel" aria-live="polite">
+    <div class="info-emoji" id="info-emoji"></div>
+    <div class="info-title" id="info-title"></div>
+    <p id="info-body"></p>
+  </div>
+  <div id="organGame">
+    <p id="og-instruction" style="margin-bottom:12px;font-weight:600;color:var(--slate);"></p>
+    <div id="bodyArea">
+      <div id="bodySvgWrap"></div>
+      <div id="organBank" aria-label="Organes a placer"></div>
+    </div>
+  </div>
+  <div id="quizGame">
+    <div class="quiz-card" id="quizCard">
+      <div class="organ-emoji" id="quiz-emoji"></div>
+      <div class="question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options" role="list"></div>
+    </div>
+    <p id="quiz-progress" style="text-align:center;color:var(--slate);font-size:.85rem;"></p>
+  </div>
+  <div id="systemGame">
+    <p id="sg-instruction" style="margin-bottom:12px;font-weight:600;color:var(--slate);"></p>
+    <div class="system-card">
+      <h3 id="sg-drag-title"></h3>
+      <div class="organ-tags" id="systemOrganPool"></div>
+    </div>
+    <div class="system-card">
+      <h3 id="sg-drop-title"></h3>
+      <div class="system-targets" id="systemTargets"></div>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="btn-play" id="sg-check" style="font-size:1rem;padding:10px 28px;" onclick="checkSystems()"></button>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:20px;">
+    <button class="btn-secondary" onclick="showLevels()" id="g-home"></button>
+  </div>
+</div>
+<div id="successScreen" class="screen" role="main" aria-live="assertive">
+  <h2 id="ss-title"></h2>
+  <div class="stars" id="ss-stars"></div>
+  <p class="success-msg" id="ss-msg"></p>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="replayLevel()" id="ss-replay"></button>
+    <button class="btn-play" onclick="nextLevel()" id="ss-next"></button>
+    <button class="btn-secondary" onclick="showLevels()" id="ss-home"></button>
+  </div>
+</div>
+<div id="feedbackToast" role="alert" aria-live="assertive"></div>
+<div id="parentGate" role="dialog" aria-modal="true" aria-labelledby="pg-title">
+  <div id="parentBox">
+    <h3 id="pg-title"></h3>
+    <p id="pg-desc"></p>
+    <div class="math-q" id="pg-math"></div>
+    <input type="number" id="pg-input" aria-label="Reponse" onkeydown="if(event.key==='Enter')checkParent()">
+    <div class="err" id="pg-err"></div>
+    <br>
+    <button class="btn-play" style="font-size:1rem;padding:10px 24px;" onclick="checkParent()" id="pg-btn"></button>
+    <button class="btn-secondary" style="margin-top:8px;" onclick="closeParents()" id="pg-close"></button>
+    <div id="parentInfo">
+      <strong id="pi-title"></strong>
+      <p id="pi-body"></p>
+    </div>
+  </div>
+</div>
+<script>
+var T={
+  fr:{
+    title:"Explorateur du Corps Humain",
+    sub:"Decouvre les organes, leurs fonctions et les grands systemes du corps !",
+    play:"Jouer !",
+    parents:"Pour les parents",
+    ls_title:"Choisis ton niveau",
+    ls_sub:"Plus tu joues, plus tu apprends !",
+    ls_back:"Accueil",
+    g_home:"Accueil",
+    levels:[
+      {name:"Placer les organes",desc:"Glisse chaque organe au bon endroit !",icon:"&#x1FAC0;"},
+      {name:"A quoi ca sert ?",desc:"Connais-tu les fonctions des organes ?",icon:"&#x1F9E0;"},
+      {name:"Les systemes du corps",desc:"Classe les organes dans leur systeme !",icon:"&#x1FAC1;"}
+    ],
+    og_instruction:"Glisse chaque organe sur son emplacement dans le corps !",
+    quiz_progress:"Question {n} sur {total}",
+    sg_drag_title:"Les organes",
+    sg_drop_title:"Les systemes",
+    sg_check:"Verifier",
+    sg_instruction:"Clique un organe, puis clique son systeme !",
+    ss_title:"Bravo !",
+    ss_replay:"Rejouer",
+    ss_next:"Niveau suivant",
+    ss_home:"Accueil",
+    ss_msgs:["Super travail ! Tu es un vrai explorateur !","Fantastique ! Tu connais tres bien le corps humain !","Incroyable ! Tes connaissances sont epoustouflantes !"],
+    pg_title:"Espace Parents",
+    pg_desc:"Resous ce calcul pour acceder a l'espace parents.",
+    pg_btn:"Valider",
+    pg_close:"Fermer",
+    pg_err:"Ce n'est pas la bonne reponse. Essaie encore !",
+    pi_title:"Informations pour les parents",
+    pi_body:"Ce jeu aide les enfants (7-12 ans) a decouvrir les organes et les systemes du corps humain de facon ludique et non effrayante. Aucune donnee n'est collectee. Aucune publicite. La progression est sauvegardee localement sur cet appareil uniquement. Competence visee : anatomie de base.",
+    locked:"Termine le niveau precedent",
+    sg_check_ok:"Tout est correct ! Parfait !",
+    sg_check_err:"Quelques erreurs... Reessaie !",
+    sg_place_all:"Place tous les organes d'abord !",
+    organs:{
+      coeur:{name:"Coeur",emoji:"&#x1FAC0;",info:"Le coeur est une pompe musculaire ! Il bat environ 70 fois par minute pour envoyer le sang dans tout ton corps. Il bat plus de 100 000 fois par jour !"},
+      poumons:{name:"Poumons",emoji:"&#x1FAC1;",info:"Tes poumons prennent l'oxygene de l'air que tu respires et rejettent le dioxyde de carbone. Tu possedes 2 poumons, le gauche est un peu plus petit que le droit !"},
+      estomac:{name:"Estomac",emoji:"&#x1F7E1;",info:"L'estomac est comme un sac qui broie et digere les aliments que tu manges. Ton estomac peut contenir jusqu'a 1,5 litre de nourriture !"},
+      cerveau:{name:"Cerveau",emoji:"&#x1F9E0;",info:"Le cerveau controle tout ton corps : tes mouvements, tes pensees, tes emotions et tes sens. Il represente seulement 2% de ton poids mais consomme 20% de ton energie !"},
+      intestins:{name:"Intestins",emoji:"&#x1F300;",info:"Les intestins absorbent les nutriments des aliments digeres pour nourrir tout ton corps. Mis bout a bout, tes intestins mesureraient environ 8 metres !"}
+    },
+    quizzes:[
+      {organ:"coeur",q:"A quoi sert le coeur ?",opts:["Digerer les aliments","Pomper le sang","Respirer","Reflechir"],ans:1},
+      {organ:"poumons",q:"Que font tes poumons ?",opts:["Ils digerent la nourriture","Ils filtrent le sang","Ils echangent l'oxygene et le CO2","Ils controlent les muscles"],ans:2},
+      {organ:"estomac",q:"Quel est le role de l'estomac ?",opts:["Pomper le sang","Digerer les aliments","Penser et memoriser","Respirer"],ans:1},
+      {organ:"cerveau",q:"Pourquoi le cerveau est-il si important ?",opts:["Il pompe le sang","Il stocke les aliments","Il controle tout le corps","Il filtre l'air"],ans:2},
+      {organ:"intestins",q:"Que font les intestins ?",opts:["Ils pompent le sang","Ils absorbent les nutriments","Ils produisent le son","Ils controlent les muscles"],ans:1},
+      {organ:"coeur",q:"Combien de fois le coeur bat-il environ par minute ?",opts:["10 fois","70 fois","200 fois","500 fois"],ans:1},
+      {organ:"poumons",q:"Quel gaz prennent tes poumons dans l'air ?",opts:["Dioxyde de carbone","Azote","Oxygene","Hydrogene"],ans:2}
+    ],
+    systems:{
+      digestion:{label:"Digestion",emoji:"&#x1F34E;",color:"#854d0e",bg:"#fef9c3",organs:["estomac","intestins"]},
+      respiration:{label:"Respiration",emoji:"&#x1F4A8;",color:"#0f4c81",bg:"#dbeafe",organs:["poumons"]},
+      circulation:{label:"Circulation",emoji:"&#x2764;",color:"#9d174d",bg:"#fce7f3",organs:["coeur"]},
+      nerveux:{label:"Systeme nerveux",emoji:"&#x1F9E0;",color:"#5b21b6",bg:"#ede9fe",organs:["cerveau"]}
+    }
+  },
+  en:{
+    title:"Human Body Explorer",
+    sub:"Discover organs, their functions, and the body's main systems!",
+    play:"Play!",
+    parents:"For Parents",
+    ls_title:"Choose your level",
+    ls_sub:"The more you play, the more you learn!",
+    ls_back:"Home",
+    g_home:"Home",
+    levels:[
+      {name:"Place the Organs",desc:"Drag each organ to the right spot!",icon:"&#x1FAC0;"},
+      {name:"What does it do?",desc:"Do you know what each organ does?",icon:"&#x1F9E0;"},
+      {name:"Body Systems",desc:"Sort organs into their systems!",icon:"&#x1FAC1;"}
+    ],
+    og_instruction:"Drag each organ to its place in the body!",
+    quiz_progress:"Question {n} of {total}",
+    sg_drag_title:"Organs",
+    sg_drop_title:"Systems",
+    sg_check:"Check",
+    sg_instruction:"Click an organ, then click its system!",
+    ss_title:"Well done!",
+    ss_replay:"Play again",
+    ss_next:"Next level",
+    ss_home:"Home",
+    ss_msgs:["Great job! You are a real explorer!","Fantastic! You know the human body really well!","Amazing! Your knowledge is impressive!"],
+    pg_title:"Parents Corner",
+    pg_desc:"Solve this sum to access the parents area.",
+    pg_btn:"Confirm",
+    pg_close:"Close",
+    pg_err:"That's not right. Try again!",
+    pi_title:"Information for parents",
+    pi_body:"This game helps children (ages 7-12) discover organs and body systems in a fun, non-scary way. No data is collected. No advertising. Progress is saved locally on this device only. Learning goal: basic anatomy.",
+    locked:"Complete the previous level",
+    sg_check_ok:"All correct! Perfect!",
+    sg_check_err:"A few mistakes... try again!",
+    sg_place_all:"Place all organs first!",
+    organs:{
+      coeur:{name:"Heart",emoji:"&#x1FAC0;",info:"The heart is a muscular pump! It beats about 70 times a minute to send blood all around your body. It beats more than 100,000 times a day!"},
+      poumons:{name:"Lungs",emoji:"&#x1FAC1;",info:"Your lungs take oxygen from the air you breathe in and release carbon dioxide when you breathe out. You have 2 lungs, the left one is a little smaller than the right!"},
+      estomac:{name:"Stomach",emoji:"&#x1F7E1;",info:"The stomach is like a bag that churns and digests the food you eat. Your stomach can hold up to 1.5 litres of food!"},
+      cerveau:{name:"Brain",emoji:"&#x1F9E0;",info:"The brain controls your whole body: movements, thoughts, feelings and senses. Your brain is only 2% of your weight but uses 20% of your energy!"},
+      intestins:{name:"Intestines",emoji:"&#x1F300;",info:"The intestines absorb nutrients from digested food to nourish your whole body. Stretched out, your intestines would measure about 8 metres!"}
+    },
+    quizzes:[
+      {organ:"coeur",q:"What does the heart do?",opts:["Digest food","Pump blood","Breathe","Think"],ans:1},
+      {organ:"poumons",q:"What do your lungs do?",opts:["Digest food","Filter blood","Exchange oxygen and CO2","Control muscles"],ans:2},
+      {organ:"estomac",q:"What is the stomach for?",opts:["Pump blood","Digest food","Think and remember","Breathe"],ans:1},
+      {organ:"cerveau",q:"Why is the brain so important?",opts:["It pumps blood","It stores food","It controls the whole body","It filters air"],ans:2},
+      {organ:"intestins",q:"What do the intestines do?",opts:["Pump blood","Absorb nutrients","Make sound","Control muscles"],ans:1},
+      {organ:"coeur",q:"About how many times does the heart beat per minute?",opts:["10 times","70 times","200 times","500 times"],ans:1},
+      {organ:"poumons",q:"What gas do your lungs take from the air?",opts:["Carbon dioxide","Nitrogen","Oxygen","Hydrogen"],ans:2}
+    ],
+    systems:{
+      digestion:{label:"Digestion",emoji:"&#x1F34E;",color:"#854d0e",bg:"#fef9c3",organs:["estomac","intestins"]},
+      respiration:{label:"Respiration",emoji:"&#x1F4A8;",color:"#0f4c81",bg:"#dbeafe",organs:["poumons"]},
+      circulation:{label:"Circulation",emoji:"&#x2764;",color:"#9d174d",bg:"#fce7f3",organs:["coeur"]},
+      nerveux:{label:"Nervous System",emoji:"&#x1F9E0;",color:"#5b21b6",bg:"#ede9fe",organs:["cerveau"]}
+    }
+  }
+};
+
+var STORAGE_KEY='pgrg_corps_humain';
+var lang=navigator.language.startsWith('en')?'en':'fr';
+var muted=false;
+var state={score:0,levelsUnlocked:1,levelsCompleted:[]};
+var currentLevel=0;
+var dragOrgan=null,dragGhost=null;
+var quizIdx=0,quizList=[],quizScore=0;
+var selectedOrganTag=null,systemAssignments={};
+var organPlaced={};
+var currentScreen='titleScreen';
+var toastTimeout=null;
+var audioCtx=null;
+var parentMath={a:0,b:0};
+
+function loadState(){try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s)state=Object.assign(state,s);}catch(e){}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.15;
+  try{var a=getAudio(),o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);o.type=type;o.frequency.setValueAtTime(freq,a.currentTime);
+    g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+    o.start();o.stop(a.currentTime+dur);}catch(e){}}
+function playSuccess(){playTone(523,.12);setTimeout(function(){playTone(659,.12);},130);setTimeout(function(){playTone(784,.22);},260);}
+function playError(){playTone(220,.2,'sawtooth',0.1);}
+function playClick(){playTone(440,.07,'sine',0.08);}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').innerHTML=muted?'&#x1F507;':'&#x1F50A;';}
+
+function tr(k){return T[lang][k]!==undefined?T[lang][k]:(T['fr'][k]!==undefined?T['fr'][k]:k);}
+
+function setLang(l){
+  lang=l;document.documentElement.lang=l;
+  document.getElementById('btnFR').className='lang-btn'+(l==='fr'?' active':'');
+  document.getElementById('btnEN').className='lang-btn'+(l==='en'?' active':'');
+  renderCurrentScreen();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  currentScreen=id;renderCurrentScreen();
+}
+function renderCurrentScreen(){
+  if(currentScreen==='titleScreen')renderTitle();
+  else if(currentScreen==='levelScreen')renderLevelScreen();
+  else if(currentScreen==='gameScreen')renderGameScreen();
+  else if(currentScreen==='successScreen')renderSuccessScreen();
+}
+
+function renderTitle(){
+  document.getElementById('t-title').textContent=tr('title');
+  document.getElementById('t-sub').textContent=tr('sub');
+  document.getElementById('t-play').textContent=tr('play');
+  document.getElementById('t-parents').textContent=tr('parents');
+  document.getElementById('mascot-area').innerHTML='<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="max-width:180px;"><ellipse cx="100" cy="160" rx="46" ry="52" fill="#7ec3ee" stroke="#0f4c81" stroke-width="3"/><circle cx="100" cy="80" r="50" fill="#ffe0b2" stroke="#f97316" stroke-width="3"/><circle cx="84" cy="72" r="8" fill="#fff" stroke="#0f4c81" stroke-width="2"/><circle cx="116" cy="72" r="8" fill="#fff" stroke="#0f4c81" stroke-width="2"/><circle cx="86" cy="73" r="4" fill="#0f4c81"/><circle cx="118" cy="73" r="4" fill="#0f4c81"/><circle cx="88" cy="71" r="1.5" fill="#fff"/><circle cx="120" cy="71" r="1.5" fill="#fff"/><path d="M85,93 Q100,108 115,93" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><ellipse cx="75" cy="88" rx="10" ry="6" fill="#ffb3ba" opacity=".6"/><ellipse cx="125" cy="88" rx="10" ry="6" fill="#ffb3ba" opacity=".6"/><rect x="92" y="140" width="16" height="5" rx="2.5" fill="#fff"/><rect x="96" y="136" width="8" height="13" rx="2.5" fill="#fff"/><path d="M78,130 Q68,145 78,155" fill="none" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/><circle cx="78" cy="157" r="5" fill="#f97316" stroke="#0f4c81" stroke-width="2"/><path d="M55,68 Q70,35 100,32 Q130,35 145,68" fill="#f97316" stroke="none"/></svg>';
+}
+
+function showLevels(){showScreen('levelScreen');}
+function renderLevelScreen(){
+  document.getElementById('ls-title').textContent=tr('ls_title');
+  document.getElementById('ls-sub').textContent=tr('ls_sub');
+  document.getElementById('ls-back').textContent=tr('ls_back');
+  var levels=tr('levels');
+  var c=document.getElementById('levelCards');c.innerHTML='';
+  levels.forEach(function(lv,i){
+    var unlocked=i<state.levelsUnlocked;
+    var completed=state.levelsCompleted.indexOf(i)>=0;
+    var d=document.createElement('div');
+    d.className='level-card'+(unlocked?'':' locked');
+    d.setAttribute('role','button');d.setAttribute('tabindex',unlocked?'0':'-1');
+    d.setAttribute('aria-label',unlocked?lv.name:tr('locked'));
+    d.innerHTML='<div class="icon">'+lv.icon+'</div><h3>'+lv.name+'</h3><p>'+(unlocked?lv.desc:tr('locked'))+'</p>'+(completed?'<div class="badge">&#x2713; OK</div>':'');
+    if(unlocked){d.onclick=function(){startLevel(i);};d.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')startLevel(i);};}
+    c.appendChild(d);
+  });
+}
+
+function renderGameScreen(){
+  var levels=tr('levels');
+  document.getElementById('gh-title').textContent=levels[currentLevel]?levels[currentLevel].name:'';
+  document.getElementById('scoreVal').textContent=state.score;
+  document.getElementById('g-home').textContent=tr('g_home');
+  updateProgress(0);hideInfo();
+}
+function updateProgress(pct){
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressBar').setAttribute('aria-valuenow',pct);
+}
+
+function startLevel(idx){
+  currentLevel=idx;playClick();showScreen('gameScreen');
+  document.getElementById('organGame').style.display='none';
+  document.getElementById('quizGame').style.display='none';
+  document.getElementById('systemGame').style.display='none';
+  if(idx===0)initOrganGame();
+  else if(idx===1)initQuizGame();
+  else if(idx===2)initSystemGame();
+}
+
+/* ---- LEVEL 1: DRAG DROP ---- */
+function initOrganGame(){
+  organPlaced={coeur:false,poumons:false,estomac:false,cerveau:false,intestins:false};
+  document.getElementById('organGame').style.display='block';
+  document.getElementById('og-instruction').textContent=tr('og_instruction');
+  renderBodySVG();renderOrganBank();updateProgress(0);
+}
+function renderBodySVG(){
+  var wrap=document.getElementById('bodySvgWrap');
+  wrap.innerHTML='<svg viewBox="0 0 200 340" xmlns="http://www.w3.org/2000/svg" id="bodySvg" style="width:100%;height:auto;"><ellipse cx="100" cy="38" rx="34" ry="36" fill="#ffe0b2" stroke="#f97316" stroke-width="2.5"/><rect x="88" y="68" width="24" height="18" rx="6" fill="#ffe0b2" stroke="#f97316" stroke-width="2"/><path d="M52,82 Q40,90 38,160 L162,160 Q160,90 148,82 Q130,76 100,76 Q70,76 52,82Z" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2.5"/><ellipse cx="100" cy="163" rx="55" ry="22" fill="#5fb4e8" stroke="#0f4c81" stroke-width="2"/><path d="M65,178 Q58,230 62,300 L80,300 Q84,250 82,178Z" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/><path d="M135,178 Q142,230 138,300 L120,300 Q116,250 118,178Z" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/><path d="M50,84 Q28,110 26,170 L40,172 Q46,120 60,96Z" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/><path d="M150,84 Q172,110 174,170 L160,172 Q154,120 140,96Z" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/><circle cx="88" cy="34" r="5" fill="#fff" stroke="#0f4c81" stroke-width="1.5"/><circle cx="112" cy="34" r="5" fill="#fff" stroke="#0f4c81" stroke-width="1.5"/><circle cx="89.5" cy="34.5" r="2.5" fill="#0f4c81"/><circle cx="113.5" cy="34.5" r="2.5" fill="#0f4c81"/><path d="M88,48 Q100,58 112,48" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><ellipse cx="71" cy="302" rx="14" ry="7" fill="#ffe0b2" stroke="#f97316" stroke-width="2"/><ellipse cx="129" cy="302" rx="14" ry="7" fill="#ffe0b2" stroke="#f97316" stroke-width="2"/><ellipse cx="24" cy="174" rx="9" ry="7" fill="#ffe0b2" stroke="#f97316" stroke-width="2"/><ellipse cx="176" cy="174" rx="9" ry="7" fill="#ffe0b2" stroke="#f97316" stroke-width="2"/></svg>';
+  var DROP_CONFIG={
+    cerveau:{left:'34%',top:'2%',width:'32%',height:'20%'},
+    coeur:{left:'40%',top:'39%',width:'22%',height:'15%'},
+    poumons:{left:'22%',top:'31%',width:'56%',height:'18%'},
+    estomac:{left:'36%',top:'51%',width:'26%',height:'14%'},
+    intestins:{left:'26%',top:'62%',width:'48%',height:'22%'}
+  };
+  Object.keys(DROP_CONFIG).forEach(function(organ){
+    var pos=DROP_CONFIG[organ];
+    var dz=document.createElement('div');
+    dz.className='drop-zone';dz.dataset.organ=organ;
+    dz.style.left=pos.left;dz.style.top=pos.top;dz.style.width=pos.width;dz.style.height=pos.height;
+    dz.innerHTML='<span style="font-size:clamp(9px,2.5vw,13px);color:#0f4c81;font-weight:700;opacity:.4;pointer-events:none;user-select:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">?</span>';
+    setupDropZone(dz);
+    wrap.appendChild(dz);
+  });
+}
+function setupDropZone(dz){
+  dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('hover');});
+  dz.addEventListener('dragleave',function(){dz.classList.remove('hover');});
+  dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('hover');handleDrop(dz,dragOrgan);});
+}
+function renderOrganBank(){
+  var bank=document.getElementById('organBank');bank.innerHTML='';
+  var organs=T[lang].organs;
+  Object.keys(organs).forEach(function(key){
+    var o=organs[key];
+    var chip=document.createElement('div');
+    chip.className='organ-chip'+(organPlaced[key]?' placed':'');
+    chip.dataset.organ=key;chip.draggable=!organPlaced[key];
+    chip.innerHTML='<span aria-hidden="true">'+o.emoji+'</span><span>'+o.name+'</span>';
+    chip.setAttribute('role','button');
+    chip.setAttribute('tabindex',organPlaced[key]?'-1':'0');
+    chip.setAttribute('aria-label',o.name);
+    chip.addEventListener('dragstart',function(e){dragOrgan=key;chip.classList.add('dragging');e.dataTransfer.setData('text/plain',key);});
+    chip.addEventListener('dragend',function(){chip.classList.remove('dragging');});
+    chip.addEventListener('touchstart',function(e){
+      if(organPlaced[key])return;
+      dragOrgan=key;
+      var touch=e.touches[0];
+      var ghost=document.createElement('div');
+      ghost.className='organ-chip';ghost.innerHTML=chip.innerHTML;
+      ghost.style.cssText='position:fixed;z-index:999;opacity:.8;pointer-events:none;left:'+(touch.clientX-40)+'px;top:'+(touch.clientY-40)+'px;';
+      document.body.appendChild(ghost);dragGhost=ghost;
+    },{passive:true});
+    chip.addEventListener('touchmove',function(e){
+      if(!dragGhost)return;e.preventDefault();
+      var touch=e.touches[0];
+      dragGhost.style.left=(touch.clientX-40)+'px';dragGhost.style.top=(touch.clientY-40)+'px';
+      document.querySelectorAll('.drop-zone').forEach(function(dz){
+        var r=dz.getBoundingClientRect();
+        dz.classList.toggle('hover',touch.clientX>=r.left&&touch.clientX<=r.right&&touch.clientY>=r.top&&touch.clientY<=r.bottom);
+      });
+    },{passive:false});
+    chip.addEventListener('touchend',function(e){
+      if(dragGhost){dragGhost.remove();dragGhost=null;}
+      document.querySelectorAll('.drop-zone').forEach(function(dz){dz.classList.remove('hover');});
+      var touch=e.changedTouches[0];
+      var el=document.elementFromPoint(touch.clientX,touch.clientY);
+      var dz=el?el.closest('.drop-zone'):null;
+      if(dz)handleDrop(dz,dragOrgan);
+      dragOrgan=null;
+    });
+    bank.appendChild(chip);
+  });
+}
+function handleDrop(dz,organKey){
+  if(!organKey||organPlaced[organKey])return;
+  var expected=dz.dataset.organ;
+  if(expected===organKey){
+    organPlaced[organKey]=true;
+    dz.classList.add('correct');dz.classList.remove('wrong');
+    var o=T[lang].organs[organKey];
+    dz.innerHTML='<span style="font-size:clamp(16px,5vw,24px);pointer-events:none;">'+o.emoji+'</span>';
+    showInfo(o.emoji,o.name,o.info);addScore(10);playSuccess();
+    showToast(o.name+' !',true);
+    var total=Object.keys(organPlaced).length;
+    var placed=Object.values(organPlaced).filter(Boolean).length;
+    updateProgress(Math.round(placed/total*100));
+    renderOrganBank();
+    if(placed===total)setTimeout(function(){completeLevel();},900);
+  } else {
+    dz.classList.add('wrong');setTimeout(function(){dz.classList.remove('wrong');},500);
+    playError();showToast(lang==='fr'?'Essaie encore !':'Try again!',false);
+  }
+  dragOrgan=null;
+}
+
+/* ---- LEVEL 2: QUIZ ---- */
+function initQuizGame(){
+  quizList=shuffle(T[lang].quizzes.slice());
+  quizIdx=0;quizScore=0;
+  document.getElementById('quizGame').style.display='block';
+  updateProgress(0);renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  if(quizIdx>=quizList.length){completeLevel();return;}
+  var q=quizList[quizIdx];
+  var o=T[lang].organs[q.organ];
+  document.getElementById('quiz-emoji').innerHTML=o.emoji;
+  document.getElementById('quiz-question').textContent=q.q;
+  var prog=tr('quiz_progress').replace('{n}',quizIdx+1).replace('{total}',quizList.length);
+  document.getElementById('quiz-progress').textContent=prog;
+  updateProgress(Math.round(quizIdx/quizList.length*100));
+  var opts=document.getElementById('quiz-options');opts.innerHTML='';
+  q.opts.forEach(function(opt,i){
+    var btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=opt;
+    btn.setAttribute('role','listitem');
+    (function(idx){btn.onclick=function(){answerQuiz(idx,q.ans,btn,opts);};})(i);
+    opts.appendChild(btn);
+  });
+  hideInfo();
+}
+function answerQuiz(chosen,correct,btn,opts){
+  opts.querySelectorAll('.quiz-opt').forEach(function(b){b.onclick=null;});
+  var q=quizList[quizIdx];var o=T[lang].organs[q.organ];
+  if(chosen===correct){
+    btn.classList.add('correct');playSuccess();addScore(15);quizScore++;
+    showToast(lang==='fr'?'Bravo !':'Well done!',true);showInfo(o.emoji,o.name,o.info);
+  } else {
+    btn.classList.add('wrong');
+    opts.querySelectorAll('.quiz-opt')[correct].classList.add('correct');
+    playError();showToast(lang==='fr'?'Essaie encore !':'Try again!',false);showInfo(o.emoji,o.name,o.info);
+  }
+  quizIdx++;updateProgress(Math.round(quizIdx/quizList.length*100));
+  setTimeout(function(){
+    if(quizIdx<quizList.length)renderQuizQuestion();
+    else setTimeout(function(){completeLevel();},300);
+  },1600);
+}
+
+/* ---- LEVEL 3: SYSTEMS ---- */
+function initSystemGame(){
+  systemAssignments={};selectedOrganTag=null;
+  document.getElementById('systemGame').style.display='block';
+  document.getElementById('sg-instruction').textContent=tr('sg_instruction');
+  document.getElementById('sg-drag-title').textContent=tr('sg_drag_title');
+  document.getElementById('sg-drop-title').textContent=tr('sg_drop_title');
+  document.getElementById('sg-check').textContent=tr('sg_check');
+  renderSystemPool();renderSystemTargets();updateProgress(0);hideInfo();
+}
+function renderSystemPool(){
+  var pool=document.getElementById('systemOrganPool');pool.innerHTML='';
+  var organs=T[lang].organs;
+  Object.keys(organs).forEach(function(key){
+    var o=organs[key];
+    var tag=document.createElement('div');
+    tag.className='organ-tag';tag.dataset.organ=key;
+    tag.innerHTML=o.emoji+' '+o.name;
+    tag.setAttribute('role','button');tag.setAttribute('tabindex','0');tag.setAttribute('aria-label',o.name);
+    (function(k,t2){
+      t2.onclick=function(){selectOrganTag(t2,k);};
+      t2.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')selectOrganTag(t2,k);};
+    })(key,tag);
+    pool.appendChild(tag);
+  });
+}
+function renderSystemTargets(){
+  var tgt=document.getElementById('systemTargets');tgt.innerHTML='';
+  var systems=T[lang].systems;
+  Object.keys(systems).forEach(function(key){
+    var sys=systems[key];
+    var d=document.createElement('div');d.className='sys-drop';d.dataset.sys=key;
+    d.style.borderColor=sys.color;d.style.color=sys.color;d.style.background=sys.bg;
+    d.innerHTML='<span style="display:block;text-align:center;">'+sys.emoji+' '+sys.label+'<br><span id="sys-organs-'+key+'" style="font-size:.72rem;font-weight:400;opacity:.85;display:block;margin-top:3px;"></span></span>';
+    (function(k){d.onclick=function(){assignToSystem(k);};})(key);
+    tgt.appendChild(d);
+  });
+}
+function selectOrganTag(tag,key){
+  playClick();
+  if(selectedOrganTag)selectedOrganTag.style.outline='';
+  selectedOrganTag=tag;tag.style.outline='3px solid var(--orange)';
+}
+function assignToSystem(sysKey){
+  if(!selectedOrganTag)return;
+  var organKey=selectedOrganTag.dataset.organ;
+  systemAssignments[organKey]=sysKey;playClick();
+  var organs=T[lang].organs;
+  Object.keys(T[lang].systems).forEach(function(sk){
+    var label=document.getElementById('sys-organs-'+sk);
+    if(!label)return;
+    var assigned=Object.keys(systemAssignments).filter(function(k){return systemAssignments[k]===sk;}).map(function(k){return organs[k].emoji+' '+organs[k].name;}).join(', ');
+    label.textContent=assigned;
+  });
+  selectedOrganTag.style.outline='';selectedOrganTag.style.background='#d1fae5';selectedOrganTag=null;
+  var total=Object.keys(T[lang].organs).length;
+  var done=Object.keys(systemAssignments).length;
+  updateProgress(Math.round(done/total*100));
+}
+function checkSystems(){
+  var systems=T[lang].systems;var organs=T[lang].organs;
+  var total=Object.keys(organs).length;
+  if(Object.keys(systemAssignments).length<total){
+    showToast(tr('sg_place_all'),false);playError();return;
+  }
+  var allCorrect=true;
+  Object.keys(systemAssignments).forEach(function(organ){
+    var assignedSys=systemAssignments[organ];
+    var isRight=Object.keys(systems).some(function(sk){return systems[sk].organs.indexOf(organ)>=0&&assignedSys===sk;});
+    if(isRight)return;
+    allCorrect=false;
+    var tag=document.querySelector('.organ-tag[data-organ="'+organ+'"]');
+    if(tag){tag.style.outline='2px solid #ef4444';setTimeout(function(){if(tag)tag.style.outline='';},2000);}
+  });
+  if(allCorrect){
+    addScore(30);playSuccess();showToast(tr('sg_check_ok'),true);
+    setTimeout(function(){completeLevel();},1000);
+  } else {
+    playError();showToast(tr('sg_check_err'),false);
+  }
+}
+
+/* ---- SUCCESS ---- */
+function completeLevel(){
+  if(state.levelsCompleted.indexOf(currentLevel)<0)state.levelsCompleted.push(currentLevel);
+  if(currentLevel+1>state.levelsUnlocked&&currentLevel+1<3)state.levelsUnlocked=currentLevel+1;
+  saveState();playSuccess();showScreen('successScreen');
+}
+function renderSuccessScreen(){
+  document.getElementById('ss-title').textContent=tr('ss_title');
+  var msgs=tr('ss_msgs');
+  document.getElementById('ss-msg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('ss-replay').textContent=tr('ss_replay');
+  document.getElementById('ss-next').textContent=tr('ss_next');
+  document.getElementById('ss-home').textContent=tr('ss_home');
+  var stars=['&#x2B50;','&#x2B50;&#x2B50;','&#x2B50;&#x2B50;&#x2B50;'];
+  document.getElementById('ss-stars').innerHTML=stars[currentLevel]||'&#x2B50;&#x2B50;&#x2B50;';
+  document.getElementById('ss-next').style.display=currentLevel<2?'':'none';
+}
+function replayLevel(){startLevel(currentLevel);}
+function nextLevel(){if(currentLevel<2)startLevel(currentLevel+1);else showLevels();}
+
+/* ---- HELPERS ---- */
+function addScore(n){
+  state.score+=n;saveState();
+  var sv=document.getElementById('scoreVal');if(sv)sv.textContent=state.score;
+  var d=document.getElementById('scoreDisplay');
+  if(d){d.classList.add('pop');setTimeout(function(){d.classList.remove('pop');},350);}
+}
+function showToast(msg,success){
+  var t=document.getElementById('feedbackToast');t.textContent=msg;
+  t.className='show '+(success?'success':'error');
+  clearTimeout(toastTimeout);toastTimeout=setTimeout(function(){t.className='';},2400);
+}
+function showInfo(emoji,title,body){
+  document.getElementById('info-emoji').innerHTML=emoji;
+  document.getElementById('info-title').textContent=title;
+  document.getElementById('info-body').textContent=body;
+  document.getElementById('infoPanel').style.display='block';
+}
+function hideInfo(){document.getElementById('infoPanel').style.display='none';}
+function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}return arr;}
+
+/* ---- PARENT GATE ---- */
+function openParents(){
+  parentMath.a=Math.floor(Math.random()*8)+2;parentMath.b=Math.floor(Math.random()*8)+2;
+  document.getElementById('pg-title').textContent=tr('pg_title');
+  document.getElementById('pg-desc').textContent=tr('pg_desc');
+  document.getElementById('pg-math').textContent=parentMath.a+' x '+parentMath.b+' = ?';
+  document.getElementById('pg-btn').textContent=tr('pg_btn');
+  document.getElementById('pg-close').textContent=tr('pg_close');
+  document.getElementById('pg-err').textContent='';
+  document.getElementById('pg-input').value='';
+  document.getElementById('parentInfo').style.display='none';
+  document.getElementById('parentGate').classList.add('open');
+  setTimeout(function(){document.getElementById('pg-input').focus();},100);
+}
+function closeParents(){document.getElementById('parentGate').classList.remove('open');}
+function checkParent(){
+  var val=parseInt(document.getElementById('pg-input').value);
+  if(val===parentMath.a*parentMath.b){
+    document.getElementById('pg-err').textContent='';
+    document.getElementById('pi-title').textContent=tr('pi_title');
+    document.getElementById('pi-body').textContent=tr('pi_body');
+    document.getElementById('parentInfo').style.display='block';
+  } else {
+    document.getElementById('pg-err').textContent=tr('pg_err');playError();
+  }
+}
+
+/* ---- INIT ---- */
+loadState();setLang(lang);renderTitle();showScreen('titleScreen');
+</script>
+</body>
+</html>

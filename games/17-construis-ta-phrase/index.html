@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Construis ta Phrase / Sentence Builder — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,#eaf6ff 0%,#d1ebff 100%);
+  min-height:100vh;color:var(--navy);
+  overflow-x:hidden;
+}
+#topbar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--blue);padding:8px 16px;
+  box-shadow:0 3px 8px rgba(0,0,0,.25);
+  flex-wrap:wrap;
+}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;}
+#topbar .brand span{
+  color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.15rem;font-weight:700;letter-spacing:.5px;
+}
+.lang-btn{
+  border:2px solid rgba(255,255,255,.5);background:transparent;
+  color:#fff;padding:5px 12px;border-radius:20px;cursor:pointer;
+  font-weight:700;font-size:.85rem;transition:background .2s;
+}
+.lang-btn.active,.lang-btn:hover{background:rgba(255,255,255,.2);}
+#muteBtn{
+  background:none;border:none;cursor:pointer;font-size:1.5rem;
+  line-height:1;padding:4px 6px;border-radius:8px;
+  transition:background .2s;
+}
+#muteBtn:hover{background:rgba(255,255,255,.15);}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px;}
+.screen.active{display:flex;}
+#titleScreen{text-align:center;padding-top:10px;}
+#titleScreen h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:clamp(1.8rem,6vw,3rem);color:var(--blue);
+  margin:12px 0 4px;
+}
+#titleScreen p.sub{color:var(--slate);font-size:1rem;margin-bottom:20px;}
+.btn-play{
+  background:var(--orange);color:#fff;border:none;
+  font-size:1.3rem;font-weight:700;padding:16px 48px;border-radius:40px;
+  cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);
+  transition:transform .12s,box-shadow .12s;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  min-width:200px;
+}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{
+  background:var(--blue);color:#fff;border:none;
+  padding:11px 26px;border-radius:30px;cursor:pointer;
+  font-size:.9rem;font-weight:700;margin-top:14px;
+  box-shadow:0 3px 0 var(--blue-dark);
+  transition:transform .12s;
+}
+.btn-secondary:active{transform:translateY(2px);}
+#mascot{margin:8px auto;display:block;}
+#parentGate{
+  background:#fff;border-radius:20px;padding:28px;
+  max-width:340px;width:100%;text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+}
+#parentGate h2{color:var(--blue);margin-bottom:10px;}
+#parentGate p{color:var(--slate);margin-bottom:16px;font-size:.95rem;}
+#gateQuestion{font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--navy);}
+#gateInput{
+  width:100%;padding:10px;border:2px solid var(--sky);border-radius:10px;
+  font-size:1.1rem;text-align:center;margin-bottom:10px;
+  font-family:inherit;
+}
+#gateError{color:#e11d48;font-size:.85rem;min-height:20px;}
+#parentInfo{
+  background:#fff;border-radius:20px;padding:28px;
+  max-width:360px;width:100%;
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+}
+#parentInfo h2{color:var(--blue);margin-bottom:12px;}
+#parentInfo p{color:var(--slate);line-height:1.6;margin-bottom:8px;font-size:.92rem;}
+#gameScreen{width:100%;max-width:700px;margin:0 auto;}
+.game-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;flex-wrap:wrap;gap:8px;
+}
+.level-badge{
+  background:var(--blue);color:#fff;border-radius:20px;
+  padding:5px 16px;font-weight:700;font-size:.85rem;
+}
+.score-display{
+  background:var(--gold);color:var(--navy);border-radius:20px;
+  padding:5px 16px;font-weight:700;font-size:.9rem;
+}
+.progress-bar{
+  background:rgba(0,0,0,.1);border-radius:10px;height:8px;
+  margin-bottom:16px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;background:var(--orange);border-radius:10px;
+  transition:width .4s ease;
+}
+#phraseTarget{
+  background:#fff;border-radius:16px;padding:16px;
+  margin-bottom:16px;text-align:center;
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
+}
+#phraseEmoji{font-size:3rem;margin-bottom:6px;}
+#phraseHint{
+  color:var(--slate);font-size:.85rem;font-style:italic;
+  margin-bottom:4px;
+}
+#answerZone{
+  min-height:70px;background:rgba(255,255,255,.7);
+  border:3px dashed var(--sky);border-radius:16px;
+  padding:12px;display:flex;flex-wrap:wrap;gap:8px;
+  align-items:center;justify-content:center;
+  margin-bottom:16px;transition:border-color .2s,background .2s;
+}
+#answerZone.drag-over{
+  border-color:var(--orange);background:rgba(249,115,22,.07);
+}
+#answerZone:empty::after{
+  content:attr(data-placeholder);
+  color:#94a3b8;font-size:.9rem;
+}
+.word-chip{
+  background:var(--blue);color:#fff;border-radius:24px;
+  padding:9px 16px;font-size:1rem;font-weight:700;cursor:grab;
+  user-select:none;touch-action:none;
+  box-shadow:0 3px 0 var(--blue-dark);
+  transition:transform .15s,opacity .15s,box-shadow .15s;
+  border:none;font-family:inherit;
+  min-height:48px;display:inline-flex;align-items:center;
+}
+.word-chip:active,.word-chip.dragging{
+  opacity:.7;transform:scale(1.08) rotate(-2deg);
+  cursor:grabbing;box-shadow:0 6px 12px rgba(0,0,0,.2);
+}
+.word-chip.in-answer{
+  background:var(--orange);box-shadow:0 3px 0 var(--orange-dark);
+}
+.word-chip.correct-chip{
+  background:var(--success);box-shadow:0 3px 0 #22a865;
+}
+#wordBank{
+  background:#fff;border-radius:16px;padding:14px;
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  min-height:70px;
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
+  margin-bottom:16px;
+}
+#feedback{
+  min-height:40px;text-align:center;font-weight:700;
+  font-size:1.05rem;padding:8px;border-radius:12px;
+  transition:all .3s;margin-bottom:12px;
+}
+#feedback.good{background:rgba(52,199,123,.15);color:#166534;}
+#feedback.bad{background:rgba(239,68,68,.1);color:#b91c1c;}
+#validateBtn{
+  background:var(--orange);color:#fff;border:none;
+  font-size:1.1rem;font-weight:700;padding:14px 36px;
+  border-radius:30px;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);
+  min-height:48px;width:100%;max-width:320px;
+  display:block;margin:0 auto 12px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  transition:transform .12s,box-shadow .12s;
+}
+#validateBtn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+#validateBtn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+#hintBtn{
+  background:var(--blue);color:#fff;border:none;
+  font-size:.9rem;padding:10px 24px;border-radius:24px;cursor:pointer;
+  display:block;margin:0 auto;font-family:inherit;font-weight:700;
+  box-shadow:0 3px 0 var(--blue-dark);min-height:48px;
+}
+#hintBtn:disabled{opacity:.4;cursor:not-allowed;}
+#successScreen{text-align:center;padding:20px 16px;}
+#successScreen h2{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:2rem;color:var(--blue);margin:12px 0 6px;
+}
+.stars{font-size:2.5rem;margin:10px 0;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+.btn-action{
+  background:var(--orange);color:#fff;border:none;
+  padding:12px 24px;border-radius:28px;cursor:pointer;
+  font-weight:700;font-size:1rem;
+  box-shadow:0 4px 0 var(--orange-dark);
+  font-family:inherit;min-height:48px;
+  transition:transform .12s;
+}
+.btn-action:active{transform:translateY(2px);}
+.btn-action.secondary{
+  background:var(--blue);box-shadow:0 4px 0 var(--blue-dark);
+}
+#ariaLive{
+  position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;
+}
+@media(max-width:480px){
+  .word-chip{font-size:.9rem;padding:8px 12px;}
+  #phraseEmoji{font-size:2.2rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+
+<div id="titleScreen" class="screen active">
+  <svg id="mascot" width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mascotte hibou avec un crayon">
+    <ellipse cx="70" cy="92" rx="36" ry="34" fill="#f97316"/>
+    <circle cx="70" cy="58" r="32" fill="#ffd23f"/>
+    <polygon points="44,35 36,14 56,28" fill="#ffd23f"/>
+    <polygon points="96,35 104,14 84,28" fill="#ffd23f"/>
+    <polygon points="44,33 40,19 53,27" fill="#f97316"/>
+    <polygon points="96,33 100,19 87,27" fill="#f97316"/>
+    <circle cx="55" cy="56" r="13" fill="#fff"/>
+    <circle cx="85" cy="56" r="13" fill="#fff"/>
+    <circle cx="57" cy="57" r="7" fill="#0f4c81"/>
+    <circle cx="87" cy="57" r="7" fill="#0f4c81"/>
+    <circle cx="59" cy="55" r="2.5" fill="#fff"/>
+    <circle cx="89" cy="55" r="2.5" fill="#fff"/>
+    <polygon points="70,64 63,74 77,74" fill="#ea580c"/>
+    <ellipse cx="70" cy="97" rx="22" ry="22" fill="#ffd23f" opacity=".6"/>
+    <ellipse cx="40" cy="97" rx="14" ry="22" fill="#ea580c" transform="rotate(-15 40 97)"/>
+    <ellipse cx="100" cy="97" rx="14" ry="22" fill="#ea580c" transform="rotate(15 100 97)"/>
+    <rect x="100" y="50" width="8" height="38" rx="2" fill="#ffd23f" transform="rotate(30 104 69)"/>
+    <polygon points="100,88 108,88 104,98" fill="#ea580c" transform="rotate(30 104 93)"/>
+    <rect x="100" y="50" width="8" height="7" rx="2" fill="#ff8fab" transform="rotate(30 104 53)"/>
+    <path d="M55 110 Q70 105 85 110" stroke="#ea580c" stroke-width="2.5" fill="none"/>
+    <path d="M50 120 Q70 115 90 120" stroke="#ea580c" stroke-width="2.5" fill="none"/>
+  </svg>
+  <h1 id="titleH1">Construis ta Phrase</h1>
+  <p class="sub" id="titleSub">Mets les mots dans le bon ordre !</p>
+  <button class="btn-play" id="playBtn" onclick="startGame()">▶ Jouer</button>
+  <button class="btn-secondary" id="parentsBtn" onclick="showGate()">👨‍👩‍👧 Pour les parents</button>
+</div>
+
+<div id="parentGateScreen" class="screen">
+  <div id="parentGate">
+    <h2 id="gateTitle">Espace parents</h2>
+    <p id="gateDesc">Résous ce calcul pour continuer :</p>
+    <div id="gateQuestion"></div>
+    <input type="number" id="gateInput" min="0" max="200" aria-label="Réponse calcul">
+    <div id="gateError" role="alert"></div>
+    <button class="btn-play" style="font-size:1rem;padding:12px 32px;" onclick="checkGate()" id="gateOkBtn">OK</button>
+    <br>
+    <button class="btn-secondary" onclick="showScreen('titleScreen')" id="gateCancelBtn">Retour</button>
+  </div>
+</div>
+
+<div id="parentInfoScreen" class="screen">
+  <div id="parentInfo">
+    <h2 id="pInfoTitle">À propos du jeu</h2>
+    <p id="pInfo1"></p>
+    <p id="pInfo2"></p>
+    <p id="pInfo3"></p>
+    <button class="btn-secondary" onclick="showScreen('titleScreen')" id="pInfoBack">← Retour</button>
+  </div>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="level-badge" id="levelBadge">Niveau 1</div>
+    <div class="score-display" id="scoreDisplay">⭐ 0</div>
+  </div>
+  <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progressBar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div id="phraseTarget">
+    <div id="phraseEmoji">🌞</div>
+    <div id="phraseHint"></div>
+  </div>
+  <div id="answerZone" data-placeholder="…" role="list" aria-label="Zone de réponse"></div>
+  <div id="wordBank" role="list" aria-label="Mots disponibles"></div>
+  <div id="feedback" role="status" aria-live="polite"></div>
+  <button id="validateBtn" onclick="validateAnswer()">✔ Valider</button>
+  <button id="hintBtn" onclick="giveHint()">💡 Indice</button>
+</div>
+
+<div id="successScreen" class="screen">
+  <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="50" cy="50" r="48" fill="#ffd23f"/>
+    <text x="50" y="68" text-anchor="middle" font-size="52">🎉</text>
+  </svg>
+  <h2 id="successTitle">Bravo !</h2>
+  <div class="stars" id="successStars">⭐⭐⭐</div>
+  <p id="successMsg" style="color:var(--slate);margin-bottom:6px;"></p>
+  <p id="successPhrase" style="font-size:1.1rem;font-weight:700;color:var(--blue);margin-bottom:16px;background:#fff;padding:10px 16px;border-radius:12px;"></p>
+  <div class="btn-row">
+    <button class="btn-action secondary" onclick="startGame()" id="replayBtn">↺ Rejouer</button>
+    <button class="btn-action" onclick="nextLevel()" id="nextBtn">Niveau suivant →</button>
+    <button class="btn-action secondary" onclick="showScreen('titleScreen')" id="homeBtn">🏠 Accueil</button>
+  </div>
+</div>
+
+<script>
+const T = {
+  fr: {
+    titleH1:"Construis ta Phrase",
+    titleSub:"Mets les mots dans le bon ordre !",
+    play:"▶ Jouer",
+    parents:"👨‍👩‍👧 Pour les parents",
+    gateTitle:"Espace parents",
+    gateDesc:"Résous ce calcul pour continuer :",
+    gateOk:"OK",
+    gateCancel:"Retour",
+    gateError:"Mauvaise réponse, essaie encore !",
+    pInfoTitle:"À propos du jeu",
+    pInfo1:"🎯 Compétence visée : syntaxe et grammaire (ordre des mots, majuscule, ponctuation).",
+    pInfo2:"🔒 Aucune donnée collectée, aucune publicité, 100% hors-ligne.",
+    pInfo3:"📈 3 niveaux de difficulté : phrases courtes → phrases longues → questions.",
+    levelBadge:function(n){return"Niveau "+n;},
+    score:function(n){return"⭐ "+n;},
+    validate:"✔ Valider",
+    hint:"💡 Indice",
+    feedbackGood:["Excellent !","Super !","Parfait !","Bravo !","Génial !"],
+    feedbackBad:["Presque ! Essaie encore.","Pas tout à fait… continue !","Regarde bien l'image !"],
+    feedbackHint:function(w){return"Le premier mot est : « "+w+" »";},
+    hintsDone:"Essaie de finir sans indice !",
+    successTitle:"Bravo !",
+    successMsg:function(pts){return"Tu as marqué "+pts+" points !";},
+    replay:"↺ Rejouer",
+    next:"Niveau suivant →",
+    home:"🏠 Accueil",
+    placeholder:"Glisse ou clique les mots ici…",
+    phraseHint:"🖼 Forme cette phrase :",
+    pInfoBack:"← Retour"
+  },
+  en: {
+    titleH1:"Sentence Builder",
+    titleSub:"Put the words in the right order!",
+    play:"▶ Play",
+    parents:"👨‍👩‍👧 For parents",
+    gateTitle:"Parents area",
+    gateDesc:"Solve this calculation to continue:",
+    gateOk:"OK",
+    gateCancel:"Back",
+    gateError:"Wrong answer, try again!",
+    pInfoTitle:"About the game",
+    pInfo1:"🎯 Skill: syntax and grammar (word order, capital letter, punctuation).",
+    pInfo2:"🔒 No data collected, no ads, 100% offline.",
+    pInfo3:"📈 3 difficulty levels: short sentences → longer ones → questions.",
+    levelBadge:function(n){return"Level "+n;},
+    score:function(n){return"⭐ "+n;},
+    validate:"✔ Check",
+    hint:"💡 Hint",
+    feedbackGood:["Excellent!","Super!","Perfect!","Well done!","Amazing!"],
+    feedbackBad:["Almost! Try again.","Not quite… keep going!","Look at the picture!"],
+    feedbackHint:function(w){return"The first word is: \""+w+"\"";},
+    hintsDone:"Try to finish without hints!",
+    successTitle:"Well done!",
+    successMsg:function(pts){return"You scored "+pts+" points!";},
+    replay:"↺ Play again",
+    next:"Next level →",
+    home:"🏠 Home",
+    placeholder:"Drag or click words here…",
+    phraseHint:"🖼 Build this sentence:",
+    pInfoBack:"← Back"
+  }
+};
+
+const DATA = {
+  fr:[
+    {level:1,words:["Le","chat","dort","."],emoji:"😴🐱",answer:["Le","chat","dort","."]},
+    {level:1,words:["Le","soleil","brille","."],emoji:"☀️",answer:["Le","soleil","brille","."]},
+    {level:1,words:["La","pluie","tombe","."],emoji:"🌧️",answer:["La","pluie","tombe","."]},
+    {level:1,words:["Le","chien","court","."],emoji:"🐕",answer:["Le","chien","court","."]},
+    {level:1,words:["L'oiseau","chante","."],emoji:"🐦🎵",answer:["L'oiseau","chante","."]},
+    {level:2,words:["Je","mange","une","pomme","."],emoji:"🍎",answer:["Je","mange","une","pomme","."]},
+    {level:2,words:["Le","lapin","saute","dans","le","jardin","."],emoji:"🐰🌿",answer:["Le","lapin","saute","dans","le","jardin","."]},
+    {level:2,words:["Ma","mère","lit","un","livre","."],emoji:"📚",answer:["Ma","mère","lit","un","livre","."]},
+    {level:2,words:["Les","oiseaux","chantent","dans","les","arbres","."],emoji:"🐦🌳",answer:["Les","oiseaux","chantent","dans","les","arbres","."]},
+    {level:2,words:["Mon","ami","joue","au","foot","."],emoji:"⚽",answer:["Mon","ami","joue","au","foot","."]},
+    {level:3,words:["Où","est","mon","chat","?"],emoji:"🔍🐱",answer:["Où","est","mon","chat","?"]},
+    {level:3,words:["Pourquoi","le","ciel","est","bleu","?"],emoji:"🌌",answer:["Pourquoi","le","ciel","est","bleu","?"]},
+    {level:3,words:["Comment","tu","t'appelles","?"],emoji:"👋",answer:["Comment","tu","t'appelles","?"]},
+    {level:3,words:["Quand","viendras-tu","à","la","maison","?"],emoji:"🏠",answer:["Quand","viendras-tu","à","la","maison","?"]},
+    {level:3,words:["Qu'est-ce","que","tu","fais","ce","soir","?"],emoji:"🤔",answer:["Qu'est-ce","que","tu","fais","ce","soir","?"]}
+  ],
+  en:[
+    {level:1,words:["The","cat","sleeps","."],emoji:"😴🐱",answer:["The","cat","sleeps","."]},
+    {level:1,words:["The","sun","shines","."],emoji:"☀️",answer:["The","sun","shines","."]},
+    {level:1,words:["The","rain","falls","."],emoji:"🌧️",answer:["The","rain","falls","."]},
+    {level:1,words:["The","dog","runs","."],emoji:"🐕",answer:["The","dog","runs","."]},
+    {level:1,words:["The","bird","sings","."],emoji:"🐦🎵",answer:["The","bird","sings","."]},
+    {level:2,words:["I","eat","an","apple","."],emoji:"🍎",answer:["I","eat","an","apple","."]},
+    {level:2,words:["The","rabbit","jumps","in","the","garden","."],emoji:"🐰🌿",answer:["The","rabbit","jumps","in","the","garden","."]},
+    {level:2,words:["My","mother","reads","a","book","."],emoji:"📚",answer:["My","mother","reads","a","book","."]},
+    {level:2,words:["The","birds","sing","in","the","trees","."],emoji:"🐦🌳",answer:["The","birds","sing","in","the","trees","."]},
+    {level:2,words:["My","friend","plays","football","."],emoji:"⚽",answer:["My","friend","plays","football","."]},
+    {level:3,words:["Where","is","my","cat","?"],emoji:"🔍🐱",answer:["Where","is","my","cat","?"]},
+    {level:3,words:["Why","is","the","sky","blue","?"],emoji:"🌌",answer:["Why","is","the","sky","blue","?"]},
+    {level:3,words:["What","is","your","name","?"],emoji:"👋",answer:["What","is","your","name","?"]},
+    {level:3,words:["When","will","you","come","home","?"],emoji:"🏠",answer:["When","will","you","come","home","?"]},
+    {level:3,words:["What","are","you","doing","tonight","?"],emoji:"🤔",answer:["What","are","you","doing","tonight","?"]}
+  ]
+};
+
+const LS_KEY='pgrg_construis_phrase';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let currentLevel=1;
+let score=0;
+let currentSentenceIndex=0;
+let levelSentences=[];
+let currentSentence=null;
+let answerWords=[];
+let bankWords=[];
+let hintsUsed=0;
+let gateA=0,gateB=0;
+let dragItem=null,dragZone=null;
+let touchChip=null,touchClone=null,touchOriginItem=null,touchOriginZone=null;
+
+const AC=window.AudioContext||window.webkitAudioContext;
+let ctx=null;
+function getCtx(){if(!ctx&&AC){ctx=new AC();}return ctx;}
+
+function playTone(freq,dur,type,vol){
+  type=type||'sine';vol=vol||0.25;
+  if(muted)return;
+  var c=getCtx();if(!c)return;
+  var o=c.createOscillator();
+  var g=c.createGain();
+  o.connect(g);g.connect(c.destination);
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,c.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+  o.start();o.stop(c.currentTime+dur);
+}
+function playSuccess(){
+  if(muted)return;
+  [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.25,'sine',.2);},i*110);});
+}
+function playCorrect(){playTone(660,.15,'sine',.18);setTimeout(function(){playTone(880,.2,'sine',.15);},120);}
+function playWrong(){playTone(220,.18,'sawtooth',.12);}
+function playClick(){playTone(440,.07,'sine',.1);}
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+  saveProgress();
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderUI();
+  saveProgress();
+}
+
+function tv(key){
+  var v=T[lang][key];
+  if(typeof v==='function'){return v.apply(null,Array.prototype.slice.call(arguments,1));}
+  return v||key;
+}
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function renderUI(){
+  var s=T[lang];
+  document.getElementById('titleH1').textContent=s.titleH1;
+  document.getElementById('titleSub').textContent=s.titleSub;
+  document.getElementById('playBtn').textContent=s.play;
+  document.getElementById('parentsBtn').textContent=s.parents;
+  document.getElementById('gateTitle').textContent=s.gateTitle;
+  document.getElementById('gateDesc').textContent=s.gateDesc;
+  document.getElementById('gateOkBtn').textContent=s.gateOk;
+  document.getElementById('gateCancelBtn').textContent=s.gateCancel;
+  document.getElementById('pInfoTitle').textContent=s.pInfoTitle;
+  document.getElementById('pInfo1').textContent=s.pInfo1;
+  document.getElementById('pInfo2').textContent=s.pInfo2;
+  document.getElementById('pInfo3').textContent=s.pInfo3;
+  document.getElementById('validateBtn').textContent=s.validate;
+  document.getElementById('hintBtn').textContent=s.hint;
+  document.getElementById('replayBtn').textContent=s.replay;
+  document.getElementById('nextBtn').textContent=s.next;
+  document.getElementById('homeBtn').textContent=s.home;
+  document.getElementById('pInfoBack').textContent=s.pInfoBack;
+  document.getElementById('successTitle').textContent=s.successTitle;
+  document.getElementById('answerZone').dataset.placeholder=s.placeholder;
+  document.getElementById('levelBadge').textContent=s.levelBadge(currentLevel);
+  document.getElementById('scoreDisplay').textContent=s.score(score);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function showGate(){
+  gateA=Math.floor(Math.random()*9)+2;
+  gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('gateQuestion').textContent=gateA+' × '+gateB+' = ?';
+  document.getElementById('gateInput').value='';
+  document.getElementById('gateError').textContent='';
+  showScreen('parentGateScreen');
+}
+
+function checkGate(){
+  var val=parseInt(document.getElementById('gateInput').value,10);
+  if(val===gateA*gateB){showScreen('parentInfoScreen');}
+  else{document.getElementById('gateError').textContent=tv('gateError');playWrong();}
+}
+
+function loadProgress(){
+  try{
+    var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.score)score=d.score;
+    if(d.currentLevel)currentLevel=d.currentLevel;
+    if(d.lang)lang=d.lang;
+    if(typeof d.muted==='boolean')muted=d.muted;
+  }catch(e){}
+}
+
+function saveProgress(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({score:score,currentLevel:currentLevel,lang:lang,muted:muted}));}catch(e){}
+}
+
+function getLevelSentences(lvl){return DATA[lang].filter(function(s){return s.level===lvl;});}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=a[i];a[i]=a[j];a[j]=tmp;
+  }
+  return a;
+}
+
+function startGame(){
+  loadProgress();
+  hintsUsed=0;
+  currentSentenceIndex=0;
+  levelSentences=getLevelSentences(currentLevel);
+  if(!levelSentences.length){currentLevel=1;levelSentences=getLevelSentences(1);}
+  levelSentences=shuffle(levelSentences).slice(0,3);
+  loadSentence();
+  showScreen('gameScreen');
+  renderUI();
+}
+
+function loadSentence(){
+  if(currentSentenceIndex>=levelSentences.length){showSuccess();return;}
+  currentSentence=levelSentences[currentSentenceIndex];
+  answerWords=[];
+  bankWords=shuffle(currentSentence.words).map(function(w,i){return{word:w,id:'w'+Date.now()+i};});
+  hintsUsed=0;
+  document.getElementById('levelBadge').textContent=tv('levelBadge',currentLevel);
+  document.getElementById('scoreDisplay').textContent=tv('score',score);
+  var pct=Math.round((currentSentenceIndex/levelSentences.length)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressBar').setAttribute('aria-valuenow',pct);
+  document.getElementById('phraseEmoji').textContent=currentSentence.emoji;
+  document.getElementById('phraseHint').textContent=tv('phraseHint');
+  var fb=document.getElementById('feedback');
+  fb.textContent='';fb.className='';
+  renderAnswerZone();
+  renderWordBank();
+  document.getElementById('validateBtn').disabled=false;
+  document.getElementById('hintBtn').disabled=false;
+}
+
+function renderWordBank(){
+  var bank=document.getElementById('wordBank');
+  bank.innerHTML='';
+  bankWords.forEach(function(item){bank.appendChild(makeChip(item,'bank'));});
+}
+
+function renderAnswerZone(){
+  var zone=document.getElementById('answerZone');
+  zone.innerHTML='';
+  answerWords.forEach(function(item){zone.appendChild(makeChip(item,'answer'));});
+}
+
+function makeChip(item,zone){
+  var btn=document.createElement('button');
+  btn.className='word-chip'+(zone==='answer'?' in-answer':'');
+  btn.textContent=item.word;
+  btn.dataset.id=item.id;
+  btn.dataset.word=item.word;
+  btn.dataset.zone=zone;
+  btn.setAttribute('role','listitem');
+  btn.setAttribute('aria-label',item.word+(zone==='answer'?' (dans la phrase)':' (disponible)'));
+  btn.setAttribute('draggable','true');
+  btn.addEventListener('click',function(){handleChipClick(item,zone);});
+  btn.addEventListener('dragstart',function(e){onDragStart(e,item,zone);});
+  btn.addEventListener('dragend',onDragEnd);
+  btn.addEventListener('touchstart',onTouchStart,{passive:false});
+  btn.addEventListener('touchmove',onTouchMove,{passive:false});
+  btn.addEventListener('touchend',onTouchEnd,{passive:false});
+  return btn;
+}
+
+function handleChipClick(item,zone){
+  playClick();
+  if(zone==='bank'){
+    bankWords=bankWords.filter(function(w){return w.id!==item.id;});
+    answerWords.push(item);
+  }else{
+    answerWords=answerWords.filter(function(w){return w.id!==item.id;});
+    bankWords.push(item);
+  }
+  renderWordBank();renderAnswerZone();announceState();
+}
+
+function announceState(){
+  var txt=answerWords.map(function(w){return w.word;}).join(' ');
+  document.getElementById('ariaLive').textContent=txt||'…';
+}
+
+function onDragStart(e,item,zone){
+  dragItem=item;dragZone=zone;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',item.id);
+}
+
+function onDragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  dragItem=null;dragZone=null;
+}
+
+function onTouchStart(e){
+  e.preventDefault();
+  var btn=e.currentTarget;
+  var id=btn.dataset.id;
+  var zone=btn.dataset.zone;
+  touchOriginItem=(zone==='bank'?bankWords:answerWords).find(function(w){return w.id===id;});
+  touchOriginZone=zone;
+  touchChip=btn;
+  var rect=btn.getBoundingClientRect();
+  touchClone=btn.cloneNode(true);
+  touchClone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;opacity:0.75;pointer-events:none;z-index:9999;transform:scale(1.1) rotate(-2deg);transition:none;margin:0;';
+  document.body.appendChild(touchClone);
+  btn.style.opacity='0.3';
+}
+
+function onTouchMove(e){
+  e.preventDefault();
+  if(!touchClone)return;
+  var t2=e.touches[0];
+  var w=touchClone.offsetWidth;
+  var h=touchClone.offsetHeight;
+  touchClone.style.left=(t2.clientX-w/2)+'px';
+  touchClone.style.top=(t2.clientY-h/2)+'px';
+  var az=document.getElementById('answerZone');
+  var azR=az.getBoundingClientRect();
+  az.classList.toggle('drag-over',t2.clientX>=azR.left&&t2.clientX<=azR.right&&t2.clientY>=azR.top&&t2.clientY<=azR.bottom);
+}
+
+function onTouchEnd(e){
+  e.preventDefault();
+  if(!touchClone||!touchOriginItem)return;
+  var t2=e.changedTouches[0];
+  var az=document.getElementById('answerZone');
+  var wb=document.getElementById('wordBank');
+  var azR=az.getBoundingClientRect();
+  var wbR=wb.getBoundingClientRect();
+  var inAZ=t2.clientX>=azR.left&&t2.clientX<=azR.right&&t2.clientY>=azR.top&&t2.clientY<=azR.bottom;
+  var inWB=t2.clientX>=wbR.left&&t2.clientX<=wbR.right&&t2.clientY>=wbR.top&&t2.clientY<=wbR.bottom;
+  az.classList.remove('drag-over');
+  if(inAZ&&touchOriginZone==='bank'){
+    bankWords=bankWords.filter(function(w){return w.id!==touchOriginItem.id;});
+    answerWords.push(touchOriginItem);
+    playClick();renderWordBank();renderAnswerZone();announceState();
+  }else if(inWB&&touchOriginZone==='answer'){
+    answerWords=answerWords.filter(function(w){return w.id!==touchOriginItem.id;});
+    bankWords.push(touchOriginItem);
+    playClick();renderWordBank();renderAnswerZone();announceState();
+  }else{
+    if(touchChip)touchChip.style.opacity='';
+  }
+  touchClone.remove();
+  touchClone=null;touchChip=null;touchOriginItem=null;touchOriginZone=null;
+}
+
+function validateAnswer(){
+  var userWords=answerWords.map(function(w){return w.word;});
+  var correct=currentSentence.answer;
+  if(userWords.length<correct.length){showFeedback(pick(tv('feedbackBad')),'bad');playWrong();return;}
+  var isCorrect=userWords.length===correct.length&&userWords.every(function(w,i){return w===correct[i];});
+  if(isCorrect){
+    document.querySelectorAll('#answerZone .word-chip').forEach(function(c){
+      c.classList.add('correct-chip');c.classList.remove('in-answer');
+    });
+    var pts=Math.max(10-hintsUsed*3,4);
+    score+=pts;
+    showFeedback(pick(tv('feedbackGood')),'good');
+    playCorrect();
+    document.getElementById('scoreDisplay').textContent=tv('score',score);
+    document.getElementById('validateBtn').disabled=true;
+    document.getElementById('hintBtn').disabled=true;
+    announceAria(pick(tv('feedbackGood')));
+    saveProgress();
+    setTimeout(function(){
+      currentSentenceIndex++;
+      if(currentSentenceIndex>=levelSentences.length){showSuccess();}
+      else{loadSentence();}
+    },1400);
+  }else{
+    showFeedback(pick(tv('feedbackBad')),'bad');
+    playWrong();
+  }
+}
+
+function showFeedback(msg,type){
+  var fb=document.getElementById('feedback');
+  fb.textContent=msg;fb.className=type;
+}
+
+function announceAria(msg){
+  var el=document.getElementById('ariaLive');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+function giveHint(){
+  if(!currentSentence)return;
+  var firstCorrect=currentSentence.answer[0];
+  if(hintsUsed<2){
+    hintsUsed++;
+    showFeedback(tv('feedbackHint',firstCorrect),'bad');
+    if(!answerWords.length||answerWords[0].word!==firstCorrect){
+      var idx=bankWords.findIndex(function(w){return w.word===firstCorrect;});
+      if(idx!==-1){
+        var item=bankWords.splice(idx,1)[0];
+        answerWords.unshift(item);
+        renderWordBank();renderAnswerZone();
+      }
+    }
+    playTone(440,.1,'sine',.1);
+  }else{
+    showFeedback(tv('hintsDone'),'bad');
+  }
+}
+
+function showSuccess(){
+  playSuccess();
+  var stars=hintsUsed===0?'⭐⭐⭐':hintsUsed===1?'⭐⭐':'⭐';
+  document.getElementById('successTitle').textContent=tv('successTitle');
+  document.getElementById('successStars').textContent=stars;
+  document.getElementById('successMsg').textContent=tv('successMsg',score);
+  var last=levelSentences[levelSentences.length-1];
+  document.getElementById('successPhrase').textContent=(currentSentence||last).answer.join(' ');
+  document.getElementById('replayBtn').textContent=tv('replay');
+  document.getElementById('nextBtn').textContent=tv('next');
+  document.getElementById('homeBtn').textContent=tv('home');
+  showScreen('successScreen');
+  saveProgress();
+}
+
+function nextLevel(){
+  currentLevel=Math.min(currentLevel+1,3);
+  startGame();
+}
+
+(function init(){
+  loadProgress();
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+  document.getElementById('btnFR').classList.toggle('active',lang==='fr');
+  document.getElementById('btnEN').classList.toggle('active',lang==='en');
+  document.documentElement.lang=lang;
+  renderUI();
+  showScreen('titleScreen');
+
+  var az=document.getElementById('answerZone');
+  az.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';az.classList.add('drag-over');});
+  az.addEventListener('dragleave',function(){az.classList.remove('drag-over');});
+  az.addEventListener('drop',function(e){
+    e.preventDefault();az.classList.remove('drag-over');
+    if(!dragItem)return;
+    if(dragZone==='bank'){
+      bankWords=bankWords.filter(function(w){return w.id!==dragItem.id;});
+      answerWords.push(dragItem);
+      playClick();renderWordBank();renderAnswerZone();announceState();
+    }
+    dragItem=null;dragZone=null;
+  });
+
+  var wb=document.getElementById('wordBank');
+  wb.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';});
+  wb.addEventListener('drop',function(e){
+    e.preventDefault();
+    if(!dragItem)return;
+    if(dragZone==='answer'){
+      answerWords=answerWords.filter(function(w){return w.id!==dragItem.id;});
+      bankWords.push(dragItem);
+      playClick();renderWordBank();renderAnswerZone();announceState();
+    }
+    dragItem=null;dragZone=null;
+  });
+
+  document.getElementById('gateInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+})();
+</script>
+</body>
+</html>

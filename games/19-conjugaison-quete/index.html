@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Conjugaison Quête / Verb Quest — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#dbeeff 0%,var(--sky-light) 50%,#e8f4ff 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:var(--navy);}
+.topbar{width:100%;max-width:700px;display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);border-radius:0 0 18px 18px;box-shadow:0 4px 16px rgba(15,76,129,.25);}
+.topbar img{height:34px}
+.topbar .brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:#fff;font-size:1.15rem;font-weight:700;flex:1}
+.topbar button{background:rgba(255,255,255,.18);border:none;border-radius:9px;color:#fff;font-size:.85rem;font-weight:700;padding:6px 11px;cursor:pointer;min-width:48px;min-height:36px;transition:background .2s}
+.topbar button.active{background:var(--orange);color:#fff}
+.topbar button:hover{background:rgba(255,255,255,.32)}
+.screen{display:none;flex-direction:column;align-items:center;padding:18px 12px 28px;width:100%;max-width:700px}
+.screen.active{display:flex}
+.mascot-wrap{margin:10px 0 4px}
+h1{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--blue);text-align:center;margin:6px 0 2px;text-shadow:0 2px 0 rgba(15,76,129,.12)}
+.subtitle{color:var(--slate);font-size:1.05rem;text-align:center;margin-bottom:14px}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.35rem;font-weight:700;padding:16px 40px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;margin-top:8px}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-parents{background:none;border:2px solid var(--blue);color:var(--blue);border-radius:12px;font-size:.9rem;padding:8px 18px;cursor:pointer;margin-top:12px;min-height:44px;font-weight:700;transition:background .2s}
+.btn-parents:hover{background:rgba(15,76,129,.08)}
+.gate-box{background:#fff;border-radius:18px;padding:22px 24px;box-shadow:0 4px 24px rgba(15,76,129,.13);width:100%;max-width:400px;text-align:center;margin-top:16px}
+.gate-box h2{color:var(--blue);font-size:1.2rem;margin-bottom:10px}
+.gate-question{font-size:1.4rem;font-weight:700;color:var(--orange);margin:10px 0}
+.gate-input{border:2px solid var(--sky);border-radius:10px;padding:10px 14px;font-size:1.2rem;text-align:center;width:100%;outline:none;margin:8px 0}
+.gate-input:focus{border-color:var(--blue)}
+.gate-err{color:#e53e3e;font-size:.9rem;min-height:20px}
+.btn-gate{background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;padding:12px 24px;cursor:pointer;min-height:48px;margin-top:6px;box-shadow:0 4px 0 var(--blue-dark)}
+.parent-info{background:var(--sky-light);border-radius:14px;padding:14px 18px;color:var(--slate);font-size:.92rem;line-height:1.6;margin-top:12px;text-align:left}
+.parent-info h3{color:var(--blue);margin-bottom:6px}
+.level-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.5rem;color:var(--blue);margin-bottom:4px;text-align:center}
+.progress-bar-wrap{width:100%;max-width:420px;background:rgba(15,76,129,.12);border-radius:99px;height:12px;margin:8px 0 16px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sky),var(--blue));transition:width .4s}
+.adventure-scene{width:100%;max-width:560px;border-radius:22px;overflow:hidden;box-shadow:0 6px 28px rgba(15,76,129,.18);margin-bottom:16px;position:relative;height:180px}
+.scene-svg{width:100%;height:100%}
+.q-card{background:#fff;border-radius:18px;padding:18px 20px 14px;box-shadow:0 4px 20px rgba(15,76,129,.13);width:100%;max-width:500px;text-align:center}
+.q-verb{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--orange);font-weight:700}
+.q-context{font-size:1.05rem;color:var(--slate);margin:4px 0 12px;line-height:1.5}
+.q-context strong{color:var(--blue)}
+.choices{display:flex;flex-direction:column;gap:10px;margin-top:12px;width:100%}
+.choice-btn{background:var(--sky-light);border:2.5px solid var(--sky);border-radius:14px;font-size:1.1rem;font-weight:700;padding:13px 18px;cursor:pointer;transition:background .15s,border-color .15s,transform .1s;min-height:52px;color:var(--navy);}
+.choice-btn:hover:not(:disabled){background:#dbeeff;border-color:var(--blue);transform:translateY(-2px)}
+.choice-btn.correct{background:#d1fae5;border-color:var(--success);color:#065f46}
+.choice-btn.wrong{background:#fee2e2;border-color:#f87171;color:#991b1b}
+.choice-btn:disabled{cursor:default}
+.feedback{font-size:1.1rem;font-weight:700;min-height:30px;margin-top:10px;text-align:center;border-radius:10px;padding:6px 14px;}
+.feedback.ok{color:#065f46;background:#d1fae5}
+.feedback.ko{color:#991b1b;background:#fee2e2}
+.success-card{background:#fff;border-radius:22px;padding:28px 22px;box-shadow:0 6px 28px rgba(15,76,129,.16);text-align:center;width:100%;max-width:460px}
+.stars{font-size:2.4rem;margin:8px 0}
+.success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.8rem;color:var(--blue);margin-bottom:6px}
+.success-sub{color:var(--slate);margin-bottom:18px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn-action{background:var(--orange);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:700;padding:13px 22px;cursor:pointer;box-shadow:0 4px 0 var(--orange-dark);min-height:52px;transition:transform .1s}
+.btn-action:active{transform:translateY(2px)}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:700;padding:13px 22px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);min-height:52px}
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;width:100%;max-width:560px;margin-top:8px}
+.level-card{background:#fff;border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;box-shadow:0 3px 14px rgba(15,76,129,.1);border:2.5px solid transparent;transition:border-color .2s,transform .15s}
+.level-card:hover{border-color:var(--blue);transform:translateY(-3px)}
+.level-card.done{border-color:var(--success)}
+.lc-icon{font-size:2rem}
+.lc-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:.95rem;color:var(--blue);margin-top:4px;font-weight:700}
+.lc-stars{font-size:.9rem;min-height:20px}
+#aria-live{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div aria-live="polite" id="aria-live"></div>
+<div class="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span class="brand">PGRG IA</span>
+  <button id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="btn-mute" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+
+<div id="screen-title" class="screen active" role="main">
+  <div class="mascot-wrap">
+    <svg width="110" height="120" viewBox="0 0 110 120" aria-label="Mascotte magicien" role="img">
+      <ellipse cx="55" cy="90" rx="30" ry="26" fill="#0f4c81"/>
+      <text x="44" y="105" font-size="14">⭐</text>
+      <circle cx="55" cy="52" r="26" fill="#fde68a"/>
+      <circle cx="45" cy="50" r="4" fill="#0f172a"/>
+      <circle cx="65" cy="50" r="4" fill="#0f172a"/>
+      <circle cx="46.5" cy="48.5" r="1.5" fill="#fff"/>
+      <circle cx="66.5" cy="48.5" r="1.5" fill="#fff"/>
+      <path d="M45 60 Q55 68 65 60" stroke="#ea580c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <polygon points="55,8 35,40 75,40" fill="#0a3559"/>
+      <rect x="30" y="38" width="50" height="6" rx="3" fill="#f97316"/>
+      <line x1="78" y1="70" x2="95" y2="55" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="96" cy="54" r="5" fill="#ffd23f" stroke="#f97316" stroke-width="1.5"/>
+      <ellipse cx="28" cy="80" rx="9" ry="5" fill="#0f4c81" transform="rotate(-30 28 80)"/>
+      <ellipse cx="82" cy="78" rx="9" ry="5" fill="#0f4c81" transform="rotate(30 82 78)"/>
+    </svg>
+  </div>
+  <h1 id="t-title"></h1>
+  <p class="subtitle" id="t-sub"></p>
+  <button class="btn-play" onclick="goLevelSelect()" id="t-play"></button>
+  <button class="btn-parents" onclick="openParentGate()" id="t-parents"></button>
+</div>
+
+<div id="screen-parent" class="screen" role="main" aria-label="Espace parents">
+  <div class="gate-box">
+    <h2 id="pg-title"></h2>
+    <p id="pg-q-label"></p>
+    <div class="gate-question" id="pg-question"></div>
+    <input class="gate-input" type="number" id="pg-input" aria-label="Réponse" onkeydown="if(event.key==='Enter')checkGate()">
+    <div class="gate-err" id="pg-err" role="alert"></div>
+    <button class="btn-gate" onclick="checkGate()" id="pg-btn"></button>
+    <div id="pg-info" class="parent-info" style="display:none"></div>
+  </div>
+  <button class="btn-parents" style="margin-top:14px" onclick="showScreen('screen-title')" id="pg-back"></button>
+</div>
+
+<div id="screen-levels" class="screen" role="main" aria-label="Choix du niveau">
+  <h1 id="ls-title"></h1>
+  <div class="level-grid" id="level-grid"></div>
+  <button class="btn-parents" style="margin-top:18px" onclick="showScreen('screen-title')" id="ls-back"></button>
+</div>
+
+<div id="screen-game" class="screen" role="main" aria-label="Jeu">
+  <div class="level-title" id="g-level-name"></div>
+  <div class="progress-bar-wrap" aria-label="Progression">
+    <div class="progress-bar" id="g-progress" style="width:0%"></div>
+  </div>
+  <div class="adventure-scene">
+    <svg class="scene-svg" viewBox="0 0 560 180" id="adventure-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky-g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a8d8f8"/>
+          <stop offset="100%" stop-color="#dbeeff"/>
+        </linearGradient>
+        <linearGradient id="ground-g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#86efac"/>
+          <stop offset="100%" stop-color="#4ade80"/>
+        </linearGradient>
+      </defs>
+      <rect width="560" height="180" fill="url(#sky-g)"/>
+      <rect y="140" width="560" height="40" fill="url(#ground-g)"/>
+      <ellipse cx="280" cy="155" rx="270" ry="10" fill="#fef9c3" opacity=".7"/>
+      <g id="cloud1">
+        <ellipse cx="90" cy="35" rx="35" ry="16" fill="white" opacity=".9"/>
+        <ellipse cx="115" cy="30" rx="22" ry="14" fill="white" opacity=".9"/>
+        <ellipse cx="68" cy="32" rx="20" ry="12" fill="white" opacity=".9"/>
+      </g>
+      <g id="cloud2">
+        <ellipse cx="440" cy="45" rx="30" ry="13" fill="white" opacity=".85"/>
+        <ellipse cx="460" cy="40" rx="18" ry="11" fill="white" opacity=".85"/>
+        <ellipse cx="420" cy="42" rx="16" ry="10" fill="white" opacity=".85"/>
+      </g>
+      <g transform="translate(460,95)">
+        <rect x="-4" y="30" width="8" height="18" fill="#92400e"/>
+        <polygon points="0,-10 -18,30 18,30" fill="#166534"/>
+        <polygon points="0,-28 -14,12 14,12" fill="#14532d"/>
+      </g>
+      <g transform="translate(490,100)">
+        <rect x="-3" y="28" width="6" height="14" fill="#92400e"/>
+        <polygon points="0,-8 -14,28 14,28" fill="#166534"/>
+      </g>
+      <g id="obstacle-g"></g>
+      <g id="hero-g" transform="translate(60,105)">
+        <ellipse cx="0" cy="20" rx="13" ry="16" fill="#0f4c81"/>
+        <circle cx="0" cy="2" r="12" fill="#fde68a"/>
+        <circle cx="-4" cy="0" r="2.5" fill="#0f172a"/>
+        <circle cx="4" cy="0" r="2.5" fill="#0f172a"/>
+        <path d="M-4 7 Q0 11 4 7" stroke="#ea580c" stroke-width="1.5" fill="none"/>
+        <polygon points="0,-15 -9,2 9,2" fill="#0a3559"/>
+        <rect x="-10" y="0" width="20" height="3" rx="1.5" fill="#f97316"/>
+        <line x1="12" y1="12" x2="20" y2="5" stroke="#ffd23f" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="21" cy="4" r="3" fill="#ffd23f"/>
+      </g>
+      <text id="score-display" x="270" y="22" font-size="13" text-anchor="middle" fill="#0a3559" font-weight="700"></text>
+    </svg>
+  </div>
+  <div class="q-card">
+    <div class="q-verb" id="q-verb"></div>
+    <div class="q-context" id="q-context"></div>
+    <div class="choices" id="choices" role="group" aria-label="Choix de réponse"></div>
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive"></div>
+  </div>
+  <button class="btn-parents" style="margin-top:14px" onclick="exitGame()" id="g-quit"></button>
+</div>
+
+<div id="screen-success" class="screen" role="main" aria-label="Niveau terminé">
+  <div class="success-card">
+    <div class="stars" id="s-stars"></div>
+    <div class="success-title" id="s-title"></div>
+    <div class="success-sub" id="s-sub"></div>
+    <div class="btn-row">
+      <button class="btn-action" onclick="replayLevel()" id="s-replay"></button>
+      <button class="btn-action" onclick="nextLevel()" id="s-next" style="display:none"></button>
+      <button class="btn-secondary" onclick="showScreen('screen-levels')" id="s-levels"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    title:"Conjugaison Quête",sub:"Conjugue pour avancer dans l'aventure !",play:"Jouer",parents:"Pour les parents",
+    pg_title:"Espace parents",pg_q_label:"Résoudre pour accéder :",pg_btn:"Valider",pg_err:"Réponse incorrecte, réessaie !",pg_back:"Retour",
+    pg_info:'<h3>Compétence visée</h3><p>Ce jeu entraîne la <strong>conjugaison des verbes</strong> en français (présent, futur, imparfait, passé composé) et en anglais (présent, prétérit, forme en -ing). L\'enfant choisit la bonne forme pour faire avancer son héros.</p><p style="margin-top:8px"><strong>Aucune donnée collectée. Aucune publicité. 100% hors-ligne.</strong></p>',
+    ls_title:"Choisis ton niveau",ls_back:"Accueil",quit:"Quitter",
+    correct:["Excellent ! ✨","Super ! 🌟","Parfait ! 🎉","Bravo ! ⭐","Génial !"],
+    wrong_pre:"Non, c'était :",s_bravo:"Bravo, aventurier !",s_perfect:"Quête accomplie !",
+    s_sub_pts:"points sur",s_replay:"Rejouer",s_next:"Niveau suivant",s_levels:"Niveaux",score_lbl:"Score :"
+  },
+  en:{
+    title:"Verb Quest",sub:"Conjugate to advance in the adventure!",play:"Play",parents:"For parents",
+    pg_title:"Parents area",pg_q_label:"Solve to access:",pg_btn:"Confirm",pg_err:"Wrong answer, try again!",pg_back:"Back",
+    pg_info:'<h3>Learning objective</h3><p>This game trains <strong>verb conjugation</strong> in French (present, future, imperfect, past) and English (present, past simple, -ing form). The child picks the correct form from 3 options.</p><p style="margin-top:8px"><strong>No data collected. No ads. 100% offline.</strong></p>',
+    ls_title:"Choose your level",ls_back:"Home",quit:"Quit",
+    correct:["Excellent! ✨","Super! 🌟","Perfect! 🎉","Bravo! ⭐","Great!"],
+    wrong_pre:"No, it was:",s_bravo:"Well done, adventurer!",s_perfect:"Quest complete!",
+    s_sub_pts:"points out of",s_replay:"Play again",s_next:"Next level",s_levels:"Levels",score_lbl:"Score:"
+  }
+};
+
+const ALL_LEVELS=[
+  {id:"fr1",icon:"🌱",lang:"fr",name:{fr:"Présent — Groupe 1",en:"Present — Group 1 (FR)"},questions:[
+    {verb:"chanter",tense:{fr:"présent",en:"présent"},pronoun:{fr:"je",en:"je"},correct:"chante",wrong:["chantes","chantons"],tmpl:{fr:"Je ___ une chanson.",en:"Je ___ une chanson."}},
+    {verb:"jouer",tense:{fr:"présent",en:"présent"},pronoun:{fr:"nous",en:"nous"},correct:"jouons",wrong:["jouez","jouent"],tmpl:{fr:"Nous ___ au parc.",en:"Nous ___ au parc."}},
+    {verb:"manger",tense:{fr:"présent",en:"présent"},pronoun:{fr:"il",en:"il"},correct:"mange",wrong:["mangent","mangeons"],tmpl:{fr:"Il ___ une pomme.",en:"Il ___ une pomme."}},
+    {verb:"parler",tense:{fr:"présent",en:"présent"},pronoun:{fr:"vous",en:"vous"},correct:"parlez",wrong:["parlent","parlons"],tmpl:{fr:"Vous ___ très bien.",en:"Vous ___ très bien."}},
+    {verb:"trouver",tense:{fr:"présent",en:"présent"},pronoun:{fr:"ils",en:"ils"},correct:"trouvent",wrong:["trouve","trouvons"],tmpl:{fr:"Ils ___ le trésor.",en:"Ils ___ le trésor."}},
+    {verb:"aimer",tense:{fr:"présent",en:"présent"},pronoun:{fr:"tu",en:"tu"},correct:"aimes",wrong:["aime","aimons"],tmpl:{fr:"Tu ___ les aventures.",en:"Tu ___ les aventures."}},
+  ]},
+  {id:"fr2",icon:"🌿",lang:"fr",name:{fr:"Présent — Groupe 2",en:"Present — Group 2 (FR)"},questions:[
+    {verb:"finir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"je",en:"je"},correct:"finis",wrong:["finit","finissons"],tmpl:{fr:"Je ___ mon travail.",en:"Je ___ mon travail."}},
+    {verb:"choisir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"tu",en:"tu"},correct:"choisis",wrong:["choisit","choisissons"],tmpl:{fr:"Tu ___ le bon chemin.",en:"Tu ___ le bon chemin."}},
+    {verb:"grandir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"il",en:"il"},correct:"grandit",wrong:["grandie","grandissent"],tmpl:{fr:"Il ___ vite.",en:"Il ___ vite."}},
+    {verb:"réussir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"nous",en:"nous"},correct:"réussissons",wrong:["réussissez","réussissent"],tmpl:{fr:"Nous ___ la quête.",en:"Nous ___ la quête."}},
+    {verb:"remplir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"vous",en:"vous"},correct:"remplissez",wrong:["remplissons","remplissent"],tmpl:{fr:"Vous ___ le seau.",en:"Vous ___ le seau."}},
+    {verb:"obéir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"ils",en:"ils"},correct:"obéissent",wrong:["obéit","obéissons"],tmpl:{fr:"Ils ___ aux règles.",en:"Ils ___ aux règles."}},
+  ]},
+  {id:"fr3",icon:"🌳",lang:"fr",name:{fr:"Présent — Groupe 3",en:"Present — Group 3 (FR)"},questions:[
+    {verb:"aller",tense:{fr:"présent",en:"présent"},pronoun:{fr:"je",en:"je"},correct:"vais",wrong:["va","allons"],tmpl:{fr:"Je ___ à l'aventure.",en:"Je ___ à l'aventure."}},
+    {verb:"être",tense:{fr:"présent",en:"présent"},pronoun:{fr:"tu",en:"tu"},correct:"es",wrong:["est","êtes"],tmpl:{fr:"Tu ___ courageux.",en:"Tu ___ courageux."}},
+    {verb:"avoir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"nous",en:"nous"},correct:"avons",wrong:["avez","ont"],tmpl:{fr:"Nous ___ un dragon.",en:"Nous ___ un dragon."}},
+    {verb:"faire",tense:{fr:"présent",en:"présent"},pronoun:{fr:"ils",en:"ils"},correct:"font",wrong:["fait","faisons"],tmpl:{fr:"Ils ___ de la magie.",en:"Ils ___ de la magie."}},
+    {verb:"venir",tense:{fr:"présent",en:"présent"},pronoun:{fr:"elle",en:"elle"},correct:"vient",wrong:["viens","venons"],tmpl:{fr:"Elle ___ de loin.",en:"Elle ___ de loin."}},
+    {verb:"prendre",tense:{fr:"présent",en:"présent"},pronoun:{fr:"vous",en:"vous"},correct:"prenez",wrong:["prennent","prend"],tmpl:{fr:"Vous ___ le bon pont.",en:"Vous ___ le bon pont."}},
+  ]},
+  {id:"fr4",icon:"🔮",lang:"fr",name:{fr:"Futur simple",en:"Future tense (FR)"},questions:[
+    {verb:"chanter",tense:{fr:"futur",en:"futur"},pronoun:{fr:"je",en:"je"},correct:"chanterai",wrong:["chantera","chanterons"],tmpl:{fr:"Je ___ demain.",en:"Je ___ demain."}},
+    {verb:"finir",tense:{fr:"futur",en:"futur"},pronoun:{fr:"tu",en:"tu"},correct:"finiras",wrong:["finira","finirez"],tmpl:{fr:"Tu ___ la quête.",en:"Tu ___ la quête."}},
+    {verb:"aller",tense:{fr:"futur",en:"futur"},pronoun:{fr:"nous",en:"nous"},correct:"irons",wrong:["allerons","irez"],tmpl:{fr:"Nous ___ au château.",en:"Nous ___ au château."}},
+    {verb:"être",tense:{fr:"futur",en:"futur"},pronoun:{fr:"il",en:"il"},correct:"sera",wrong:["est","seras"],tmpl:{fr:"Il ___ champion.",en:"Il ___ champion."}},
+    {verb:"avoir",tense:{fr:"futur",en:"futur"},pronoun:{fr:"vous",en:"vous"},correct:"aurez",wrong:["avez","auront"],tmpl:{fr:"Vous ___ la récompense.",en:"Vous ___ la récompense."}},
+    {verb:"faire",tense:{fr:"futur",en:"futur"},pronoun:{fr:"ils",en:"ils"},correct:"feront",wrong:["font","ferez"],tmpl:{fr:"Ils ___ la fête.",en:"Ils ___ la fête."}},
+  ]},
+  {id:"fr5",icon:"📜",lang:"fr",name:{fr:"Imparfait",en:"Imperfect (FR)"},questions:[
+    {verb:"jouer",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"je",en:"je"},correct:"jouais",wrong:["jouait","jouions"],tmpl:{fr:"Je ___ souvent.",en:"Je ___ souvent."}},
+    {verb:"manger",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"tu",en:"tu"},correct:"mangeais",wrong:["mangeait","mangions"],tmpl:{fr:"Tu ___ des fruits.",en:"Tu ___ des fruits."}},
+    {verb:"être",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"nous",en:"nous"},correct:"étions",wrong:["étaient","étiez"],tmpl:{fr:"Nous ___ des guerriers.",en:"Nous ___ des guerriers."}},
+    {verb:"avoir",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"ils",en:"ils"},correct:"avaient",wrong:["avait","aviez"],tmpl:{fr:"Ils ___ de la magie.",en:"Ils ___ de la magie."}},
+    {verb:"aller",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"elle",en:"elle"},correct:"allait",wrong:["allais","allions"],tmpl:{fr:"Elle ___ dans la forêt.",en:"Elle ___ dans la forêt."}},
+    {verb:"finir",tense:{fr:"imparfait",en:"imparfait"},pronoun:{fr:"vous",en:"vous"},correct:"finissiez",wrong:["finissaient","finissions"],tmpl:{fr:"Vous ___ toujours.",en:"Vous ___ toujours."}},
+  ]},
+  {id:"fr6",icon:"⚔️",lang:"fr",name:{fr:"Passé composé",en:"Past tense (FR)"},questions:[
+    {verb:"chanter",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"j'",en:"j'"},correct:"ai chanté",wrong:["avais chanté","a chanté"],tmpl:{fr:"J'___ hier.",en:"J'___ hier."}},
+    {verb:"finir",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"tu",en:"tu"},correct:"as fini",wrong:["a fini","avais fini"],tmpl:{fr:"Tu ___ la quête.",en:"Tu ___ la quête."}},
+    {verb:"aller",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"il",en:"il"},correct:"est allé",wrong:["a allé","était allé"],tmpl:{fr:"Il ___ au château.",en:"Il ___ au château."}},
+    {verb:"faire",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"nous",en:"nous"},correct:"avons fait",wrong:["avions fait","avez fait"],tmpl:{fr:"Nous ___ de la magie.",en:"Nous ___ de la magie."}},
+    {verb:"venir",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"vous",en:"vous"},correct:"êtes venus",wrong:["avez venu","étiez venus"],tmpl:{fr:"Vous ___ ici.",en:"Vous ___ ici."}},
+    {verb:"prendre",tense:{fr:"passé composé",en:"passé composé"},pronoun:{fr:"ils",en:"ils"},correct:"ont pris",wrong:["avaient pris","ont prendu"],tmpl:{fr:"Ils ___ le pont.",en:"Ils ___ le pont."}},
+  ]},
+  {id:"en1",icon:"🇬🇧",lang:"en",name:{fr:"Anglais — Présent",en:"English — Present"},questions:[
+    {verb:"play",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"I",en:"I"},correct:"play",wrong:["plays","playing"],tmpl:{fr:"I ___ every day.",en:"I ___ every day."}},
+    {verb:"run",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"she",en:"she"},correct:"runs",wrong:["run","running"],tmpl:{fr:"She ___ fast.",en:"She ___ fast."}},
+    {verb:"have",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"they",en:"they"},correct:"have",wrong:["has","having"],tmpl:{fr:"They ___ a dragon.",en:"They ___ a dragon."}},
+    {verb:"go",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"he",en:"he"},correct:"goes",wrong:["go","going"],tmpl:{fr:"He ___ to school.",en:"He ___ to school."}},
+    {verb:"be",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"we",en:"we"},correct:"are",wrong:["is","am"],tmpl:{fr:"We ___ brave.",en:"We ___ brave."}},
+    {verb:"do",tense:{fr:"présent",en:"present simple"},pronoun:{fr:"it",en:"it"},correct:"does",wrong:["do","did"],tmpl:{fr:"It ___ not work.",en:"It ___ not work."}},
+  ]},
+  {id:"en2",icon:"🏰",lang:"en",name:{fr:"Anglais — Passé",en:"English — Past Simple"},questions:[
+    {verb:"jump",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"I",en:"I"},correct:"jumped",wrong:["jump","jumps"],tmpl:{fr:"I ___ over the bridge.",en:"I ___ over the bridge."}},
+    {verb:"go",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"she",en:"she"},correct:"went",wrong:["goed","goes"],tmpl:{fr:"She ___ to the castle.",en:"She ___ to the castle."}},
+    {verb:"have",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"they",en:"they"},correct:"had",wrong:["have","haved"],tmpl:{fr:"They ___ a treasure.",en:"They ___ a treasure."}},
+    {verb:"be",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"he",en:"he"},correct:"was",wrong:["were","been"],tmpl:{fr:"He ___ a hero.",en:"He ___ a hero."}},
+    {verb:"make",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"we",en:"we"},correct:"made",wrong:["maked","makes"],tmpl:{fr:"We ___ a spell.",en:"We ___ a spell."}},
+    {verb:"find",tense:{fr:"passé",en:"past simple"},pronoun:{fr:"I",en:"I"},correct:"found",wrong:["finded","finds"],tmpl:{fr:"I ___ the key.",en:"I ___ the key."}},
+  ]},
+  {id:"en3",icon:"✨",lang:"en",name:{fr:"Anglais — Forme -ing",en:"English — -ing Form"},questions:[
+    {verb:"run",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"I am",en:"I am"},correct:"running",wrong:["runing","runs"],tmpl:{fr:"I am ___ fast.",en:"I am ___ fast."}},
+    {verb:"jump",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"she is",en:"she is"},correct:"jumping",wrong:["jumpping","jumped"],tmpl:{fr:"She is ___ high.",en:"She is ___ high."}},
+    {verb:"make",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"we are",en:"we are"},correct:"making",wrong:["makeing","maked"],tmpl:{fr:"We are ___ a potion.",en:"We are ___ a potion."}},
+    {verb:"play",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"they are",en:"they are"},correct:"playing",wrong:["plaing","plays"],tmpl:{fr:"They are ___ a game.",en:"They are ___ a game."}},
+    {verb:"go",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"he is",en:"he is"},correct:"going",wrong:["goeing","went"],tmpl:{fr:"He is ___ to the forest.",en:"He is ___ to the forest."}},
+    {verb:"write",tense:{fr:"-ing",en:"present continuous"},pronoun:{fr:"I am",en:"I am"},correct:"writing",wrong:["writeing","writting"],tmpl:{fr:"I am ___ a spell.",en:"I am ___ a spell."}},
+  ]},
+];
+
+const LS_KEY="pgrg_conjugaison_quete";
+let lang=navigator.language.startsWith("fr")?"fr":"en";
+let muted=false;
+let currentLevelIdx=0,currentQIdx=0,score=0,answered=false;
+let gateA=0,gateB=0,heroX=60,animFrame=null;
+
+function getSaved(id){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||"{}");return d[id]||{stars:0,best:0};}catch(e){return{stars:0,best:0};}}
+function setSaved(id,obj){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||"{}");d[id]=obj;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){}}
+
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  type=type||"sine";vol=vol||0.18;
+  if(muted)return;
+  try{const ac=getAudio(),osc=ac.createOscillator(),gain=ac.createGain();osc.connect(gain);gain.connect(ac.destination);osc.type=type;osc.frequency.value=freq;gain.gain.setValueAtTime(vol,ac.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);osc.start();osc.stop(ac.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(523,.12);setTimeout(function(){playTone(659,.12);},130);setTimeout(function(){playTone(784,.25);},260);}
+function playWrong(){playTone(220,.15,"sawtooth",.12);setTimeout(function(){playTone(196,.2,"sawtooth",.1);},160);}
+function playLevelComplete(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.2);},i*120);});}
+function toggleMute(){muted=!muted;document.getElementById("btn-mute").textContent=muted?"🔇":"🔊";}
+
+function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");var el=document.getElementById(id);announce(el.getAttribute("aria-label")||"");}
+function announce(msg){var el=document.getElementById("aria-live");el.textContent="";setTimeout(function(){el.textContent=msg;},50);}
+function setLang(l){lang=l;document.documentElement.lang=l;document.getElementById("btn-fr").classList.toggle("active",l==="fr");document.getElementById("btn-en").classList.toggle("active",l==="en");render();}
+function render(){
+  var t=T[lang];
+  document.getElementById("t-title").textContent=t.title;
+  document.getElementById("t-sub").textContent=t.sub;
+  document.getElementById("t-play").textContent=t.play;
+  document.getElementById("t-parents").textContent=t.parents;
+  document.getElementById("pg-title").textContent=t.pg_title;
+  document.getElementById("pg-q-label").textContent=t.pg_q_label;
+  document.getElementById("pg-btn").textContent=t.pg_btn;
+  document.getElementById("pg-back").textContent=t.pg_back;
+  document.getElementById("ls-title").textContent=t.ls_title;
+  document.getElementById("ls-back").textContent=t.ls_back;
+  document.getElementById("g-quit").textContent=t.quit;
+  if(document.getElementById("screen-levels").classList.contains("active"))renderLevelSelect();
+}
+function openParentGate(){
+  gateA=Math.floor(Math.random()*9)+2;gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById("pg-question").textContent=gateA+" × "+gateB+" = ?";
+  document.getElementById("pg-input").value="";
+  document.getElementById("pg-err").textContent="";
+  document.getElementById("pg-info").style.display="none";
+  showScreen("screen-parent");
+  setTimeout(function(){document.getElementById("pg-input").focus();},200);
+}
+function checkGate(){
+  var val=parseInt(document.getElementById("pg-input").value,10),t=T[lang];
+  if(val===gateA*gateB){document.getElementById("pg-err").textContent="";document.getElementById("pg-info").style.display="block";document.getElementById("pg-info").innerHTML=t.pg_info;playSuccess();}
+  else{document.getElementById("pg-err").textContent=t.pg_err;playWrong();}
+}
+function goLevelSelect(){renderLevelSelect();showScreen("screen-levels");}
+function renderLevelSelect(){
+  var grid=document.getElementById("level-grid");grid.innerHTML="";
+  ALL_LEVELS.forEach(function(lv,i){
+    var saved=getSaved(lv.id),div=document.createElement("div");
+    div.className="level-card"+(saved.stars>0?" done":"");
+    div.setAttribute("role","button");div.setAttribute("tabindex","0");
+    div.setAttribute("aria-label",lv.name[lang]+(saved.stars>0?" ✔":""));
+    div.innerHTML='<div class="lc-icon">'+lv.icon+'</div><div class="lc-name">'+lv.name[lang]+'</div><div class="lc-stars">'+(saved.stars>0?"⭐".repeat(saved.stars):"")+'</div>';
+    div.onclick=function(){startLevel(i);};
+    div.onkeydown=function(e){if(e.key==="Enter"||e.key===" ")startLevel(i);};
+    grid.appendChild(div);
+  });
+}
+function startLevel(idx){
+  currentLevelIdx=idx;currentQIdx=0;score=0;answered=false;heroX=60;
+  var lv=ALL_LEVELS[idx];
+  document.getElementById("g-level-name").textContent=lv.name[lang];
+  showScreen("screen-game");
+  updateScene();renderQuestion();
+}
+function getObstacleSVG(qIdx){
+  var type=qIdx%3;
+  if(type===0)return'<g><rect x="320" y="125" width="130" height="18" rx="4" fill="#92400e"/><line x1="320" y1="125" x2="320" y2="143" stroke="#78350f" stroke-width="4"/><line x1="450" y1="125" x2="450" y2="143" stroke="#78350f" stroke-width="4"/><rect x="310" y="115" width="150" height="12" rx="3" fill="#b45309"/><ellipse cx="385" cy="150" rx="65" ry="10" fill="#7dd3fc" opacity=".6"/><ellipse cx="385" cy="107" rx="14" ry="16" fill="#86efac"/><circle cx="385" cy="90" r="11" fill="#4ade80"/><circle cx="381" cy="88" r="2.5" fill="#0f172a"/><circle cx="389" cy="88" r="2.5" fill="#0f172a"/><path d="M381 95 Q385 99 389 95" stroke="#166534" stroke-width="1.5" fill="none"/><text x="369" y="76" font-size="12">🛡️</text></g>';
+  if(type===1)return'<g><ellipse cx="390" cy="118" rx="28" ry="20" fill="#f97316"/><circle cx="390" cy="97" r="16" fill="#fb923c"/><circle cx="384" cy="94" r="3" fill="#0f172a"/><circle cx="396" cy="94" r="3" fill="#0f172a"/><path d="M384 102 Q390 107 396 102" stroke="#7c2d12" stroke-width="1.5" fill="none"/><polygon points="385,84 380,72 390,80" fill="#ef4444"/><polygon points="395,84 400,72 390,80" fill="#ef4444"/><path d="M364 105 Q340 85 360 95" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/><path d="M416 105 Q440 85 420 95" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/><text x="378" y="145" font-size="11">🔥</text></g>';
+  return'<g><rect x="355" y="80" width="65" height="65" rx="6" fill="none" stroke="#a855f7" stroke-width="4"/><rect x="364" y="110" width="20" height="35" rx="4" fill="#7c3aed"/><rect x="391" y="110" width="20" height="35" rx="4" fill="#7c3aed"/><ellipse cx="387" cy="95" rx="25" ry="18" fill="#ddd6fe" stroke="#a855f7" stroke-width="3"/><text x="374" y="100" font-size="16">⭐</text><circle cx="363" cy="90" r="4" fill="#ffd23f"/><circle cx="412" cy="90" r="4" fill="#ffd23f"/></g>';
+}
+function updateScene(){
+  var lv=ALL_LEVELS[currentLevelIdx];
+  document.getElementById("obstacle-g").innerHTML=getObstacleSVG(currentQIdx);
+  document.getElementById("score-display").textContent=T[lang].score_lbl+" "+score+"/"+lv.questions.length;
+  document.getElementById("g-progress").style.width=((currentQIdx/lv.questions.length)*100)+"%";
+}
+function moveHero(toX,cb){
+  cancelAnimationFrame(animFrame);
+  var x=heroX;
+  function step(){
+    x+=(toX-x)*.15;if(Math.abs(toX-x)<1){x=toX;}
+    document.getElementById("hero-g").setAttribute("transform","translate("+x+",105)");heroX=x;
+    if(Math.abs(x-toX)>0.5){animFrame=requestAnimationFrame(step);}else if(cb)setTimeout(cb,100);
+  }step();
+}
+function renderQuestion(){
+  var lv=ALL_LEVELS[currentLevelIdx],q=lv.questions[currentQIdx];
+  answered=false;updateScene();
+  document.getElementById("q-verb").textContent=q.verb;
+  document.getElementById("q-context").innerHTML="<strong>"+q.pronoun[lang]+"</strong> — "+q.tense[lang]+"<br><em>"+q.tmpl[lang].replace("___","________")+"</em>";
+  var choices=[q.correct,q.wrong[0],q.wrong[1]];
+  for(var i=choices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=choices[i];choices[i]=choices[j];choices[j]=tmp;}
+  var cont=document.getElementById("choices");cont.innerHTML="";
+  choices.forEach(function(c){
+    var btn=document.createElement("button");btn.className="choice-btn";btn.textContent=c;btn.setAttribute("aria-label",c);
+    btn.onclick=function(){checkAnswer(c,q,lv);};
+    cont.appendChild(btn);
+  });
+  document.getElementById("feedback").textContent="";document.getElementById("feedback").className="feedback";
+}
+function checkAnswer(chosen,q,lv){
+  if(answered)return;answered=true;
+  var t=T[lang],correct=(chosen===q.correct);
+  document.querySelectorAll(".choice-btn").forEach(function(b){
+    b.disabled=true;
+    if(b.textContent===q.correct)b.classList.add("correct");
+    if(b.textContent===chosen&&!correct)b.classList.add("wrong");
+  });
+  var fb=document.getElementById("feedback");
+  if(correct){
+    score++;
+    var msg=t.correct[Math.floor(Math.random()*t.correct.length)];
+    fb.textContent=msg;fb.className="feedback ok";announce(msg);playSuccess();
+    var targetX=Math.min(heroX+55,350);
+    moveHero(targetX,function(){setTimeout(function(){advanceQuestion(lv);},400);});
+  }else{
+    var msg2=t.wrong_pre+" "+q.correct;
+    fb.textContent=msg2;fb.className="feedback ko";announce(msg2);playWrong();
+    setTimeout(function(){advanceQuestion(lv);},1500);
+  }
+}
+function advanceQuestion(lv){currentQIdx++;if(currentQIdx>=lv.questions.length)endLevel(lv);else renderQuestion();}
+function endLevel(lv){
+  cancelAnimationFrame(animFrame);
+  var total=lv.questions.length,pct=score/total,stars=pct>=1?3:pct>=0.67?2:pct>=0.33?1:0,t=T[lang];
+  var prev=getSaved(lv.id);
+  if(stars>prev.stars||score>prev.best)setSaved(lv.id,{stars:Math.max(stars,prev.stars),best:Math.max(score,prev.best)});
+  playLevelComplete();
+  document.getElementById("s-stars").textContent=stars>0?"⭐".repeat(stars):"🌱";
+  document.getElementById("s-title").textContent=stars>=3?t.s_perfect:t.s_bravo;
+  document.getElementById("s-sub").textContent=score+" "+t.s_sub_pts+" "+total;
+  document.getElementById("s-replay").textContent=t.s_replay;
+  document.getElementById("s-levels").textContent=t.s_levels;
+  var hasNext=currentLevelIdx<ALL_LEVELS.length-1,nextBtn=document.getElementById("s-next");
+  nextBtn.textContent=t.s_next;nextBtn.style.display=hasNext?"inline-block":"none";
+  showScreen("screen-success");
+}
+function replayLevel(){startLevel(currentLevelIdx);}
+function nextLevel(){if(currentLevelIdx<ALL_LEVELS.length-1)startLevel(currentLevelIdx+1);else showScreen("screen-levels");}
+function exitGame(){cancelAnimationFrame(animFrame);showScreen("screen-levels");}
+
+(function(){
+  document.getElementById("btn-fr").classList.toggle("active",lang==="fr");
+  document.getElementById("btn-en").classList.toggle("active",lang==="en");
+  document.documentElement.lang=lang;render();showScreen("screen-title");
+})();
+</script>
+</body>
+</html>

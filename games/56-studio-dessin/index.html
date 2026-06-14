@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Studio de Dessin Magique / Magic Draw Studio — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--sky-light);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);padding:6px 14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.25);flex-wrap:wrap;gap:6px;}
+#topbar-left{display:flex;align-items:center;gap:10px;}
+#topbar-left img{height:34px;}
+#brand{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:.5px;}
+#topbar-right{display:flex;gap:6px;align-items:center;}
+.lang-btn{background:transparent;border:2px solid rgba(255,255,255,0.6);color:#fff;border-radius:20px;padding:4px 12px;font-size:.85rem;cursor:pointer;font-weight:700;transition:all .2s;}
+.lang-btn.active,.lang-btn:hover{background:#fff;color:var(--blue);}
+#mute-btn{background:transparent;border:none;font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s;min-width:44px;min-height:44px;}
+#mute-btn:hover{background:rgba(255,255,255,0.2);}
+.screen{display:none;min-height:calc(100vh - 60px);flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+#screen-title{background:linear-gradient(160deg,var(--sky-light) 0%,#d0eeff 100%);justify-content:center;padding:20px;gap:16px;}
+.mascot-wrap{margin:10px 0;}
+.game-title{color:var(--blue);font-size:2.2rem;text-align:center;line-height:1.1;}
+.game-subtitle{color:var(--slate);font-size:1.1rem;text-align:center;max-width:380px;}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:28px;font-size:1.4rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;padding:14px 48px;cursor:pointer;font-weight:700;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;}
+.btn-play:hover{transform:translateY(-2px);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:22px;padding:10px 28px;font-size:1rem;cursor:pointer;font-weight:700;box-shadow:0 4px 0 var(--blue-dark);min-height:48px;transition:transform .1s,box-shadow .1s;font-family:'Nunito',system-ui,sans-serif;}
+.btn-secondary:hover{transform:translateY(-2px);}
+.btn-secondary:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blue-dark);}
+#screen-parents{background:var(--sky-light);justify-content:center;padding:24px;gap:14px;text-align:center;}
+#screen-parents h2{color:var(--blue);font-size:1.6rem;}
+#parent-question{font-size:1.3rem;color:var(--navy);font-weight:700;}
+#parent-input{font-size:1.3rem;padding:10px 18px;border-radius:14px;border:2px solid var(--blue);width:120px;text-align:center;margin:4px 0;}
+#parent-result{font-size:1rem;min-height:24px;color:var(--success);font-weight:700;}
+#parent-info{background:#fff;border-radius:18px;padding:20px;max-width:480px;font-size:.97rem;color:var(--slate);line-height:1.6;display:none;border:2px solid var(--sky);}
+#screen-game{background:var(--sky-light);padding:10px;gap:8px;align-items:stretch;flex-direction:column;}
+#game-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between;}
+#mode-tabs{display:flex;gap:6px;}
+.tab-btn{background:#fff;border:2px solid var(--blue);color:var(--blue);border-radius:20px;padding:6px 18px;font-size:.92rem;cursor:pointer;font-weight:700;min-height:42px;transition:all .2s;font-family:'Nunito',system-ui,sans-serif;}
+.tab-btn.active{background:var(--blue);color:#fff;}
+#guide-animals{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.animal-btn{background:#fff;border:2px solid var(--sky);color:var(--blue);border-radius:16px;padding:6px 14px;font-size:.88rem;cursor:pointer;font-weight:700;min-height:42px;transition:all .2s;font-family:'Nunito',system-ui,sans-serif;}
+.animal-btn.active{background:var(--gold);border-color:var(--orange);color:var(--navy);}
+#canvas-wrap{position:relative;flex:1;display:flex;justify-content:center;align-items:center;}
+#draw-canvas{background:#fff;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);cursor:crosshair;touch-action:none;max-width:100%;max-height:calc(100vh - 280px);}
+#guide-overlay{position:absolute;top:0;left:0;pointer-events:none;border-radius:18px;}
+#toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.09);}
+.color-btn{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;position:relative;min-width:38px;}
+.color-btn.selected{border-color:var(--navy);transform:scale(1.2);}
+.color-btn:hover{transform:scale(1.15);}
+.color-name-tip{position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:.78rem;padding:3px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:20;}
+.color-btn:hover .color-name-tip{opacity:1;}
+.sep{width:1px;height:32px;background:#ddd;margin:0 4px;}
+.size-btn{background:var(--sky-light);border:2px solid var(--sky);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;min-width:38px;min-height:38px;}
+.size-btn.selected{border-color:var(--blue);background:#dbeeff;}
+#eraser-btn,#clear-btn{background:var(--sky-light);border:2px solid var(--sky);border-radius:14px;padding:6px 12px;cursor:pointer;font-size:1.1rem;min-height:38px;transition:all .2s;font-family:'Nunito',system-ui,sans-serif;}
+#eraser-btn.active{background:#ffe4e4;border-color:#f87171;}
+#clear-btn:hover{background:#fff3cd;}
+#guide-info{text-align:center;font-size:1rem;color:var(--blue);font-weight:700;min-height:28px;}
+#step-btn{background:var(--success);color:#fff;border:none;border-radius:20px;padding:8px 24px;font-size:.95rem;cursor:pointer;font-weight:700;min-height:44px;box-shadow:0 4px 0 #25a062;font-family:'Nunito',system-ui,sans-serif;}
+#screen-success{background:linear-gradient(160deg,#e8ffe8,#d0ffe0);justify-content:center;padding:30px;gap:18px;text-align:center;}
+#success-stars{font-size:2.8rem;letter-spacing:4px;}
+#success-title{color:var(--blue);font-size:2rem;}
+#success-sub{color:var(--slate);font-size:1.1rem;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+#aria-live{position:absolute;left:-9999px;height:1px;overflow:hidden;}
+@media(max-width:500px){.game-title{font-size:1.6rem;}#draw-canvas{max-height:calc(100vh - 310px);}}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span id="brand">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+  </div>
+</div>
+<div id="screen-title" class="screen active">
+  <div class="mascot-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="70" cy="85" rx="38" ry="32" fill="#f5c97a"/>
+      <ellipse cx="70" cy="62" rx="32" ry="30" fill="#f5c97a"/>
+      <circle cx="42" cy="38" r="13" fill="#f5c97a"/>
+      <circle cx="42" cy="38" r="8" fill="#f9a8d4"/>
+      <circle cx="98" cy="38" r="13" fill="#f5c97a"/>
+      <circle cx="98" cy="38" r="8" fill="#f9a8d4"/>
+      <ellipse cx="70" cy="68" rx="20" ry="16" fill="#fde8b0"/>
+      <circle cx="59" cy="58" r="5" fill="#1e293b"/>
+      <circle cx="81" cy="58" r="5" fill="#1e293b"/>
+      <circle cx="61" cy="56" r="2" fill="#fff"/>
+      <circle cx="83" cy="56" r="2" fill="#fff"/>
+      <ellipse cx="70" cy="70" rx="8" ry="5" fill="#e879a0"/>
+      <path d="M64 70 Q70 76 76 70" stroke="#c2185b" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="70" cy="42" rx="28" ry="8" fill="#0f4c81"/>
+      <path d="M44 40 Q70 20 96 40" fill="#0f4c81"/>
+      <circle cx="90" cy="30" r="5" fill="#f97316"/>
+      <rect x="98" y="90" width="5" height="30" rx="2" fill="#c97b2a" transform="rotate(-25 100 90)"/>
+      <rect x="97" y="84" width="7" height="10" rx="2" fill="#e0e0e0" transform="rotate(-25 100 90)"/>
+      <ellipse cx="93" cy="117" rx="5" ry="3" fill="#f97316" transform="rotate(-25 100 90)"/>
+      <ellipse cx="45" cy="100" rx="15" ry="11" fill="#fff" stroke="#ccc" stroke-width="1"/>
+      <circle cx="38" cy="97" r="4" fill="#ef4444"/>
+      <circle cx="45" cy="94" r="4" fill="#fbbf24"/>
+      <circle cx="52" cy="97" r="4" fill="#22c55e"/>
+      <circle cx="48" cy="104" r="4" fill="#3b82f6"/>
+      <circle cx="40" cy="104" r="4" fill="#a855f7"/>
+    </svg>
+  </div>
+  <h1 class="game-title title-font" id="t-title">Studio de Dessin Magique</h1>
+  <p class="game-subtitle" id="t-subtitle">Dessine, cree, exprime-toi librement !</p>
+  <button class="btn-play" id="t-play" onclick="showGame()">Jouer !</button>
+  <button class="btn-secondary" id="t-parents" onclick="showParents()" style="margin-top:4px;">Pour les parents</button>
+</div>
+<div id="screen-parents" class="screen">
+  <h2 id="p-title">Espace Parents</h2>
+  <p id="p-question-label">Pour continuer, resoudre :</p>
+  <div id="parent-question"></div>
+  <input id="parent-input" type="number" min="0" max="200" aria-label="Reponse" oninput="checkParent()">
+  <div id="parent-result" aria-live="polite"></div>
+  <div id="parent-info">
+    <strong id="pi-title">A propos de ce jeu</strong><br><br>
+    <span id="pi-text"></span>
+  </div>
+  <button class="btn-secondary" onclick="showTitle()" id="p-back" style="margin-top:10px;">Retour</button>
+</div>
+<div id="screen-game" class="screen">
+  <div id="game-header">
+    <div id="mode-tabs">
+      <button class="tab-btn active" id="tab-free" onclick="setMode('free')">Dessin Libre</button>
+      <button class="tab-btn" id="tab-guide" onclick="setMode('guide')">Dessin Guide</button>
+    </div>
+    <button class="btn-secondary" onclick="showTitle()" id="g-back" style="font-size:.85rem;padding:6px 14px;min-height:40px;">Accueil</button>
+  </div>
+  <div id="guide-animals" style="display:none;">
+    <button class="animal-btn" onclick="selectAnimal('cat')" id="animal-cat">Chat</button>
+    <button class="animal-btn" onclick="selectAnimal('house')" id="animal-house">Maison</button>
+    <button class="animal-btn" onclick="selectAnimal('flower')" id="animal-flower">Fleur</button>
+    <button class="animal-btn" onclick="selectAnimal('car')" id="animal-car">Voiture</button>
+  </div>
+  <div id="guide-info" style="display:none;"></div>
+  <div id="canvas-wrap">
+    <canvas id="draw-canvas"></canvas>
+    <canvas id="guide-overlay"></canvas>
+  </div>
+  <div id="toolbar">
+    <div id="color-palette" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;"></div>
+    <div class="sep"></div>
+    <button class="size-btn selected" onclick="setSize(4)" id="sz1" aria-label="Petit pinceau">
+      <svg width="22" height="22"><circle cx="11" cy="11" r="4" fill="#475569"/></svg>
+    </button>
+    <button class="size-btn" onclick="setSize(10)" id="sz2" aria-label="Pinceau moyen">
+      <svg width="22" height="22"><circle cx="11" cy="11" r="7" fill="#475569"/></svg>
+    </button>
+    <button class="size-btn" onclick="setSize(20)" id="sz3" aria-label="Gros pinceau">
+      <svg width="22" height="22"><circle cx="11" cy="11" r="10" fill="#475569"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button id="eraser-btn" onclick="toggleEraser()" aria-pressed="false">Gomme</button>
+    <button id="clear-btn" onclick="clearCanvas()">Effacer tout</button>
+  </div>
+  <div style="display:flex;justify-content:center;margin-top:4px;">
+    <button id="step-btn" onclick="nextStep()" style="display:none;"></button>
+  </div>
+</div>
+<div id="screen-success" class="screen">
+  <div id="success-stars">Bravo !</div>
+  <h2 class="title-font" id="success-title">Super travail !</h2>
+  <p id="success-sub">Tu as dessine comme un vrai artiste !</p>
+  <div class="btn-row">
+    <button class="btn-play" onclick="replayGuide()" id="s-replay">Rejouer</button>
+    <button class="btn-secondary" onclick="showTitle()" id="s-home">Accueil</button>
+  </div>
+</div>
+<script>
+var T={
+  fr:{
+    title:"Studio de Dessin Magique",subtitle:"Dessine, cree, exprime-toi librement !",
+    play:"🎨 Jouer !",parents:"👨‍👩‍👧 Pour les parents",
+    pTitle:"Espace Parents",pQuestionLabel:"Pour continuer, resoudre :",pBack:"← Retour",
+    piTitle:"A propos de ce jeu",
+    piText:"Studio de Dessin Magique developpe la motricite fine, la creativite et l'expression artistique (5–10 ans). Mode libre : exploration couleurs et formes. Mode guide : decomposer un dessin en etapes simples. Aucune donnee collectee. Aucune publicite. Progression enregistree localement.",
+    tabFree:"🖌️ Dessin Libre",tabGuide:"✏️ Dessin Guide",gBack:"🏠 Accueil",
+    animalLabels:{cat:"🐱 Chat",house:"🏠 Maison",flower:"🌸 Fleur",car:"🚗 Voiture"},
+    guideChoose:"Choisis un sujet a dessiner !",
+    stepBtn:"Etape suivante ➡️",finishBtn:"Terminer 🎉",
+    successTitle:"Bravo !",successSub:"Tu as dessine comme un vrai artiste !",
+    sReplay:"🔄 Rejouer",sHome:"🏠 Accueil",
+    eraser:"Gomme",clearAll:"Effacer tout",
+    colorNames:{"#ef4444":"Rouge","#f97316":"Orange","#fbbf24":"Jaune","#22c55e":"Vert","#0ea5e9":"Bleu ciel","#3b82f6":"Bleu","#8b5cf6":"Violet","#ec4899":"Rose","#6b7280":"Gris","#1e293b":"Noir","#ffffff":"Blanc","#f5c97a":"Sable","#84cc16":"Vert pomme","#06b6d4":"Turquoise"},
+    ariaDrawing:"Dessin en cours",ariaCleared:"Dessin efface",ariaEraserOn:"Gomme activee",ariaEraserOff:"Pinceau active",
+    guideSteps:{
+      cat:["Dessine un grand cercle pour la tete du chat","Ajoute deux triangles pointus pour les oreilles","Dessine deux ronds pour les yeux","Trace un petit nez triangulaire et une bouche en W","Ajoute des moustaches de chaque cote","Dessine le corps en ovale sous la tete","Ajoute une longue queue courbe — Bravo, le chat est fini !"],
+      house:["Dessine un grand carre pour les murs de la maison","Ajoute un triangle pointu sur le dessus pour le toit","Trace une petite porte rectangulaire au centre","Ajoute deux fenetres carrees","Dessine une chemineee sur le toit","Colorie la maison — Super !"],
+      flower:["Dessine un cercle au centre pour le coeur de la fleur","Ajoute 6 grands petales autour du cercle","Trace une longue tige verte vers le bas","Ajoute deux petites feuilles sur la tige","Colorie les petales — Magnifique !"],
+      car:["Dessine un grand rectangle pour le corps de la voiture","Ajoute un rectangle plus petit au-dessus pour le toit","Trace deux grands cercles pour les roues","Ajoute des cercles a l'interieur pour les jantes","Dessine les vitres et les phares","Colorie ta voiture — Elle est prete a rouler !"]
+    }
+  },
+  en:{
+    title:"Magic Draw Studio",subtitle:"Draw, create, express yourself freely!",
+    play:"🎨 Play!",parents:"👨‍👩‍👧 For Parents",
+    pTitle:"Parents Area",pQuestionLabel:"To continue, solve:",pBack:"← Back",
+    piTitle:"About this game",
+    piText:"Magic Draw Studio develops fine motor skills, creativity and artistic expression in children aged 5–10. Free mode: explore colours and shapes. Guided mode: break a drawing into simple steps. No data collected. No ads. Progress saved locally on this device.",
+    tabFree:"🖌️ Free Draw",tabGuide:"✏️ Guided Draw",gBack:"🏠 Home",
+    animalLabels:{cat:"🐱 Cat",house:"🏠 House",flower:"🌸 Flower",car:"🚗 Car"},
+    guideChoose:"Choose a subject to draw!",
+    stepBtn:"Next step ➡️",finishBtn:"Finish 🎉",
+    successTitle:"Well done!",successSub:"You drew like a real artist!",
+    sReplay:"🔄 Play again",sHome:"🏠 Home",
+    eraser:"Eraser",clearAll:"Clear all",
+    colorNames:{"#ef4444":"Red","#f97316":"Orange","#fbbf24":"Yellow","#22c55e":"Green","#0ea5e9":"Sky blue","#3b82f6":"Blue","#8b5cf6":"Purple","#ec4899":"Pink","#6b7280":"Grey","#1e293b":"Black","#ffffff":"White","#f5c97a":"Sand","#84cc16":"Lime green","#06b6d4":"Turquoise"},
+    ariaDrawing:"Drawing in progress",ariaCleared:"Drawing cleared",ariaEraserOn:"Eraser activated",ariaEraserOff:"Brush activated",
+    guideSteps:{
+      cat:["Draw a big circle for the cat's head","Add two pointy triangles for the ears","Draw two circles for the eyes","Draw a small triangle nose and a W-shaped mouth","Add whiskers on each side","Draw an oval body below the head","Add a long curvy tail — The cat is done!"],
+      house:["Draw a big square for the walls","Add a pointy triangle on top for the roof","Draw a small rectangular door in the centre","Add two square windows","Draw a chimney on the roof","Colour the house — Super!"],
+      flower:["Draw a circle in the centre for the flower's heart","Add 6 big petals around the circle","Draw a long green stem downward","Add two small leaves on the stem","Colour the petals — Magnificent!"],
+      car:["Draw a big rectangle for the car body","Add a smaller rectangle on top for the roof","Draw two big circles for the wheels","Add circles inside for the hubcaps","Draw the windows and headlights","Colour your car — Ready to roll!"]
+    }
+  }
+};
+
+var COLORS=["#ef4444","#f97316","#fbbf24","#22c55e","#0ea5e9","#3b82f6","#8b5cf6","#ec4899","#6b7280","#1e293b","#ffffff","#f5c97a","#84cc16","#06b6d4"];
+
+var GUIDE_SHAPES={
+  cat:[
+    {type:'circle',cx:0.5,cy:0.38,r:0.18},
+    {type:'polygon',pts:[[0.34,0.22],[0.29,0.10],[0.42,0.20]]},
+    {type:'polygon',pts:[[0.66,0.22],[0.71,0.10],[0.58,0.20]]},
+    {type:'circle',cx:0.42,cy:0.35,r:0.05},
+    {type:'circle',cx:0.58,cy:0.35,r:0.05},
+    {type:'polygon',pts:[[0.5,0.43],[0.46,0.48],[0.54,0.48]]},
+    {type:'polyline',pts:[[0.44,0.50],[0.47,0.53],[0.50,0.50],[0.53,0.53],[0.56,0.50]]},
+    {type:'polyline',pts:[[0.24,0.44],[0.42,0.46]]},
+    {type:'polyline',pts:[[0.24,0.47],[0.42,0.48]]},
+    {type:'polyline',pts:[[0.76,0.44],[0.58,0.46]]},
+    {type:'polyline',pts:[[0.76,0.47],[0.58,0.48]]},
+    {type:'ellipse',cx:0.5,cy:0.70,rx:0.20,ry:0.16},
+    {type:'polyline',pts:[[0.70,0.80],[0.80,0.75],[0.82,0.65],[0.75,0.60]]}
+  ],
+  house:[
+    {type:'rect',x:0.25,y:0.45,w:0.50,h:0.42},
+    {type:'polygon',pts:[[0.20,0.45],[0.50,0.12],[0.80,0.45]]},
+    {type:'rect',x:0.43,y:0.63,w:0.14,h:0.24},
+    {type:'rect',x:0.28,y:0.52,w:0.12,h:0.12},
+    {type:'rect',x:0.60,y:0.52,w:0.12,h:0.12},
+    {type:'rect',x:0.62,y:0.16,w:0.08,h:0.16}
+  ],
+  flower:[
+    {type:'circle',cx:0.50,cy:0.42,r:0.10},
+    {type:'circle',cx:0.50,cy:0.26,r:0.09},
+    {type:'circle',cx:0.63,cy:0.30,r:0.09},
+    {type:'circle',cx:0.67,cy:0.44,r:0.09},
+    {type:'circle',cx:0.60,cy:0.56,r:0.09},
+    {type:'circle',cx:0.40,cy:0.56,r:0.09},
+    {type:'circle',cx:0.33,cy:0.44,r:0.09},
+    {type:'circle',cx:0.37,cy:0.30,r:0.09},
+    {type:'polyline',pts:[[0.50,0.52],[0.50,0.88]]},
+    {type:'ellipse',cx:0.41,cy:0.69,rx:0.09,ry:0.04},
+    {type:'ellipse',cx:0.59,cy:0.76,rx:0.09,ry:0.04}
+  ],
+  car:[
+    {type:'rect',x:0.12,y:0.50,w:0.76,h:0.24},
+    {type:'rect',x:0.28,y:0.30,w:0.44,h:0.22},
+    {type:'circle',cx:0.27,cy:0.76,r:0.11},
+    {type:'circle',cx:0.73,cy:0.76,r:0.11},
+    {type:'circle',cx:0.27,cy:0.76,r:0.05},
+    {type:'circle',cx:0.73,cy:0.76,r:0.05},
+    {type:'rect',x:0.30,y:0.32,w:0.17,h:0.16},
+    {type:'rect',x:0.53,y:0.32,w:0.17,h:0.16},
+    {type:'rect',x:0.14,y:0.58,w:0.08,h:0.06},
+    {type:'rect',x:0.78,y:0.58,w:0.08,h:0.06}
+  ]
+};
+
+var GUIDE_STEP_SHAPES={
+  cat:[[0],[1,2],[3,4],[5,6],[7,8,9,10],[11],[12]],
+  house:[[0],[1],[2],[3,4],[5]],
+  flower:[[0],[1,2,3,4,5,6,7],[8],[9,10]],
+  car:[[0],[1],[2,3],[4,5],[6,7,8,9]]
+};
+
+var LS_KEY='pgrg_studio_dessin';
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var mode='free';
+var currentAnimal=null;
+var currentStep=0;
+var brushColor='#3b82f6';
+var brushSize=4;
+var eraserOn=false;
+var canvas,ctx,guideCanvas,gctx;
+var drawing=false;
+var lastX=0,lastY=0;
+var soundTimer=null;
+var parentAnswer=0;
+var audioCtx=null;
+
+function getAudio(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,dur,type,vol){
+  if(muted) return;
+  type=type||'sine'; vol=vol||0.15;
+  try{
+    var c=getAudio();
+    var o=c.createOscillator();
+    var g=c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,c.currentTime);
+    g.gain.linearRampToValueAtTime(vol,c.currentTime+0.02);
+    g.gain.linearRampToValueAtTime(0,c.currentTime+dur);
+    o.start(c.currentTime); o.stop(c.currentTime+dur+0.05);
+  }catch(e){}
+}
+function playBrush(){ playTone(220+Math.random()*80,0.07,'triangle',0.05); }
+function playStep(){ playTone(440,0.12,'sine',0.15); setTimeout(function(){playTone(550,0.15,'sine',0.12);},80); }
+function playSuccess(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,0.25,'sine',0.18);},i*120);});}
+function playClear(){ playTone(300,0.15,'sawtooth',0.07); }
+function toggleMute(){ muted=!muted; document.getElementById('mute-btn').textContent=muted?'🔇':'🔊'; }
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI(); saveState();
+}
+function tl(key){ return T[lang][key]||T['fr'][key]||key; }
+function tlObj(key){ return T[lang][key]||T['fr'][key]||{}; }
+
+function renderUI(){
+  document.documentElement.lang=lang;
+  document.getElementById('t-title').textContent=tl('title');
+  document.getElementById('t-subtitle').textContent=tl('subtitle');
+  document.getElementById('t-play').textContent=tl('play');
+  document.getElementById('t-parents').textContent=tl('parents');
+  document.getElementById('p-title').textContent=tl('pTitle');
+  document.getElementById('p-question-label').textContent=tl('pQuestionLabel');
+  document.getElementById('p-back').textContent=tl('pBack');
+  document.getElementById('pi-title').textContent=tl('piTitle');
+  document.getElementById('pi-text').textContent=tl('piText');
+  document.getElementById('tab-free').textContent=tl('tabFree');
+  document.getElementById('tab-guide').textContent=tl('tabGuide');
+  document.getElementById('g-back').textContent=tl('gBack');
+  document.getElementById('eraser-btn').textContent=tl('eraser');
+  document.getElementById('clear-btn').textContent=tl('clearAll');
+  var al=tlObj('animalLabels');
+  Object.keys(al).forEach(function(k){
+    var b=document.getElementById('animal-'+k);
+    if(b) b.textContent=al[k];
+  });
+  updateGuideInfo();
+  updateStepBtn();
+  document.getElementById('success-title').textContent=tl('successTitle');
+  document.getElementById('success-sub').textContent=tl('successSub');
+  document.getElementById('s-replay').textContent=tl('sReplay');
+  document.getElementById('s-home').textContent=tl('sHome');
+  renderColors();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+function showTitle(){ showScreen('screen-title'); }
+function showParents(){
+  showScreen('screen-parents');
+  genParentQuestion();
+  document.getElementById('parent-info').style.display='none';
+  document.getElementById('parent-result').textContent='';
+  document.getElementById('parent-input').value='';
+}
+function showGame(){ showScreen('screen-game'); initCanvas(); }
+function showSuccess(){ showScreen('screen-success'); playSuccess(); document.getElementById('success-stars').textContent='⭐⭐⭐'; }
+
+function genParentQuestion(){
+  var a=Math.floor(Math.random()*9)+2;
+  var b=Math.floor(Math.random()*9)+2;
+  parentAnswer=a*b;
+  document.getElementById('parent-question').textContent=a+' x '+b+' = ?';
+}
+function checkParent(){
+  var v=parseInt(document.getElementById('parent-input').value)||0;
+  if(v===parentAnswer){
+    document.getElementById('parent-result').textContent='✅';
+    document.getElementById('parent-info').style.display='block';
+    playTone(660,0.2,'sine');
+  } else {
+    document.getElementById('parent-result').textContent='';
+    document.getElementById('parent-info').style.display='none';
+  }
+}
+
+function initCanvas(){
+  canvas=document.getElementById('draw-canvas');
+  guideCanvas=document.getElementById('guide-overlay');
+  ctx=canvas.getContext('2d');
+  gctx=guideCanvas.getContext('2d');
+  resizeCanvas();
+  canvas.removeEventListener('pointerdown',onDown);
+  canvas.removeEventListener('pointermove',onMove);
+  canvas.removeEventListener('pointerup',onUp);
+  canvas.removeEventListener('pointercancel',onUp);
+  canvas.removeEventListener('pointerleave',onUp);
+  canvas.addEventListener('pointerdown',onDown,{passive:false});
+  canvas.addEventListener('pointermove',onMove,{passive:false});
+  canvas.addEventListener('pointerup',onUp,{passive:false});
+  canvas.addEventListener('pointercancel',onUp,{passive:false});
+  canvas.addEventListener('pointerleave',onUp,{passive:false});
+  renderColors();
+  updateGuideVisibility();
+  if(mode==='guide'&&currentAnimal){ renderGuideDots(); }
+}
+
+function resizeCanvas(){
+  var wrap=document.getElementById('canvas-wrap');
+  var W=Math.min(wrap.clientWidth-16,700);
+  var H=Math.min(window.innerHeight-310,520,Math.floor(W*0.78));
+  canvas.width=Math.floor(W); canvas.height=Math.floor(H);
+  guideCanvas.width=canvas.width; guideCanvas.height=canvas.height;
+  guideCanvas.style.width=canvas.width+'px'; guideCanvas.style.height=canvas.height+'px';
+  canvas.style.width=canvas.width+'px'; canvas.style.height=canvas.height+'px';
+  guideCanvas.style.position='absolute'; guideCanvas.style.top='0'; guideCanvas.style.left='0';
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(mode==='guide'&&currentAnimal) renderGuideDots();
+}
+
+window.addEventListener('resize',function(){
+  var s=document.querySelector('.screen.active');
+  if(s&&s.id==='screen-game') resizeCanvas();
+});
+
+function getPos(e){
+  var rect=canvas.getBoundingClientRect();
+  var x,y;
+  if(e.pointerType==='touch'||e.touches){
+    x=e.clientX-rect.left; y=e.clientY-rect.top;
+  } else {
+    x=e.clientX-rect.left; y=e.clientY-rect.top;
+  }
+  // scale for canvas vs display
+  var sx=canvas.width/rect.width;
+  var sy=canvas.height/rect.height;
+  return [x*sx,y*sy];
+}
+
+function onDown(e){
+  e.preventDefault();
+  drawing=true;
+  var p=getPos(e);
+  lastX=p[0]; lastY=p[1];
+  ctx.beginPath();
+  ctx.arc(lastX,lastY,eraserOn?brushSize*1.5:brushSize,0,Math.PI*2);
+  ctx.fillStyle=eraserOn?'#ffffff':brushColor;
+  ctx.fill();
+  announce(tl('ariaDrawing'));
+}
+function onMove(e){
+  e.preventDefault();
+  if(!drawing) return;
+  var p=getPos(e);
+  var x=p[0],y=p[1];
+  ctx.beginPath();
+  ctx.moveTo(lastX,lastY);
+  ctx.lineTo(x,y);
+  ctx.strokeStyle=eraserOn?'#ffffff':brushColor;
+  ctx.lineWidth=eraserOn?brushSize*3:brushSize*2;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x,y,eraserOn?brushSize*1.5:brushSize,0,Math.PI*2);
+  ctx.fillStyle=eraserOn?'#ffffff':brushColor;
+  ctx.fill();
+  lastX=x; lastY=y;
+  if(!soundTimer){ soundTimer=setTimeout(function(){playBrush();soundTimer=null;},80); }
+}
+function onUp(e){ drawing=false; }
+
+function renderColors(){
+  var pal=document.getElementById('color-palette');
+  if(!pal) return;
+  pal.innerHTML='';
+  var names=tlObj('colorNames');
+  COLORS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='color-btn'+(c===brushColor?' selected':'');
+    btn.style.background=c;
+    if(c==='#ffffff') btn.style.border='3px solid #ccc';
+    var label=names[c]||c;
+    btn.setAttribute('aria-label',label);
+    var tip=document.createElement('span');
+    tip.className='color-name-tip';
+    tip.textContent=label;
+    btn.appendChild(tip);
+    (function(col){btn.addEventListener('click',function(){selectColor(col);});})(c);
+    pal.appendChild(btn);
+  });
+}
+
+function selectColor(c){
+  brushColor=c;
+  eraserOn=false;
+  var eb=document.getElementById('eraser-btn');
+  eb.classList.remove('active');
+  eb.setAttribute('aria-pressed','false');
+  renderColors();
+}
+
+function setSize(s){
+  brushSize=s;
+  var sizes=[4,10,20];
+  ['sz1','sz2','sz3'].forEach(function(id,i){
+    var b=document.getElementById(id);
+    if(b) b.classList.toggle('selected',sizes[i]===s);
+  });
+}
+
+function toggleEraser(){
+  eraserOn=!eraserOn;
+  var btn=document.getElementById('eraser-btn');
+  btn.classList.toggle('active',eraserOn);
+  btn.setAttribute('aria-pressed',eraserOn?'true':'false');
+  announce(eraserOn?tl('ariaEraserOn'):tl('ariaEraserOff'));
+}
+
+function clearCanvas(){
+  if(!ctx) return;
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  playClear();
+  announce(tl('ariaCleared'));
+  if(mode==='guide'&&currentAnimal) renderGuideDots();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('tab-free').classList.toggle('active',m==='free');
+  document.getElementById('tab-guide').classList.toggle('active',m==='guide');
+  updateGuideVisibility();
+  updateGuideInfo();
+  updateStepBtn();
+  if(m==='guide'){
+    if(currentAnimal) renderGuideDots();
+  } else {
+    if(gctx) gctx.clearRect(0,0,guideCanvas.width,guideCanvas.height);
+  }
+  saveState();
+}
+
+function updateGuideVisibility(){
+  var isGuide=mode==='guide';
+  document.getElementById('guide-animals').style.display=isGuide?'flex':'none';
+  document.getElementById('guide-info').style.display=isGuide?'block':'none';
+  document.getElementById('step-btn').style.display=(isGuide&&currentAnimal)?'inline-block':'none';
+}
+
+function updateGuideInfo(){
+  var el=document.getElementById('guide-info');
+  if(!el) return;
+  if(mode==='guide'){
+    if(!currentAnimal){
+      el.textContent=tl('guideChoose');
+    } else {
+      var steps=T[lang].guideSteps[currentAnimal]||T['fr'].guideSteps[currentAnimal]||[];
+      el.textContent=steps[currentStep]||'';
+    }
+  }
+}
+
+function updateStepBtn(){
+  var btn=document.getElementById('step-btn');
+  if(!btn) return;
+  if(mode==='guide'&&currentAnimal){
+    var steps=T[lang].guideSteps[currentAnimal]||T['fr'].guideSteps[currentAnimal]||[];
+    var isLast=currentStep>=steps.length-1;
+    btn.textContent=isLast?tl('finishBtn'):tl('stepBtn');
+    btn.style.display='inline-block';
+  } else {
+    btn.style.display='none';
+  }
+}
+
+function selectAnimal(a){
+  currentAnimal=a;
+  currentStep=0;
+  document.querySelectorAll('.animal-btn').forEach(function(b){b.classList.remove('active');});
+  var ab=document.getElementById('animal-'+a);
+  if(ab) ab.classList.add('active');
+  clearCanvas();
+  renderGuideDots();
+  updateGuideInfo();
+  updateStepBtn();
+  updateGuideVisibility();
+  playStep();
+  saveState();
+}
+
+function nextStep(){
+  if(!currentAnimal) return;
+  var steps=T[lang].guideSteps[currentAnimal]||T['fr'].guideSteps[currentAnimal]||[];
+  if(currentStep>=steps.length-1){ showSuccess(); return; }
+  currentStep++;
+  renderGuideDots();
+  updateGuideInfo();
+  updateStepBtn();
+  playStep();
+  saveState();
+}
+
+function replayGuide(){
+  currentStep=0;
+  showGame();
+  if(currentAnimal){
+    clearCanvas();
+    renderGuideDots();
+    updateGuideInfo();
+    updateStepBtn();
+  }
+}
+
+function renderGuideDots(){
+  if(!gctx) return;
+  gctx.clearRect(0,0,guideCanvas.width,guideCanvas.height);
+  if(!currentAnimal) return;
+  var shapes=GUIDE_SHAPES[currentAnimal]||[];
+  var stepMap=GUIDE_STEP_SHAPES[currentAnimal]||[];
+  var W=guideCanvas.width,H=guideCanvas.height;
+  for(var s=0;s<currentStep;s++){
+    var idxs=stepMap[s]||[];
+    idxs.forEach(function(i){drawGuideShape(shapes[i],W,H,'rgba(100,160,255,0.20)',1.5,false);});
+  }
+  var curIdxs=stepMap[currentStep]||[];
+  curIdxs.forEach(function(i){drawGuideShape(shapes[i],W,H,'rgba(15,76,129,0.75)',2.5,true);});
+}
+
+function drawGuideShape(shape,W,H,strokeColor,lw,dashed){
+  if(!shape) return;
+  gctx.save();
+  gctx.strokeStyle=strokeColor;
+  gctx.lineWidth=lw;
+  if(dashed) gctx.setLineDash([8,6]);
+  else gctx.setLineDash([]);
+  gctx.beginPath();
+  if(shape.type==='circle'){
+    gctx.arc(shape.cx*W,shape.cy*H,shape.r*Math.min(W,H),0,Math.PI*2);
+  } else if(shape.type==='ellipse'){
+    gctx.ellipse(shape.cx*W,shape.cy*H,shape.rx*W,shape.ry*H,0,0,Math.PI*2);
+  } else if(shape.type==='rect'){
+    gctx.rect(shape.x*W,shape.y*H,shape.w*W,shape.h*H);
+  } else if(shape.type==='polygon'){
+    var pts=shape.pts;
+    gctx.moveTo(pts[0][0]*W,pts[0][1]*H);
+    for(var i=1;i<pts.length;i++) gctx.lineTo(pts[i][0]*W,pts[i][1]*H);
+    gctx.closePath();
+  } else if(shape.type==='polyline'){
+    var pts=shape.pts;
+    gctx.moveTo(pts[0][0]*W,pts[0][1]*H);
+    for(var i=1;i<pts.length;i++) gctx.lineTo(pts[i][0]*W,pts[i][1]*H);
+  }
+  gctx.stroke();
+  gctx.restore();
+}
+
+function announce(msg){
+  var el=document.getElementById('aria-live');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+function saveState(){
+  try{ localStorage.setItem(LS_KEY,JSON.stringify({lang:lang,mode:mode,currentAnimal:currentAnimal,currentStep:currentStep})); }catch(e){}
+}
+function loadState(){
+  try{
+    var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.lang) lang=d.lang;
+    if(d.mode) mode=d.mode;
+    if(d.currentAnimal) currentAnimal=d.currentAnimal;
+    if(typeof d.currentStep==='number') currentStep=d.currentStep;
+  }catch(e){}
+}
+
+loadState();
+renderUI();
+document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+document.getElementById('btn-en').classList.toggle('active',lang==='en');
+</script>
+</body>
+</html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Petit Chef / Little Chef — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#d0eaff 100%);min-height:100vh;color:var(--navy);}
+h1,h2,h3,.title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;gap:8px;padding:6px 12px;flex-wrap:wrap;}
+#topbar img{height:34px;}
+#brand{font-family:'Fredoka',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;flex:1;}
+.btn-lang{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.85rem;font-weight:700;min-width:48px;min-height:36px;}
+.btn-lang.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+#btn-mute{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px;min-width:44px;min-height:44px;}
+.screen{display:none;padding:16px;max-width:700px;margin:0 auto;}
+.screen.active{display:block;}
+#title-mascot{display:flex;justify-content:center;margin:16px 0;}
+#title-name{font-size:2.2rem;text-align:center;color:var(--blue);line-height:1.1;}
+#title-sub{text-align:center;color:var(--slate);font-size:1rem;margin:8px 0 20px;}
+.btn-primary{display:block;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:1.2rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka',system-ui,sans-serif;text-align:center;min-height:52px;width:100%;max-width:300px;margin:0 auto;}
+.btn-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{display:block;background:var(--blue);color:#fff;border:none;border-radius:14px;padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);text-align:center;min-height:48px;font-family:'Fredoka',system-ui,sans-serif;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#btn-parents{background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;margin-top:16px;font-size:.9rem;display:block;text-align:center;}
+#recipe-select{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:16px 0;}
+.recipe-card{background:#fff;border-radius:16px;padding:16px;text-align:center;cursor:pointer;border:3px solid transparent;transition:.2s;min-width:140px;box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.recipe-card:hover{border-color:var(--orange);transform:translateY(-2px);}
+.recipe-card.selected{border-color:var(--orange);background:#fff8f0;}
+.recipe-card .r-emoji{font-size:2.5rem;display:block;margin-bottom:6px;}
+.recipe-card .r-name{font-family:'Fredoka',system-ui,sans-serif;font-size:1rem;color:var(--blue);font-weight:700;}
+.recipe-card .r-diff{font-size:.75rem;color:var(--slate);margin-top:4px;}
+#level-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+#level-info{font-family:'Fredoka',system-ui,sans-serif;font-size:1.1rem;color:var(--blue);font-weight:700;}
+#stars-display{font-size:1.2rem;margin-left:auto;}
+#recipe-title-game{font-size:1.3rem;font-weight:700;color:var(--blue);text-align:center;margin-bottom:4px;}
+#recipe-emoji-game{font-size:2rem;text-align:center;margin-bottom:8px;}
+#steps-progress{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+.step-dot{width:24px;height:24px;border-radius:50%;background:#d1e5f7;border:2px solid #b0cfe8;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--slate);}
+.step-dot.done{background:var(--success);border-color:#22a863;color:#fff;}
+.step-dot.current{background:var(--orange);border-color:var(--orange-dark);color:#fff;animation:pulse .8s ease-in-out infinite alternate;}
+@keyframes pulse{from{transform:scale(1);}to{transform:scale(1.15);}}
+#instruction-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.07);}
+#instruction-icon{font-size:2.2rem;text-align:center;}
+#instruction-text{text-align:center;font-size:1rem;color:var(--navy);margin-top:6px;line-height:1.4;}
+#instruction-qty{text-align:center;font-size:1.4rem;font-weight:700;color:var(--orange);font-family:'Fredoka',system-ui,sans-serif;}
+#shelf-label{font-family:'Fredoka',system-ui,sans-serif;color:var(--blue);font-size:.95rem;margin-bottom:8px;text-align:center;}
+#ingredient-shelf{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px;}
+.ingr-btn{background:#fff;border:3px solid #cce3f5;border-radius:14px;padding:10px 14px;cursor:pointer;text-align:center;transition:.15s;min-width:90px;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Nunito',system-ui,sans-serif;}
+.ingr-btn:hover,.ingr-btn:focus{border-color:var(--orange);background:#fff8f0;transform:scale(1.05);}
+.ingr-btn .i-emoji{font-size:1.8rem;}
+.ingr-btn .i-name{font-size:.75rem;color:var(--slate);font-weight:700;}
+#qty-picker{display:none;background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.1);}
+#qty-title{text-align:center;font-size:.9rem;color:var(--slate);margin-bottom:10px;}
+#qty-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.qty-btn{background:var(--sky-light);border:2px solid var(--sky);border-radius:12px;padding:8px 16px;cursor:pointer;font-size:1rem;font-weight:700;font-family:'Fredoka',system-ui,sans-serif;color:var(--blue);min-width:64px;min-height:48px;transition:.15s;}
+.qty-btn:hover{background:var(--gold);border-color:#e6be00;color:var(--navy);}
+#bowl-area{background:linear-gradient(135deg,#fffde7,#fff8e1);border-radius:16px;padding:14px;margin-bottom:14px;min-height:90px;border:2px dashed var(--gold);}
+#bowl-title{font-size:.85rem;color:var(--slate);text-align:center;margin-bottom:8px;font-weight:700;}
+#bowl-contents{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.bowl-item{background:#fff;border-radius:10px;padding:4px 10px;font-size:.8rem;display:flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.bowl-item .bi-emoji{font-size:1.1rem;}
+.bowl-item .bi-qty{font-weight:700;color:var(--orange);font-size:.75rem;}
+#feedback-area{min-height:44px;text-align:center;font-size:1rem;font-weight:700;padding:8px;border-radius:10px;margin-bottom:8px;}
+#feedback-area.ok{background:#e8faf2;color:#1a8c56;}
+#feedback-area.err{background:#fff0f0;color:#c0392b;}
+#progress-wrap{background:#d1e5f7;border-radius:99px;height:12px;margin-bottom:14px;overflow:hidden;}
+#progress-bar{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:99px;transition:width .4s;}
+#win-dish{text-align:center;font-size:5rem;margin:16px 0;animation:bounce .6s ease infinite alternate;}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-12px);}}
+#win-title{text-align:center;font-family:'Fredoka',system-ui,sans-serif;font-size:2rem;color:var(--orange);margin-bottom:8px;}
+#win-subtitle{text-align:center;color:var(--slate);margin-bottom:20px;}
+#win-stars{text-align:center;font-size:2.5rem;margin-bottom:20px;}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+#modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;}
+#modal-bg.open{display:flex;}
+#modal-box{background:#fff;border-radius:20px;padding:24px;max-width:380px;width:90%;position:relative;}
+#modal-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--slate);}
+#modal-title{font-family:'Fredoka',system-ui,sans-serif;font-size:1.4rem;color:var(--blue);margin-bottom:12px;}
+#parental-gate{text-align:center;}
+#gate-question{font-size:1.1rem;margin-bottom:12px;}
+#gate-input{border:2px solid var(--sky);border-radius:10px;padding:8px 14px;font-size:1.1rem;width:100px;text-align:center;}
+#gate-err{color:#c0392b;font-size:.85rem;margin-top:6px;min-height:20px;}
+#parents-info{display:none;}
+#parents-info p{font-size:.9rem;color:var(--slate);line-height:1.5;margin-bottom:8px;}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){
+  #title-name{font-size:1.7rem;}
+  .ingr-btn{min-width:76px;min-height:64px;}
+  .qty-btn{min-width:54px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span id="brand">PGRG IA</span>
+  <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<div id="screen-title" class="screen active">
+  <div id="title-mascot">
+    <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" aria-label="Mascotte petit chef">
+      <ellipse cx="80" cy="58" rx="32" ry="10" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+      <rect x="54" y="32" width="52" height="28" rx="10" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+      <ellipse cx="80" cy="32" rx="20" ry="14" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+      <circle cx="80" cy="82" r="28" fill="#ffe4b5" stroke="#e8c885" stroke-width="2"/>
+      <ellipse cx="70" cy="78" rx="4" ry="5" fill="#0f4c81"/>
+      <ellipse cx="90" cy="78" rx="4" ry="5" fill="#0f4c81"/>
+      <circle cx="71.5" cy="76.5" r="1.5" fill="#fff"/>
+      <circle cx="91.5" cy="76.5" r="1.5" fill="#fff"/>
+      <path d="M68 88 Q80 98 92 88" stroke="#0f4c81" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="63" cy="87" r="6" fill="#ffb3b3" opacity=".5"/>
+      <circle cx="97" cy="87" r="6" fill="#ffb3b3" opacity=".5"/>
+      <rect x="56" y="108" width="48" height="36" rx="12" fill="#fff" stroke="#0f4c81" stroke-width="2"/>
+      <path d="M68 108 L68 144 Q80 148 92 144 L92 108 Q80 116 68 108Z" fill="#7ec3ee" opacity=".6"/>
+      <line x1="110" y1="112" x2="130" y2="140" stroke="#e8c885" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="132" cy="143" r="6" fill="#e8c885"/>
+      <text x="72" y="132" font-size="12" fill="#f97316">&#9733;</text>
+    </svg>
+  </div>
+  <div id="title-name" class="title">&#127850; Petit Chef</div>
+  <div id="title-sub"></div>
+  <div id="recipe-select-intro" style="margin-bottom:14px;text-align:center;font-size:.95rem;color:var(--slate);"></div>
+  <div id="recipe-select"></div>
+  <br>
+  <button class="btn-primary" id="btn-play" onclick="startGame()"></button>
+  <br>
+  <button id="btn-parents" onclick="openParents()"></button>
+</div>
+<div id="screen-game" class="screen">
+  <div id="level-bar">
+    <span id="level-info"></span>
+    <span id="stars-display">&#11088; <span id="star-count">3</span></span>
+  </div>
+  <div id="recipe-emoji-game"></div>
+  <div id="recipe-title-game"></div>
+  <div id="progress-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="steps-progress"></div>
+  <div id="instruction-card">
+    <div id="instruction-icon"></div>
+    <div id="instruction-text"></div>
+    <div id="instruction-qty"></div>
+  </div>
+  <div id="shelf-label"></div>
+  <div id="ingredient-shelf"></div>
+  <div id="qty-picker">
+    <div id="qty-title"></div>
+    <div id="qty-options"></div>
+  </div>
+  <div id="bowl-area">
+    <div id="bowl-title"></div>
+    <div id="bowl-contents"></div>
+  </div>
+  <div id="feedback-area" aria-live="polite"></div>
+  <button class="btn-secondary" onclick="goHome()" id="btn-home-game" style="margin-top:6px;"></button>
+</div>
+<div id="screen-win" class="screen">
+  <div id="win-dish"></div>
+  <div id="win-title"></div>
+  <div id="win-subtitle"></div>
+  <div id="win-stars"></div>
+  <div class="btn-row">
+    <button class="btn-primary" id="btn-replay" onclick="replayLevel()" style="max-width:200px;"></button>
+    <button class="btn-secondary" id="btn-next-level" onclick="nextLevel()" style="max-width:200px;"></button>
+  </div>
+  <br>
+  <button class="btn-secondary" onclick="goHome()" id="btn-home-win" style="max-width:200px;margin:0 auto;display:block;"></button>
+</div>
+<div id="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-box">
+    <button id="modal-close" onclick="closeParents()" aria-label="Fermer">&#10005;</button>
+    <div id="modal-title"></div>
+    <div id="parental-gate">
+      <div id="gate-question"></div>
+      <input id="gate-input" type="number" min="0" max="200" aria-label="Reponse" inputmode="numeric">
+      <button class="btn-primary" id="gate-submit" onclick="checkGate()" style="margin-top:10px;max-width:180px;font-size:1rem;"></button>
+      <div id="gate-err" aria-live="polite"></div>
+    </div>
+    <div id="parents-info">
+      <p id="pinfo-1"></p>
+      <p id="pinfo-2"></p>
+      <p id="pinfo-3"></p>
+      <p id="pinfo-4"></p>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+var T={
+  fr:{
+    subtitle:"Suis la recette, deviens un grand chef !",
+    selectRecipe:"Choisis ta recette :",
+    play:"Jouer !",
+    parents:"Pour les parents",
+    levelLabel:"Niveau",
+    stepOf:"Etape",
+    shelfLabel:"Clique sur le bon ingredient :",
+    bowlTitle:"Ton bol :",
+    feedbackCorrect:["Bravo !","Super !","Parfait !","Excellent !","Genial !","C'est ca !"],
+    feedbackWrongIngr:"Ce n'est pas le bon ingredient. Essaie encore !",
+    feedbackWrongQty:"Ce n'est pas la bonne quantite. Essaie encore !",
+    qtyTitle:"Quelle quantite ?",
+    btnHome:"Accueil",
+    btnReplay:"Rejouer",
+    btnNextLevel:"Niveau suivant",
+    winTitle:"Bravo, Chef !",
+    winSub:"Tu as reussi la recette ! C'est delicieux !",
+    gateTitle:"Espace parents",
+    gateQ:"Combien font : ",
+    gateSubmit:"Valider",
+    gateErr:"Reponse incorrecte. Reessaie !",
+    pinfo1:"Competences visees : sequences logiques, fractions simples (1/2, 1/4), mesures, autonomie pratique.",
+    pinfo2:"Le jeu propose 3 recettes (cookies, soupe, smoothie) sur 3 niveaux de difficulte croissante.",
+    pinfo3:"Aucune donnee collectee, aucune publicite, 100% hors-ligne.",
+    pinfo4:"PGRG IA -- Jeux educatifs gratuits pour les enfants.",
+    rname:{cookies:"Cookies au chocolat",soup:"Soupe de legumes",smoothie:"Smoothie tropical"},
+    rdiff:{cookies:"Facile",soup:"Moyen",smoothie:"Avance"},
+    units:{cup:"tasse","half":"1/2 tasse","quarter":"1/4 tasse",tbsp:"c. a soupe",tsp:"c. a cafe",piece:"piece",ml:"ml",g:"g"}
+  },
+  en:{
+    subtitle:"Follow the recipe, become a great chef!",
+    selectRecipe:"Choose your recipe:",
+    play:"Play!",
+    parents:"For parents",
+    levelLabel:"Level",
+    stepOf:"Step",
+    shelfLabel:"Click the right ingredient:",
+    bowlTitle:"Your bowl:",
+    feedbackCorrect:["Great!","Super!","Perfect!","Excellent!","Amazing!","That's it!"],
+    feedbackWrongIngr:"That's not the right ingredient. Try again!",
+    feedbackWrongQty:"That's not the right amount. Try again!",
+    qtyTitle:"Which amount?",
+    btnHome:"Home",
+    btnReplay:"Play again",
+    btnNextLevel:"Next level",
+    winTitle:"Well done, Chef!",
+    winSub:"You finished the recipe! It looks delicious!",
+    gateTitle:"Parent zone",
+    gateQ:"What is: ",
+    gateSubmit:"Confirm",
+    gateErr:"Wrong answer. Try again!",
+    pinfo1:"Skills: logical sequences, simple fractions (1/2, 1/4), measurements, practical autonomy.",
+    pinfo2:"3 recipes (cookies, soup, smoothie) across 3 difficulty levels.",
+    pinfo3:"No data collected, no ads, 100% offline.",
+    pinfo4:"PGRG IA -- Free educational games for kids.",
+    rname:{cookies:"Chocolate Cookies",soup:"Vegetable Soup",smoothie:"Tropical Smoothie"},
+    rdiff:{cookies:"Easy",soup:"Medium",smoothie:"Advanced"},
+    units:{cup:"cup","half":"1/2 cup","quarter":"1/4 cup",tbsp:"tbsp",tsp:"tsp",piece:"piece",ml:"ml",g:"g"}
+  }
+};
+
+var RECIPES={
+  cookies:{
+    emoji:"&#127850;",
+    levels:[
+      {steps:[
+        {action:"add",ingr:"flour",emoji:"&#127806;",distract:["butter","sugar","egg"]},
+        {action:"add",ingr:"butter",emoji:"&#129472;",distract:["milk","flour","salt"]},
+        {action:"add",ingr:"sugar",emoji:"&#127852;",distract:["egg","chocolate","flour"]},
+        {action:"add",ingr:"egg",emoji:"&#129370;",distract:["sugar","salt","butter"]},
+        {action:"add",ingr:"chocolate",emoji:"&#127851;",distract:["flour","milk","sugar"]},
+        {action:"mix",ingr:null,emoji:"&#129362;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"flour",qty:"half",unit:"cup",emoji:"&#127806;",distract:["butter","sugar","egg","salt"]},
+        {action:"measure",ingr:"sugar",qty:"quarter",unit:"cup",emoji:"&#127852;",distract:["flour","milk","chocolate","egg"]},
+        {action:"add",ingr:"butter",qty:"2",unit:"tbsp",emoji:"&#129472;",distract:["salt","flour","sugar","milk"]},
+        {action:"add",ingr:"egg",qty:"1",unit:"piece",emoji:"&#129370;",distract:["butter","sugar","salt","chocolate"]},
+        {action:"add",ingr:"chocolate",qty:"half",unit:"cup",emoji:"&#127851;",distract:["flour","milk","sugar","egg"]},
+        {action:"mix",ingr:null,emoji:"&#129362;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"flour",qty:"1",unit:"cup",emoji:"&#127806;",distract:["butter","sugar","egg","salt","milk","chocolate"]},
+        {action:"measure",ingr:"sugar",qty:"half",unit:"cup",emoji:"&#127852;",distract:["flour","salt","milk","chocolate","egg","butter"]},
+        {action:"add",ingr:"salt",qty:"1",unit:"tsp",emoji:"&#129474;",distract:["flour","sugar","milk","butter","egg","chocolate"]},
+        {action:"add",ingr:"butter",qty:"quarter",unit:"cup",emoji:"&#129472;",distract:["salt","flour","sugar","milk","chocolate","egg"]},
+        {action:"add",ingr:"egg",qty:"2",unit:"piece",emoji:"&#129370;",distract:["butter","sugar","salt","flour","milk","chocolate"]},
+        {action:"add",ingr:"chocolate",qty:"half",unit:"cup",emoji:"&#127851;",distract:["flour","milk","sugar","egg","salt","butter"]},
+        {action:"mix",ingr:null,emoji:"&#129362;",distract:[]}
+      ]}
+    ]
+  },
+  soup:{
+    emoji:"&#127858;",
+    levels:[
+      {steps:[
+        {action:"add",ingr:"carrot",emoji:"&#129365;",distract:["tomato","potato","onion"]},
+        {action:"add",ingr:"potato",emoji:"&#129364;",distract:["carrot","leek","pepper"]},
+        {action:"add",ingr:"tomato",emoji:"&#127813;",distract:["potato","carrot","onion"]},
+        {action:"add",ingr:"onion",emoji:"&#129477;",distract:["tomato","carrot","leek"]},
+        {action:"add",ingr:"water",emoji:"&#128167;",distract:["carrot","tomato","potato"]},
+        {action:"heat",ingr:null,emoji:"&#128293;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"carrot",qty:"2",unit:"piece",emoji:"&#129365;",distract:["tomato","potato","onion","pepper","leek"]},
+        {action:"measure",ingr:"potato",qty:"1",unit:"piece",emoji:"&#129364;",distract:["carrot","leek","pepper","onion","tomato"]},
+        {action:"add",ingr:"onion",qty:"half",unit:"piece",emoji:"&#129477;",distract:["tomato","carrot","potato","leek","pepper"]},
+        {action:"add",ingr:"tomato",qty:"2",unit:"piece",emoji:"&#127813;",distract:["potato","onion","carrot","leek","pepper"]},
+        {action:"measure",ingr:"water",qty:"1",unit:"cup",emoji:"&#128167;",distract:["carrot","tomato","potato","onion","pepper"]},
+        {action:"heat",ingr:null,emoji:"&#128293;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"carrot",qty:"3",unit:"piece",emoji:"&#129365;",distract:["tomato","potato","onion","pepper","leek","zucchini"]},
+        {action:"measure",ingr:"potato",qty:"2",unit:"piece",emoji:"&#129364;",distract:["carrot","leek","pepper","onion","tomato","zucchini"]},
+        {action:"add",ingr:"leek",qty:"1",unit:"piece",emoji:"&#127807;",distract:["tomato","carrot","potato","onion","pepper","zucchini"]},
+        {action:"add",ingr:"onion",qty:"half",unit:"piece",emoji:"&#129477;",distract:["leek","tomato","carrot","potato","pepper","zucchini"]},
+        {action:"add",ingr:"tomato",qty:"2",unit:"piece",emoji:"&#127813;",distract:["potato","onion","carrot","leek","pepper","zucchini"]},
+        {action:"measure",ingr:"water",qty:"half",unit:"cup",emoji:"&#128167;",distract:["carrot","tomato","potato","onion","pepper","leek"]},
+        {action:"heat",ingr:null,emoji:"&#128293;",distract:[]}
+      ]}
+    ]
+  },
+  smoothie:{
+    emoji:"&#129380;",
+    levels:[
+      {steps:[
+        {action:"add",ingr:"banana",emoji:"&#127820;",distract:["strawberry","mango","milk"]},
+        {action:"add",ingr:"strawberry",emoji:"&#127827;",distract:["banana","mango","orange"]},
+        {action:"add",ingr:"milk",emoji:"&#129371;",distract:["strawberry","banana","orange"]},
+        {action:"blend",ingr:null,emoji:"&#127826;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"banana",qty:"1",unit:"piece",emoji:"&#127820;",distract:["strawberry","mango","milk","orange","pineapple"]},
+        {action:"measure",ingr:"mango",qty:"half",unit:"cup",emoji:"&#129389;",distract:["banana","strawberry","milk","orange","pineapple"]},
+        {action:"add",ingr:"strawberry",qty:"quarter",unit:"cup",emoji:"&#127827;",distract:["banana","mango","milk","orange","pineapple"]},
+        {action:"measure",ingr:"milk",qty:"half",unit:"cup",emoji:"&#129371;",distract:["banana","mango","strawberry","orange","pineapple"]},
+        {action:"blend",ingr:null,emoji:"&#127826;",distract:[]}
+      ]},
+      {steps:[
+        {action:"measure",ingr:"banana",qty:"1",unit:"piece",emoji:"&#127820;",distract:["strawberry","mango","milk","orange","pineapple","coconut"]},
+        {action:"measure",ingr:"mango",qty:"half",unit:"cup",emoji:"&#129389;",distract:["banana","strawberry","milk","orange","pineapple","coconut"]},
+        {action:"add",ingr:"pineapple",qty:"quarter",unit:"cup",emoji:"&#127821;",distract:["banana","mango","milk","orange","strawberry","coconut"]},
+        {action:"add",ingr:"strawberry",qty:"quarter",unit:"cup",emoji:"&#127827;",distract:["banana","mango","milk","orange","pineapple","coconut"]},
+        {action:"measure",ingr:"coconut",qty:"2",unit:"tbsp",emoji:"&#129381;",distract:["banana","mango","strawberry","orange","pineapple","milk"]},
+        {action:"measure",ingr:"milk",qty:"quarter",unit:"cup",emoji:"&#129371;",distract:["banana","mango","strawberry","orange","pineapple","coconut"]},
+        {action:"blend",ingr:null,emoji:"&#127826;",distract:[]}
+      ]}
+    ]
+  }
+};
+
+var INGR_NAMES={
+  fr:{flour:"Farine",butter:"Beurre",sugar:"Sucre",egg:"Oeuf",chocolate:"Chocolat",salt:"Sel",milk:"Lait",carrot:"Carotte",potato:"Pomme de terre",tomato:"Tomate",onion:"Oignon",leek:"Poireau",pepper:"Poivron",water:"Eau",zucchini:"Courgette",banana:"Banane",strawberry:"Fraise",mango:"Mangue",orange:"Orange",pineapple:"Ananas",coconut:"Noix de coco"},
+  en:{flour:"Flour",butter:"Butter",sugar:"Sugar",egg:"Egg",chocolate:"Chocolate",salt:"Salt",milk:"Milk",carrot:"Carrot",potato:"Potato",tomato:"Tomato",onion:"Onion",leek:"Leek",pepper:"Pepper",water:"Water",zucchini:"Zucchini",banana:"Banana",strawberry:"Strawberry",mango:"Mango",orange:"Orange",pineapple:"Pineapple",coconut:"Coconut"}
+};
+
+var INGR_EMOJI={
+  flour:"&#127806;",butter:"&#129472;",sugar:"&#127852;",egg:"&#129370;",chocolate:"&#127851;",salt:"&#129474;",milk:"&#129371;",
+  carrot:"&#129365;",potato:"&#129364;",tomato:"&#127813;",onion:"&#129477;",leek:"&#127807;",pepper:"&#129393;",water:"&#128167;",zucchini:"&#129388;",
+  banana:"&#127820;",strawberry:"&#127827;",mango:"&#129389;",orange:"&#127818;",pineapple:"&#127821;",coconut:"&#129381;"
+};
+
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var selectedRecipe='cookies';
+var currentLevel=0;
+var currentStep=0;
+var stepPhase='ingr';
+var stars=3;
+var mistakes=0;
+var bowlContents=[];
+var gateA=0,gateB=0;
+var audioCtx=null;
+var STORAGE_KEY='pgrg_petit_chef';
+var progress={};
+try{progress=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');}catch(e){}
+
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playSound(type){
+  if(muted)return;
+  try{
+    var ctx=getAudio();
+    var o=ctx.createOscillator();
+    var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    if(type==='ok'){
+      o.frequency.setValueAtTime(523,ctx.currentTime);
+      o.frequency.setValueAtTime(659,ctx.currentTime+0.1);
+      o.frequency.setValueAtTime(784,ctx.currentTime+0.2);
+      g.gain.setValueAtTime(0.18,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      o.start();o.stop(ctx.currentTime+0.5);
+    }else if(type==='err'){
+      o.frequency.setValueAtTime(280,ctx.currentTime);
+      o.frequency.setValueAtTime(230,ctx.currentTime+0.12);
+      g.gain.setValueAtTime(0.12,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+      o.start();o.stop(ctx.currentTime+0.3);
+    }else if(type==='win'){
+      var freqs=[523,659,784,1047];
+      freqs.forEach(function(f,i){
+        var ow=ctx.createOscillator();var gw=ctx.createGain();
+        ow.connect(gw);gw.connect(ctx.destination);
+        ow.frequency.value=f;
+        gw.gain.setValueAtTime(0.15,ctx.currentTime+i*0.12);
+        gw.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.12+0.4);
+        ow.start(ctx.currentTime+i*0.12);ow.stop(ctx.currentTime+i*0.12+0.4);
+      });
+    }else if(type==='click'){
+      o.frequency.setValueAtTime(660,ctx.currentTime);
+      g.gain.setValueAtTime(0.08,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
+      o.start();o.stop(ctx.currentTime+0.12);
+    }
+  }catch(e){}
+}
+
+function t(key){
+  var keys=key.split('.');
+  var obj=T[lang];
+  for(var i=0;i<keys.length;i++){if(obj===undefined||obj===null)return key;obj=obj[keys[i]];}
+  return obj!==undefined?obj:key;
+}
+function tIngr(name){return(INGR_NAMES[lang]||INGR_NAMES.fr)[name]||name;}
+function fmtQty(qty,unit){
+  var u=t('units.'+unit)||unit;
+  if(qty==='half')return'1/2 '+u;
+  if(qty==='quarter')return'1/4 '+u;
+  return qty+' '+u;
+}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderAll();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function goHome(){showScreen('title');renderTitle();}
+
+function renderAll(){
+  var screen=document.querySelector('.screen.active');
+  var id=screen?screen.id:'screen-title';
+  if(id==='screen-title')renderTitle();
+  else if(id==='screen-game')renderGameUI();
+  else if(id==='screen-win')renderWin();
+  document.getElementById('btn-mute').textContent=muted?'&#128263;':'&#128266;';
+}
+
+function renderTitle(){
+  document.getElementById('title-sub').textContent=t('subtitle');
+  document.getElementById('recipe-select-intro').textContent=t('selectRecipe');
+  document.getElementById('btn-play').textContent=t('play');
+  document.getElementById('btn-parents').textContent=t('parents');
+  var sel=document.getElementById('recipe-select');
+  sel.innerHTML='';
+  ['cookies','soup','smoothie'].forEach(function(key){
+    var prog2=progress[key]||{};
+    var starsStr='';
+    for(var i=0;i<(prog2.maxLevel||0);i++)starsStr+='&#11088;';
+    var card=document.createElement('div');
+    card.className='recipe-card'+(selectedRecipe===key?' selected':'');
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.setAttribute('aria-pressed',selectedRecipe===key?'true':'false');
+    card.innerHTML='<span class="r-emoji">'+RECIPES[key].emoji+'</span><span class="r-name">'+t('rname.'+key)+'</span><span class="r-diff">'+t('rdiff.'+key)+'</span><div style="font-size:.8rem;margin-top:4px;min-height:16px">'+starsStr+'</div>';
+    card.onclick=(function(k){return function(){selectedRecipe=k;renderTitle();playSound('click');};})(key);
+    card.onkeydown=(function(k){return function(e){if(e.key==='Enter'||e.key===' '){selectedRecipe=k;renderTitle();}};})(key);
+    sel.appendChild(card);
+  });
+}
+
+function startGame(){
+  playSound('click');
+  var prog2=progress[selectedRecipe];
+  currentLevel=prog2&&prog2.maxLevel?Math.min(prog2.maxLevel,RECIPES[selectedRecipe].levels.length-1):0;
+  initLevel();
+  showScreen('game');
+}
+
+function initLevel(){
+  currentStep=0;stepPhase='ingr';mistakes=0;stars=3;bowlContents=[];
+  renderGameUI();
+}
+
+function renderGameUI(){
+  var rec=RECIPES[selectedRecipe];
+  var level=rec.levels[currentLevel];
+  var step=level.steps[currentStep];
+  var totalSteps=level.steps.length;
+  document.getElementById('level-info').textContent=t('levelLabel')+' '+(currentLevel+1)+' — '+t('rname.'+selectedRecipe);
+  document.getElementById('recipe-emoji-game').innerHTML=rec.emoji;
+  document.getElementById('recipe-title-game').textContent=t('rname.'+selectedRecipe);
+  document.getElementById('star-count').textContent=repeatStar(stars);
+  var pct=(currentStep/totalSteps)*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  var dotsEl=document.getElementById('steps-progress');
+  dotsEl.innerHTML='';
+  for(var i=0;i<totalSteps;i++){
+    var d=document.createElement('div');
+    d.className='step-dot'+(i<currentStep?' done':i===currentStep?' current':'');
+    d.textContent=i+1;
+    dotsEl.appendChild(d);
+  }
+  renderInstruction(step);
+  document.getElementById('bowl-title').textContent=t('bowlTitle');
+  renderBowl();
+  if(stepPhase==='ingr'){
+    renderShelf(step);
+    document.getElementById('qty-picker').style.display='none';
+  }else{
+    document.getElementById('ingredient-shelf').innerHTML='';
+    document.getElementById('shelf-label').textContent='';
+    renderQtyPicker(step);
+  }
+  var fb=document.getElementById('feedback-area');
+  fb.textContent='';fb.className='';
+  document.getElementById('btn-home-game').textContent=t('btnHome');
+}
+
+function repeatStar(n){var s='';for(var i=0;i<n;i++)s+='&#11088;';return s;}
+
+function renderInstruction(step){
+  var iconEl=document.getElementById('instruction-icon');
+  var textEl=document.getElementById('instruction-text');
+  var qtyEl=document.getElementById('instruction-qty');
+  if(step.action==='mix'){
+    iconEl.innerHTML='&#129362;';
+    textEl.textContent=lang==='fr'?"Melange tous les ingredients !":"Mix all the ingredients!";
+    qtyEl.textContent='';
+  }else if(step.action==='heat'&&!step.ingr){
+    iconEl.innerHTML='&#128293;';
+    textEl.textContent=lang==='fr'?"Chauffe la casserole !":"Heat the pot!";
+    qtyEl.textContent='';
+  }else if(step.action==='blend'){
+    iconEl.innerHTML='&#127826;';
+    textEl.textContent=lang==='fr'?"Mixe le tout !":"Blend it all!";
+    qtyEl.textContent='';
+  }else{
+    iconEl.innerHTML=step.emoji||'';
+    var verb=step.action==='measure'?(lang==='fr'?'Mesure :':'Measure:'):(lang==='fr'?'Ajoute :':'Add:');
+    textEl.textContent=verb+' '+tIngr(step.ingr);
+    qtyEl.textContent=step.qty?fmtQty(step.qty,step.unit):'';
+  }
+}
+
+function renderShelf(step){
+  var shelf=document.getElementById('ingredient-shelf');
+  shelf.innerHTML='';
+  document.getElementById('shelf-label').textContent=t('shelfLabel');
+  if(step.action==='mix'||step.action==='blend'){
+    var lbl=step.action==='mix'?(lang==='fr'?'Melanger':'Mix'):(lang==='fr'?'Mixer':'Blend');
+    var ico=step.action==='mix'?'&#129362;':'&#127826;';
+    var btn=document.createElement('button');
+    btn.className='ingr-btn';btn.setAttribute('aria-label',lbl);
+    btn.innerHTML='<span class="i-emoji">'+ico+'</span><span class="i-name">'+lbl+'</span>';
+    btn.onclick=(function(s){return function(){handleAction(s);};})(step);
+    shelf.appendChild(btn);
+    document.getElementById('shelf-label').textContent='';
+    return;
+  }
+  if(step.action==='heat'&&!step.ingr){
+    var lbl2=lang==='fr'?'Chauffer':'Heat';
+    var btn2=document.createElement('button');
+    btn2.className='ingr-btn';btn2.setAttribute('aria-label',lbl2);
+    btn2.innerHTML='<span class="i-emoji">&#128293;</span><span class="i-name">'+lbl2+'</span>';
+    btn2.onclick=(function(s){return function(){handleAction(s);};})(step);
+    shelf.appendChild(btn2);
+    document.getElementById('shelf-label').textContent='';
+    return;
+  }
+  var options=shuffle([step.ingr].concat(step.distract||[]));
+  options.forEach(function(key){
+    var emoji=INGR_EMOJI[key]||'?';
+    var name=tIngr(key);
+    var btn3=document.createElement('button');
+    btn3.className='ingr-btn';btn3.setAttribute('aria-label',name);
+    btn3.innerHTML='<span class="i-emoji">'+emoji+'</span><span class="i-name">'+name+'</span>';
+    btn3.onclick=(function(k,s,b){return function(){handleIngrClick(k,s,b);};})(key,step,btn3);
+    shelf.appendChild(btn3);
+  });
+}
+
+function renderQtyPicker(step){
+  var picker=document.getElementById('qty-picker');
+  picker.style.display='block';
+  document.getElementById('qty-title').textContent=t('qtyTitle');
+  var optsEl=document.getElementById('qty-options');
+  optsEl.innerHTML='';
+  var wrongs=buildWrongQtys(step.qty,step.unit);
+  var all=shuffle([{qty:step.qty,unit:step.unit}].concat(wrongs));
+  all.forEach(function(item){
+    var btn=document.createElement('button');
+    btn.className='qty-btn';
+    btn.textContent=fmtQty(item.qty,item.unit);
+    btn.onclick=(function(q,s,b){return function(){handleQtyClick(q,s,b);};})(item.qty,step,btn);
+    optsEl.appendChild(btn);
+  });
+}
+
+function buildWrongQtys(correctQty,correctUnit){
+  var pools=['1','2','3','half','quarter'];
+  var unitPool=['cup','tbsp','tsp','piece'];
+  var results=[];
+  var used={};
+  used[correctQty+':'+correctUnit]=true;
+  var otherQtys=pools.filter(function(q){return q!==correctQty;});
+  for(var i=0;i<2&&otherQtys.length>0;i++){
+    var q=otherQtys[Math.floor(Math.random()*otherQtys.length)];
+    var key=q+':'+correctUnit;
+    if(!used[key]){used[key]=true;results.push({qty:q,unit:correctUnit});}
+  }
+  var otherUnits=unitPool.filter(function(u){return u!==correctUnit;});
+  if(otherUnits.length>0){
+    var u=otherUnits[Math.floor(Math.random()*otherUnits.length)];
+    var key2=correctQty+':'+u;
+    if(!used[key2])results.push({qty:correctQty,unit:u});
+  }
+  return results.slice(0,3);
+}
+
+function renderBowl(){
+  var bowlEl=document.getElementById('bowl-contents');
+  bowlEl.innerHTML='';
+  bowlContents.forEach(function(item){
+    var div=document.createElement('div');
+    div.className='bowl-item';
+    div.innerHTML='<span class="bi-emoji">'+item.emoji+'</span><span>'+item.name+'</span>'+(item.qty?'<span class="bi-qty">'+item.qty+'</span>':'');
+    bowlEl.appendChild(div);
+  });
+}
+
+function handleAction(step){
+  playSound('ok');
+  showFeedback(true,'');
+  advanceStep();
+}
+
+function handleIngrClick(key,step,btn){
+  playSound('click');
+  if(key===step.ingr){
+    if(step.qty){
+      stepPhase='qty';
+      btn.style.background='#e8faf2';btn.style.borderColor='var(--success)';
+      setTimeout(function(){renderGameUI();},300);
+    }else{
+      playSound('ok');
+      addToBowl(step);
+      showFeedback(true,'');
+      advanceStep();
+    }
+  }else{
+    mistakes++;
+    if(mistakes>=2&&stars>1){stars--;document.getElementById('star-count').textContent=repeatStar(stars);}
+    playSound('err');
+    showFeedback(false,t('feedbackWrongIngr'));
+    btn.style.border='3px solid #c0392b';
+    setTimeout(function(){if(btn)btn.style.border='3px solid #cce3f5';},800);
+  }
+}
+
+function handleQtyClick(qty,step,btn){
+  if(qty===step.qty){
+    playSound('ok');
+    addToBowl(step);
+    showFeedback(true,'');
+    stepPhase='ingr';
+    advanceStep();
+  }else{
+    mistakes++;
+    if(mistakes>=2&&stars>1){stars--;document.getElementById('star-count').textContent=repeatStar(stars);}
+    playSound('err');
+    showFeedback(false,t('feedbackWrongQty'));
+    btn.style.background='#fff0f0';btn.style.borderColor='#c0392b';
+    setTimeout(function(){if(btn){btn.style.background='';btn.style.borderColor='';}},800);
+  }
+}
+
+function addToBowl(step){
+  if(!step.ingr)return;
+  bowlContents.push({emoji:step.emoji||INGR_EMOJI[step.ingr]||'',name:tIngr(step.ingr),qty:step.qty?fmtQty(step.qty,step.unit):''});
+}
+
+function advanceStep(){
+  var rec=RECIPES[selectedRecipe];
+  var level=rec.levels[currentLevel];
+  currentStep++;
+  if(currentStep>=level.steps.length){
+    setTimeout(function(){finishLevel();},600);
+  }else{
+    setTimeout(function(){renderGameUI();},350);
+  }
+}
+
+function showFeedback(ok,msg){
+  var fb=document.getElementById('feedback-area');
+  if(ok){
+    var msgs=t('feedbackCorrect');
+    var pick=msgs[Math.floor(Math.random()*msgs.length)];
+    fb.textContent=pick;fb.className='ok';setAria(pick);
+  }else{
+    fb.textContent=msg;fb.className='err';setAria(msg);
+  }
+}
+
+function setAria(msg){
+  var el=document.getElementById('aria-live');
+  el.textContent='';
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+function finishLevel(){
+  playSound('win');
+  var maxLevel=currentLevel+1;
+  if(!progress[selectedRecipe])progress[selectedRecipe]={};
+  if((progress[selectedRecipe].maxLevel||0)<maxLevel)progress[selectedRecipe].maxLevel=maxLevel;
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress));}catch(e){}
+  renderWin();
+  showScreen('win');
+}
+
+function renderWin(){
+  var rec=RECIPES[selectedRecipe];
+  document.getElementById('win-dish').innerHTML=rec.emoji;
+  document.getElementById('win-title').textContent=t('winTitle');
+  document.getElementById('win-subtitle').textContent=t('winSub');
+  document.getElementById('win-stars').textContent=repeatStar(stars);
+  document.getElementById('btn-replay').textContent=t('btnReplay');
+  var hasNext=currentLevel<rec.levels.length-1;
+  var nextBtn=document.getElementById('btn-next-level');
+  nextBtn.textContent=t('btnNextLevel');
+  nextBtn.style.display=hasNext?'':'none';
+  document.getElementById('btn-home-win').textContent=t('btnHome');
+}
+
+function replayLevel(){playSound('click');initLevel();showScreen('game');}
+function nextLevel(){
+  playSound('click');
+  var rec=RECIPES[selectedRecipe];
+  if(currentLevel<rec.levels.length-1){currentLevel++;initLevel();showScreen('game');}
+  else goHome();
+}
+
+function openParents(){
+  gateA=Math.floor(Math.random()*9)+2;
+  gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('modal-title').textContent=t('gateTitle');
+  document.getElementById('gate-question').textContent=t('gateQ')+gateA+' x '+gateB+' = ?';
+  document.getElementById('gate-submit').textContent=t('gateSubmit');
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-err').textContent='';
+  document.getElementById('parental-gate').style.display='block';
+  document.getElementById('parents-info').style.display='none';
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(function(){document.getElementById('gate-input').focus();},100);
+}
+function closeParents(){document.getElementById('modal-bg').classList.remove('open');}
+function checkGate(){
+  var val=parseInt(document.getElementById('gate-input').value);
+  if(val===gateA*gateB){
+    document.getElementById('parental-gate').style.display='none';
+    var info=document.getElementById('parents-info');
+    info.style.display='block';
+    document.getElementById('pinfo-1').textContent=t('pinfo1');
+    document.getElementById('pinfo-2').textContent=t('pinfo2');
+    document.getElementById('pinfo-3').textContent=t('pinfo3');
+    document.getElementById('pinfo-4').textContent=t('pinfo4');
+  }else{
+    document.getElementById('gate-err').textContent=t('gateErr');
+    document.getElementById('gate-input').value='';
+    document.getElementById('gate-input').focus();
+  }
+}
+document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+document.getElementById('modal-bg').addEventListener('click',function(e){if(e.target===document.getElementById('modal-bg'))closeParents();});
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'&#128263;':'&#128266;';}
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+setLang(lang);
+renderTitle();
+</script>
+</body>
+</html>

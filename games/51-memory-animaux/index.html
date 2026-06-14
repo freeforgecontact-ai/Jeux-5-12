@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f4c81">
+<title>Memory des Animaux / Animal Memory — PGRG IA</title>
+<style>
+  :root {
+    --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+    --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+    --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+    --success:#34c77b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; min-height: 100vh;
+    font-family: 'Nunito', system-ui, sans-serif;
+    background: linear-gradient(160deg, #eaf6ff 0%, #d0eaff 50%, #e8f4fd 100%);
+    color: var(--navy);
+    overflow-x: hidden;
+  }
+  h1, h2, h3, .brand {
+    font-family: 'Fredoka', 'Baloo 2', 'Nunito', system-ui, sans-serif;
+  }
+  #topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--blue); padding: 8px 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 3px 8px rgba(0,0,0,.25);
+  }
+  .brand-row { display: flex; align-items: center; gap: 8px; color: #fff; }
+  .brand-name { font-family: 'Fredoka','Baloo 2','Nunito',system-ui; font-size: 1.2rem; font-weight: 700; }
+  .topbar-btns { display: flex; gap: 8px; align-items: center; }
+  .lang-btn {
+    background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.4);
+    color: #fff; border-radius: 20px; padding: 4px 12px;
+    font-size: .85rem; font-weight: 700; cursor: pointer; transition: background .2s;
+    min-width: 48px; min-height: 36px;
+  }
+  .lang-btn:hover, .lang-btn.active { background: var(--orange); border-color: var(--orange); }
+  .sound-btn {
+    background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.4);
+    color: #fff; border-radius: 50%; width: 40px; height: 40px;
+    font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .sound-btn:hover { background: rgba(255,255,255,.3); }
+  .screen { display: none; flex-direction: column; align-items: center; padding: 24px 16px 48px; min-height: calc(100vh - 54px); }
+  .screen.active { display: flex; }
+  #screen-title { justify-content: center; gap: 16px; }
+  .mascot-container { margin-top: 8px; }
+  .game-title { font-size: clamp(1.8rem, 6vw, 3rem); color: var(--blue); text-align: center; line-height: 1.1; }
+  .game-subtitle { font-size: clamp(.9rem, 3vw, 1.15rem); color: var(--slate); text-align: center; max-width: 360px; }
+  .levels-preview {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 8px 0;
+  }
+  .level-chip {
+    background: rgba(15,76,129,.1); border: 2px solid var(--sky);
+    border-radius: 12px; padding: 6px 14px; font-size: .85rem; color: var(--blue); font-weight: 700;
+  }
+  .btn-play {
+    background: var(--orange); color: #fff; border: none; border-radius: 24px;
+    padding: 14px 48px; font-size: 1.3rem; font-weight: 800;
+    font-family: 'Fredoka','Baloo 2','Nunito',system-ui;
+    box-shadow: 0 5px 0 var(--orange-dark); cursor: pointer;
+    transition: transform .1s, box-shadow .1s; min-height: 56px;
+    letter-spacing: .02em;
+  }
+  .btn-play:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--orange-dark); }
+  .btn-play:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--orange-dark); }
+  .parental-link {
+    margin-top: 8px; color: var(--slate); font-size: .85rem; cursor: pointer;
+    text-decoration: underline; background: none; border: none;
+    min-height: 44px; padding: 8px;
+  }
+  .parental-link:hover { color: var(--blue); }
+  #parental-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(15,23,42,.7); align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  #parental-overlay.open { display: flex; }
+  .parental-box {
+    background: #fff; border-radius: 20px; padding: 28px 24px; max-width: 340px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35); text-align: center;
+  }
+  .parental-box h2 { color: var(--blue); margin-bottom: 8px; }
+  .parental-box p { color: var(--slate); margin-bottom: 16px; font-size: .95rem; }
+  #parental-question { font-weight: 800; font-size: 1.2rem; color: var(--navy); margin-bottom: 12px; }
+  #parental-input {
+    width: 100%; padding: 10px 14px; border: 2px solid var(--sky); border-radius: 12px;
+    font-size: 1.1rem; text-align: center; font-family: inherit; outline: none; margin-bottom: 12px;
+  }
+  #parental-input:focus { border-color: var(--blue); }
+  #parental-error { color: #e53e3e; font-size: .85rem; min-height: 20px; margin-bottom: 8px; }
+  .parental-btns { display: flex; gap: 10px; }
+  .btn-confirm {
+    flex: 1; background: var(--blue); color: #fff; border: none; border-radius: 14px;
+    padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 0 var(--blue-dark); transition: transform .1s;
+  }
+  .btn-confirm:hover { transform: translateY(-1px); }
+  .btn-cancel {
+    flex: 1; background: #e2e8f0; color: var(--slate); border: none; border-radius: 14px;
+    padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;
+  }
+  #screen-game { gap: 16px; }
+  .game-header {
+    width: 100%; max-width: 540px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .game-info { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .info-chip {
+    background: rgba(15,76,129,.1); border: 2px solid var(--sky);
+    border-radius: 12px; padding: 6px 12px; font-size: .85rem; font-weight: 700; color: var(--blue);
+  }
+  .info-chip span { color: var(--orange); }
+  .btn-home {
+    background: #e2e8f0; border: none; border-radius: 14px; padding: 8px 16px;
+    font-size: .85rem; font-weight: 700; color: var(--slate); cursor: pointer;
+    min-height: 44px; transition: background .2s;
+  }
+  .btn-home:hover { background: #cbd5e1; }
+  .level-selector { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .level-tab {
+    background: rgba(15,76,129,.08); border: 2px solid var(--sky);
+    border-radius: 12px; padding: 6px 16px; font-size: .85rem; font-weight: 700;
+    color: var(--slate); cursor: pointer; min-height: 44px; transition: all .2s;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .level-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .level-tab .best { font-size: .7rem; font-weight: 400; color: var(--gold); }
+  #card-grid {
+    display: grid; gap: 10px; width: 100%; max-width: 520px;
+    justify-items: center; align-items: center;
+  }
+  .card { perspective: 600px; cursor: pointer; width: 100%; aspect-ratio: 1; }
+  .card-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+    border-radius: 16px;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card.matched .card-inner { transform: rotateY(180deg); }
+  .card-front, .card-back {
+    position: absolute; inset: 0; backface-visibility: hidden;
+    border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .card-back {
+    background: var(--blue);
+    box-shadow: 0 4px 12px rgba(15,76,129,.4), inset 0 0 0 3px rgba(255,255,255,.15);
+    color: rgba(255,255,255,.5);
+    user-select: none; font-weight: 900;
+  }
+  .card-back-inner {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 2px;
+    opacity: .4; font-size: clamp(.8rem, 3vw, 1.2rem); line-height: 1;
+    pointer-events: none;
+  }
+  .card-front {
+    transform: rotateY(180deg);
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    font-size: clamp(2rem, 9vw, 4.5rem);
+    user-select: none;
+    border: 3px solid var(--sky-light);
+  }
+  .card.matched .card-front {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: var(--success);
+    box-shadow: 0 4px 16px rgba(52,199,123,.3);
+  }
+  @keyframes shake {
+    0%,100% { transform: rotateY(180deg) translateX(0); }
+    25% { transform: rotateY(180deg) translateX(-6px); }
+    75% { transform: rotateY(180deg) translateX(6px); }
+  }
+  .card.mismatch .card-inner { animation: shake .4s ease; }
+  @keyframes pulse-match {
+    0% { transform: rotateY(180deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.12); }
+    100% { transform: rotateY(180deg) scale(1); }
+  }
+  .card.matched-anim .card-inner { animation: pulse-match .35s ease; }
+  #aria-status { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+  #screen-success { justify-content: center; gap: 20px; text-align: center; }
+  .success-title { font-size: clamp(1.6rem, 5vw, 2.4rem); color: var(--blue); }
+  .stars-row { display: flex; gap: 8px; justify-content: center; }
+  .star {
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+    opacity: .25; transform: scale(.8);
+    transition: opacity .4s, transform .4s;
+  }
+  .star.lit { opacity: 1; transform: scale(1.1); }
+  @keyframes star-pop {
+    0% { transform: scale(.5); opacity: 0; }
+    70% { transform: scale(1.35); opacity: 1; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+  .star.pop { animation: star-pop .45s ease forwards; }
+  .success-stats { color: var(--slate); font-size: 1rem; }
+  .best-score-badge {
+    background: linear-gradient(135deg, var(--gold), #ffb700);
+    border-radius: 16px; padding: 8px 20px;
+    font-weight: 800; font-size: 1rem; color: var(--navy);
+    display: inline-block; box-shadow: 0 3px 8px rgba(0,0,0,.15);
+  }
+  .success-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .btn-replay {
+    background: var(--orange); color: #fff; border: none; border-radius: 20px;
+    padding: 12px 28px; font-size: 1rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 5px 0 var(--orange-dark); min-height: 52px;
+    font-family: 'Fredoka','Baloo 2','Nunito',system-ui;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-replay:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--orange-dark); }
+  .btn-replay:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--orange-dark); }
+  .btn-next {
+    background: var(--blue); color: #fff; border: none; border-radius: 20px;
+    padding: 12px 28px; font-size: 1rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 5px 0 var(--blue-dark); min-height: 52px;
+    font-family: 'Fredoka','Baloo 2','Nunito',system-ui;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--blue-dark); }
+  .btn-next:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--blue-dark); }
+  .btn-home2 {
+    background: #e2e8f0; color: var(--slate); border: none; border-radius: 20px;
+    padding: 12px 24px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    min-height: 52px; font-family: inherit; transition: background .2s;
+  }
+  .btn-home2:hover { background: #cbd5e1; }
+  #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 200; width: 100%; height: 100%; }
+  @media (max-width: 380px) { #card-grid { gap: 6px; } }
+  @media (min-width: 600px) { #card-grid { gap: 14px; } }
+</style>
+</head>
+<body>
+<div aria-live="polite" aria-atomic="true" id="aria-status"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="topbar" role="banner">
+  <div class="brand-row">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span class="brand-name">PGRG IA</span>
+  </div>
+  <div class="topbar-btns">
+    <button class="lang-btn" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button class="sound-btn" id="sound-toggle" onclick="toggleSound()" aria-label="Son activé">🔊</button>
+  </div>
+</div>
+
+<div id="parental-overlay" role="dialog" aria-modal="true" aria-labelledby="parental-title">
+  <div class="parental-box">
+    <h2 id="parental-title">Pour les parents</h2>
+    <p id="parental-desc">Ce jeu est conçu pour les enfants de 5 à 8 ans.</p>
+    <div id="parental-question"></div>
+    <input type="number" id="parental-input" inputmode="numeric" min="0" max="999" aria-label="Réponse">
+    <div id="parental-error" role="alert"></div>
+    <div class="parental-btns">
+      <button class="btn-cancel" id="parental-cancel-btn" onclick="closeParental()">Annuler</button>
+      <button class="btn-confirm" onclick="checkParental()">OK</button>
+    </div>
+  </div>
+</div>
+
+<main>
+<section id="screen-title" class="screen active" aria-label="Écran titre">
+  <div class="mascot-container">
+    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
+      <ellipse cx="60" cy="76" rx="34" ry="38" fill="#f97316"/>
+      <ellipse cx="28" cy="82" rx="14" ry="22" fill="#ea580c" transform="rotate(-15 28 82)"/>
+      <ellipse cx="92" cy="82" rx="14" ry="22" fill="#ea580c" transform="rotate(15 92 82)"/>
+      <ellipse cx="60" cy="84" rx="22" ry="26" fill="#ffd23f"/>
+      <ellipse cx="60" cy="46" rx="28" ry="26" fill="#f97316"/>
+      <polygon points="34,24 40,6 50,22" fill="#ea580c"/>
+      <polygon points="86,24 80,6 70,22" fill="#ea580c"/>
+      <circle cx="48" cy="46" r="12" fill="#fff"/>
+      <circle cx="72" cy="46" r="12" fill="#fff"/>
+      <circle cx="48" cy="46" r="9" fill="#0f4c81"/>
+      <circle cx="72" cy="46" r="9" fill="#0f4c81"/>
+      <circle cx="49" cy="45" r="5" fill="#0f172a"/>
+      <circle cx="73" cy="45" r="5" fill="#0f172a"/>
+      <circle cx="51" cy="43" r="2" fill="#fff"/>
+      <circle cx="75" cy="43" r="2" fill="#fff"/>
+      <polygon points="60,55 53,62 67,62" fill="#ffd23f"/>
+      <ellipse cx="48" cy="112" rx="10" ry="5" fill="#ea580c" transform="rotate(-10 48 112)"/>
+      <ellipse cx="72" cy="112" rx="10" ry="5" fill="#ea580c" transform="rotate(10 72 112)"/>
+    </svg>
+  </div>
+  <h1 class="game-title" id="title-main">Memory des Animaux</h1>
+  <p class="game-subtitle" id="title-sub">Retrouve toutes les paires d'animaux ! Entraîne ta mémoire.</p>
+  <div class="levels-preview">
+    <span class="level-chip" id="chip-easy">Facile 2×2</span>
+    <span class="level-chip" id="chip-med">Moyen 2×3</span>
+    <span class="level-chip" id="chip-hard">Difficile 4×4</span>
+  </div>
+  <button class="btn-play" id="play-btn" onclick="startGame(0)">Jouer !</button>
+  <button class="parental-link" id="parental-btn" onclick="openParental()">Pour les parents</button>
+</section>
+
+<section id="screen-game" class="screen" aria-label="Jeu">
+  <div class="game-header">
+    <div class="game-info">
+      <div class="info-chip" id="chip-level"></div>
+      <div class="info-chip" id="chip-moves"></div>
+      <div class="info-chip" id="chip-pairs"></div>
+    </div>
+    <button class="btn-home" id="home-btn-game" onclick="goHome()">🏠 Accueil</button>
+  </div>
+  <div class="level-selector" id="level-selector" role="tablist">
+    <button class="level-tab" role="tab" aria-selected="false" id="tab-0" onclick="startGame(0)">
+      <span id="tab-label-0">Facile</span>
+      <span class="best" id="best-0"></span>
+    </button>
+    <button class="level-tab" role="tab" aria-selected="false" id="tab-1" onclick="startGame(1)">
+      <span id="tab-label-1">Moyen</span>
+      <span class="best" id="best-1"></span>
+    </button>
+    <button class="level-tab" role="tab" aria-selected="false" id="tab-2" onclick="startGame(2)">
+      <span id="tab-label-2">Difficile</span>
+      <span class="best" id="best-2"></span>
+    </button>
+  </div>
+  <div id="card-grid" role="list"></div>
+</section>
+
+<section id="screen-success" class="screen" aria-label="Félicitations">
+  <h2 class="success-title" id="success-title">Bravo !</h2>
+  <div class="stars-row" id="stars-row">
+    <span class="star" id="star1">⭐</span>
+    <span class="star" id="star2">⭐</span>
+    <span class="star" id="star3">⭐</span>
+  </div>
+  <p class="success-stats" id="success-stats"></p>
+  <div id="best-badge-wrap"></div>
+  <div class="success-btns">
+    <button class="btn-replay" id="replay-btn" onclick="replayLevel()">Rejouer</button>
+    <button class="btn-next" id="btn-next-level" onclick="nextLevel()">Niveau suivant →</button>
+    <button class="btn-home2" id="home-btn-success" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</section>
+</main>
+
+<script>
+(function() {
+"use strict";
+
+// ===== TRANSLATIONS =====
+var T = {
+  fr: {
+    game_title: "Memory des Animaux",
+    game_subtitle: "Retrouve toutes les paires d'animaux ! Entraîne ta mémoire.",
+    chip_easy: "Facile 2×2", chip_med: "Moyen 2×3", chip_hard: "Difficile 4×4",
+    play_btn: "Jouer !",
+    parental_btn: "Pour les parents",
+    parental_title: "Pour les parents",
+    parental_desc: "Ce jeu est conçu pour les enfants de 5 à 8 ans. Aucune publicité, aucune donnée collectée.",
+    parental_q: "{a} × {b} = ?",
+    cancel: "Annuler", confirm: "Valider",
+    parental_wrong: "Ce n'est pas le bon résultat. Essayez encore !",
+    home_btn: "🏠 Accueil",
+    tab_easy: "Facile", tab_med: "Moyen", tab_hard: "Difficile",
+    level_label: "Niveau", moves_label: "Coups", pairs_label: "Paires", best_label: "Mieux",
+    success_3: "Parfait ! 🎉", success_2: "Bien joué ! 😊", success_1: "Bravo ! Continue ! 🙂",
+    success_stats: "Toutes les paires en {moves} coups !",
+    best_new: "🏆 Nouveau record !",
+    best_prev: "🏆 Meilleur : {n} coups",
+    replay_btn: "Rejouer", next_btn: "Niveau suivant →",
+    level_names: ["Facile (2×2)", "Moyen (2×3)", "Difficile (4×4)"],
+    card_hidden: "Carte cachée {i}",
+    card_flip: "{animal}",
+    pair_found: "Paire trouvée !",
+    no_match: "Pas une paire, réessaie."
+  },
+  en: {
+    game_title: "Animal Memory",
+    game_subtitle: "Find all the animal pairs! Train your memory.",
+    chip_easy: "Easy 2×2", chip_med: "Medium 2×3", chip_hard: "Hard 4×4",
+    play_btn: "Play!",
+    parental_btn: "For parents",
+    parental_title: "For parents",
+    parental_desc: "This game is designed for children ages 5–8. No ads, no data collected.",
+    parental_q: "{a} × {b} = ?",
+    cancel: "Cancel", confirm: "OK",
+    parental_wrong: "That's not right. Please try again!",
+    home_btn: "🏠 Home",
+    tab_easy: "Easy", tab_med: "Medium", tab_hard: "Hard",
+    level_label: "Level", moves_label: "Moves", pairs_label: "Pairs", best_label: "Best",
+    success_3: "Perfect! 🎉", success_2: "Nice job! 😊", success_1: "Keep going! 🙂",
+    success_stats: "All pairs in {moves} moves!",
+    best_new: "🏆 New record!",
+    best_prev: "🏆 Best: {n} moves",
+    replay_btn: "Play Again", next_btn: "Next Level →",
+    level_names: ["Easy (2×2)", "Medium (2×3)", "Hard (4×4)"],
+    card_hidden: "Hidden card {i}",
+    card_flip: "{animal}",
+    pair_found: "Pair found!",
+    no_match: "Not a pair, try again."
+  }
+};
+
+// ===== GLOBALS =====
+var lang = (navigator.language || 'fr').startsWith('fr') ? 'fr' : 'en';
+var soundOn = true;
+var currentLevel = 0;
+var cards = [];
+var flipped = [];
+var matched = 0;
+var moves = 0;
+var totalPairs = 0;
+var locked = false;
+var lastMoves = 0;
+var lastLevel = 0;
+var parentalA = 0, parentalB = 0, parentalAns = 0;
+var confettiRaf = null;
+var confettiParts = [];
+
+var LEVELS = [
+  {cols:2, rows:2, pairs:2},
+  {cols:3, rows:2, pairs:3},
+  {cols:4, rows:4, pairs:8}
+];
+
+var ALL_ANIMALS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🦁','🐯','🦄','🐸','🐮','🐷','🐙'];
+
+var LS_KEY = 'pgrg_memory_animaux';
+
+// ===== I18N =====
+function tr(key, vars) {
+  var src = T[lang] || T['fr'];
+  var s = src[key] !== undefined ? src[key] : ((T['fr'][key]) || key);
+  if (vars) {
+    Object.keys(vars).forEach(function(k) { s = s.replace('{' + k + '}', vars[k]); });
+  }
+  return s;
+}
+
+function renderAll() {
+  document.documentElement.lang = lang;
+  document.title = tr('game_title') + ' — PGRG IA';
+  setText('title-main', tr('game_title'));
+  setText('title-sub', tr('game_subtitle'));
+  setText('chip-easy', tr('chip_easy'));
+  setText('chip-med', tr('chip_med'));
+  setText('chip-hard', tr('chip_hard'));
+  setText('play-btn', tr('play_btn'));
+  setText('parental-btn', tr('parental_btn'));
+  setText('home-btn-game', tr('home_btn'));
+  setText('tab-label-0', tr('tab_easy'));
+  setText('tab-label-1', tr('tab_med'));
+  setText('tab-label-2', tr('tab_hard'));
+  setText('replay-btn', tr('replay_btn'));
+  setText('btn-next-level', tr('next_btn'));
+  setText('home-btn-success', tr('home_btn'));
+  setText('parental-cancel-btn', tr('cancel'));
+  document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  updateGameUI();
+  renderBestScores();
+}
+
+function setText(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+window.setLang = function(l) {
+  lang = l;
+  renderAll();
+  var s = currentScreen();
+  if (s === 'success') renderSuccessText();
+};
+
+// ===== SOUND =====
+var audioCtx = null;
+function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return audioCtx;
+}
+function playTone(freq, type, dur, vol, delay) {
+  if (!soundOn) return;
+  var ctx = getAudio(); if (!ctx) return;
+  try {
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type || 'sine';
+    var t0 = ctx.currentTime + (delay || 0);
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.001, t0);
+    gain.gain.linearRampToValueAtTime(vol || 0.15, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  } catch(e) {}
+}
+function sndFlip()    { playTone(440,'sine',0.1,0.12); }
+function sndMatch()   { playTone(523,'sine',0.12,0.18); playTone(659,'sine',0.14,0.18,0.1); playTone(784,'sine',0.18,0.18,0.22); }
+function sndMiss()    { playTone(220,'sawtooth',0.12,0.07); playTone(196,'sawtooth',0.12,0.07,0.13); }
+function sndWin()     { [523,587,659,698,784,880,1047].forEach(function(f,i){ playTone(f,'sine',0.22,0.14,i*0.09); }); }
+
+window.toggleSound = function() {
+  soundOn = !soundOn;
+  var btn = document.getElementById('sound-toggle');
+  btn.textContent = soundOn ? '🔊' : '🔇';
+  btn.setAttribute('aria-label', soundOn ? 'Son activé' : 'Son désactivé');
+};
+
+// ===== LOCALSTORAGE =====
+function loadData() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e) { return {}; } }
+function saveData(d) { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch(e) {} }
+function getBest(lv) { return loadData()['b'+lv] || null; }
+function saveBest(lv, mv) {
+  var d = loadData(); var prev = d['b'+lv] || null;
+  if (prev === null || mv < prev) { d['b'+lv] = mv; saveData(d); return true; }
+  return false;
+}
+
+// ===== SCREENS =====
+function currentScreen() {
+  if (document.getElementById('screen-title').classList.contains('active')) return 'title';
+  if (document.getElementById('screen-game').classList.contains('active')) return 'game';
+  if (document.getElementById('screen-success').classList.contains('active')) return 'success';
+  return '';
+}
+function showScreen(id) {
+  ['screen-title','screen-game','screen-success'].forEach(function(s) {
+    document.getElementById(s).classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== PARENTAL GATE =====
+window.openParental = function() {
+  parentalA = Math.floor(Math.random()*9)+2;
+  parentalB = Math.floor(Math.random()*9)+2;
+  parentalAns = parentalA * parentalB;
+  document.getElementById('parental-title').textContent = tr('parental_title');
+  document.getElementById('parental-desc').textContent = tr('parental_desc');
+  document.getElementById('parental-question').textContent = tr('parental_q',{a:parentalA,b:parentalB});
+  document.getElementById('parental-input').value = '';
+  document.getElementById('parental-error').textContent = '';
+  document.getElementById('parental-cancel-btn').textContent = tr('cancel');
+  document.getElementById('parental-overlay').classList.add('open');
+  document.getElementById('parental-input').focus();
+};
+window.closeParental = function() {
+  document.getElementById('parental-overlay').classList.remove('open');
+};
+window.checkParental = function() {
+  var val = parseInt(document.getElementById('parental-input').value, 10);
+  if (val === parentalAns) {
+    closeParental();
+    alert(lang === 'fr'
+      ? '🎮 PGRG IA — Jeux éducatifs gratuits\n\nMemory des Animaux entraîne la mémoire visuelle.\n\n✅ Sans publicité\n✅ Sans collecte de données\n✅ Fonctionne hors-ligne\n✅ Pour les 5–8 ans\n\nScores sauvegardés localement sur cet appareil.'
+      : '🎮 PGRG IA — Free educational games\n\nAnimal Memory trains visual memory.\n\n✅ No ads\n✅ No data collected\n✅ Works offline\n✅ Ages 5–8\n\nScores saved locally on this device only.');
+  } else {
+    document.getElementById('parental-error').textContent = tr('parental_wrong');
+    document.getElementById('parental-input').value = '';
+    document.getElementById('parental-input').focus();
+  }
+};
+document.getElementById('parental-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkParental();
+  if (e.key === 'Escape') closeParental();
+});
+
+// ===== HOME =====
+window.goHome = function() {
+  locked = false; flipped = [];
+  stopConfetti();
+  showScreen('screen-title');
+};
+
+// ===== SHUFFLE =====
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+// ===== START GAME =====
+window.startGame = function(lv) {
+  currentLevel = lv;
+  locked = false; flipped = []; matched = 0; moves = 0;
+  var cfg = LEVELS[lv];
+  totalPairs = cfg.pairs;
+  var chosen = shuffle(ALL_ANIMALS).slice(0, totalPairs);
+  var deck = shuffle(chosen.concat(chosen));
+  cards = deck.map(function(emoji, i) {
+    return {id: i, emoji: emoji, isFlipped: false, isMatched: false};
+  });
+  showScreen('screen-game');
+  setActiveTab(lv);
+  renderBestScores();
+  buildGrid(cfg);
+  updateGameUI();
+};
+
+function setActiveTab(idx) {
+  for (var i = 0; i < 3; i++) {
+    var tab = document.getElementById('tab-'+i);
+    tab.classList.toggle('active', i === idx);
+    tab.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+  }
+}
+
+function renderBestScores() {
+  for (var i = 0; i < 3; i++) {
+    var best = getBest(i);
+    var el = document.getElementById('best-'+i);
+    if (el) el.textContent = best ? (tr('best_label') + ': ' + best) : '';
+  }
+}
+
+// ===== BUILD GRID =====
+function buildGrid(cfg) {
+  var grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = 'repeat(' + cfg.cols + ', 1fr)';
+  grid.style.maxWidth = cfg.cols >= 4 ? '500px' : (cfg.cols === 3 ? '420px' : '320px');
+
+  cards.forEach(function(card, idx) {
+    var el = document.createElement('div');
+    el.className = 'card';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', tr('card_hidden', {i: idx + 1}));
+    el.setAttribute('data-id', String(idx));
+    el.innerHTML =
+      '<div class="card-inner">' +
+        '<div class="card-back" aria-hidden="true">' +
+          '<div class="card-back-inner">' +
+            '<span>?</span><span>?</span><span>?</span>' +
+            '<span>?</span><span>?</span><span>?</span>' +
+            '<span>?</span><span>?</span><span>?</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-front" aria-hidden="true">' + card.emoji + '</div>' +
+      '</div>';
+    el.addEventListener('click', function() { onCardClick(idx); });
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(idx); }
+    });
+    grid.appendChild(el);
+  });
+}
+
+// ===== CARD CLICK =====
+function onCardClick(idx) {
+  if (locked) return;
+  var card = cards[idx];
+  if (card.isFlipped || card.isMatched) return;
+  if (flipped.length >= 2) return;
+
+  card.isFlipped = true;
+  flipEl(idx, true);
+  var el = document.querySelector('[data-id="'+idx+'"]');
+  if (el) el.setAttribute('aria-label', tr('card_flip', {animal: card.emoji}));
+  sndFlip();
+  flipped.push(idx);
+
+  if (flipped.length === 2) {
+    moves++;
+    updateGameUI();
+    locked = true;
+    setTimeout(evalPair, 700);
+  }
+}
+
+function flipEl(idx, on) {
+  var el = document.querySelector('[data-id="'+idx+'"]');
+  if (!el) return;
+  if (on) el.classList.add('flipped');
+  else el.classList.remove('flipped');
+}
+
+function evalPair() {
+  var i1 = flipped[0], i2 = flipped[1];
+  var c1 = cards[i1], c2 = cards[i2];
+
+  if (c1.emoji === c2.emoji) {
+    c1.isMatched = true; c2.isMatched = true;
+    markMatch(i1); markMatch(i2);
+    sndMatch();
+    announce(tr('pair_found'));
+    matched++;
+    flipped = [];
+    locked = false;
+    updateGameUI();
+    if (matched === totalPairs) {
+      setTimeout(showSuccess, 500);
+    }
+  } else {
+    sndMiss();
+    announce(tr('no_match'));
+    addShake(i1); addShake(i2);
+    setTimeout(function() {
+      removeShake(i1); removeShake(i2);
+      cards[i1].isFlipped = false; cards[i2].isFlipped = false;
+      flipEl(i1, false); flipEl(i2, false);
+      var e1 = document.querySelector('[data-id="'+i1+'"]');
+      var e2 = document.querySelector('[data-id="'+i2+'"]');
+      if (e1) e1.setAttribute('aria-label', tr('card_hidden', {i: i1+1}));
+      if (e2) e2.setAttribute('aria-label', tr('card_hidden', {i: i2+1}));
+      flipped = [];
+      locked = false;
+    }, 550);
+  }
+}
+
+function markMatch(idx) {
+  var el = document.querySelector('[data-id="'+idx+'"]');
+  if (!el) return;
+  el.classList.add('matched', 'matched-anim');
+  el.setAttribute('aria-label', '✅ ' + cards[idx].emoji);
+  setTimeout(function() { el.classList.remove('matched-anim'); }, 400);
+}
+function addShake(idx) {
+  var el = document.querySelector('[data-id="'+idx+'"]');
+  if (el) el.classList.add('mismatch');
+}
+function removeShake(idx) {
+  var el = document.querySelector('[data-id="'+idx+'"]');
+  if (el) el.classList.remove('mismatch');
+}
+
+function updateGameUI() {
+  var lnames = tr('level_names');
+  var name = Array.isArray(lnames) ? lnames[currentLevel] : (lnames || '');
+  var lvEl = document.getElementById('chip-level');
+  var mvEl = document.getElementById('chip-moves');
+  var prEl = document.getElementById('chip-pairs');
+  if (lvEl) lvEl.innerHTML = tr('level_label') + ': <span>' + name + '</span>';
+  if (mvEl) mvEl.innerHTML = tr('moves_label') + ': <span>' + moves + '</span>';
+  if (prEl) prEl.innerHTML = tr('pairs_label') + ': <span>' + matched + '/' + totalPairs + '</span>';
+}
+
+function announce(msg) {
+  var el = document.getElementById('aria-status');
+  if (!el) return;
+  el.textContent = '';
+  setTimeout(function() { el.textContent = msg; }, 30);
+}
+
+// ===== SUCCESS =====
+function computeStars(lv, mv) {
+  var p = LEVELS[lv].pairs;
+  if (mv <= p * 2) return 3;
+  if (mv <= p * 3) return 2;
+  return 1;
+}
+
+function showSuccess() {
+  lastMoves = moves; lastLevel = currentLevel;
+  stopConfetti();
+  showScreen('screen-success');
+  renderSuccessText();
+  sndWin();
+  launchConfetti();
+}
+
+function renderSuccessText() {
+  var stars = computeStars(lastLevel, lastMoves);
+  var titles = {3: tr('success_3'), 2: tr('success_2'), 1: tr('success_1')};
+  setText('success-title', titles[stars]);
+
+  ['star1','star2','star3'].forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('lit','pop');
+    if (i < stars) {
+      (function(el2, delay) {
+        setTimeout(function() { el2.classList.add('lit','pop'); }, delay);
+      })(el, 200 + i * 280);
+    }
+  });
+
+  setText('success-stats', tr('success_stats', {moves: lastMoves}));
+
+  var isNew = saveBest(lastLevel, lastMoves);
+  var bestNow = getBest(lastLevel);
+  var wrap = document.getElementById('best-badge-wrap');
+  if (wrap) {
+    if (isNew) {
+      wrap.innerHTML = '<div class="best-score-badge">' + tr('best_new') + '</div>';
+    } else if (bestNow) {
+      wrap.innerHTML = '<div class="best-score-badge">' + tr('best_prev', {n: bestNow}) + '</div>';
+    } else {
+      wrap.innerHTML = '';
+    }
+  }
+
+  var nextBtn = document.getElementById('btn-next-level');
+  if (nextBtn) nextBtn.style.display = lastLevel < LEVELS.length - 1 ? '' : 'none';
+  setText('replay-btn', tr('replay_btn'));
+  setText('btn-next-level', tr('next_btn'));
+  setText('home-btn-success', tr('home_btn'));
+}
+
+window.replayLevel = function() { stopConfetti(); startGame(lastLevel); };
+window.nextLevel   = function() { stopConfetti(); if (lastLevel < LEVELS.length-1) startGame(lastLevel+1); };
+
+// ===== CONFETTI =====
+var CCOLORS = ['#f97316','#ffd23f','#34c77b','#7ec3ee','#0f4c81','#fff','#ea580c','#ff6b9d'];
+
+function launchConfetti() {
+  var canvas = document.getElementById('confetti-canvas');
+  var ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  confettiParts = [];
+  for (var i = 0; i < 90; i++) {
+    confettiParts.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 180,
+      w: 7 + Math.random() * 9,
+      h: 5 + Math.random() * 7,
+      color: CCOLORS[Math.floor(Math.random()*CCOLORS.length)],
+      angle: Math.random() * Math.PI * 2,
+      spin: (Math.random()-.5)*0.14,
+      vx: (Math.random()-.5)*2.5,
+      vy: 1.8 + Math.random()*3.5,
+      alpha: 1, fade: 0.008 + Math.random()*0.006
+    });
+  }
+  var frames = 0;
+  function loop() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    frames++;
+    var alive = false;
+    confettiParts.forEach(function(p) {
+      p.x += p.vx; p.y += p.vy; p.angle += p.spin;
+      if (frames > 90) p.alpha -= p.fade;
+      if (p.y > canvas.height + 20) { p.y = -10; p.x = Math.random()*canvas.width; p.alpha = 1; }
+      if (p.alpha > 0.01) {
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      }
+    });
+    if (!alive && frames > 90) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+    confettiRaf = requestAnimationFrame(loop);
+  }
+  confettiRaf = requestAnimationFrame(loop);
+}
+
+function stopConfetti() {
+  if (confettiRaf) { cancelAnimationFrame(confettiRaf); confettiRaf = null; }
+  var canvas = document.getElementById('confetti-canvas');
+  if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  confettiParts = [];
+}
+
+// ===== RESIZE =====
+window.addEventListener('resize', function() {
+  if (currentScreen() === 'game') {
+    var cfg = LEVELS[currentLevel];
+    buildGrid(cfg);
+    cards.forEach(function(card, idx) {
+      if (card.isFlipped || card.isMatched) flipEl(idx, true);
+      if (card.isMatched) {
+        var el = document.querySelector('[data-id="'+idx+'"]');
+        if (el) { el.classList.add('matched'); el.setAttribute('aria-label', '✅ '+card.emoji); }
+      }
+    });
+    updateGameUI();
+  }
+  if (confettiRaf) {
+    var canvas = document.getElementById('confetti-canvas');
+    if (canvas) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  }
+});
+
+// ===== INIT =====
+renderAll();
+
+})();
+</script>
+</body>
+</html>

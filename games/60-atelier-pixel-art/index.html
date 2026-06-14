@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Atelier Pixel Art / Pixel Art Studio — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#d0eaff 100%);min-height:100vh;color:var(--navy);overflow-x:hidden;}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--blue);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px #0005;}
+#topbar img{height:34px;}
+#brand{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;flex:1;}
+.topbtn{background:#fff2;border:none;color:#fff;font-size:0.9rem;padding:6px 12px;border-radius:20px;cursor:pointer;min-width:48px;min-height:36px;font-weight:700;transition:background .2s;}
+.topbtn:hover,.topbtn.active{background:#fff4;}
+#langbtns{display:flex;gap:4px;}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px;min-height:calc(100vh - 56px);}
+.screen.active{display:flex;}
+#mascot-area{margin:20px 0 10px;}
+#game-title{font-size:2.2rem;color:var(--blue);text-align:center;line-height:1.2;}
+#game-subtitle{font-size:1.1rem;color:var(--slate);text-align:center;margin:8px 0 24px;}
+.btn-play{background:var(--orange);color:#fff;border:none;font-size:1.4rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;padding:16px 48px;border-radius:32px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{background:var(--blue);color:#fff;border:none;font-size:1rem;font-family:'Nunito',system-ui,sans-serif;padding:10px 28px;border-radius:20px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;min-height:48px;margin-top:16px;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#parents-link{background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;font-size:0.95rem;margin-top:20px;padding:8px;}
+#level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin:20px 0;}
+.level-card{background:#fff;border-radius:16px;padding:20px 28px;text-align:center;cursor:pointer;box-shadow:0 4px 12px #0002;transition:transform .15s,box-shadow .15s;min-width:140px;border:3px solid transparent;}
+.level-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px #0003;}
+.level-card.completed{border-color:var(--success);}
+.level-card .lc-icon{font-size:2.4rem;}
+.level-card .lc-name{font-size:1rem;font-weight:700;margin-top:6px;color:var(--blue);}
+.level-card .lc-size{font-size:.85rem;color:var(--slate);}
+.level-card .lc-stars{color:var(--gold);font-size:1rem;margin-top:4px;}
+#game-screen{padding:12px 8px;}
+#game-header{display:flex;align-items:center;gap:10px;width:100%;max-width:800px;margin-bottom:10px;flex-wrap:wrap;}
+#game-level-title{font-size:1.1rem;font-weight:700;color:var(--blue);flex:1;}
+#mode-indicator{background:var(--sky-light);border:2px solid var(--sky);border-radius:12px;padding:4px 14px;font-size:.85rem;color:var(--blue);font-weight:700;}
+#tools-panel{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;}
+.tool-btn{background:#fff;border:3px solid #ddd;border-radius:12px;padding:8px 14px;cursor:pointer;font-size:1.4rem;min-width:52px;min-height:52px;transition:border-color .15s,background .15s;}
+.tool-btn.active{border-color:var(--orange);background:#fff8f0;}
+.tool-btn:hover{border-color:var(--sky);}
+.tool-label{font-size:.65rem;display:block;text-align:center;color:var(--slate);font-family:'Nunito',system-ui,sans-serif;}
+#palette-panel{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:520px;}
+.color-swatch{width:36px;height:36px;border-radius:8px;cursor:pointer;border:3px solid transparent;transition:transform .1s,border-color .1s;flex-shrink:0;}
+.color-swatch:hover{transform:scale(1.15);}
+.color-swatch.selected{border-color:var(--navy);transform:scale(1.2);}
+#custom-color{width:36px;height:36px;border-radius:8px;cursor:pointer;border:3px solid #aaa;padding:0;}
+#canvas-wrap{display:flex;justify-content:center;align-items:flex-start;gap:16px;flex-wrap:wrap;width:100%;}
+#pixel-canvas{display:grid;gap:1px;background:#ccc;border:3px solid var(--blue);border-radius:8px;cursor:crosshair;user-select:none;touch-action:none;box-shadow:0 4px 16px #0003;}
+.pixel-cell{background:#fff;cursor:crosshair;position:relative;}
+#ref-panel{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px #0002;flex-shrink:0;}
+#ref-title{font-size:.9rem;font-weight:700;color:var(--blue);margin-bottom:8px;text-align:center;}
+#ref-canvas{display:grid;gap:1px;background:#ccc;border:2px solid var(--blue);border-radius:6px;}
+.ref-cell{width:12px;height:12px;}
+#progress-bar-wrap{width:100%;max-width:520px;background:#ddd;border-radius:10px;height:14px;margin:8px 0;overflow:hidden;}
+#progress-bar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--success),#22d3ee);transition:width .4s;}
+#progress-text{font-size:.85rem;color:var(--slate);text-align:center;}
+#game-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;}
+.btn-action{background:var(--blue);color:#fff;border:none;font-size:.95rem;font-family:'Nunito',system-ui,sans-serif;padding:10px 22px;border-radius:20px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);min-height:48px;transition:transform .1s,box-shadow .1s;}
+.btn-action:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.btn-action.orange{background:var(--orange);box-shadow:0 4px 0 var(--orange-dark);}
+.btn-action.orange:active{box-shadow:0 2px 0 var(--orange-dark);}
+#success-stars{font-size:3rem;text-align:center;margin:20px 0 10px;}
+#success-msg{font-size:1.6rem;color:var(--blue);text-align:center;margin-bottom:6px;}
+#success-sub{font-size:1rem;color:var(--slate);text-align:center;margin-bottom:24px;}
+#success-preview{border:4px solid var(--gold);border-radius:12px;box-shadow:0 4px 16px #0003;margin:16px 0;image-rendering:pixelated;}
+#parents-inner{background:#fff;border-radius:20px;padding:28px;max-width:520px;width:100%;box-shadow:0 4px 20px #0002;}
+#math-challenge{background:var(--sky-light);border-radius:12px;padding:16px;margin:16px 0;text-align:center;}
+#math-q{font-size:1.4rem;font-weight:700;color:var(--blue);margin-bottom:10px;}
+#math-input{font-size:1.3rem;width:80px;text-align:center;padding:8px;border:3px solid var(--blue);border-radius:10px;}
+#math-submit{background:var(--orange);color:#fff;border:none;font-size:1rem;padding:10px 20px;border-radius:12px;cursor:pointer;margin-left:10px;min-height:48px;}
+#math-err{color:#e00;margin-top:8px;font-size:.9rem;}
+#aria-msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 22px;border-radius:20px;font-size:.95rem;pointer-events:none;transition:opacity .3s;z-index:999;}
+@media(max-width:600px){
+  #game-title{font-size:1.6rem;}
+  .btn-play{font-size:1.1rem;padding:14px 36px;}
+  .color-swatch{width:30px;height:30px;}
+  .tool-btn{min-width:46px;min-height:46px;padding:6px 10px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span id="brand">PGRG IA</span>
+  <div id="langbtns">
+    <button class="topbtn active" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="topbtn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  </div>
+  <button class="topbtn" id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+
+<div aria-live="polite" aria-atomic="true" id="aria-msg" style="opacity:0;"></div>
+
+<div class="screen active" id="title-screen" role="main">
+  <div id="mascot-area">
+    <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pixel le robot artiste">
+      <rect x="30" y="50" width="60" height="55" rx="8" fill="#0f4c81"/>
+      <rect x="32" y="14" width="56" height="44" rx="10" fill="#7ec3ee"/>
+      <rect x="40" y="24" width="14" height="14" rx="3" fill="#fff"/>
+      <rect x="66" y="24" width="14" height="14" rx="3" fill="#fff"/>
+      <rect x="44" y="27" width="6" height="6" rx="2" fill="#0f4c81"/>
+      <rect x="70" y="27" width="6" height="6" rx="2" fill="#0f4c81"/>
+      <rect x="57" y="4" width="6" height="14" rx="3" fill="#f97316"/>
+      <circle cx="60" cy="4" r="5" fill="#ffd23f"/>
+      <rect x="44" y="44" width="6" height="4" rx="2" fill="#0f4c81"/>
+      <rect x="56" y="48" width="8" height="4" rx="2" fill="#0f4c81"/>
+      <rect x="70" y="44" width="6" height="4" rx="2" fill="#0f4c81"/>
+      <rect x="10" y="55" width="22" height="10" rx="5" fill="#0f4c81"/>
+      <rect x="88" y="55" width="22" height="10" rx="5" fill="#0f4c81"/>
+      <rect x="104" y="50" width="5" height="20" rx="2" fill="#ffd23f" transform="rotate(20,106,60)"/>
+      <polygon points="104,70 110,70 107,80" fill="#f97316" transform="rotate(20,107,70)"/>
+      <rect x="38" y="102" width="16" height="14" rx="5" fill="#0a3559"/>
+      <rect x="66" y="102" width="16" height="14" rx="5" fill="#0a3559"/>
+      <rect x="46" y="62" width="8" height="8" rx="1" fill="#f97316"/>
+      <rect x="58" y="62" width="8" height="8" rx="1" fill="#ffd23f"/>
+      <rect x="70" y="62" width="8" height="8" rx="1" fill="#34c77b"/>
+      <rect x="46" y="74" width="8" height="8" rx="1" fill="#34c77b"/>
+      <rect x="58" y="74" width="8" height="8" rx="1" fill="#f97316"/>
+      <rect x="70" y="74" width="8" height="8" rx="1" fill="#7ec3ee"/>
+    </svg>
+  </div>
+  <h1 class="title-font" id="game-title"></h1>
+  <p id="game-subtitle"></p>
+  <button class="btn-play" onclick="showLevelSelect()" id="btn-play-main"></button>
+  <button id="parents-link" onclick="showParentsGate()"></button>
+</div>
+
+<div class="screen" id="level-screen" role="main">
+  <h2 class="title-font" id="level-title" style="font-size:1.8rem;color:var(--blue);margin-bottom:6px;text-align:center;"></h2>
+  <p id="level-sub" style="color:var(--slate);margin-bottom:16px;text-align:center;"></p>
+  <div id="level-cards"></div>
+  <button class="btn-secondary" onclick="showScreen('title-screen')" id="btn-back-title"></button>
+</div>
+
+<div class="screen" id="game-screen" role="main">
+  <div id="game-header">
+    <button class="btn-action" onclick="showLevelSelect()" id="btn-back-level" style="padding:8px 16px;font-size:.85rem;"></button>
+    <span id="game-level-title"></span>
+    <span id="mode-indicator"></span>
+  </div>
+  <div id="tools-panel" role="toolbar" aria-label="Outils">
+    <button class="tool-btn active" id="tool-pencil" onclick="selectTool('pencil')">
+      ✏️<span class="tool-label" id="tl-pencil"></span>
+    </button>
+    <button class="tool-btn" id="tool-fill" onclick="selectTool('fill')">
+      🪣<span class="tool-label" id="tl-fill"></span>
+    </button>
+    <button class="tool-btn" id="tool-eraser" onclick="selectTool('eraser')">
+      🧹<span class="tool-label" id="tl-eraser"></span>
+    </button>
+    <button class="tool-btn" onclick="clearCanvas()" id="btn-clear-tool">
+      🗑️<span class="tool-label" id="tl-clear"></span>
+    </button>
+  </div>
+  <div id="palette-panel" role="group" aria-label="Palette de couleurs"></div>
+  <div id="progress-bar-wrap" style="display:none;">
+    <div id="progress-bar" style="width:0%"></div>
+  </div>
+  <div id="progress-text" style="display:none;"></div>
+  <div id="canvas-wrap">
+    <div>
+      <div id="pixel-canvas" role="img" aria-label="Grille de dessin"></div>
+    </div>
+    <div id="ref-panel" style="display:none;">
+      <div id="ref-title"></div>
+      <div id="ref-canvas"></div>
+    </div>
+  </div>
+  <div id="game-actions">
+    <button class="btn-action" onclick="undoAction()" id="btn-undo"></button>
+    <button class="btn-action orange" onclick="checkCompletion(true)" id="btn-validate" style="display:none;"></button>
+    <button class="btn-action orange" onclick="saveDrawing()" id="btn-save" style="display:none;"></button>
+  </div>
+</div>
+
+<div class="screen" id="success-screen" role="main">
+  <div id="success-stars"></div>
+  <h2 class="title-font" id="success-msg"></h2>
+  <p id="success-sub"></p>
+  <canvas id="success-preview" width="160" height="160"></canvas>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px;">
+    <button class="btn-action" onclick="replayLevel()" id="btn-replay"></button>
+    <button class="btn-action orange" onclick="nextLevel()" id="btn-next"></button>
+    <button class="btn-action" onclick="showLevelSelect()" id="btn-home-success"></button>
+  </div>
+</div>
+
+<div class="screen" id="parents-screen" role="main">
+  <div id="parents-inner">
+    <h2 class="title-font" id="parents-title" style="color:var(--blue);margin-bottom:12px;"></h2>
+    <div id="math-challenge">
+      <div id="math-q"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;">
+        <input type="number" id="math-input" aria-label="Réponse" min="0" max="999">
+        <button id="math-submit" onclick="checkMath()"></button>
+      </div>
+      <div id="math-err" aria-live="polite"></div>
+    </div>
+    <div id="parents-info" style="display:none;">
+      <p id="parents-p1" style="margin-bottom:10px;line-height:1.6;"></p>
+      <p id="parents-p2" style="margin-bottom:10px;line-height:1.6;"></p>
+      <p id="parents-p3" style="margin-bottom:10px;line-height:1.6;"></p>
+      <button class="btn-secondary" onclick="showScreen('title-screen')" id="btn-back-parents" style="margin-top:16px;"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    gameTitle:"Atelier Pixel Art",
+    gameSub:"Crée de superbes images pixel par pixel !",
+    btnPlay:"🎨 Jouer",
+    parentsLink:"👨‍👩‍👧 Pour les parents",
+    levelTitle:"Choisis ton niveau",
+    levelSub:"Plus tu avances, plus la grille est grande !",
+    btnBackTitle:"← Accueil",
+    btnBackLevel:"← Niveaux",
+    modeModel:"📋 Mode modèle",
+    modeFree:"🆓 Mode libre",
+    tlPencil:"Crayon",
+    tlFill:"Remplir",
+    tlEraser:"Gomme",
+    tlClear:"Effacer tout",
+    btnUndo:"↩ Annuler",
+    btnValidate:"✅ Valider",
+    btnSave:"💾 Sauvegarder",
+    refTitle:"📖 Modèle",
+    progressText:function(n,tot){return n+" / "+tot+" cases correctes";},
+    successMsg:"Bravo !",
+    successSub:"Tu as créé un super pixel art !",
+    stars3:"Parfait !",
+    stars2:"Très bien !",
+    stars1:"Bien joué !",
+    btnReplay:"🔄 Rejouer",
+    btnNext:"▶ Niveau suivant",
+    btnHomeSuccess:"🏠 Accueil",
+    parentsTitle:"Espace parents",
+    mathSubmit:"OK",
+    mathErr:"Essaie encore !",
+    parentsP1:"🎯 Compétences visées : créativité, repérage dans un quadrillage (coordonnées), patience et concentration.",
+    parentsP2:"🔒 Aucune donnée collectée. Aucune publicité. 100% hors-ligne. Progression sauvegardée localement.",
+    parentsP3:"✨ Ce jeu fait partie de PGRG IA — jeux éducatifs gratuits et ouverts pour les enfants.",
+    btnBackParents:"← Retour",
+    clearConfirm:"Effacer tout le dessin ?",
+    saved:"Dessin sauvegardé !",
+    levels:[
+      {name:"Cœur",desc:"8×8 · Modèle simple",icon:"❤️"},
+      {name:"Étoile",desc:"8×8 · Modèle guidé",icon:"⭐"},
+      {name:"Maison",desc:"12×12 · Modèle",icon:"🏠"},
+      {name:"Fusée",desc:"12×12 · Modèle détaillé",icon:"🚀"},
+      {name:"Soleil",desc:"16×16 · Modèle avancé",icon:"☀️"},
+      {name:"Mode libre",desc:"16×16 · Crée librement !",icon:"🎨"}
+    ]
+  },
+  en:{
+    gameTitle:"Pixel Art Studio",
+    gameSub:"Create awesome images pixel by pixel!",
+    btnPlay:"🎨 Play",
+    parentsLink:"👨‍👩‍👧 For parents",
+    levelTitle:"Choose your level",
+    levelSub:"The grid gets bigger as you progress!",
+    btnBackTitle:"← Home",
+    btnBackLevel:"← Levels",
+    modeModel:"📋 Template mode",
+    modeFree:"🆓 Free mode",
+    tlPencil:"Pencil",
+    tlFill:"Fill",
+    tlEraser:"Eraser",
+    tlClear:"Clear all",
+    btnUndo:"↩ Undo",
+    btnValidate:"✅ Validate",
+    btnSave:"💾 Save",
+    refTitle:"📖 Template",
+    progressText:function(n,tot){return n+" / "+tot+" cells correct";},
+    successMsg:"Well done!",
+    successSub:"You created awesome pixel art!",
+    stars3:"Perfect!",
+    stars2:"Great job!",
+    stars1:"Nice work!",
+    btnReplay:"🔄 Play again",
+    btnNext:"▶ Next level",
+    btnHomeSuccess:"🏠 Home",
+    parentsTitle:"Parents area",
+    mathSubmit:"OK",
+    mathErr:"Try again!",
+    parentsP1:"🎯 Skills: creativity, grid navigation (coordinates), patience and focus.",
+    parentsP2:"🔒 No data collected. No ads. 100% offline. Progress saved locally.",
+    parentsP3:"✨ This game is part of PGRG IA — free and open educational games for children.",
+    btnBackParents:"← Back",
+    clearConfirm:"Clear the whole drawing?",
+    saved:"Drawing saved!",
+    levels:[
+      {name:"Heart",desc:"8×8 · Simple template",icon:"❤️"},
+      {name:"Star",desc:"8×8 · Guided template",icon:"⭐"},
+      {name:"House",desc:"12×12 · Template",icon:"🏠"},
+      {name:"Rocket",desc:"12×12 · Detailed template",icon:"🚀"},
+      {name:"Sun",desc:"16×16 · Advanced template",icon:"☀️"},
+      {name:"Free mode",desc:"16×16 · Create freely!",icon:"🎨"}
+    ]
+  }
+};
+
+// PALETTE: 0=white,1=black,2=orange,3=gold,4=green,5=blue,6=sky,7=red,8=purple,9=pink,10=brown,11=slate
+var PALETTE=["#ffffff","#000000","#f97316","#ffd23f","#34c77b","#0f4c81","#7ec3ee","#e74c3c","#9b59b6","#ff69b4","#8B4513","#475569"];
+
+// TEMPLATES
+var HEART_8=[
+  [0,7,7,0,0,7,7,0],
+  [7,7,7,7,7,7,7,7],
+  [7,7,7,7,7,7,7,7],
+  [7,7,7,7,7,7,7,7],
+  [0,7,7,7,7,7,7,0],
+  [0,0,7,7,7,7,0,0],
+  [0,0,0,7,7,0,0,0],
+  [0,0,0,0,0,0,0,0]
+];
+var STAR_8=[
+  [0,0,0,3,3,0,0,0],
+  [0,0,0,3,3,0,0,0],
+  [3,3,3,3,3,3,3,3],
+  [0,3,3,3,3,3,3,0],
+  [0,0,3,3,3,3,0,0],
+  [0,3,3,0,0,3,3,0],
+  [3,3,0,0,0,0,3,3],
+  [0,0,0,0,0,0,0,0]
+];
+var HOUSE_12=[
+  [0,0,0,0,0,7,7,0,0,0,0,0],
+  [0,0,0,0,7,7,7,7,0,0,0,0],
+  [0,0,0,7,7,7,7,7,7,0,0,0],
+  [0,0,7,7,7,7,7,7,7,7,0,0],
+  [0,7,7,7,7,7,7,7,7,7,7,0],
+  [7,7,7,7,7,7,7,7,7,7,7,7],
+  [0,5,5,5,5,5,5,5,5,5,5,0],
+  [0,5,5,3,3,5,5,3,3,5,5,0],
+  [0,5,5,3,3,5,5,3,3,5,5,0],
+  [0,5,5,5,5,1,1,5,5,5,5,0],
+  [0,5,5,5,5,1,1,5,5,5,5,0],
+  [0,5,5,5,5,1,1,5,5,5,5,0]
+];
+var ROCKET_12=[
+  [0,0,0,0,0,5,5,0,0,0,0,0],
+  [0,0,0,0,5,6,6,5,0,0,0,0],
+  [0,0,0,5,6,6,6,6,5,0,0,0],
+  [0,0,5,6,6,6,6,6,6,5,0,0],
+  [0,0,0,5,6,6,6,6,5,0,0,0],
+  [0,0,0,5,6,3,3,6,5,0,0,0],
+  [0,0,0,5,5,3,3,5,5,0,0,0],
+  [0,0,7,5,5,1,1,5,5,7,0,0],
+  [0,7,7,0,5,1,1,5,0,7,7,0],
+  [7,7,0,0,0,1,1,0,0,0,7,7],
+  [0,0,0,0,0,2,2,0,0,0,0,0],
+  [0,0,0,0,0,2,2,0,0,0,0,0]
+];
+function buildSun16(){
+  var g=[];
+  for(var r=0;r<16;r++){g.push([]);for(var c=0;c<16;c++)g[r].push(0);}
+  for(var r=0;r<16;r++)for(var c=0;c<16;c++){
+    var dr=r-7.5,dc=c-7.5,d=Math.sqrt(dr*dr+dc*dc);
+    if(d<4.2)g[r][c]=3;
+    else if(d<5.8)g[r][c]=2;
+  }
+  [[0,7],[0,8],[7,0],[8,0],[15,7],[15,8],[7,15],[8,15]].forEach(function(p){if(g[p[0]][p[1]]===0)g[p[0]][p[1]]=3;});
+  [[1,1],[1,2],[2,1],[1,13],[1,14],[2,14],[13,1],[14,1],[14,2],[13,14],[14,13],[14,14]].forEach(function(p){if(g[p[0]][p[1]]===0)g[p[0]][p[1]]=2;});
+  return g;
+}
+var SUN_16=buildSun16();
+
+var LEVELS=[
+  {id:0,grid:8,mode:"model",template:HEART_8,freeMode:false},
+  {id:1,grid:8,mode:"model",template:STAR_8,freeMode:false},
+  {id:2,grid:12,mode:"model",template:HOUSE_12,freeMode:false},
+  {id:3,grid:12,mode:"model",template:ROCKET_12,freeMode:false},
+  {id:4,grid:16,mode:"model",template:SUN_16,freeMode:false},
+  {id:5,grid:16,mode:"free",template:null,freeMode:true}
+];
+
+var LS_KEY="pgrg_pixel_art";
+var lang=navigator.language.startsWith('en')?'en':'fr';
+var muted=false;
+var currentTool='pencil';
+var currentColor=PALETTE[7];
+var currentLevelId=0;
+var gridData=[];
+var undoStack=[];
+var isDrawing=false;
+var mathA=0,mathB=0;
+var progress={};
+var savedDrawings={};
+
+function loadStorage(){
+  try{var raw=localStorage.getItem(LS_KEY);if(raw){var d=JSON.parse(raw);progress=d.progress||{};savedDrawings=d.drawings||{};}}catch(e){}
+}
+function saveStorage(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({progress:progress,drawings:savedDrawings}));}catch(e){}
+}
+loadStorage();
+
+function tr(key,a,b){var v=T[lang][key];return typeof v==='function'?v(a,b):v;}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI();
+}
+
+function renderUI(){
+  document.getElementById('game-title').textContent=tr('gameTitle');
+  document.getElementById('game-subtitle').textContent=tr('gameSub');
+  document.getElementById('btn-play-main').textContent=tr('btnPlay');
+  document.getElementById('parents-link').textContent=tr('parentsLink');
+  document.getElementById('level-title').textContent=tr('levelTitle');
+  document.getElementById('level-sub').textContent=tr('levelSub');
+  document.getElementById('btn-back-title').textContent=tr('btnBackTitle');
+  document.getElementById('btn-back-level').textContent=tr('btnBackLevel');
+  document.getElementById('tl-pencil').textContent=tr('tlPencil');
+  document.getElementById('tl-fill').textContent=tr('tlFill');
+  document.getElementById('tl-eraser').textContent=tr('tlEraser');
+  document.getElementById('tl-clear').textContent=tr('tlClear');
+  document.getElementById('btn-undo').textContent=tr('btnUndo');
+  document.getElementById('btn-validate').textContent=tr('btnValidate');
+  document.getElementById('btn-save').textContent=tr('btnSave');
+  document.getElementById('ref-title').textContent=tr('refTitle');
+  document.getElementById('btn-replay').textContent=tr('btnReplay');
+  document.getElementById('btn-next').textContent=tr('btnNext');
+  document.getElementById('btn-home-success').textContent=tr('btnHomeSuccess');
+  document.getElementById('parents-title').textContent=tr('parentsTitle');
+  document.getElementById('math-submit').textContent=tr('mathSubmit');
+  document.getElementById('parents-p1').textContent=tr('parentsP1');
+  document.getElementById('parents-p2').textContent=tr('parentsP2');
+  document.getElementById('parents-p3').textContent=tr('parentsP3');
+  document.getElementById('btn-back-parents').textContent=tr('btnBackParents');
+  document.getElementById('success-msg').textContent=tr('successMsg');
+  document.getElementById('success-sub').textContent=tr('successSub');
+  renderLevelCards();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showLevelSelect(){renderLevelCards();showScreen('level-screen');}
+function showParentsGate(){
+  mathA=Math.floor(Math.random()*9)+2;
+  mathB=Math.floor(Math.random()*9)+2;
+  document.getElementById('math-q').textContent=mathA+' × '+mathB+' = ?';
+  document.getElementById('math-input').value='';
+  document.getElementById('math-err').textContent='';
+  document.getElementById('math-challenge').style.display='block';
+  document.getElementById('parents-info').style.display='none';
+  showScreen('parents-screen');
+}
+function checkMath(){
+  var ans=parseInt(document.getElementById('math-input').value);
+  if(ans===mathA*mathB){
+    document.getElementById('math-challenge').style.display='none';
+    document.getElementById('parents-info').style.display='block';
+  }else{
+    document.getElementById('math-err').textContent=tr('mathErr');
+    playSound('error');
+  }
+}
+document.getElementById('math-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkMath();});
+
+function renderLevelCards(){
+  var container=document.getElementById('level-cards');
+  container.innerHTML='';
+  var tLevels=T[lang].levels;
+  LEVELS.forEach(function(lv,i){
+    var stars=progress[i]||0;
+    var div=document.createElement('div');
+    div.className='level-card'+(stars>0?' completed':'');
+    div.setAttribute('role','button');
+    div.setAttribute('tabindex','0');
+    div.setAttribute('aria-label',tLevels[i].name+' — '+tLevels[i].desc);
+    div.innerHTML='<div class="lc-icon">'+tLevels[i].icon+'</div>'
+      +'<div class="lc-name">'+tLevels[i].name+'</div>'
+      +'<div class="lc-size">'+tLevels[i].desc+'</div>'
+      +'<div class="lc-stars">'+'⭐'.repeat(stars)+'</div>';
+    div.onclick=function(){startLevel(i);};
+    div.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')startLevel(i);};
+    container.appendChild(div);
+  });
+}
+
+function startLevel(id){
+  currentLevelId=id;
+  var lv=LEVELS[id];
+  var sz=lv.grid;
+  var tLevels=T[lang].levels;
+  gridData=[];
+  for(var r=0;r<sz;r++){gridData.push([]);for(var c=0;c<sz;c++)gridData[r].push('');}
+  undoStack=[];
+  if(lv.freeMode&&savedDrawings[id]){
+    try{gridData=JSON.parse(JSON.stringify(savedDrawings[id]));}catch(e){}
+  }
+  buildCanvas(sz,lv);
+  document.getElementById('game-level-title').textContent=tLevels[id].name;
+  document.getElementById('mode-indicator').textContent=lv.freeMode?tr('modeFree'):tr('modeModel');
+  document.getElementById('btn-validate').style.display=lv.freeMode?'none':'inline-block';
+  document.getElementById('btn-save').style.display=lv.freeMode?'inline-block':'none';
+  var pbw=document.getElementById('progress-bar-wrap');
+  var pbt=document.getElementById('progress-text');
+  if(lv.freeMode){pbw.style.display='none';pbt.style.display='none';}
+  else{pbw.style.display='block';pbt.style.display='block';updateProgress();}
+  var refPanel=document.getElementById('ref-panel');
+  if(lv.freeMode){refPanel.style.display='none';}
+  else{refPanel.style.display='block';buildRefCanvas(lv);}
+  buildPalette(lv);
+  selectTool('pencil');
+  showScreen('game-screen');
+}
+
+function buildCanvas(sz,lv){
+  var canvas=document.getElementById('pixel-canvas');
+  canvas.innerHTML='';
+  var maxW=Math.min(window.innerWidth-48,480);
+  var cellSize=Math.max(14,Math.floor((maxW-sz)/sz));
+  canvas.style.gridTemplateColumns='repeat('+sz+','+cellSize+'px)';
+  canvas.style.gridTemplateRows='repeat('+sz+','+cellSize+'px)';
+  for(var r=0;r<sz;r++){
+    for(var c=0;c<sz;c++){
+      var cell=document.createElement('div');
+      cell.className='pixel-cell';
+      cell.dataset.r=r;cell.dataset.c=c;
+      cell.style.width=cellSize+'px';
+      cell.style.height=cellSize+'px';
+      if(!lv.freeMode&&lv.template){
+        var ci=lv.template[r][c];
+        if(ci>0){
+          cell.style.backgroundColor='#efefef';
+          if(cellSize>=16){
+            var hint=document.createElement('span');
+            hint.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:'+Math.max(6,Math.floor(cellSize*0.4))+'px;color:#bbb;pointer-events:none;font-weight:700;';
+            hint.textContent=ci.toString();
+            hint.className='hint-span';
+            cell.appendChild(hint);
+          }
+        }
+      }
+      if(gridData[r][c])applyColor(cell,gridData[r][c],lv,r,c,false);
+      cell.addEventListener('pointerdown',onPointerDown);
+      cell.addEventListener('pointerenter',onPointerEnter);
+      canvas.appendChild(cell);
+    }
+  }
+  canvas.addEventListener('pointerup',function(){isDrawing=false;});
+  canvas.addEventListener('pointerleave',function(){isDrawing=false;});
+  canvas.addEventListener('pointerdown',function(){playSound('paint');},{passive:true});
+}
+
+function getCellEl(r,c){return document.querySelector('#pixel-canvas .pixel-cell[data-r="'+r+'"][data-c="'+c+'"]');}
+
+function onPointerDown(e){e.preventDefault();isDrawing=true;paintCell(e.currentTarget);}
+function onPointerEnter(e){if(!isDrawing)return;e.preventDefault();paintCell(e.currentTarget);}
+
+function paintCell(cell){
+  var r=parseInt(cell.dataset.r),c=parseInt(cell.dataset.c);
+  var lv=LEVELS[currentLevelId];
+  if(currentTool==='fill'){floodFill(r,c,lv);return;}
+  var oldColor=gridData[r][c];
+  var newColor=currentTool==='pencil'?currentColor:'';
+  if(oldColor===newColor)return;
+  pushHistory();
+  gridData[r][c]=newColor;
+  applyColor(cell,newColor,lv,r,c,true);
+  if(!lv.freeMode)updateProgress();
+}
+
+function applyColor(cell,color,lv,r,c,updateHint){
+  if(color){
+    cell.style.backgroundColor=color;
+    if(updateHint){var h=cell.querySelector('.hint-span');if(h)h.style.opacity='0';}
+  }else{
+    if(lv&&!lv.freeMode&&lv.template){var ci=lv.template[r][c];cell.style.backgroundColor=ci>0?'#efefef':'#fff';}
+    else cell.style.backgroundColor='#fff';
+    if(updateHint){var h=cell.querySelector('.hint-span');if(h)h.style.opacity='1';}
+  }
+}
+
+function floodFill(sr,sc,lv){
+  var sz=lv.grid;
+  var targetColor=gridData[sr][sc];
+  var fillColor=currentTool==='eraser'?'':currentColor;
+  if(targetColor===fillColor)return;
+  pushHistory();
+  var stack=[[sr,sc]];
+  var visited={};
+  while(stack.length){
+    var pos=stack.pop();
+    var r=pos[0],c=pos[1];
+    var key=r+','+c;
+    if(visited[key])continue;
+    if(r<0||r>=sz||c<0||c>=sz)continue;
+    if(gridData[r][c]!==targetColor)continue;
+    visited[key]=1;
+    gridData[r][c]=fillColor;
+    var cell=getCellEl(r,c);
+    if(cell)applyColor(cell,fillColor,lv,r,c,true);
+    stack.push([r+1,c],[r-1,c],[r,c+1],[r,c-1]);
+  }
+  if(!lv.freeMode)updateProgress();
+}
+
+function pushHistory(){
+  undoStack.push(JSON.stringify(gridData));
+  if(undoStack.length>60)undoStack.shift();
+}
+function undoAction(){
+  if(!undoStack.length)return;
+  var prev=JSON.parse(undoStack.pop());
+  gridData=prev;
+  var lv=LEVELS[currentLevelId];
+  var sz=lv.grid;
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){var cell=getCellEl(r,c);if(cell)applyColor(cell,gridData[r][c],lv,r,c,true);}
+  if(!lv.freeMode)updateProgress();
+}
+
+function clearCanvas(){
+  if(!confirm(tr('clearConfirm')))return;
+  var lv=LEVELS[currentLevelId];
+  var sz=lv.grid;
+  pushHistory();
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){
+    gridData[r][c]='';
+    var cell=getCellEl(r,c);
+    if(cell)applyColor(cell,'',lv,r,c,true);
+  }
+  if(!lv.freeMode)updateProgress();
+}
+
+function updateProgress(){
+  var lv=LEVELS[currentLevelId];
+  if(lv.freeMode||!lv.template)return null;
+  var sz=lv.grid;
+  var correct=0,total=0;
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){
+    var expected=lv.template[r][c];
+    if(expected===0)continue;
+    total++;
+    if(gridData[r][c]===PALETTE[expected])correct++;
+  }
+  var pct=total>0?Math.round(correct/total*100):0;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=tr('progressText',correct,total);
+  return {correct:correct,total:total,pct:pct};
+}
+
+function checkCompletion(manual){
+  var lv=LEVELS[currentLevelId];
+  if(lv.freeMode){progress[currentLevelId]=Math.max(progress[currentLevelId]||0,3);saveStorage();showSuccess(3);return;}
+  var res=updateProgress();
+  if(!res)return;
+  var stars=0;
+  if(res.pct>=95)stars=3;
+  else if(res.pct>=75)stars=2;
+  else if(res.pct>=50)stars=1;
+  if(manual&&res.pct<50){ariaMsg(tr('progressText',res.correct,res.total));playSound('error');return;}
+  var finalStars=Math.max(stars,manual?1:0);
+  if(finalStars>0){
+    progress[currentLevelId]=Math.max(progress[currentLevelId]||0,finalStars);
+    saveStorage();
+    showSuccess(finalStars);
+  }
+}
+
+function showSuccess(stars){
+  playSound('success');
+  document.getElementById('success-stars').textContent='⭐'.repeat(stars);
+  document.getElementById('success-msg').textContent=tr('successMsg');
+  var sub=stars===3?tr('stars3'):stars===2?tr('stars2'):tr('stars1');
+  document.getElementById('success-sub').textContent=sub;
+  drawSuccessPreview();
+  document.getElementById('btn-next').style.display=(currentLevelId>=LEVELS.length-1)?'none':'inline-block';
+  showScreen('success-screen');
+}
+
+function drawSuccessPreview(){
+  var cvs=document.getElementById('success-preview');
+  var ctx=cvs.getContext('2d');
+  var lv=LEVELS[currentLevelId];
+  var sz=lv.grid;
+  var csz=Math.floor(160/sz);
+  cvs.width=sz*csz;cvs.height=sz*csz;
+  ctx.fillStyle='#f0f0f0';ctx.fillRect(0,0,cvs.width,cvs.height);
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){
+    var col=gridData[r][c];
+    if(col){ctx.fillStyle=col;ctx.fillRect(c*csz,r*csz,csz,csz);}
+  }
+}
+
+function replayLevel(){startLevel(currentLevelId);}
+function nextLevel(){var next=currentLevelId+1;if(next<LEVELS.length)startLevel(next);else showLevelSelect();}
+
+function saveDrawing(){
+  savedDrawings[currentLevelId]=JSON.parse(JSON.stringify(gridData));
+  saveStorage();
+  ariaMsg(tr('saved'));
+  playSound('chime');
+}
+
+function selectTool(tool){
+  currentTool=tool;
+  document.querySelectorAll('.tool-btn').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById('tool-'+tool);
+  if(el)el.classList.add('active');
+}
+
+function buildPalette(lv){
+  var panel=document.getElementById('palette-panel');
+  panel.innerHTML='';
+  var colorsToShow=PALETTE.slice(1);
+  if(!lv.freeMode&&lv.template){
+    var used={};
+    lv.template.forEach(function(row){row.forEach(function(ci){if(ci>0)used[ci]=1;});});
+    colorsToShow=Object.keys(used).map(function(ci){return PALETTE[parseInt(ci)];});
+  }
+  colorsToShow.forEach(function(col){
+    var sw=document.createElement('div');
+    sw.className='color-swatch'+(col===currentColor?' selected':'');
+    sw.style.backgroundColor=col;
+    sw.setAttribute('role','radio');
+    sw.setAttribute('aria-checked',col===currentColor?'true':'false');
+    sw.setAttribute('tabindex','0');
+    sw.setAttribute('aria-label',col);
+    sw.onclick=function(){selectColor(col);};
+    sw.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')selectColor(col);};
+    panel.appendChild(sw);
+  });
+  var inp=document.createElement('input');
+  inp.type='color';inp.id='custom-color';inp.value=currentColor;
+  inp.setAttribute('aria-label',lang==='fr'?'Couleur personnalisée':'Custom color');
+  inp.oninput=function(){selectColor(inp.value);};
+  panel.appendChild(inp);
+  if(colorsToShow.length>0)selectColor(colorsToShow[0]);
+}
+
+function selectColor(col){
+  currentColor=col;
+  if(currentTool==='eraser')selectTool('pencil');
+  document.querySelectorAll('.color-swatch').forEach(function(sw){
+    var bgRaw=sw.style.backgroundColor;
+    var match=bgRaw===col||hexToRgb(col)===bgRaw;
+    sw.classList.toggle('selected',match);
+    sw.setAttribute('aria-checked',match?'true':'false');
+  });
+  var cc=document.getElementById('custom-color');
+  if(cc)cc.value=col;
+}
+
+function hexToRgb(hex){
+  if(!hex||hex[0]!=='#')return hex;
+  var r=parseInt(hex.slice(1,3),16);
+  var g=parseInt(hex.slice(3,5),16);
+  var b=parseInt(hex.slice(5,7),16);
+  return 'rgb('+r+', '+g+', '+b+')';
+}
+
+function buildRefCanvas(lv){
+  var ref=document.getElementById('ref-canvas');
+  ref.innerHTML='';
+  var sz=lv.grid;
+  var csz=Math.max(6,Math.floor(120/sz));
+  ref.style.gridTemplateColumns='repeat('+sz+','+csz+'px)';
+  ref.style.gridTemplateRows='repeat('+sz+','+csz+'px)';
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){
+    var ci=lv.template[r][c];
+    var cell=document.createElement('div');
+    cell.className='ref-cell';
+    cell.style.width=csz+'px';cell.style.height=csz+'px';
+    cell.style.backgroundColor=ci>0?PALETTE[ci]:'#fff';
+    ref.appendChild(cell);
+  }
+}
+
+var audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playSound(type){
+  if(muted)return;
+  try{
+    var ctx=getAudio();
+    if(type==='paint'){var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=480+Math.random()*80;o.type='sine';g.gain.setValueAtTime(0.07,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.06);o.start();o.stop(ctx.currentTime+0.07);}
+    else if(type==='success'){[523,659,784,1047].forEach(function(f,i){var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.12,ctx.currentTime+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.25);o.start(ctx.currentTime+i*0.1);o.stop(ctx.currentTime+i*0.1+0.3);});}
+    else if(type==='error'){var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=200;o.type='square';g.gain.setValueAtTime(0.07,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);o.start();o.stop(ctx.currentTime+0.3);}
+    else if(type==='chime'){[523,784].forEach(function(f,i){var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0.1,ctx.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.12+0.3);o.start(ctx.currentTime+i*0.12);o.stop(ctx.currentTime+i*0.12+0.35);});}
+  }catch(e){}
+}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';}
+
+var ariaTimer=null;
+function ariaMsg(msg){
+  var el=document.getElementById('aria-msg');
+  el.textContent=msg;el.style.opacity='1';
+  if(ariaTimer)clearTimeout(ariaTimer);
+  ariaTimer=setTimeout(function(){el.style.opacity='0';},2500);
+}
+
+renderUI();
+setLang(lang);
+</script>
+</body>
+</html>

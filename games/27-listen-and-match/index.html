@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Listen & Match — Écoute & Associe | PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#dbeeff 0%,var(--sky-light) 100%);min-height:100vh;display:flex;flex-direction:column;}
+button{cursor:pointer;border:none;font-family:inherit;}
+h1,h2,h3{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;gap:10px;padding:6px 14px;flex-wrap:wrap;min-height:52px;position:sticky;top:0;z-index:100;}
+#topbar .brand{display:flex;align-items:center;gap:8px;margin-right:auto;}
+#topbar .brand span{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.02em;}
+.btn-lang{background:rgba(255,255,255,.18);color:#fff;border-radius:20px;padding:4px 12px;font-size:.85rem;font-weight:700;transition:background .2s;}
+.btn-lang.active,.btn-lang:hover{background:var(--orange);}
+#btn-mute{background:none;color:#fff;font-size:1.4rem;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+#btn-mute:hover{background:rgba(255,255,255,.2);}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 16px 40px;gap:18px;}
+.screen.active{display:flex;}
+#mascot-wrap{margin-top:10px;}
+#title-h1{color:var(--blue);font-size:2.2rem;text-align:center;line-height:1.1;}
+#title-sub{color:var(--slate);font-size:1.05rem;text-align:center;max-width:340px;}
+.btn-play{background:var(--orange);color:#fff;font-size:1.25rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;padding:16px 48px;border-radius:50px;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-width:200px;min-height:56px;}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{background:none;color:var(--blue);text-decoration:underline;font-size:.9rem;padding:6px;border-radius:8px;}
+.btn-parents:hover{color:var(--orange);}
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;}
+#modal-overlay.open{display:flex;}
+#modal-box{background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:14px;}
+#modal-box h2{color:var(--blue);font-size:1.3rem;}
+#gate-input{padding:12px 14px;border:2px solid var(--sky);border-radius:12px;font-size:1.1rem;width:100%;outline:none;}
+#gate-input:focus{border-color:var(--blue);}
+#gate-error{color:var(--orange-dark);font-size:.9rem;min-height:20px;}
+.btn-gate{background:var(--blue);color:#fff;padding:12px 24px;border-radius:30px;font-size:1rem;font-weight:700;box-shadow:0 4px 0 var(--blue-dark);}
+.btn-gate:hover{background:var(--blue-dark);}
+#parents-info{display:none;flex-direction:column;gap:10px;}
+#parents-info p{color:#334;font-size:.95rem;line-height:1.5;}
+.btn-close-modal{background:var(--orange);color:#fff;padding:10px 24px;border-radius:30px;font-size:.95rem;font-weight:700;align-self:flex-end;box-shadow:0 3px 0 var(--orange-dark);}
+#level-bar{width:100%;max-width:500px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+#level-label{color:var(--blue);font-weight:700;font-size:.95rem;}
+#progress-bar-wrap{flex:1;background:#d0e8ff;border-radius:20px;height:12px;min-width:80px;}
+#progress-bar-fill{height:12px;border-radius:20px;background:linear-gradient(90deg,var(--orange),var(--gold));transition:width .4s;}
+#score-display{color:var(--slate);font-size:.9rem;font-weight:700;white-space:nowrap;}
+#question-area{background:#fff;border-radius:24px;padding:22px 20px;box-shadow:0 4px 20px rgba(15,76,129,.12);width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+#word-fallback{color:var(--blue);font-size:1.6rem;font-weight:700;text-align:center;font-family:'Fredoka','Nunito',system-ui,sans-serif;display:none;padding:4px 0;border:2px dashed var(--sky);border-radius:12px;width:100%;padding:10px;}
+#word-fallback.visible{display:block;}
+#instructions{color:var(--slate);font-size:.95rem;text-align:center;}
+.btn-listen{background:var(--blue);color:#fff;font-size:1rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;padding:12px 28px;border-radius:50px;box-shadow:0 4px 0 var(--blue-dark);display:flex;align-items:center;gap:8px;min-height:52px;min-width:160px;justify-content:center;transition:transform .1s,box-shadow .1s;}
+.btn-listen:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--blue-dark);}
+.btn-listen:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.btn-listen:disabled{opacity:.6;cursor:not-allowed;}
+#choices-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%;max-width:500px;}
+.choice-card{background:#fff;border-radius:20px;padding:14px 8px;box-shadow:0 3px 14px rgba(15,76,129,.1);border:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:110px;transition:transform .15s,border-color .15s,box-shadow .15s;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.choice-card:hover:not(.disabled){transform:translateY(-3px);box-shadow:0 6px 20px rgba(15,76,129,.18);}
+.choice-card:active:not(.disabled){transform:translateY(1px);}
+.choice-card .emoji{font-size:2.8rem;line-height:1;user-select:none;}
+.choice-card .label{font-size:.82rem;color:var(--slate);font-weight:700;text-align:center;line-height:1.2;}
+.choice-card.correct{border-color:var(--success);background:#f0fff7;pointer-events:none;}
+.choice-card.correct .label{color:var(--success);}
+.choice-card.wrong{border-color:#ef4444;background:#fff5f5;pointer-events:none;}
+.choice-card.wrong .label{color:#ef4444;}
+.choice-card.disabled{pointer-events:none;opacity:.7;}
+.choice-card:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+#feedback-msg{font-size:1.1rem;font-weight:700;text-align:center;min-height:28px;transition:opacity .2s;color:var(--success);font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#feedback-msg.wrong-msg{color:#ef4444;}
+.btn-next{background:var(--orange);color:#fff;font-size:1.05rem;font-weight:700;font-family:'Fredoka','Nunito',system-ui,sans-serif;padding:13px 38px;border-radius:50px;box-shadow:0 5px 0 var(--orange-dark);min-height:52px;transition:transform .1s,box-shadow .1s;display:none;}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-next:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+#win-screen{text-align:center;}
+#win-stars{font-size:3.5rem;letter-spacing:4px;}
+#win-title{color:var(--blue);font-size:1.8rem;}
+#win-sub{color:var(--slate);font-size:1rem;}
+#win-score{color:var(--orange);font-size:1.2rem;font-weight:700;}
+.win-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.btn-secondary{background:var(--blue);color:#fff;padding:12px 28px;border-radius:40px;font-size:1rem;font-weight:700;font-family:'Fredoka','Nunito',system-ui,sans-serif;box-shadow:0 4px 0 var(--blue-dark);min-height:52px;}
+.btn-secondary:hover{background:var(--blue-dark);}
+[aria-live="polite"].sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:400px){#title-h1{font-size:1.7rem;}#choices-grid{gap:10px;}.choice-card .emoji{font-size:2.2rem;}}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="btn-lang" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="btn-mute" onclick="toggleMute()" aria-label="Couper le son">🔊</button>
+</div>
+
+<div aria-live="polite" class="sr-only" id="aria-live"></div>
+
+<div class="screen active" id="screen-title">
+  <div id="mascot-wrap">
+    <svg viewBox="0 0 160 160" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hibou avec écouteurs">
+      <ellipse cx="80" cy="112" rx="42" ry="36" fill="#7ec3ee"/>
+      <circle cx="80" cy="68" r="36" fill="#7ec3ee"/>
+      <polygon points="52,40 44,16 62,36" fill="#0f4c81"/>
+      <polygon points="108,40 116,16 98,36" fill="#0f4c81"/>
+      <ellipse cx="80" cy="116" rx="26" ry="20" fill="#eaf6ff"/>
+      <circle cx="66" cy="66" r="13" fill="#fff"/>
+      <circle cx="94" cy="66" r="13" fill="#fff"/>
+      <circle cx="68" cy="67" r="7" fill="#0f172a"/>
+      <circle cx="96" cy="67" r="7" fill="#0f172a"/>
+      <circle cx="70" cy="65" r="2.5" fill="#fff"/>
+      <circle cx="98" cy="65" r="2.5" fill="#fff"/>
+      <polygon points="80,76 72,85 88,85" fill="#f97316"/>
+      <path d="M46,62 Q48,38 80,38 Q112,38 114,62" fill="none" stroke="#0f4c81" stroke-width="5" stroke-linecap="round"/>
+      <rect x="40" y="60" width="12" height="18" rx="6" fill="#f97316"/>
+      <rect x="108" y="60" width="12" height="18" rx="6" fill="#f97316"/>
+      <ellipse cx="42" cy="114" rx="16" ry="22" fill="#5aadd4" transform="rotate(-18,42,114)"/>
+      <ellipse cx="118" cy="114" rx="16" ry="22" fill="#5aadd4" transform="rotate(18,118,114)"/>
+      <ellipse cx="66" cy="148" rx="14" ry="7" fill="#f97316"/>
+      <ellipse cx="94" cy="148" rx="14" ry="7" fill="#f97316"/>
+      <text x="124" y="54" font-size="22" fill="#ffd23f">♪</text>
+      <text x="14" y="78" font-size="18" fill="#ffd23f">♫</text>
+    </svg>
+  </div>
+  <h1 id="title-h1"></h1>
+  <p id="title-sub"></p>
+  <button class="btn-play" onclick="startGame()" id="btn-start"></button>
+  <button class="btn-parents" onclick="openParents()" id="btn-parents-link"></button>
+</div>
+
+<div class="screen" id="screen-game">
+  <div id="level-bar">
+    <span id="level-label"></span>
+    <div id="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+      <div id="progress-bar-fill" style="width:0%"></div>
+    </div>
+    <span id="score-display"></span>
+  </div>
+  <div id="question-area">
+    <p id="instructions"></p>
+    <div id="word-fallback"></div>
+    <button class="btn-listen" id="btn-listen" onclick="speak(true)">
+      <span aria-hidden="true">🔊</span><span id="btn-listen-text"></span>
+    </button>
+  </div>
+  <div id="choices-grid" role="group" aria-label="Choix"></div>
+  <div id="feedback-msg" aria-live="assertive"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()"></button>
+</div>
+
+<div class="screen" id="screen-win" id="win-screen">
+  <div id="win-stars"></div>
+  <h2 id="win-title"></h2>
+  <p id="win-sub"></p>
+  <p id="win-score"></p>
+  <div class="win-btns">
+    <button class="btn-play" id="btn-next-level" onclick="nextLevel()"></button>
+    <button class="btn-secondary" id="btn-replay" onclick="replayLevel()"></button>
+    <button class="btn-secondary" id="btn-home" onclick="goHome()"></button>
+  </div>
+</div>
+
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-box">
+    <h2 id="modal-title"></h2>
+    <div id="gate-area" style="display:flex;flex-direction:column;gap:10px;">
+      <p id="gate-question-text"></p>
+      <input type="number" id="gate-input" aria-label="Réponse" min="0" max="999"
+             onkeydown="if(event.key==='Enter')checkGate()">
+      <p id="gate-error" role="alert"></p>
+      <button class="btn-gate" onclick="checkGate()" id="btn-gate-check"></button>
+    </div>
+    <div id="parents-info">
+      <p id="pi-skill"></p>
+      <p id="pi-data"></p>
+      <p id="pi-ads"></p>
+      <p id="pi-tech"></p>
+      <button class="btn-close-modal" onclick="closeParents()" id="btn-close-parents"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+var LEVELS=[
+  {label:{fr:"Niveau 1 — Mots simples",en:"Level 1 — Simple words"},items:[
+    {text:"cat",choices:[{emoji:"🐱",label:{fr:"Chat",en:"Cat"},correct:true},{emoji:"🐶",label:{fr:"Chien",en:"Dog"},correct:false},{emoji:"🐟",label:{fr:"Poisson",en:"Fish"},correct:false},{emoji:"🐭",label:{fr:"Souris",en:"Mouse"},correct:false}]},
+    {text:"sun",choices:[{emoji:"🌙",label:{fr:"Lune",en:"Moon"},correct:false},{emoji:"☀️",label:{fr:"Soleil",en:"Sun"},correct:true},{emoji:"⭐",label:{fr:"Étoile",en:"Star"},correct:false},{emoji:"☁️",label:{fr:"Nuage",en:"Cloud"},correct:false}]},
+    {text:"apple",choices:[{emoji:"🍌",label:{fr:"Banane",en:"Banana"},correct:false},{emoji:"🍇",label:{fr:"Raisin",en:"Grapes"},correct:false},{emoji:"🍎",label:{fr:"Pomme",en:"Apple"},correct:true},{emoji:"🍊",label:{fr:"Orange",en:"Orange"},correct:false}]},
+    {text:"house",choices:[{emoji:"🏠",label:{fr:"Maison",en:"House"},correct:true},{emoji:"🏕️",label:{fr:"Tente",en:"Tent"},correct:false},{emoji:"🏰",label:{fr:"Château",en:"Castle"},correct:false},{emoji:"🚗",label:{fr:"Voiture",en:"Car"},correct:false}]},
+    {text:"book",choices:[{emoji:"📖",label:{fr:"Livre",en:"Book"},correct:true},{emoji:"✏️",label:{fr:"Crayon",en:"Pencil"},correct:false},{emoji:"🎒",label:{fr:"Sac",en:"Bag"},correct:false},{emoji:"📏",label:{fr:"Règle",en:"Ruler"},correct:false}]},
+    {text:"tree",choices:[{emoji:"🌸",label:{fr:"Fleur",en:"Flower"},correct:false},{emoji:"🌿",label:{fr:"Herbe",en:"Grass"},correct:false},{emoji:"🌳",label:{fr:"Arbre",en:"Tree"},correct:true},{emoji:"🍄",label:{fr:"Champignon",en:"Mushroom"},correct:false}]},
+    {text:"bird",choices:[{emoji:"🐦",label:{fr:"Oiseau",en:"Bird"},correct:true},{emoji:"🦋",label:{fr:"Papillon",en:"Butterfly"},correct:false},{emoji:"🐝",label:{fr:"Abeille",en:"Bee"},correct:false},{emoji:"🐛",label:{fr:"Chenille",en:"Caterpillar"},correct:false}]},
+    {text:"ball",choices:[{emoji:"⚽",label:{fr:"Ballon",en:"Ball"},correct:true},{emoji:"🎯",label:{fr:"Cible",en:"Target"},correct:false},{emoji:"🎮",label:{fr:"Manette",en:"Controller"},correct:false},{emoji:"🎲",label:{fr:"Dé",en:"Dice"},correct:false}]}
+  ]},
+  {label:{fr:"Niveau 2 — Phrases courtes",en:"Level 2 — Short phrases"},items:[
+    {text:"a red car",choices:[{emoji:"🚗",label:{fr:"Voiture rouge",en:"Red car"},correct:true},{emoji:"🚕",label:{fr:"Voiture jaune",en:"Yellow car"},correct:false},{emoji:"🚌",label:{fr:"Bus",en:"Bus"},correct:false},{emoji:"🛵",label:{fr:"Scooter",en:"Scooter"},correct:false}]},
+    {text:"a big dog",choices:[{emoji:"🐩",label:{fr:"Petit chien",en:"Small dog"},correct:false},{emoji:"🐕",label:{fr:"Grand chien",en:"Big dog"},correct:true},{emoji:"🐈",label:{fr:"Chat",en:"Cat"},correct:false},{emoji:"🐇",label:{fr:"Lapin",en:"Rabbit"},correct:false}]},
+    {text:"it is raining",choices:[{emoji:"☀️",label:{fr:"Soleil",en:"Sunny"},correct:false},{emoji:"🌨️",label:{fr:"Neige",en:"Snow"},correct:false},{emoji:"🌧️",label:{fr:"Pluie",en:"Rain"},correct:true},{emoji:"🌫️",label:{fr:"Brouillard",en:"Fog"},correct:false}]},
+    {text:"she is sleeping",choices:[{emoji:"🏃",label:{fr:"Elle court",en:"Running"},correct:false},{emoji:"😴",label:{fr:"Elle dort",en:"Sleeping"},correct:true},{emoji:"🍽️",label:{fr:"Elle mange",en:"Eating"},correct:false},{emoji:"📚",label:{fr:"Elle lit",en:"Reading"},correct:false}]},
+    {text:"a yellow star",choices:[{emoji:"⭐",label:{fr:"Étoile jaune",en:"Yellow star"},correct:true},{emoji:"🌙",label:{fr:"Lune",en:"Moon"},correct:false},{emoji:"🔵",label:{fr:"Cercle bleu",en:"Blue circle"},correct:false},{emoji:"❤️",label:{fr:"Cœur rouge",en:"Red heart"},correct:false}]},
+    {text:"he is eating",choices:[{emoji:"😴",label:{fr:"Il dort",en:"Sleeping"},correct:false},{emoji:"🏊",label:{fr:"Il nage",en:"Swimming"},correct:false},{emoji:"🍽️",label:{fr:"Il mange",en:"Eating"},correct:true},{emoji:"🎨",label:{fr:"Il dessine",en:"Drawing"},correct:false}]},
+    {text:"the blue sea",choices:[{emoji:"🏔️",label:{fr:"Montagne",en:"Mountain"},correct:false},{emoji:"🌊",label:{fr:"Mer bleue",en:"Blue sea"},correct:true},{emoji:"🌲",label:{fr:"Forêt",en:"Forest"},correct:false},{emoji:"🏜️",label:{fr:"Désert",en:"Desert"},correct:false}]},
+    {text:"a happy child",choices:[{emoji:"😢",label:{fr:"Enfant triste",en:"Sad child"},correct:false},{emoji:"😠",label:{fr:"Enfant en colère",en:"Angry child"},correct:false},{emoji:"😊",label:{fr:"Enfant heureux",en:"Happy child"},correct:true},{emoji:"😨",label:{fr:"Enfant effrayé",en:"Scared child"},correct:false}]}
+  ]},
+  {label:{fr:"Niveau 3 — Phrases longues",en:"Level 3 — Longer phrases"},items:[
+    {text:"The cat is sitting on the chair",choices:[{emoji:"🐱🛏️",label:{fr:"Chat sur le lit",en:"Cat on bed"},correct:false},{emoji:"🐱🪑",label:{fr:"Chat sur la chaise",en:"Cat on chair"},correct:true},{emoji:"🐶🪑",label:{fr:"Chien sur chaise",en:"Dog on chair"},correct:false},{emoji:"🐱🌳",label:{fr:"Chat dans arbre",en:"Cat in tree"},correct:false}]},
+    {text:"She is reading a book in the park",choices:[{emoji:"📖🏠",label:{fr:"Lit à la maison",en:"Reading at home"},correct:false},{emoji:"📖🌳",label:{fr:"Lit dans le parc",en:"Reading in park"},correct:true},{emoji:"📖🏫",label:{fr:"Lit à l'école",en:"Reading at school"},correct:false},{emoji:"🎮🌳",label:{fr:"Joue dans le parc",en:"Playing in park"},correct:false}]},
+    {text:"There are three birds in the tree",choices:[{emoji:"1️⃣🐦",label:{fr:"1 oiseau",en:"1 bird"},correct:false},{emoji:"2️⃣🐦",label:{fr:"2 oiseaux",en:"2 birds"},correct:false},{emoji:"3️⃣🐦",label:{fr:"3 oiseaux",en:"3 birds"},correct:true},{emoji:"4️⃣🐦",label:{fr:"4 oiseaux",en:"4 birds"},correct:false}]},
+    {text:"He is riding his bicycle to school",choices:[{emoji:"🚌🏫",label:{fr:"Bus vers école",en:"Bus to school"},correct:false},{emoji:"🚶🏫",label:{fr:"Marche vers école",en:"Walking to school"},correct:false},{emoji:"🚲🏫",label:{fr:"Vélo vers école",en:"Bike to school"},correct:true},{emoji:"🚗🏫",label:{fr:"Voiture vers école",en:"Car to school"},correct:false}]},
+    {text:"The children are playing in the snow",choices:[{emoji:"🏖️👧",label:{fr:"Joue à la plage",en:"Playing at beach"},correct:false},{emoji:"❄️👦👧",label:{fr:"Joue dans la neige",en:"Playing in snow"},correct:true},{emoji:"🌧️👧",label:{fr:"Joue sous la pluie",en:"Playing in rain"},correct:false},{emoji:"☀️👧",label:{fr:"Joue au soleil",en:"Playing in sun"},correct:false}]},
+    {text:"She has a pink umbrella",choices:[{emoji:"☂️💙",label:{fr:"Parapluie bleu",en:"Blue umbrella"},correct:false},{emoji:"☂️💚",label:{fr:"Parapluie vert",en:"Green umbrella"},correct:false},{emoji:"☂️💛",label:{fr:"Parapluie jaune",en:"Yellow umbrella"},correct:false},{emoji:"☂️🩷",label:{fr:"Parapluie rose",en:"Pink umbrella"},correct:true}]},
+    {text:"The dog is running fast in the garden",choices:[{emoji:"🐶🌳🐢",label:{fr:"Chien lent",en:"Dog slow"},correct:false},{emoji:"🐶💤🌿",label:{fr:"Chien qui dort",en:"Dog sleeping"},correct:false},{emoji:"🐶💨🌿",label:{fr:"Chien rapide jardin",en:"Dog fast garden"},correct:true},{emoji:"🐱💨🌿",label:{fr:"Chat rapide jardin",en:"Cat fast garden"},correct:false}]},
+    {text:"They are eating pizza for dinner",choices:[{emoji:"🥗🍽️",label:{fr:"Salade au dîner",en:"Salad for dinner"},correct:false},{emoji:"🍔🍽️",label:{fr:"Burger au dîner",en:"Burger for dinner"},correct:false},{emoji:"🍕🍽️",label:{fr:"Pizza au dîner",en:"Pizza for dinner"},correct:true},{emoji:"🍣🍽️",label:{fr:"Sushi au dîner",en:"Sushi for dinner"},correct:false}]}
+  ]}
+];
+
+var T={
+  fr:{title:"Écoute & Associe",subtitle:"Écoute les mots anglais et trouve la bonne image !",play:"Jouer",parents:"Pour les parents",modal_title:"Espace parents",gate_q:"Combien font",gate_check:"Valider",gate_err:"Réponse incorrecte, essaie encore !",pi_skill:"🎯 Compétence : compréhension orale de l'anglais (A1→A2). L'enfant associe des mots et phrases entendus à des images.",pi_data:"🔒 Aucune donnée personnelle collectée. Progression sauvegardée localement sur cet appareil uniquement.",pi_ads:"🚫 Aucune publicité, aucun achat intégré, entièrement gratuit.",pi_tech:"⚙️ Fonctionne hors-ligne. La voix utilise la synthèse vocale du navigateur (aucun réseau).",close:"Fermer",level:"Niveau",score:"Score",listen:"Écouter",relisten:"Réécouter",instructions:"Quelle image correspond au son entendu ?",feedback_correct:["Excellent ! 🌟","Bravo ! 🎉","Super ! ✨","Parfait ! 🏆","Génial ! 🎊"],feedback_wrong:["Pas tout à fait, essaie encore !","Ce n'est pas ça, courage !","Presque ! Essaie encore !"],next:"Question suivante",win_title:"Niveau terminé !",win_sub:"Tu as fini ce niveau !",win_score:"Score :",next_level:"Niveau suivant",replay:"Rejouer",home:"Accueil",win_all_title:"Félicitations !",win_all_sub:"Tu as terminé tous les niveaux ! Tu es un champion de l'anglais !"},
+  en:{title:"Listen & Match",subtitle:"Listen to English words and find the right picture!",play:"Play",parents:"For parents",modal_title:"Parents' area",gate_q:"How much is",gate_check:"Check",gate_err:"Wrong answer, try again!",pi_skill:"🎯 Skill: English listening comprehension (A1→A2). The child matches heard words and phrases to images.",pi_data:"🔒 No personal data collected. Progress is saved locally on this device only.",pi_ads:"🚫 No ads, no in-app purchases, completely free.",pi_tech:"⚙️ Works offline. Voice uses the browser's speech synthesis (no network needed).",close:"Close",level:"Level",score:"Score",listen:"Listen",relisten:"Listen again",instructions:"Which picture matches the sound?",feedback_correct:["Excellent! 🌟","Great job! 🎉","Amazing! ✨","Perfect! 🏆","Awesome! 🎊"],feedback_wrong:["Not quite… try again!","That's not it, keep going!","Almost! Try again!"],next:"Next question",win_title:"Level complete!",win_sub:"You finished this level!",win_score:"Score:",next_level:"Next level",replay:"Play again",home:"Home",win_all_title:"Congratulations!",win_all_sub:"You finished all levels! You're an English champion!"}
+};
+
+var lang=(navigator.language||"fr").startsWith("fr")?"fr":"en";
+var muted=false;
+var currentLevel=0;
+var currentIndex=0;
+var score=0;
+var levelOrder=[];
+var answered=false;
+var hasSpoken=false;
+var gateA=0,gateB=0,gateAns=0;
+var currentText="";
+var audioCtx=null;
+
+function loadProgress(){
+  try{var d=JSON.parse(localStorage.getItem("pgrg_listen_match")||"{}");currentLevel=Math.min(d.level||0,LEVELS.length-1);}catch(e){currentLevel=0;}
+}
+function saveProgress(){
+  try{localStorage.setItem("pgrg_listen_match",JSON.stringify({level:currentLevel}));}catch(e){}
+}
+
+function getAudioCtx(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,dur,vol,type){
+  if(muted)return;
+  try{var ctx=getAudioCtx();var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=type||"sine";o.frequency.value=freq;g.gain.setValueAtTime(vol||0.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);o.start();o.stop(ctx.currentTime+dur);}catch(e){}
+}
+function playSuccess(){if(muted)return;playTone(523,0.1,0.13);setTimeout(function(){playTone(659,0.1,0.13);},110);setTimeout(function(){playTone(784,0.15,0.13);},220);setTimeout(function(){playTone(1047,0.22,0.1);},340);}
+function playWrong(){if(muted)return;playTone(220,0.15,0.08,"triangle");setTimeout(function(){playTone(196,0.18,0.07,"triangle");},140);}
+function playClick(){if(muted)return;playTone(440,0.06,0.07);}
+
+var speechAvailable=typeof speechSynthesis!=="undefined";
+function speak(userAction){
+  if(!currentText)return;
+  if(muted&&!userAction)return;
+  if(!speechAvailable){showFallback();return;}
+  try{
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(currentText);
+    u.lang="en-US";u.rate=0.82;u.pitch=1.0;u.volume=muted?0:1;
+    u.onend=function(){hasSpoken=true;};
+    u.onerror=function(){showFallback();};
+    window.speechSynthesis.speak(u);
+    hasSpoken=true;
+    document.getElementById("btn-listen-text").textContent=t("relisten");
+  }catch(e){showFallback();}
+}
+function showFallback(){
+  var el=document.getElementById("word-fallback");
+  el.textContent=currentText;
+  el.classList.add("visible");
+  hasSpoken=true;
+  document.getElementById("btn-listen-text").textContent=t("relisten");
+}
+
+function setLang(l){lang=l;document.getElementById("btn-fr").classList.toggle("active",l==="fr");document.getElementById("btn-en").classList.toggle("active",l==="en");renderUI();}
+function t(k){return(T[lang]&&T[lang][k])||T.fr[k]||k;}
+
+function renderUI(){
+  document.getElementById("title-h1").textContent=t("title");
+  document.getElementById("title-sub").textContent=t("subtitle");
+  document.getElementById("btn-start").textContent=t("play");
+  document.getElementById("btn-parents-link").textContent=t("parents");
+  document.getElementById("modal-title").textContent=t("modal_title");
+  document.getElementById("btn-gate-check").textContent=t("gate_check");
+  document.getElementById("btn-close-parents").textContent=t("close");
+  document.getElementById("pi-skill").textContent=t("pi_skill");
+  document.getElementById("pi-data").textContent=t("pi_data");
+  document.getElementById("pi-ads").textContent=t("pi_ads");
+  document.getElementById("pi-tech").textContent=t("pi_tech");
+  document.getElementById("btn-next-level").textContent=t("next_level");
+  document.getElementById("btn-replay").textContent=t("replay");
+  document.getElementById("btn-home").textContent=t("home");
+  var gs=document.getElementById("screen-game");
+  if(gs&&gs.classList.contains("active")){
+    document.getElementById("instructions").textContent=t("instructions");
+    document.getElementById("btn-listen-text").textContent=hasSpoken?t("relisten"):t("listen");
+    document.getElementById("score-display").textContent=t("score")+": "+score;
+    document.getElementById("btn-next").textContent=t("next");
+    var lev=LEVELS[currentLevel];
+    if(lev)document.getElementById("level-label").textContent=lev.label[lang];
+    refreshChoiceLabels();
+  }
+}
+
+function refreshChoiceLabels(){
+  var lev=LEVELS[currentLevel];if(!lev)return;
+  var item=lev.items[levelOrder[currentIndex]];if(!item)return;
+  var cards=document.querySelectorAll(".choice-card");
+  cards.forEach(function(card,i){
+    var lbl=card.querySelector(".label");
+    var idx=parseInt(card.getAttribute("data-idx"),10);
+    if(lbl&&item.choices[idx])lbl.textContent=item.choices[idx].label[lang];
+  });
+}
+
+function toggleMute(){muted=!muted;document.getElementById("btn-mute").textContent=muted?"🔇":"🔊";document.getElementById("btn-mute").setAttribute("aria-label",muted?"Activer le son":"Couper le son");}
+
+function openParents(){
+  gateA=Math.floor(Math.random()*9)+2;gateB=Math.floor(Math.random()*9)+2;gateAns=gateA*gateB;
+  document.getElementById("gate-question-text").textContent=t("gate_q")+" "+gateA+" × "+gateB+" ?";
+  document.getElementById("gate-input").value="";document.getElementById("gate-error").textContent="";
+  document.getElementById("gate-area").style.display="flex";
+  document.getElementById("parents-info").style.display="none";
+  document.getElementById("modal-overlay").classList.add("open");
+  setTimeout(function(){document.getElementById("gate-input").focus();},100);
+}
+function checkGate(){
+  var val=parseInt(document.getElementById("gate-input").value,10);
+  if(val===gateAns){document.getElementById("gate-area").style.display="none";document.getElementById("parents-info").style.display="flex";}
+  else{document.getElementById("gate-error").textContent=t("gate_err");document.getElementById("gate-input").value="";document.getElementById("gate-input").focus();}
+}
+function closeParents(){document.getElementById("modal-overlay").classList.remove("open");}
+document.getElementById("modal-overlay").addEventListener("click",function(e){if(e.target===this)closeParents();});
+
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
+
+function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
+
+function startGame(){playClick();score=0;loadProgress();initLevel();showScreen("screen-game");renderUI();}
+
+function initLevel(){
+  var lev=LEVELS[currentLevel];
+  var idx=[];for(var i=0;i<lev.items.length;i++)idx.push(i);
+  levelOrder=shuffle(idx);
+  currentIndex=0;answered=false;hasSpoken=false;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;hasSpoken=false;
+  var lev=LEVELS[currentLevel];
+  var item=lev.items[levelOrder[currentIndex]];
+  currentText=item.text;
+  var pct=Math.round((currentIndex/lev.items.length)*100);
+  document.getElementById("progress-bar-fill").style.width=pct+"%";
+  document.getElementById("progress-bar-wrap").setAttribute("aria-valuenow",pct);
+  document.getElementById("instructions").textContent=t("instructions");
+  document.getElementById("btn-listen-text").textContent=t("listen");
+  document.getElementById("btn-listen").disabled=false;
+  var fb=document.getElementById("word-fallback");fb.textContent="";fb.classList.remove("visible");
+  document.getElementById("level-label").textContent=lev.label[lang];
+  document.getElementById("score-display").textContent=t("score")+": "+score;
+  document.getElementById("feedback-msg").textContent="";
+  document.getElementById("feedback-msg").className="";
+  document.getElementById("btn-next").style.display="none";
+
+  var displayChoices=shuffle(item.choices.map(function(c,i){return{emoji:c.emoji,label:c.label,correct:c.correct,origIdx:i};}));
+  var grid=document.getElementById("choices-grid");
+  grid.innerHTML="";
+  displayChoices.forEach(function(choice,di){
+    var card=document.createElement("button");
+    card.className="choice-card";
+    card.setAttribute("data-idx",choice.origIdx);
+    card.setAttribute("aria-label",choice.label[lang]);
+    card.innerHTML='<span class="emoji" aria-hidden="true">'+choice.emoji+'</span><span class="label">'+choice.label[lang]+'</span>';
+    card.onclick=(function(c){return function(){selectChoice(this,c.correct);};})(choice);
+    grid.appendChild(card);
+  });
+  setTimeout(function(){speak(false);},400);
+}
+
+function selectChoice(card,correct){
+  if(answered)return;
+  answered=true;playClick();
+  document.querySelectorAll(".choice-card").forEach(function(c){c.classList.add("disabled");});
+  if(correct){
+    card.classList.add("correct");card.classList.remove("disabled");
+    score++;document.getElementById("score-display").textContent=t("score")+": "+score;
+    var msgs=T[lang].feedback_correct;
+    var msg=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById("feedback-msg").textContent=msg;
+    document.getElementById("feedback-msg").className="";
+    setAria(msg);playSuccess();
+  } else {
+    card.classList.add("wrong");card.classList.remove("disabled");
+    highlightCorrect();
+    var msgs=T[lang].feedback_wrong;
+    var msg=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById("feedback-msg").textContent=msg;
+    document.getElementById("feedback-msg").className="wrong-msg";
+    setAria(msg);playWrong();
+  }
+  document.getElementById("btn-next").style.display="inline-block";
+  document.getElementById("btn-next").textContent=t("next");
+  document.getElementById("btn-listen-text").textContent=t("relisten");
+}
+
+function highlightCorrect(){
+  var lev=LEVELS[currentLevel];var item=lev.items[levelOrder[currentIndex]];
+  var correctLabel=null;
+  item.choices.forEach(function(c){if(c.correct)correctLabel=c.label[lang];});
+  document.querySelectorAll(".choice-card").forEach(function(card){
+    var lbl=card.querySelector(".label");
+    if(lbl&&lbl.textContent===correctLabel&&!card.classList.contains("wrong"))card.classList.add("correct");
+  });
+}
+
+function nextQuestion(){
+  playClick();currentIndex++;
+  if(currentIndex>=LEVELS[currentLevel].items.length)showWin();
+  else renderQuestion();
+}
+
+function showWin(){
+  var total=LEVELS[currentLevel].items.length;
+  var stars="⭐";
+  if(score>=Math.ceil(total*0.5))stars="⭐⭐";
+  if(score>=Math.ceil(total*0.75))stars="⭐⭐⭐";
+  if(score===total)stars="🌟🌟🌟";
+  var allDone=currentLevel>=LEVELS.length-1;
+  document.getElementById("win-stars").textContent=stars;
+  if(allDone){document.getElementById("win-title").textContent=t("win_all_title");document.getElementById("win-sub").textContent=t("win_all_sub");document.getElementById("btn-next-level").style.display="none";}
+  else{document.getElementById("win-title").textContent=t("win_title");document.getElementById("win-sub").textContent=t("win_sub");document.getElementById("btn-next-level").style.display="inline-block";}
+  document.getElementById("win-score").textContent=t("win_score")+" "+score+" / "+total;
+  if(!allDone)saveProgress();
+  playSuccess();showScreen("screen-win");
+}
+function nextLevel(){playClick();if(currentLevel<LEVELS.length-1){currentLevel++;saveProgress();}score=0;initLevel();showScreen("screen-game");renderUI();}
+function replayLevel(){playClick();score=0;initLevel();showScreen("screen-game");renderUI();}
+function goHome(){playClick();score=0;showScreen("screen-title");}
+
+function setAria(msg){var el=document.getElementById("aria-live");el.textContent="";setTimeout(function(){el.textContent=msg;},60);}
+
+loadProgress();setLang(lang);
+</script>
+</body>
+</html>

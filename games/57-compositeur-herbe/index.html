@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Compositeur en Herbe / Little Composer — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,#dbeeff 0%,var(--sky-light) 100%);
+  min-height:100vh; color:var(--navy); overflow-x:hidden;
+}
+button{cursor:pointer;border:none;font-family:inherit;font-size:1rem}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);color:#fff;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+#topbar .logo-wrap{display:flex;align-items:center;gap:8px;flex:1}
+#topbar .brand{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff}
+.lang-btn{background:rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:4px 10px;font-weight:700;font-size:.9rem;transition:background .2s;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center}
+.lang-btn.active,.lang-btn:hover{background:var(--orange)}
+#mute-btn{background:rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:4px 10px;font-size:1.2rem;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#mute-btn:hover{background:var(--orange)}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 14px 40px;min-height:calc(100vh - 60px)}
+.screen.active{display:flex}
+#title-screen{justify-content:center;gap:16px;text-align:center}
+#game-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.4rem;color:var(--blue);font-weight:700;line-height:1.1;}
+#game-subtitle{font-size:1.1rem;color:var(--slate);max-width:380px}
+.btn-play{background:var(--orange);color:#fff;border-radius:18px;padding:16px 44px;font-size:1.4rem;font-weight:700;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;min-width:200px;min-height:56px;}
+.btn-play:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--orange-dark)}
+.btn-parents{background:transparent;color:var(--blue);text-decoration:underline;font-size:.95rem;padding:8px;min-height:44px;}
+#level-screen{gap:14px;text-align:center}
+.level-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.8rem;color:var(--blue);font-weight:700}
+.level-cards{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:700px}
+.level-card{background:#fff;border-radius:16px;padding:20px 18px;width:180px;box-shadow:0 4px 16px rgba(15,76,129,.13);cursor:pointer;transition:transform .15s,box-shadow .15s;border:2px solid transparent;}
+.level-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(15,76,129,.2);border-color:var(--orange)}
+.lc-icon{font-size:2.2rem;margin-bottom:8px}
+.lc-name{font-weight:700;color:var(--blue);font-size:1rem}
+.lc-desc{font-size:.82rem;color:var(--slate);margin-top:4px}
+.lc-stars{color:var(--gold);font-size:1rem;margin-top:6px}
+#game-screen{gap:12px;width:100%}
+.game-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:820px}
+.game-info-box{background:var(--blue);color:#fff;border-radius:12px;padding:8px 16px;font-weight:700;font-size:1rem;flex:1;min-width:120px;text-align:center}
+.btn-back{background:var(--slate);color:#fff;border-radius:12px;padding:8px 16px;font-weight:700;font-size:.95rem;min-height:44px}
+.btn-back:hover{background:var(--blue)}
+#model-wrap{background:#fff;border-radius:14px;padding:10px 14px;max-width:820px;width:100%;box-shadow:0 2px 10px rgba(15,76,129,.1);text-align:center;}
+.model-label{font-weight:700;color:var(--blue);font-size:.95rem;margin-bottom:6px}
+#roll-outer{width:100%;max-width:820px;overflow-x:auto;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(15,76,129,.12);padding:8px;}
+#roll-container{display:grid;position:relative;user-select:none;}
+.roll-cell{width:44px;height:40px;border:1px solid #d4e8f8;cursor:pointer;border-radius:6px;transition:background .1s;position:relative;display:flex;align-items:center;justify-content:center;}
+.roll-cell.active{background:var(--orange);border-color:var(--orange-dark)}
+.roll-cell.playhead{outline:3px solid var(--gold);outline-offset:-2px;z-index:2}
+.note-label{width:48px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:var(--blue);background:var(--sky-light);border-radius:6px 0 0 6px;border:1px solid #d4e8f8;flex-shrink:0;}
+#controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;max-width:820px;width:100%}
+.btn-play-roll{background:var(--orange);color:#fff;border-radius:14px;padding:12px 28px;font-size:1.1rem;font-weight:700;box-shadow:0 4px 0 var(--orange-dark);min-height:52px;min-width:120px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;}
+.btn-play-roll:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-stop-roll{background:var(--slate);color:#fff;border-radius:14px;padding:12px 22px;font-size:1.1rem;font-weight:700;min-height:52px;min-width:100px;}
+.btn-stop-roll:hover{background:var(--blue)}
+.btn-clear{background:#fff;color:var(--slate);border:2px solid #cde;border-radius:14px;padding:10px 18px;font-size:1rem;font-weight:700;min-height:48px;}
+.btn-clear:hover{border-color:var(--orange);color:var(--orange)}
+.tempo-wrap{display:flex;align-items:center;gap:8px}
+.tempo-label{font-weight:700;color:var(--blue);font-size:.9rem}
+#tempo-slider{width:90px;accent-color:var(--orange);height:6px}
+#tempo-val{font-weight:700;color:var(--orange);font-size:.9rem;min-width:38px}
+.btn-check{background:var(--success);color:#fff;border-radius:14px;padding:12px 24px;font-size:1.1rem;font-weight:700;min-height:52px;min-width:120px;box-shadow:0 4px 0 #1e9a58;transition:transform .1s,box-shadow .1s;}
+.btn-check:hover{transform:translateY(2px);box-shadow:0 2px 0 #1e9a58}
+.btn-play-model{background:var(--blue);color:#fff;border-radius:14px;padding:10px 18px;font-size:1rem;font-weight:700;min-height:48px;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s;}
+.btn-play-model:hover{transform:translateY(2px)}
+#feedback-bar{max-width:820px;width:100%;min-height:48px;border-radius:12px;padding:10px 18px;font-weight:700;font-size:1.05rem;text-align:center;background:transparent;transition:background .3s;}
+#success-screen{gap:16px;text-align:center;justify-content:center}
+.success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--orange);font-weight:700}
+.stars-row{font-size:2.8rem;color:var(--gold);letter-spacing:4px}
+.success-msg{font-size:1.1rem;color:var(--slate);max-width:360px}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px}
+.btn-secondary{background:#fff;color:var(--blue);border:2px solid var(--blue);border-radius:14px;padding:12px 22px;font-size:1rem;font-weight:700;min-height:48px;}
+.btn-secondary:hover{background:var(--sky-light)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(15,76,129,.25);}
+.modal-box h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);margin-bottom:10px;font-size:1.5rem}
+.modal-box p{color:var(--slate);font-size:.95rem;margin-bottom:14px;line-height:1.5}
+.modal-close{background:var(--orange);color:#fff;border-radius:12px;padding:10px 24px;font-size:1rem;font-weight:700;min-height:44px;box-shadow:0 4px 0 var(--orange-dark);}
+#parental-gate-form input{border:2px solid #cde;border-radius:10px;padding:10px 14px;font-size:1.1rem;width:120px;text-align:center;font-family:inherit;color:var(--navy);margin:8px 0 12px;}
+.parental-q{font-weight:700;color:var(--navy);font-size:1.1rem;margin-bottom:4px}
+#parental-err{color:var(--orange-dark);font-size:.9rem;min-height:18px}
+.mini-note{min-width:36px;min-height:36px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;margin:2px}
+@media(max-width:600px){.roll-cell{width:34px;height:34px}.note-label{width:38px;height:34px;font-size:.68rem}#game-title{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="logo-wrap">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span class="brand">PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btn-fr" aria-label="Français">FR</button>
+  <button class="lang-btn" id="btn-en" aria-label="English">EN</button>
+  <button id="mute-btn" aria-label="Muet">🔊</button>
+</div>
+
+<div id="title-screen" class="screen active">
+  <div style="margin:0 auto">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="70" cy="100" rx="38" ry="28" fill="#ffd23f"/>
+      <circle cx="70" cy="62" r="34" fill="#ffd23f"/>
+      <circle cx="59" cy="56" r="7" fill="#fff"/>
+      <circle cx="81" cy="56" r="7" fill="#fff"/>
+      <circle cx="61" cy="57" r="4" fill="#0f172a"/>
+      <circle cx="83" cy="57" r="4" fill="#0f172a"/>
+      <circle cx="62" cy="55" r="1.5" fill="#fff"/>
+      <circle cx="84" cy="55" r="1.5" fill="#fff"/>
+      <path d="M56 70 Q70 82 84 70" stroke="#e65c00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <text x="26" y="38" font-size="18" fill="#0f4c81">♪</text>
+      <text x="97" y="42" font-size="14" fill="#f97316">♫</text>
+      <text x="50" y="28" font-size="12" fill="#34c77b">♩</text>
+      <ellipse cx="33" cy="98" rx="9" ry="6" fill="#ffd23f" transform="rotate(-30,33,98)"/>
+      <ellipse cx="107" cy="98" rx="9" ry="6" fill="#ffd23f" transform="rotate(30,107,98)"/>
+      <line x1="105" y1="93" x2="122" y2="72" stroke="#7ec3ee" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="122" cy="71" r="5" fill="#f97316"/>
+      <ellipse cx="58" cy="126" rx="10" ry="7" fill="#ffd23f"/>
+      <ellipse cx="82" cy="126" rx="10" ry="7" fill="#ffd23f"/>
+      <circle cx="50" cy="68" r="7" fill="#f97316" opacity="0.18"/>
+      <circle cx="90" cy="68" r="7" fill="#f97316" opacity="0.18"/>
+    </svg>
+  </div>
+  <h1 id="game-title"></h1>
+  <p id="game-subtitle"></p>
+  <button class="btn-play" id="btn-jouer" onclick="goLevelSelect()"></button>
+  <button class="btn-parents" id="btn-parents-link" onclick="openParentalGate()"></button>
+</div>
+
+<div id="level-screen" class="screen">
+  <h2 class="level-title" id="level-screen-title"></h2>
+  <div class="level-cards" id="level-cards"></div>
+  <button class="btn-back" id="btn-back-title" onclick="showScreen('title-screen')" style="margin-top:12px"></button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <button class="btn-back" id="btn-back-level" onclick="goLevelSelect()"></button>
+    <div class="game-info-box" id="game-level-info"></div>
+  </div>
+  <div id="model-wrap" style="display:none">
+    <div class="model-label" id="model-label-txt"></div>
+    <div id="model-notes-display"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <button class="btn-play-model" id="btn-play-model-btn" onclick="playModelMelody()"></button>
+    </div>
+  </div>
+  <div id="roll-outer">
+    <div style="display:flex;gap:0;align-items:stretch" id="roll-with-labels">
+      <div id="note-labels" style="display:flex;flex-direction:column"></div>
+      <div id="roll-container"></div>
+    </div>
+  </div>
+  <div id="controls">
+    <button class="btn-play-roll" id="btn-play-roll" onclick="playRoll()"></button>
+    <button class="btn-stop-roll" id="btn-stop-roll" onclick="stopRoll()"></button>
+    <button class="btn-clear" id="btn-clear" onclick="clearRoll()"></button>
+    <div class="tempo-wrap">
+      <span class="tempo-label" id="tempo-lbl"></span>
+      <input type="range" id="tempo-slider" min="40" max="180" value="90" oninput="updateTempo(this.value)">
+      <span id="tempo-val">90</span>
+    </div>
+    <button class="btn-check" id="btn-check" onclick="checkMelody()" style="display:none"></button>
+  </div>
+  <div id="feedback-bar" role="status" aria-live="polite"></div>
+</div>
+
+<div id="success-screen" class="screen">
+  <div class="success-title" id="success-title"></div>
+  <div class="stars-row" id="stars-row">⭐⭐⭐</div>
+  <p class="success-msg" id="success-msg"></p>
+  <div class="btn-row">
+    <button class="btn-play" id="btn-replay" onclick="replayLevel()"></button>
+    <button class="btn-secondary" id="btn-next-level" onclick="goLevelSelect()"></button>
+    <button class="btn-secondary" id="btn-home" onclick="showScreen('title-screen')"></button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="parental-overlay">
+  <div class="modal-box">
+    <h2 id="pm-title"></h2>
+    <div id="parental-gate-content">
+      <p class="parental-q" id="pm-question"></p>
+      <form id="parental-gate-form" onsubmit="checkParental(event)">
+        <input type="number" id="parental-answer" min="0" max="999" placeholder="?" autocomplete="off">
+        <div id="parental-err"></div>
+        <button type="submit" class="modal-close" id="pm-ok-btn"></button>
+      </form>
+    </div>
+    <div id="parental-info" style="display:none">
+      <p id="pm-info-text"></p>
+      <button class="modal-close" id="pm-close-btn" onclick="closeParentalGate()"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const T={
+  fr:{
+    title:'Compositeur en Herbe',subtitle:'Crée ta mélodie, joue et explore la musique !',
+    play:'Jouer',parentsLink:'Pour les parents',levelTitle:'Choisir un niveau',
+    backTitle:'← Accueil',backLevel:'← Niveaux',
+    levels:[
+      {name:'Frère Jacques',desc:'Reproduis la mélodie !',icon:'🎵'},
+      {name:'Au Clair de la Lune',desc:'Retrouve les notes !',icon:'🌙'},
+      {name:'Compose librement !',desc:'Crée ta propre mélodie',icon:'🎨'},
+      {name:'Jeu de Rythme',desc:'Joue avec le rythme !',icon:'🥁'},
+    ],
+    modelLabel:'Mélodie à reproduire :',playModel:'▶ Écouter le modèle',
+    playRoll:'▶ Jouer',stopRoll:'⏹ Stop',clearRoll:'Effacer',tempoLabel:'Tempo :',
+    check:'✓ Vérifier',
+    feedbackCorrect:['Bravo ! C\'est parfait ! 🎉','Excellent ! Tu es un vrai compositeur ! 🌟','Super ! Tu maîtrises cette mélodie ! 🎵'],
+    feedbackPartial:['Presque ! Quelques notes sont différentes. Essaie encore !','Tu y es presque ! Écoute bien le modèle et réessaie.'],
+    feedbackEmpty:'Place des notes sur la grille avant de vérifier !',
+    feedbackFree:'Jolie mélodie ! Continue à créer ! 🎵',
+    successTitle:'Bravo !',successMsg:'Tu as reproduit la mélodie avec succès !',
+    successFree:'Ta mélodie est sauvegardée ! Continue à composer !',
+    replay:'↺ Rejouer',nextLevel:'→ Autres niveaux',home:'🏠 Accueil',
+    pmTitle:'Espace Parents',pmOk:'Valider',pmClose:'Fermer',
+    pmInfo:'Compositeur en Herbe aide les enfants (6-12 ans) à découvrir la musique, le rythme et la mélodie. Compétences visées : écoute musicale, mémoire auditive, créativité. Aucune donnée collectée, aucune publicité, tout reste sur l\'appareil.',
+    levelInfo:['Niveau 1 — Frère Jacques','Niveau 2 — Au Clair de la Lune','Niveau 3 — Composition libre','Niveau 4 — Rythme'],
+    hint:'Clique les cases pour placer ou enlever des notes',
+    noteNames:['Mi5','Ré5','Do5','Si4','La4','Sol4','Fa4','Mi4','Ré4','Do4'],
+  },
+  en:{
+    title:'Little Composer',subtitle:'Create your melody, play and explore music!',
+    play:'Play',parentsLink:'For parents',levelTitle:'Choose a level',
+    backTitle:'← Home',backLevel:'← Levels',
+    levels:[
+      {name:'Frère Jacques',desc:'Reproduce the melody!',icon:'🎵'},
+      {name:'Moonlight Song',desc:'Find the notes!',icon:'🌙'},
+      {name:'Free Compose!',desc:'Create your own melody',icon:'🎨'},
+      {name:'Rhythm Game',desc:'Play with rhythm!',icon:'🥁'},
+    ],
+    modelLabel:'Melody to reproduce:',playModel:'▶ Listen to model',
+    playRoll:'▶ Play',stopRoll:'⏹ Stop',clearRoll:'Clear',tempoLabel:'Tempo:',
+    check:'✓ Check',
+    feedbackCorrect:['Bravo! That\'s perfect! 🎉','Excellent! You\'re a real composer! 🌟','Amazing! You mastered this melody! 🎵'],
+    feedbackPartial:['Almost! A few notes are different. Try again!','So close! Listen to the model carefully and try again.'],
+    feedbackEmpty:'Place some notes on the grid before checking!',
+    feedbackFree:'Beautiful melody! Keep creating! 🎵',
+    successTitle:'Well done!',successMsg:'You reproduced the melody successfully!',
+    successFree:'Your melody is saved! Keep composing!',
+    replay:'↺ Play again',nextLevel:'→ Other levels',home:'🏠 Home',
+    pmTitle:'Parents\' Corner',pmOk:'Submit',pmClose:'Close',
+    pmInfo:'Little Composer helps children (ages 6-12) discover music, rhythm and melody. Skills targeted: musical listening, auditory memory, creativity. No data collected, no ads, everything stays on the device.',
+    levelInfo:['Level 1 — Frère Jacques','Level 2 — Moonlight Song','Level 3 — Free Compose','Level 4 — Rhythm'],
+    hint:'Click cells to place or remove notes',
+    noteNames:['E5','D5','C5','B4','A4','G4','F4','E4','D4','C4'],
+  }
+};
+
+const NOTES=[
+  {freq:659.25,black:false},{freq:587.33,black:false},{freq:523.25,black:false},
+  {freq:493.88,black:false},{freq:440.00,black:false},{freq:392.00,black:false},
+  {freq:349.23,black:false},{freq:329.63,black:false},{freq:293.66,black:false},
+  {freq:261.63,black:false},
+];
+const ROWS=10, COLS=16;
+
+// Models: [row, col] pairs. row 9=C4, 8=D4, 7=E4, 6=F4, 5=G4, 4=A4, 3=B4, 2=C5, 1=D5, 0=E5
+const LEVEL_MODELS=[
+  // Frère Jacques: Do Ré Mi Do | Do Ré Mi Do | Mi Fa Sol - | Mi Fa Sol -
+  [[9,0],[8,1],[7,2],[9,3], [9,4],[8,5],[7,6],[9,7], [7,8],[6,9],[5,10],[null,11], [7,12],[6,13],[5,14],[null,15]],
+  // Au Clair de la Lune: Do Do Do Ré Mi - Ré - | Do Mi Ré Ré Do - - -
+  [[9,0],[9,1],[9,2],[8,3],[7,4],[null,5],[8,6],[null,7], [9,8],[7,9],[8,10],[8,11],[9,12],[null,13],[null,14],[null,15]],
+  null,
+  null
+];
+
+const STORAGE_KEY='pgrg_compositeur';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false, currentLevel=0, tempo=90, isPlaying=false, playTimeout=null, audioCtx=null;
+let grid=[];
+let parentalA=0, parentalB=0;
+
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+
+function playNote(freq,duration,time,volume){
+  if(muted||!freq)return;
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    const now=ctx.currentTime;
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(freq,now+time);
+    gain.gain.setValueAtTime(0,now+time);
+    gain.gain.linearRampToValueAtTime(volume,now+time+0.02);
+    gain.gain.linearRampToValueAtTime(volume*0.7,now+time+duration*0.6);
+    gain.gain.linearRampToValueAtTime(0,now+time+duration*0.92);
+    osc.start(now+time);osc.stop(now+time+duration+0.05);
+  }catch(e){}
+}
+
+function playSuccess(){
+  if(muted)return;
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>playNote(f,0.3,i*0.1,0.15));
+}
+function playError(){if(muted)return;playNote(200,0.18,0,0.12);}
+
+function loadSave(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');}catch(e){return{};}}
+function saveProp(k,v){try{const s=loadSave();s[k]=v;localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){}}
+function getStars(lvl){return loadSave()['stars_'+lvl]||0;}
+function saveStars(lvl,stars){const p=getStars(lvl);if(stars>p)saveProp('stars_'+lvl,stars);}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function t(k){return T[lang][k]||T.fr[k]||k;}
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  saveProp('lang',l);
+  renderAll();
+  if(document.getElementById('game-screen').classList.contains('active'))buildRoll();
+}
+
+function renderAll(){
+  document.getElementById('game-title').textContent=t('title');
+  document.getElementById('game-subtitle').textContent=t('subtitle');
+  document.getElementById('btn-jouer').textContent=t('play');
+  document.getElementById('btn-parents-link').textContent=t('parentsLink');
+  document.getElementById('level-screen-title').textContent=t('levelTitle');
+  document.getElementById('btn-back-title').textContent=t('backTitle');
+  document.getElementById('btn-back-level').textContent=t('backLevel');
+  document.getElementById('btn-play-roll').textContent=t('playRoll');
+  document.getElementById('btn-stop-roll').textContent=t('stopRoll');
+  document.getElementById('btn-clear').textContent=t('clearRoll');
+  document.getElementById('tempo-lbl').textContent=t('tempoLabel');
+  document.getElementById('btn-check').textContent=t('check');
+  document.getElementById('btn-play-model-btn').textContent=t('playModel');
+  document.getElementById('model-label-txt').textContent=t('modelLabel');
+  document.getElementById('success-title').textContent=t('successTitle');
+  document.getElementById('btn-replay').textContent=t('replay');
+  document.getElementById('btn-next-level').textContent=t('nextLevel');
+  document.getElementById('btn-home').textContent=t('home');
+  document.getElementById('pm-title').textContent=t('pmTitle');
+  document.getElementById('pm-ok-btn').textContent=t('pmOk');
+  document.getElementById('pm-close-btn').textContent=t('pmClose');
+  document.getElementById('pm-info-text').textContent=t('pmInfo');
+  renderLevelCards();
+}
+
+function renderLevelCards(){
+  const c=document.getElementById('level-cards');c.innerHTML='';
+  T[lang].levels.forEach((lv,i)=>{
+    const stars=getStars(i);
+    const card=document.createElement('div');
+    card.className='level-card';card.tabIndex=0;card.setAttribute('role','button');
+    card.setAttribute('aria-label',lv.name+' — '+lv.desc);
+    card.innerHTML='<div class="lc-icon">'+lv.icon+'</div><div class="lc-name">'+lv.name+'</div><div class="lc-desc">'+lv.desc+'</div><div class="lc-stars" aria-label="'+stars+' étoiles">'+'⭐'.repeat(stars)+'☆'.repeat(3-stars)+'</div>';
+    card.onclick=()=>startLevel(i);
+    card.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')startLevel(i);};
+    c.appendChild(card);
+  });
+}
+
+function goLevelSelect(){renderLevelCards();showScreen('level-screen');}
+
+function startLevel(lvl){
+  currentLevel=lvl;stopRoll();
+  initGrid();
+  if(lvl>=2){
+    const s=loadSave()['melody_'+lvl];
+    if(s&&s.length===ROWS){
+      grid=s.map(r=>r.map(v=>!!v));
+      grid=grid.map(r=>{while(r.length<COLS)r.push(false);return r.slice(0,COLS);});
+    }
+  }
+  buildRoll();
+  const isRepro=lvl<=1;
+  document.getElementById('btn-check').style.display=isRepro?'':'none';
+  const mw=document.getElementById('model-wrap');
+  if(isRepro){mw.style.display='';renderModelNotes(LEVEL_MODELS[lvl]);}
+  else{mw.style.display='none';}
+  document.getElementById('game-level-info').textContent=T[lang].levelInfo[lvl]||'';
+  setFeedback(t('hint'),'info');
+  showScreen('game-screen');
+}
+
+function initGrid(){grid=Array.from({length:ROWS},()=>Array(COLS).fill(false));}
+
+function buildRoll(){
+  const container=document.getElementById('roll-container');
+  const labelsEl=document.getElementById('note-labels');
+  container.innerHTML='';labelsEl.innerHTML='';
+  container.style.cssText='display:grid;grid-template-columns:repeat('+COLS+',1fr);grid-template-rows:repeat('+ROWS+',1fr);';
+  const names=T[lang].noteNames;
+  NOTES.forEach((note,row)=>{
+    const lbl=document.createElement('div');
+    lbl.className='note-label';lbl.textContent=names[row]||'';lbl.style.height='40px';
+    labelsEl.appendChild(lbl);
+  });
+  for(let row=0;row<ROWS;row++){
+    for(let col=0;col<COLS;col++){
+      const cell=document.createElement('div');
+      cell.className='roll-cell'+(grid[row][col]?' active':'');
+      cell.dataset.row=row;cell.dataset.col=col;
+      cell.setAttribute('role','checkbox');
+      cell.setAttribute('aria-checked',String(grid[row][col]));
+      cell.setAttribute('aria-label',(T[lang].noteNames[row]||'')+' temps '+(col+1));
+      cell.tabIndex=0;
+      cell.style.gridRow=(row+1);cell.style.gridColumn=(col+1);
+      cell.onclick=()=>toggleCell(row,col);
+      cell.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')toggleCell(row,col);};
+      container.appendChild(cell);
+    }
+  }
+}
+
+function toggleCell(row,col){
+  grid[row][col]=!grid[row][col];
+  const cell=document.querySelector('#roll-container .roll-cell[data-row="'+row+'"][data-col="'+col+'"]');
+  if(cell){cell.classList.toggle('active',grid[row][col]);cell.setAttribute('aria-checked',String(grid[row][col]));}
+  if(grid[row][col])playNote(NOTES[row].freq,0.25,0,0.2);
+  if(currentLevel>=2)saveProp('melody_'+currentLevel,grid.map(r=>r.map(v=>v?1:0)));
+}
+
+function clearRoll(){stopRoll();initGrid();buildRoll();if(currentLevel>=2)saveProp('melody_'+currentLevel,null);setFeedback(t('hint'),'info');}
+
+function updateTempo(val){tempo=parseInt(val);document.getElementById('tempo-val').textContent=val;}
+
+function playRoll(){
+  if(isPlaying)stopRoll();
+  isPlaying=true;let col=0;
+  const beatMs=(60/tempo)*1000;
+  function step(){
+    if(!isPlaying)return;
+    document.querySelectorAll('.roll-cell.playhead').forEach(el=>el.classList.remove('playhead'));
+    for(let row=0;row<ROWS;row++){
+      const cell=document.querySelector('#roll-container .roll-cell[data-row="'+row+'"][data-col="'+col+'"]');
+      if(cell)cell.classList.add('playhead');
+      if(grid[row][col])playNote(NOTES[row].freq,beatMs*0.8/1000,0,0.22);
+    }
+    col++;
+    if(col>=COLS){playTimeout=setTimeout(()=>{document.querySelectorAll('.roll-cell.playhead').forEach(el=>el.classList.remove('playhead'));isPlaying=false;},beatMs);}
+    else{playTimeout=setTimeout(step,beatMs);}
+  }
+  step();
+}
+
+function stopRoll(){
+  isPlaying=false;
+  if(playTimeout){clearTimeout(playTimeout);playTimeout=null;}
+  document.querySelectorAll('.roll-cell.playhead').forEach(el=>el.classList.remove('playhead'));
+}
+
+function playModelMelody(){
+  const model=LEVEL_MODELS[currentLevel];if(!model)return;
+  const beatMs=(60/tempo)*1000;
+  model.forEach(([row,col])=>{if(row!==null)playNote(NOTES[row].freq,beatMs*0.8/1000,col*beatMs/1000,0.18);});
+}
+
+function renderModelNotes(model){
+  if(!model)return;
+  const display=document.getElementById('model-notes-display');display.innerHTML='';
+  const byCol={};
+  model.forEach(([row,col])=>{if(!byCol[col])byCol[col]=[];if(row!==null)byCol[col].push(row);});
+  const maxCol=Math.max(...model.map(([,c])=>c));
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;gap:3px;flex-wrap:wrap;justify-content:center;padding:4px 0;';
+  const names=T[lang].noteNames;
+  for(let col=0;col<=maxCol;col++){
+    const cell=document.createElement('div');
+    cell.className='mini-note';
+    if(byCol[col]&&byCol[col].length>0){
+      cell.style.background='var(--sky)';cell.style.color='var(--navy)';
+      cell.textContent=byCol[col].map(r=>names[r]).join('/');
+    }else{
+      cell.style.background='#f0f4fa';cell.style.color='#c0ccd8';
+      cell.textContent='—';
+    }
+    wrap.appendChild(cell);
+  }
+  display.appendChild(wrap);
+}
+
+function setFeedback(msg,type){
+  const el=document.getElementById('feedback-bar');
+  el.textContent=msg;
+  el.style.background=type==='ok'?'#d4f5e4':type==='err'?'#ffe4d0':'#e0f0fb';
+  el.style.color=type==='ok'?'#1a7a40':type==='err'?'#c24000':'var(--blue)';
+}
+
+function checkMelody(){
+  if(currentLevel>=2){
+    const hasNotes=grid.some(r=>r.some(v=>v));
+    if(!hasNotes){setFeedback(t('feedbackEmpty'),'err');return;}
+    setFeedback(t('feedbackFree'),'ok');playSuccess();saveStars(currentLevel,3);
+    setTimeout(()=>showSuccess(3),1000);return;
+  }
+  const model=LEVEL_MODELS[currentLevel];if(!model)return;
+  const hasNotes=grid.some(r=>r.some(v=>v));
+  if(!hasNotes){setFeedback(t('feedbackEmpty'),'err');playError();return;}
+  const modelGrid=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  model.forEach(([row,col])=>{if(row!==null&&row<ROWS&&col<COLS)modelGrid[row][col]=true;});
+  let matches=0,total=0,extra=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(modelGrid[r][c]){total++;if(grid[r][c])matches++;else extra++;}
+    else{if(grid[r][c])extra++;}
+  }
+  const score=total>0?matches/total:0;
+  if(score>=0.85&&extra<=3){
+    const msgs=t('feedbackCorrect');setFeedback(msgs[Math.floor(Math.random()*msgs.length)],'ok');
+    const stars=score>=1&&extra===0?3:score>=0.9?2:1;
+    saveStars(currentLevel,stars);playSuccess();
+    setTimeout(()=>showSuccess(stars),1200);
+  }else{
+    const msgs=t('feedbackPartial');setFeedback(msgs[Math.floor(Math.random()*msgs.length)],'err');playError();
+  }
+}
+
+function showSuccess(stars){
+  document.getElementById('success-title').textContent=t('successTitle');
+  const se=document.getElementById('stars-row');
+  se.textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  se.setAttribute('aria-label',stars+' étoiles');
+  document.getElementById('success-msg').textContent=currentLevel>=2?t('successFree'):t('successMsg');
+  showScreen('success-screen');
+}
+
+function replayLevel(){startLevel(currentLevel);}
+
+function openParentalGate(){
+  parentalA=Math.floor(Math.random()*9)+1;parentalB=Math.floor(Math.random()*9)+1;
+  document.getElementById('pm-question').textContent=parentalA+' × '+parentalB+' = ?';
+  document.getElementById('parental-gate-content').style.display='';
+  document.getElementById('parental-info').style.display='none';
+  document.getElementById('parental-answer').value='';
+  document.getElementById('parental-err').textContent='';
+  document.getElementById('parental-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('parental-answer').focus(),100);
+}
+function checkParental(e){
+  e.preventDefault();
+  const val=parseInt(document.getElementById('parental-answer').value);
+  if(val===parentalA*parentalB){
+    document.getElementById('parental-gate-content').style.display='none';
+    document.getElementById('parental-info').style.display='';
+  }else{
+    document.getElementById('parental-err').textContent=lang==='fr'?'Réessaie !':'Try again!';
+    document.getElementById('parental-answer').value='';
+    document.getElementById('parental-answer').focus();
+  }
+}
+function closeParentalGate(){document.getElementById('parental-overlay').classList.remove('open');}
+document.getElementById('parental-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('parental-overlay'))closeParentalGate();});
+
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';document.getElementById('mute-btn').setAttribute('aria-label',muted?'Son désactivé':'Son activé');}
+
+document.getElementById('btn-fr').onclick=()=>setLang('fr');
+document.getElementById('btn-en').onclick=()=>setLang('en');
+document.getElementById('mute-btn').onclick=toggleMute;
+
+(function init(){
+  const s=loadSave();if(s.lang)lang=s.lang;
+  document.documentElement.lang=lang;
+  document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  renderAll();
+})();
+</script>
+</body>
+</html>

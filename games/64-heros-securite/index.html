@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Héros de la Sécurité / Safety Hero — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,#ddeeff 0%,#eaf6ff 60%,#fffbe8 100%);
+  min-height:100vh;color:var(--navy);
+}
+h1,h2,h3,.title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--blue);flex-wrap:wrap;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;}
+#topbar .brand img{height:34px;}
+#topbar .brand-text{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;}
+.lang-btn{background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff;border-radius:20px;padding:4px 12px;cursor:pointer;font-size:.9rem;transition:background .2s;}
+.lang-btn.active,.lang-btn:hover{background:rgba(255,255,255,.25);}
+#muteBtn{background:transparent;border:none;font-size:1.4rem;cursor:pointer;padding:4px 8px;border-radius:8px;}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 16px 32px;min-height:calc(100vh - 56px);}
+.screen.active{display:flex;}
+#titleScreen{justify-content:center;gap:16px;text-align:center;}
+.mascotte{margin:0 auto;}
+.game-title{font-size:2.2rem;color:var(--blue);font-family:'Fredoka','Nunito',system-ui,sans-serif;line-height:1.1;}
+.game-subtitle{font-size:1.1rem;color:var(--slate);margin-top:4px;}
+.btn{display:inline-block;border:none;border-radius:24px;cursor:pointer;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;font-size:1.2rem;padding:14px 36px;transition:transform .1s,box-shadow .1s;text-align:center;min-width:160px;min-height:48px;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:translateY(3px);box-shadow:none!important;}
+.btn-orange{background:var(--orange);color:#fff;box-shadow:0 5px 0 var(--orange-dark);}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 5px 0 var(--blue-dark);}
+.btn-sm{font-size:1rem;padding:10px 24px;min-width:100px;}
+.btn-parents{background:transparent;border:2px solid var(--blue);color:var(--blue);border-radius:20px;padding:8px 20px;cursor:pointer;font-size:.9rem;font-family:'Nunito',system-ui,sans-serif;min-height:48px;}
+.btn-parents:hover{background:var(--sky-light);}
+#badgesRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
+.badge-icon{font-size:1.8rem;filter:grayscale(1);transition:filter .4s;}
+.badge-icon.earned{filter:grayscale(0);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:20px;padding:28px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.modal-box h2{color:var(--blue);font-size:1.4rem;margin-bottom:12px;}
+.modal-box p{color:var(--slate);font-size:.95rem;line-height:1.6;margin-bottom:12px;}
+#parentInput{width:100%;padding:12px;border:2px solid var(--sky);border-radius:12px;font-size:1.2rem;text-align:center;margin:8px 0;}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;position:absolute;top:12px;right:16px;color:var(--slate);}
+#levelScreen{gap:20px;text-align:center;}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:8px;}
+.level-card{background:#fff;border-radius:20px;padding:24px 20px;width:180px;box-shadow:0 4px 16px rgba(15,76,129,.12);cursor:pointer;transition:transform .15s,box-shadow .15s;border:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.level-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(15,76,129,.2);}
+.level-card.locked{opacity:.5;cursor:not-allowed;}
+.level-card.done{border-color:var(--success);}
+.level-card .lv-emoji{font-size:2.8rem;}
+.level-card .lv-name{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;color:var(--blue);font-weight:700;}
+.level-card .lv-sub{font-size:.8rem;color:var(--slate);}
+#gameScreen{gap:16px;max-width:700px;width:100%;margin:0 auto;}
+#gameHeader{display:flex;align-items:center;gap:12px;width:100%;}
+#levelLabel{font-size:1rem;color:var(--blue);font-weight:700;flex:1;}
+#scoreDisplay{font-size:1rem;color:var(--slate);}
+#progressBar{width:100%;height:10px;background:#d4e9ff;border-radius:8px;overflow:hidden;}
+#progressFill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:8px;transition:width .4s;}
+#scenarioBox{background:#fff;border-radius:24px;padding:24px;width:100%;box-shadow:0 4px 20px rgba(15,76,129,.1);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;}
+#scenarioTitle{font-size:1.1rem;color:var(--slate);}
+#scenarioQuestion{font-size:1.15rem;color:var(--navy);font-weight:700;line-height:1.4;}
+#choicesArea{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%;}
+.choice-btn{background:var(--sky-light);border:3px solid var(--sky);border-radius:16px;padding:14px 20px;cursor:pointer;font-size:1rem;color:var(--navy);transition:background .15s,border-color .15s,transform .1s;min-height:56px;display:flex;align-items:center;gap:8px;font-family:'Nunito',system-ui,sans-serif;font-weight:600;}
+.choice-btn:hover{background:#d0eeff;border-color:var(--blue);}
+.choice-btn:active{transform:scale(.97);}
+.choice-btn.correct{background:#d6f5e5;border-color:var(--success);}
+.choice-btn.wrong{background:#fce4e4;border-color:#e05454;}
+.choice-btn:disabled{cursor:default;}
+#roadCanvas{border-radius:16px;display:block;}
+#feedbackArea{background:var(--sky-light);border-radius:16px;padding:16px 20px;width:100%;text-align:center;display:none;}
+#feedbackArea.show{display:block;}
+#feedbackEmoji{font-size:2rem;}
+#feedbackText{font-size:1.05rem;color:var(--navy);margin-top:4px;line-height:1.4;}
+#nextBtn{margin-top:8px;}
+#successScreen{justify-content:center;gap:20px;text-align:center;}
+#successStars{font-size:3rem;letter-spacing:4px;}
+.success-badge{font-size:4rem;animation:popIn .5s ease;}
+@keyframes popIn{from{transform:scale(0) rotate(-20deg);}to{transform:scale(1) rotate(0deg);}}
+#successTitle{font-size:2rem;color:var(--blue);font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#successMsg{font-size:1rem;color:var(--slate);}
+.success-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){.game-title{font-size:1.6rem;}.level-card{width:140px;padding:16px 12px;}.level-card .lv-emoji{font-size:2.2rem;}#scenarioBox{padding:16px;}}
+</style>
+</head>
+<body>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+<div id="topbar" role="banner">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+    <span class="brand-text">PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Muet / Mute">🔊</button>
+</div>
+<div class="modal-overlay" id="parentOverlay" role="dialog" aria-modal="true" aria-labelledby="parentTitle">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-close" onclick="closeParent()" aria-label="Fermer">✕</button>
+    <h2 id="parentTitle">👨‍👩‍👧 <span class="t" data-k="parentTitle"></span></h2>
+    <p id="parentChallenge" style="font-size:1.1rem;font-weight:700;color:var(--blue);"></p>
+    <input type="number" id="parentInput" min="0" max="200" aria-label="Réponse">
+    <button class="btn btn-blue" style="width:100%;margin-top:8px;" onclick="checkParent()"><span class="t" data-k="parentCheck"></span></button>
+    <div id="parentInfo" style="display:none;margin-top:12px;"><p id="parentInfoText"></p></div>
+  </div>
+</div>
+<div class="screen active" id="titleScreen" role="main">
+  <svg class="mascotte" width="160" height="160" viewBox="0 0 160 160" aria-hidden="true">
+    <circle cx="80" cy="90" r="45" fill="#7ec3ee"/>
+    <path d="M40 100 Q80 145 120 100 L115 130 Q80 160 45 130 Z" fill="#f97316"/>
+    <circle cx="80" cy="52" r="30" fill="#ffd39a"/>
+    <circle cx="70" cy="48" r="5" fill="#fff"/>
+    <circle cx="90" cy="48" r="5" fill="#fff"/>
+    <circle cx="71" cy="49" r="3" fill="#0f4c81"/>
+    <circle cx="91" cy="49" r="3" fill="#0f4c81"/>
+    <path d="M68 60 Q80 70 92 60" fill="none" stroke="#c07830" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon points="80,78 83,86 92,86 85,91 88,99 80,94 72,99 75,91 68,86 77,86" fill="#ffd23f"/>
+    <ellipse cx="42" cy="95" rx="10" ry="16" fill="#7ec3ee" transform="rotate(-20,42,95)"/>
+    <ellipse cx="118" cy="95" rx="10" ry="16" fill="#7ec3ee" transform="rotate(20,118,95)"/>
+    <path d="M112 82 L125 82 L125 95 L118 100 L111 95 Z" fill="#0f4c81" opacity=".85"/>
+    <path d="M118 86 L118 96" stroke="#ffd23f" stroke-width="2"/>
+    <path d="M113 90 L123 90" stroke="#ffd23f" stroke-width="2"/>
+    <path d="M52 50 Q55 25 80 22 Q105 25 108 50 Q100 42 80 40 Q60 42 52 50 Z" fill="#0f4c81"/>
+    <rect x="74" y="22" width="12" height="8" rx="3" fill="#f97316"/>
+  </svg>
+  <h1 class="game-title"><span class="t" data-k="gameTitle"></span></h1>
+  <p class="game-subtitle t" data-k="gameSub"></p>
+  <div id="badgesRow" aria-label="Badges"></div>
+  <button class="btn btn-orange" onclick="showLevels()" style="margin-top:8px;">
+    <span class="t" data-k="play"></span>
+  </button>
+  <button class="btn-parents" onclick="openParent()">
+    <span class="t" data-k="forParents"></span>
+  </button>
+</div>
+<div class="screen" id="levelScreen" role="main">
+  <h2 class="game-title t" data-k="chooseLvl"></h2>
+  <div class="level-cards" id="levelCards"></div>
+  <button class="btn btn-blue btn-sm" style="margin-top:16px;" onclick="showTitle()">
+    <span class="t" data-k="back"></span>
+  </button>
+</div>
+<div class="screen" id="gameScreen" role="main">
+  <div id="gameHeader">
+    <span id="levelLabel"></span>
+    <span id="scoreDisplay"></span>
+  </div>
+  <div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="progressFill" style="width:0%"></div>
+  </div>
+  <div id="scenarioBox">
+    <p id="scenarioTitle"></p>
+    <canvas id="roadCanvas" width="340" height="180" style="display:none;"></canvas>
+    <svg id="homeIllustration" style="display:none;" width="340" height="180" viewBox="0 0 340 180" aria-hidden="true"></svg>
+    <div id="bikeScene" style="display:none;width:100%;max-width:340px;"></div>
+    <p id="scenarioQuestion"></p>
+    <div id="choicesArea" role="group" aria-label="Choix"></div>
+  </div>
+  <div id="feedbackArea" aria-live="assertive">
+    <div id="feedbackEmoji"></div>
+    <div id="feedbackText"></div>
+    <button class="btn btn-orange btn-sm" id="nextBtn" onclick="nextScenario()" style="margin-top:12px;">
+      <span class="t" data-k="next"></span>
+    </button>
+  </div>
+</div>
+<div class="screen" id="successScreen" role="main">
+  <div id="successStars"></div>
+  <div class="success-badge" id="successBadge"></div>
+  <h2 id="successTitle" class="game-title"></h2>
+  <p id="successMsg"></p>
+  <div class="success-btns">
+    <button class="btn btn-orange" onclick="replayLevel()"><span class="t" data-k="replay"></span></button>
+    <button class="btn btn-blue" onclick="showLevels()"><span class="t" data-k="allLevels"></span></button>
+  </div>
+</div>
+<script>
+const T={
+  fr:{
+    gameTitle:"Héros de la Sécurité",gameSub:"Apprends les bons réflexes pour rester en sécurité !",
+    play:"Jouer !",forParents:"Pour les parents",chooseLvl:"Choisis ton niveau",
+    back:"← Accueil",next:"Suivant →",replay:"Rejouer",allLevels:"Tous les niveaux",
+    parentTitle:"Espace parents",parentCheck:"Valider",
+    parentInfo:"Ce jeu aide les enfants de 5 à 9 ans à apprendre les bons réflexes de sécurité : traverser la rue, reconnaître les dangers à la maison et à vélo. Aucune donnée n'est collectée, aucune publicité. La progression est sauvegardée localement sur cet appareil.",
+    score:"Points",lvRoad:"La route",lvHome:"La maison",lvBike:"Le vélo",
+    lvRoadSub:"Traverser en sécurité",lvHomeSub:"Dangers à la maison",lvBikeSub:"Casque et règles",
+    successGood:"Bravo, Héros !",successPerfect:"Parfait, Super-Héros !",
+    successMsgRoad:"Tu sais maintenant traverser la rue en sécurité !",
+    successMsgHome:"Tu reconnais bien les dangers à la maison !",
+    successMsgBike:"Tu connais les règles du vélo !",
+    locked:"🔒 Bloqué",done:"✅ Terminé",
+    greenMan:"Le bonhomme vert est allumé. Que fais-tu ?",
+    redMan:"Le bonhomme est rouge. Que fais-tu ?",
+    lookBoth:"Avant de traverser, tu dois…",carFast:"Une voiture arrive vite. Tu…",
+    dangerQ:"Est-ce sûr ou dangereux ?",safe:"✅ Sûr",danger:"⚠️ Dangereux",
+    actCross:"Je traverse vite",actWait:"J'attends et je regarde",actRun:"Je cours",
+    actWaitGreen:"J'attends le bonhomme vert",actLook:"Je regarde à gauche et à droite",
+    actGoNow:"Je traverse maintenant",actWaitCar:"J'attends que la voiture passe",actCrossCar:"Je traverse quand même",
+    fbWaitRed:"Bien ! On attend que le feu passe au vert avant de traverser. 😊",
+    fbWrongRed:"Attention ! Le rouge veut dire STOP. On attend toujours le bonhomme vert !",
+    fbLook:"Exactement ! On regarde à gauche, à droite, et encore à gauche. Les yeux ouverts !",
+    fbWait:"Très sage ! On attend que la voiture soit passée. La sécurité avant tout !",
+    fbGoodRoad:["Super ! Tu attends le bonhomme vert et tu regardes des deux côtés. 🌟","Excellent ! Tu traverses sur le passage piéton, bravo !","Parfait ! Toujours regarder à gauche, à droite et encore à gauche !"],
+    fbSafe:["Bien joué ! C'est sûr. ✅","Correct ! Pas de danger ici. ✅","Parfait ! Tu as bien regardé. ✅"],
+    fbDanger:["Bravo ! C'est dangereux. On demande à un adulte. ⚠️","Super réflexe ! On ne touche jamais ça sans adulte. ⚠️","Excellent ! Toujours demander à un adulte pour ça. ⚠️"],
+    fbWrongSafe:"Attention ! C'est en fait dangereux. On demande toujours à un adulte. 💛",
+    fbWrongDanger:"Pas de souci ! C'est en fait sans danger. Tu vas vite apprendre ! 💛",
+    helmetQ:"Avant de partir à vélo, que mets-tu ?",helmetGood:"Mon casque",helmetBad:"Rien de spécial",
+    sidewalkQ:"Sur le trottoir, tu…",sidewalkGood:"Je roule doucement",sidewalkBad:"Je roule très vite",
+    signalQ:"Tu dois tourner. Tu…",signalGood:"Je tends le bras",signalBad:"Je tourne sans prévenir",
+    nightQ:"La nuit à vélo, tu as besoin de…",nightGood:"Des lumières et un gilet réfléchissant",nightBad:"Rien de plus",
+  },
+  en:{
+    gameTitle:"Safety Hero",gameSub:"Learn the right habits to stay safe!",
+    play:"Play!",forParents:"For Parents",chooseLvl:"Choose your level",
+    back:"← Home",next:"Next →",replay:"Play Again",allLevels:"All Levels",
+    parentTitle:"Parents Area",parentCheck:"Confirm",
+    parentInfo:"This game helps children aged 5-9 learn safety habits: crossing the street, recognizing home hazards, and bike safety. No data is collected, no ads. Progress is saved locally on this device.",
+    score:"Points",lvRoad:"The Street",lvHome:"The House",lvBike:"The Bike",
+    lvRoadSub:"Cross safely",lvHomeSub:"Home hazards",lvBikeSub:"Helmet & rules",
+    successGood:"Well done, Hero!",successPerfect:"Perfect, Super-Hero!",
+    successMsgRoad:"You now know how to cross the street safely!",
+    successMsgHome:"You can spot home hazards!",
+    successMsgBike:"You know the bike rules!",
+    locked:"🔒 Locked",done:"✅ Done",
+    greenMan:"The green light is on. What do you do?",
+    redMan:"The light is red. What do you do?",
+    lookBoth:"Before crossing, you must…",carFast:"A car is coming fast. You…",
+    dangerQ:"Is this safe or dangerous?",safe:"✅ Safe",danger:"⚠️ Dangerous",
+    actCross:"I cross quickly",actWait:"I wait and look",actRun:"I run across",
+    actWaitGreen:"I wait for green",actLook:"I look left and right",
+    actGoNow:"I cross now",actWaitCar:"I wait for the car",actCrossCar:"I cross anyway",
+    fbWaitRed:"Good! We wait for the green light before crossing. 😊",
+    fbWrongRed:"Watch out! Red means STOP. Always wait for the green light!",
+    fbLook:"Exactly! Look left, right, and left again. Eyes open!",
+    fbWait:"Very wise! Wait for the car to pass. Safety first!",
+    fbGoodRoad:["Great! You wait for green and look both ways. 🌟","Excellent! You cross at the crosswalk, well done!","Perfect! Always look left, right, and left again!"],
+    fbSafe:["Well done! It's safe. ✅","Correct! No danger here. ✅","Perfect! You looked carefully. ✅"],
+    fbDanger:["Great! That's dangerous. Ask an adult. ⚠️","Super reflex! Never touch that without an adult. ⚠️","Excellent! Always ask an adult for that. ⚠️"],
+    fbWrongSafe:"Watch out! That's actually dangerous. Always ask an adult. 💛",
+    fbWrongDanger:"No worries! That's actually safe. You'll learn quickly! 💛",
+    helmetQ:"Before riding your bike, you put on…",helmetGood:"My helmet",helmetBad:"Nothing special",
+    sidewalkQ:"On the sidewalk, you…",sidewalkGood:"Ride slowly",sidewalkBad:"Ride very fast",
+    signalQ:"You need to turn. You…",signalGood:"Signal with my arm",signalBad:"Turn without warning",
+    nightQ:"At night on a bike, you need…",nightGood:"Lights and a reflective vest",nightBad:"Nothing extra",
+  }
+};
+
+const SAVE_KEY='pgrg_heros_securite';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let state={badges:[],scores:{0:0,1:0,2:0}};
+let currentLevel=0,scenarioIndex=0,currentScore=0,answered=false,scenarios=[];
+
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&Array.isArray(s.badges))state=s;}catch(e){}
+
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  type=type||'sine';vol=vol||0.18;
+  if(muted)return;
+  try{const c=getAudio();const o=c.createOscillator();const g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+  o.start();o.stop(c.currentTime+dur);}catch(e){}
+}
+function playSuccess(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.25),i*120));}
+function playCorrect(){playTone(660,.12);setTimeout(()=>playTone(880,.2),130);}
+function playWrong(){playTone(220,.15,'sawtooth',.1);setTimeout(()=>playTone(180,.2,'sawtooth',.08),170);}
+function playBadge(){[523,659,784,880,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.18),i*100));}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+function setLang(l){
+  lang=l;document.documentElement.lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  renderAll();
+}
+function t(k){return T[lang][k]||k;}
+function renderAll(){
+  document.querySelectorAll('.t[data-k]').forEach(el=>{el.textContent=t(el.dataset.k);});
+  renderBadges();
+  if(document.getElementById('levelScreen').classList.contains('active'))buildLevelCards();
+}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function showTitle(){showScreen('titleScreen');renderBadges();}
+function showLevels(){showScreen('levelScreen');buildLevelCards();}
+
+const BADGE_EMOJIS=['🏅','🛡️','⭐'];
+function renderBadges(){
+  const row=document.getElementById('badgesRow');row.innerHTML='';
+  [0,1,2].forEach(i=>{
+    const span=document.createElement('span');
+    span.className='badge-icon'+(state.badges.includes(i)?' earned':'');
+    span.textContent=BADGE_EMOJIS[i];
+    row.appendChild(span);
+  });
+}
+
+let parentMath={a:0,b:0};
+function openParent(){
+  parentMath.a=3+Math.floor(Math.random()*7);parentMath.b=3+Math.floor(Math.random()*7);
+  document.getElementById('parentChallenge').textContent=parentMath.a+' × '+parentMath.b+' = ?';
+  document.getElementById('parentInput').value='';
+  document.getElementById('parentInfo').style.display='none';
+  document.getElementById('parentOverlay').classList.add('open');
+}
+function closeParent(){document.getElementById('parentOverlay').classList.remove('open');}
+function checkParent(){
+  const val=parseInt(document.getElementById('parentInput').value);
+  if(val===parentMath.a*parentMath.b){
+    document.getElementById('parentInfo').style.display='block';
+    document.getElementById('parentInfoText').textContent=t('parentInfo');
+  } else {
+    document.getElementById('parentInput').style.borderColor='#e05454';
+    setTimeout(()=>{document.getElementById('parentInput').style.borderColor='';},800);
+  }
+}
+
+function buildLevelCards(){
+  const c=document.getElementById('levelCards');c.innerHTML='';
+  const names=['lvRoad','lvHome','lvBike'];
+  const subs=['lvRoadSub','lvHomeSub','lvBikeSub'];
+  const emojis=['🚦','🏠','🚲'];
+  [0,1,2].forEach(i=>{
+    const locked=i>0&&!state.badges.includes(i-1);
+    const done=state.badges.includes(i);
+    const card=document.createElement('div');
+    card.className='level-card'+(locked?' locked':'')+(done?' done':'');
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex',locked?'-1':'0');
+    card.innerHTML='<div class="lv-emoji">'+emojis[i]+'</div><div class="lv-name">'+t(names[i])+'</div><div class="lv-sub">'+(locked?t('locked'):(done?t('done'):t(subs[i])))+'</div>';
+    if(!locked){card.onclick=()=>startLevel(i);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')startLevel(i);};}
+    c.appendChild(card);
+  });
+}
+
+const HOME_ITEMS=[
+  {emoji:'🔌',labelFr:'Une prise électrique',labelEn:'An electrical outlet',safe:false},
+  {emoji:'🧴',labelFr:'Du produit ménager',labelEn:'Cleaning product',safe:false},
+  {emoji:'🍎',labelFr:'Une pomme',labelEn:'An apple',safe:true},
+  {emoji:'🔥',labelFr:'Une casserole chaude',labelEn:'A hot saucepan',safe:false},
+  {emoji:'💊',labelFr:'Des médicaments',labelEn:'Medicine tablets',safe:false},
+  {emoji:'📚',labelFr:'Des livres',labelEn:'Books',safe:true},
+  {emoji:'🪣',labelFr:'Un seau d\'eau',labelEn:'A bucket of water',safe:true},
+  {emoji:'🔪',labelFr:'Un couteau',labelEn:'A knife',safe:false},
+  {emoji:'🧸',labelFr:'Un ourson en peluche',labelEn:'A teddy bear',safe:true},
+  {emoji:'🕯️',labelFr:'Une bougie allumée',labelEn:'A lit candle',safe:false},
+];
+
+function pick(arr){if(Array.isArray(arr))return arr[Math.floor(Math.random()*arr.length)];return arr;}
+
+function getRoadScenarios(){
+  return [
+    {type:'road',situation:'green',q:t('greenMan'),
+     choices:[{label:t('actCross'),correct:false},{label:t('actWait'),correct:true}],
+     fbCorrect:pick(t('fbGoodRoad')),fbWrong:t('fbWrongRed')},
+    {type:'road',situation:'red',q:t('redMan'),
+     choices:[{label:t('actWaitGreen'),correct:true},{label:t('actCross'),correct:false}],
+     fbCorrect:t('fbWaitRed'),fbWrong:t('fbWrongRed')},
+    {type:'road',situation:'look',q:t('lookBoth'),
+     choices:[{label:t('actLook'),correct:true},{label:t('actGoNow'),correct:false}],
+     fbCorrect:t('fbLook'),fbWrong:t('fbLook')},
+    {type:'road',situation:'car',q:t('carFast'),
+     choices:[{label:t('actWaitCar'),correct:true},{label:t('actCrossCar'),correct:false}],
+     fbCorrect:t('fbWait'),fbWrong:t('fbWait')},
+    {type:'road',situation:'green',q:t('greenMan'),
+     choices:[{label:t('actRun'),correct:false},{label:t('actWait'),correct:true}],
+     fbCorrect:pick(t('fbGoodRoad')),fbWrong:t('fbWrongRed')},
+  ];
+}
+
+function getHomeScenarios(){
+  const shuffled=[...HOME_ITEMS].sort(()=>Math.random()-.5).slice(0,6);
+  return shuffled.map(item=>({
+    type:'home',item,q:t('dangerQ'),
+    choices:[{label:t('safe'),correct:item.safe},{label:t('danger'),correct:!item.safe}],
+    fbCorrect:item.safe?pick(t('fbSafe')):pick(t('fbDanger')),
+    fbWrong:item.safe?t('fbWrongDanger'):t('fbWrongSafe'),
+  }));
+}
+
+function getBikeScenarios(){
+  return [
+    {type:'bike',scene:'helmet',q:t('helmetQ'),
+     choices:[{label:t('helmetGood'),correct:true},{label:t('helmetBad'),correct:false}],
+     fbCorrect:lang==='fr'?'Bravo ! Le casque protège ta tête. Toujours le mettre avant de pédaler ! ⛑️':'Great! The helmet protects your head. Always wear it before pedaling! ⛑️',
+     fbWrong:lang==='fr'?'Oh ! Le casque est indispensable pour protéger ta tête. On l\'oublie jamais ! 💛':'Oh! The helmet is essential to protect your head. Never forget it! 💛'},
+    {type:'bike',scene:'sidewalk',q:t('sidewalkQ'),
+     choices:[{label:t('sidewalkGood'),correct:true},{label:t('sidewalkBad'),correct:false}],
+     fbCorrect:lang==='fr'?'Parfait ! Sur le trottoir, on roule doucement pour ne pas bousculer les piétons. 🐢':'Perfect! On the sidewalk, ride slowly to avoid bumping pedestrians. 🐢',
+     fbWrong:lang==='fr'?'Attention ! On roule doucement sur le trottoir pour protéger tout le monde. 💛':'Be careful! Ride slowly on the sidewalk to keep everyone safe. 💛'},
+    {type:'bike',scene:'signal',q:t('signalQ'),
+     choices:[{label:t('signalGood'),correct:true},{label:t('signalBad'),correct:false}],
+     fbCorrect:lang==='fr'?'Excellent ! Tendre le bras prévient les autres cyclistes et conducteurs. 💪':'Excellent! Signaling with your arm warns other cyclists and drivers. 💪',
+     fbWrong:lang==='fr'?'Il faut toujours signaler son changement de direction ! 💛':'Always signal when turning! Others need to know. 💛'},
+    {type:'bike',scene:'night',q:t('nightQ'),
+     choices:[{label:t('nightGood'),correct:true},{label:t('nightBad'),correct:false}],
+     fbCorrect:lang==='fr'?'Parfait ! La lumière et le gilet réfléchissant te rendent visible la nuit. 💡':'Perfect! Lights and a reflective vest make you visible at night. 💡',
+     fbWrong:lang==='fr'?'La nuit, il faut être bien visible ! Lumières et gilet réfléchissant sont indispensables. 💛':'At night, you must be visible! Lights and reflective vest are essential. 💛'},
+    {type:'bike',scene:'helmet',q:t('helmetQ'),
+     choices:[{label:t('helmetBad'),correct:false},{label:t('helmetGood'),correct:true}],
+     fbCorrect:lang==='fr'?'Super ! Le casque, toujours ! 🌟':'Super! Helmet, always! 🌟',
+     fbWrong:lang==='fr'?'Le casque est ton meilleur ami à vélo ! 💛':'The helmet is your best friend on a bike! 💛'},
+  ];
+}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startLevel(lv){
+  currentLevel=lv;scenarioIndex=0;currentScore=0;answered=false;
+  if(lv===0)scenarios=getRoadScenarios();
+  else if(lv===1)scenarios=getHomeScenarios();
+  else scenarios=getBikeScenarios();
+  scenarios=shuffle(scenarios);
+  showScreen('gameScreen');
+  updateGameHeader();
+  showScenario();
+}
+
+function updateGameHeader(){
+  const names=[t('lvRoad'),t('lvHome'),t('lvBike')];
+  document.getElementById('levelLabel').textContent=['🚦','🏠','🚲'][currentLevel]+' '+names[currentLevel];
+  document.getElementById('scoreDisplay').textContent=t('score')+': '+currentScore;
+  const pct=Math.round((scenarioIndex/scenarios.length)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressBar').setAttribute('aria-valuenow',pct);
+}
+
+function showScenario(){
+  answered=false;
+  document.getElementById('feedbackArea').classList.remove('show');
+  const sc=scenarios[scenarioIndex];
+  document.getElementById('roadCanvas').style.display='none';
+  document.getElementById('homeIllustration').style.display='none';
+  document.getElementById('bikeScene').style.display='none';
+  if(sc.type==='road'){
+    const canvas=document.getElementById('roadCanvas');canvas.style.display='block';drawRoad(canvas,sc.situation);
+  } else if(sc.type==='home'){
+    const svg=document.getElementById('homeIllustration');svg.style.display='block';drawHomeItem(svg,sc.item);
+  } else if(sc.type==='bike'){
+    const div=document.getElementById('bikeScene');div.style.display='block';drawBikeScene(div,sc.scene);
+  }
+  const titleLabels={0:{fr:'🚦 La route',en:'🚦 The street'},1:{fr:'🏠 La maison',en:'🏠 The house'},2:{fr:'🚲 Le vélo',en:'🚲 The bike'}};
+  document.getElementById('scenarioTitle').textContent=titleLabels[currentLevel][lang];
+  document.getElementById('scenarioQuestion').textContent=sc.q;
+  const area=document.getElementById('choicesArea');area.innerHTML='';
+  sc.choices.forEach((ch)=>{
+    const btn=document.createElement('button');btn.className='choice-btn';
+    btn.textContent=ch.label;btn.setAttribute('aria-label',ch.label);
+    btn.onclick=()=>handleChoice(btn,ch.correct,sc);
+    area.appendChild(btn);
+  });
+  updateGameHeader();
+}
+
+function handleChoice(btn,correct,sc){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  if(correct){
+    btn.classList.add('correct');currentScore+=10;playCorrect();
+    showFeedback('🌟',sc.fbCorrect);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.choice-btn').forEach((b,i)=>{if(sc.choices[i]&&sc.choices[i].correct)b.classList.add('correct');});
+    playWrong();showFeedback('💛',sc.fbWrong);
+  }
+  announce((correct?'✅ ':'💛 ')+(correct?sc.fbCorrect:sc.fbWrong));
+  updateGameHeader();
+}
+
+function showFeedback(emoji,text){
+  document.getElementById('feedbackEmoji').textContent=emoji;
+  document.getElementById('feedbackText').textContent=text;
+  document.getElementById('feedbackArea').classList.add('show');
+  // Update next button text
+  document.querySelectorAll('#nextBtn .t').forEach(el=>el.textContent=t(el.dataset.k));
+}
+
+function nextScenario(){
+  scenarioIndex++;
+  if(scenarioIndex>=scenarios.length)finishLevel();
+  else showScenario();
+}
+
+function finishLevel(){
+  if(!state.badges.includes(currentLevel)){state.badges.push(currentLevel);playBadge();}
+  else playSuccess();
+  state.scores[currentLevel]=Math.max(state.scores[currentLevel]||0,currentScore);
+  saveState();
+  const perfect=currentScore>=scenarios.length*10;
+  showSuccess(perfect);
+}
+
+function showSuccess(perfect){
+  showScreen('successScreen');
+  document.getElementById('successStars').textContent=perfect?'⭐⭐⭐':'⭐⭐';
+  document.getElementById('successBadge').textContent=BADGE_EMOJIS[currentLevel];
+  document.getElementById('successTitle').textContent=perfect?t('successPerfect'):t('successGood');
+  const msgs=[t('successMsgRoad'),t('successMsgHome'),t('successMsgBike')];
+  document.getElementById('successMsg').textContent=msgs[currentLevel];
+  document.querySelectorAll('#successScreen .t').forEach(el=>el.textContent=t(el.dataset.k));
+  announce(document.getElementById('successTitle').textContent);
+}
+
+function replayLevel(){startLevel(currentLevel);}
+
+function saveState(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
+
+function announce(msg){const el=document.getElementById('ariaLive');el.textContent='';setTimeout(()=>{el.textContent=msg;},50);}
+
+// ===== DRAWINGS =====
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+function drawRoad(canvas,situation){
+  const ctx=canvas.getContext('2d');const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  // Sky
+  const sky=ctx.createLinearGradient(0,0,0,h*.45);sky.addColorStop(0,'#a8d8f0');sky.addColorStop(1,'#d6eef8');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.45);
+  // Ground
+  ctx.fillStyle='#c9e8a0';ctx.fillRect(0,h*.45,w,h*.55);
+  // Road
+  ctx.fillStyle='#777';ctx.fillRect(0,h*.45,w,h*.35);
+  // Road lines
+  ctx.setLineDash([28,18]);ctx.strokeStyle='#fff';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(0,h*.62);ctx.lineTo(w,h*.62);ctx.stroke();ctx.setLineDash([]);
+  // Crosswalk
+  for(let x=w/2-64;x<w/2+64;x+=18){
+    if(Math.floor((x-w/2+64)/18)%2===0){ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(x,h*.46,16,h*.32);}
+  }
+  // Buildings
+  [[20,h*.12,58,h*.33,'#8ab4d4'],[90,h*.18,48,h*.27,'#a0c0d8'],[200,h*.08,68,h*.37,'#8ab4d4'],[280,h*.15,54,h*.3,'#9ab8d0']].forEach(b=>{
+    ctx.fillStyle=b[4];ctx.fillRect(b[0],b[1],b[2],b[3]);
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    for(let i=0;i<2;i++)for(let j=0;j<3;j++)ctx.fillRect(b[0]+6+i*18,b[1]+6+j*22,12,14);
+  });
+  // Traffic light
+  ctx.fillStyle='#555';ctx.fillRect(w*.76-4,h*.04,7,h*.42);
+  roundRect(ctx,w*.76-17,h*.04,34,78,7);ctx.fillStyle='#2a2a2a';ctx.fill();
+  // Red
+  ctx.fillStyle=situation==='red'?'#ff4444':'#550000';
+  ctx.beginPath();ctx.arc(w*.76,h*.04+16,11,0,Math.PI*2);ctx.fill();
+  // Green
+  ctx.fillStyle=situation==='green'?'#44ee88':'#005500';
+  ctx.beginPath();ctx.arc(w*.76,h*.04+58,11,0,Math.PI*2);ctx.fill();
+  // Figure
+  drawWalkFigure(ctx,w*.45,h*.44,situation);
+  // Car
+  if(situation==='car')drawCar(ctx,12,h*.5);
+}
+
+function drawWalkFigure(ctx,x,y,sit){
+  ctx.fillStyle='#ffd39a';ctx.beginPath();ctx.arc(x,y-26,9,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#0f4c81';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(x,y-17);ctx.lineTo(x,y);ctx.stroke();
+  if(sit==='look'){
+    ctx.beginPath();ctx.moveTo(x-13,y-8);ctx.lineTo(x,y-7);ctx.lineTo(x+13,y-8);ctx.stroke();
+  } else {
+    ctx.beginPath();ctx.moveTo(x-9,y-5);ctx.lineTo(x,y-7);ctx.lineTo(x+9,y-5);ctx.stroke();
+  }
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+14);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+7,y+14);ctx.stroke();
+}
+
+function drawCar(ctx,x,y){
+  ctx.fillStyle='#e05454';roundRect(ctx,x,y+8,78,34,7);ctx.fill();
+  ctx.fillStyle='#c03030';roundRect(ctx,x+11,y,48,22,6);ctx.fill();
+  ctx.fillStyle='#a8d8f0';roundRect(ctx,x+14,y+2,18,15,3);ctx.fill();
+  ctx.fillStyle='#a8d8f0';roundRect(ctx,x+36,y+2,18,15,3);ctx.fill();
+  ctx.fillStyle='#333';
+  ctx.beginPath();ctx.arc(x+17,y+42,9,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+60,y+42,9,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#888';
+  ctx.beginPath();ctx.arc(x+17,y+42,4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+60,y+42,4,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;
+  [y+18,y+26,y+34].forEach(ly=>{ctx.beginPath();ctx.moveTo(x+78,ly);ctx.lineTo(x+94,ly);ctx.stroke();});
+}
+
+function drawHomeItem(svg,item){
+  svg.innerHTML='<rect width="340" height="180" rx="16" fill="#fff8ee"/>'
+    +'<text x="170" y="115" text-anchor="middle" font-size="80">'+item.emoji+'</text>'
+    +'<text x="170" y="158" text-anchor="middle" font-size="15" fill="#475569" font-family="Nunito,sans-serif">'+(lang==='fr'?item.labelFr:item.labelEn)+'</text>';
+}
+
+function drawBikeScene(container,scene){
+  const helmet=`<svg width="100%" viewBox="0 0 340 180" aria-hidden="true">
+    <rect width="340" height="180" rx="16" fill="#eaf6ff"/>
+    <circle cx="170" cy="62" r="26" fill="#ffd39a"/>
+    <path d="M144 64 Q147 35 170 33 Q193 35 196 64 Z" fill="#f97316"/>
+    <rect x="144" y="62" width="52" height="7" rx="3" fill="#ea580c"/>
+    <path d="M157 68 Q170 74 183 68" fill="none" stroke="#c07830" stroke-width="2"/>
+    <circle cx="162" cy="58" r="4" fill="#0f4c81"/>
+    <circle cx="178" cy="58" r="4" fill="#0f4c81"/>
+    <rect x="158" y="88" width="24" height="36" rx="8" fill="#7ec3ee"/>
+    <circle cx="140" cy="148" r="20" fill="none" stroke="#555" stroke-width="4"/>
+    <circle cx="200" cy="148" r="20" fill="none" stroke="#555" stroke-width="4"/>
+    <line x1="140" y1="148" x2="170" y2="112" stroke="#555" stroke-width="4"/>
+    <line x1="200" y1="148" x2="170" y2="112" stroke="#555" stroke-width="4"/>
+    <line x1="140" y1="148" x2="200" y2="148" stroke="#555" stroke-width="4"/>
+    <line x1="155" y1="112" x2="185" y2="112" stroke="#555" stroke-width="4"/>
+    <text x="170" y="25" text-anchor="middle" font-size="18">⛑️</text>
+  </svg>`;
+  const sidewalk=`<svg width="100%" viewBox="0 0 340 180" aria-hidden="true">
+    <rect width="340" height="180" rx="16" fill="#f0faf0"/>
+    <rect x="0" y="115" width="340" height="65" fill="#d0d0d0"/>
+    <circle cx="136" cy="80" r="18" fill="#ffd39a"/>
+    <path d="M118 82 Q120 60 136 58 Q152 60 154 82 Z" fill="#f97316"/>
+    <rect x="124" y="98" width="24" height="26" rx="7" fill="#7ec3ee"/>
+    <circle cx="108" cy="140" r="18" fill="none" stroke="#555" stroke-width="4"/>
+    <circle cx="165" cy="140" r="18" fill="none" stroke="#555" stroke-width="4"/>
+    <line x1="108" y1="140" x2="136" y2="108" stroke="#555" stroke-width="3"/>
+    <line x1="165" y1="140" x2="136" y2="108" stroke="#555" stroke-width="3"/>
+    <line x1="108" y1="140" x2="165" y2="140" stroke="#555" stroke-width="3"/>
+    <circle cx="248" cy="88" r="14" fill="#ffd39a"/>
+    <rect x="241" y="102" width="14" height="24" rx="4" fill="#7ec3ee"/>
+    <text x="200" y="72" font-size="28">🐢</text>
+  </svg>`;
+  const signal=`<svg width="100%" viewBox="0 0 340 180" aria-hidden="true">
+    <rect width="340" height="180" rx="16" fill="#eaf6ff"/>
+    <rect x="0" y="120" width="340" height="60" fill="#bbb"/>
+    <text x="50" y="156" font-size="30" fill="#fff" opacity=".4">→</text>
+    <text x="100" y="156" font-size="30" fill="#fff" opacity=".4">→</text>
+    <circle cx="168" cy="70" r="20" fill="#ffd39a"/>
+    <path d="M148 72 Q150 50 168 48 Q186 50 188 72 Z" fill="#f97316"/>
+    <rect x="156" y="90" width="24" height="26" rx="6" fill="#7ec3ee"/>
+    <line x1="180" y1="92" x2="218" y2="82" stroke="#ffd39a" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="220" cy="81" r="6" fill="#ffd39a"/>
+    <circle cx="140" cy="132" r="17" fill="none" stroke="#555" stroke-width="4"/>
+    <circle cx="196" cy="132" r="17" fill="none" stroke="#555" stroke-width="4"/>
+    <line x1="140" y1="132" x2="168" y2="102" stroke="#555" stroke-width="3"/>
+    <line x1="196" y1="132" x2="168" y2="102" stroke="#555" stroke-width="3"/>
+    <line x1="140" y1="132" x2="196" y2="132" stroke="#555" stroke-width="3"/>
+    <text x="260" y="100" font-size="26">💪</text>
+  </svg>`;
+  const night=`<svg width="100%" viewBox="0 0 340 180" aria-hidden="true">
+    <rect width="340" height="180" rx="16" fill="#0f172a"/>
+    <circle cx="295" cy="28" r="18" fill="#ffd23f"/>
+    <text x="18" y="35" font-size="13" fill="#ffd23f">★ ★ ★ ★</text>
+    <rect x="0" y="122" width="340" height="58" fill="#333"/>
+    <rect x="55" y="142" width="38" height="5" rx="2" fill="#fff" opacity=".4"/>
+    <rect x="140" y="142" width="38" height="5" rx="2" fill="#fff" opacity=".4"/>
+    <rect x="225" y="142" width="38" height="5" rx="2" fill="#fff" opacity=".4"/>
+    <circle cx="140" cy="72" r="19" fill="#ffd39a"/>
+    <path d="M121 74 Q123 52 140 50 Q157 52 159 74 Z" fill="#f97316"/>
+    <rect x="128" y="91" width="24" height="30" rx="7" fill="#ffd23f"/>
+    <line x1="128" y1="100" x2="152" y2="100" stroke="#f97316" stroke-width="2"/>
+    <line x1="128" y1="110" x2="152" y2="110" stroke="#f97316" stroke-width="2"/>
+    <circle cx="112" cy="130" r="16" fill="none" stroke="#555" stroke-width="4"/>
+    <circle cx="170" cy="130" r="16" fill="none" stroke="#555" stroke-width="4"/>
+    <line x1="112" y1="130" x2="140" y2="100" stroke="#555" stroke-width="3"/>
+    <line x1="170" y1="130" x2="140" y2="100" stroke="#555" stroke-width="3"/>
+    <line x1="112" y1="130" x2="170" y2="130" stroke="#555" stroke-width="3"/>
+    <circle cx="170" cy="130" r="5" fill="#ffd23f"/>
+    <path d="M175 128 L205 118 L205 122 L175 132 Z" fill="rgba(255,210,63,.25)"/>
+    <circle cx="112" cy="130" r="5" fill="#ff4444"/>
+    <text x="230" y="90" font-size="20">💡</text>
+  </svg>`;
+  const sceneMap={helmet,sidewalk,signal,night};
+  container.innerHTML=sceneMap[scene]||helmet;
+}
+
+function init(){setLang(lang);renderBadges();}
+init();
+</script>
+</body>
+</html>

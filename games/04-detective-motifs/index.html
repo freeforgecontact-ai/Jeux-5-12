@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Détective des Motifs / Pattern Detective — PGRG IA</title>
+<style>
+:root {
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,#eaf6ff 0%,#dbeeff 100%);min-height:100vh;overflow-x:hidden}
+body{display:flex;flex-direction:column;align-items:center;min-height:100vh}
+.topbar{width:100%;max-width:700px;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;gap:8px}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-family:'Fredoka','Baloo 2','Nunito',system-ui;font-size:1.15rem;font-weight:700;color:var(--blue-dark)}
+.btn-sm{background:var(--blue);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:.85rem;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;min-height:36px}
+.btn-sm:active{transform:translateY(2px);box-shadow:0 1px 0 var(--blue-dark)}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:700px;padding:16px;flex:1}
+.screen.active{display:flex}
+.mascot-wrap{margin:10px 0 6px}
+.game-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui;font-size:2.2rem;font-weight:700;color:var(--blue);text-align:center;line-height:1.1;margin-bottom:4px}
+.game-subtitle{color:var(--slate);font-size:1.05rem;text-align:center;margin-bottom:18px}
+.btn-primary{background:var(--orange);color:#fff;border:none;border-radius:28px;padding:14px 40px;font-size:1.25rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .12s,box-shadow .12s;font-family:'Fredoka','Nunito',system-ui;min-height:52px;min-width:180px;letter-spacing:.02em}
+.btn-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:28px;padding:10px 28px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .12s,box-shadow .12s;min-height:44px}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.parents-link{margin-top:10px;background:none;border:none;color:var(--slate);font-size:.85rem;cursor:pointer;text-decoration:underline;padding:6px}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:28px 24px;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(15,23,42,.2)}
+.modal-title{font-family:'Fredoka','Nunito',system-ui;font-size:1.3rem;color:var(--blue);font-weight:700;margin-bottom:8px;text-align:center}
+.modal-body{font-size:.95rem;color:var(--navy);margin-bottom:16px;text-align:center;line-height:1.5}
+.modal-math{font-size:1.4rem;font-weight:700;color:var(--orange);margin:12px 0;text-align:center;font-family:'Fredoka','Nunito',system-ui}
+.modal-input{width:100%;border:2px solid var(--sky);border-radius:12px;padding:10px 14px;font-size:1.2rem;text-align:center;outline:none;font-family:'Nunito',system-ui;margin-bottom:8px}
+.modal-input:focus{border-color:var(--blue)}
+.modal-error{color:#e53e3e;font-size:.85rem;text-align:center;min-height:20px}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.modal-parents-content{display:none}
+.modal-parents-content.open{display:block}
+.parents-info{font-size:.9rem;color:var(--navy);line-height:1.6}
+.parents-info h3{color:var(--blue);font-size:1rem;margin-top:10px;margin-bottom:3px}
+.game-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.level-info{font-family:'Fredoka','Nunito',system-ui;font-size:1rem;color:var(--blue);font-weight:700}
+.score-display{background:var(--gold);color:var(--navy);border-radius:16px;padding:4px 14px;font-weight:700;font-size:1rem;font-family:'Fredoka','Nunito',system-ui}
+.pattern-area{background:#fff;border-radius:24px;padding:20px 12px 16px;width:100%;box-shadow:0 4px 16px rgba(15,76,129,.1);margin-bottom:16px}
+.pattern-title{font-size:.85rem;color:var(--slate);text-align:center;margin-bottom:12px;font-weight:600}
+.pattern-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px}
+.pattern-cell{width:68px;height:68px;border-radius:14px;background:var(--sky-light);border:2px solid var(--sky);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pattern-cell svg{width:44px;height:44px}
+.pattern-cell.question{background:var(--gold);border-color:var(--orange);border-width:3px;font-size:1.8rem;font-weight:700;color:var(--orange-dark)}
+.pattern-cell.question.filling{animation:fill-pop .45s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes fill-pop{0%{transform:scale(.6);opacity:.4}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1;background:var(--success);border-color:#1e9e5c}}
+.pattern-cell.question.filled{background:var(--success);border-color:#1e9e5c}
+.choices-title{font-size:.85rem;color:var(--slate);text-align:center;margin-bottom:10px;font-weight:600}
+.choices-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:16px}
+.choice-btn{width:88px;height:88px;border-radius:18px;background:#fff;border:3px solid var(--sky);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,transform .12s,box-shadow .12s;box-shadow:0 4px 0 #b8d8f0;flex-shrink:0}
+.choice-btn:hover,.choice-btn:focus{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 0 var(--sky)}
+.choice-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--sky)}
+.choice-btn svg{width:56px;height:56px}
+.choice-btn.wrong{border-color:#e53e3e;animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.choice-btn.correct{border-color:var(--success);background:#e8fff2}
+.feedback-bar{min-height:36px;text-align:center;font-size:1rem;font-weight:700;padding:6px;border-radius:10px;margin-bottom:4px}
+.feedback-bar.ok{background:#e8fff2;color:#1e7a4c}
+.feedback-bar.ko{background:#fff0f0;color:#c53030}
+.progress-bar-wrap{width:100%;background:#dbe8f5;border-radius:100px;height:10px;overflow:hidden;margin-bottom:6px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:100px;transition:width .4s ease}
+.success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui;font-size:2rem;font-weight:700;color:var(--blue);text-align:center;margin-top:8px}
+.stars-row{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.star{font-size:2.8rem;transition:transform .3s;display:inline-block}
+.star.lit{animation:star-pop .4s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes star-pop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0deg)}}
+.success-msg{font-size:1.05rem;color:var(--slate);text-align:center;margin-bottom:20px;line-height:1.5}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:10}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(max-width:420px){
+  .pattern-cell{width:52px;height:52px}
+  .pattern-cell svg{width:34px;height:34px}
+  .choice-btn{width:74px;height:74px}
+  .choice-btn svg{width:46px;height:46px}
+  .game-title{font-size:1.7rem}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-sm" id="btnLang" aria-label="Changer la langue">EN</button>
+    <button class="btn-sm" id="btnSound" aria-label="Son">&#128266;</button>
+  </div>
+</div>
+<div aria-live="polite" aria-atomic="true" class="visually-hidden" id="ariaLive"></div>
+
+<section class="screen active" id="screenTitle">
+  <div class="mascot-wrap">
+    <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="55" cy="52" r="28" fill="#fff" stroke="#0f4c81" stroke-width="3"/>
+      <ellipse cx="47" cy="49" rx="7" ry="8" fill="#f0e0c8"/>
+      <ellipse cx="63" cy="49" rx="7" ry="8" fill="#f0e0c8"/>
+      <circle cx="47" cy="49" r="4" fill="#fff"/>
+      <circle cx="63" cy="49" r="4" fill="#fff"/>
+      <circle cx="48" cy="48" r="2.5" fill="#0f4c81"/>
+      <circle cx="64" cy="48" r="2.5" fill="#0f4c81"/>
+      <circle cx="49" cy="47" r="1" fill="#fff"/>
+      <circle cx="65" cy="47" r="1" fill="#fff"/>
+      <rect x="33" y="28" width="44" height="8" rx="4" fill="#0f4c81"/>
+      <ellipse cx="55" cy="28" rx="20" ry="12" fill="#0a3559"/>
+      <path d="M47 58 Q55 65 63 58" stroke="#0f4c81" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="78" cy="78" r="16" fill="none" stroke="#f97316" stroke-width="4"/>
+      <circle cx="78" cy="78" r="10" fill="rgba(126,195,238,.3)"/>
+      <line x1="89" y1="89" x2="100" y2="100" stroke="#f97316" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 class="game-title" id="titleMain"></h1>
+  <p class="game-subtitle" id="titleSub"></p>
+  <button class="btn-primary" id="btnPlay"></button>
+  <button class="parents-link" id="btnParents"></button>
+</section>
+
+<section class="screen" id="screenGame" aria-label="Jeu">
+  <div class="game-header">
+    <div class="level-info" id="levelLabel"></div>
+    <div class="score-display" id="scoreLabel"></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  <div class="pattern-area">
+    <div class="pattern-title" id="patternLabel"></div>
+    <div class="pattern-row" id="patternRow"></div>
+  </div>
+  <div class="choices-title" id="choicesLabel"></div>
+  <div class="choices-row" id="choicesRow"></div>
+  <div class="feedback-bar" id="feedbackBar" role="status"></div>
+</section>
+
+<section class="screen" id="screenSuccess">
+  <div style="font-size:3.5rem;margin-top:8px">&#127881;</div>
+  <h2 class="success-title" id="successTitle"></h2>
+  <div class="stars-row" id="starsRow"></div>
+  <p class="success-msg" id="successMsg"></p>
+  <div class="success-btns">
+    <button class="btn-secondary" id="btnReplay"></button>
+    <button class="btn-primary" id="btnNext"></button>
+    <button class="btn-sm" id="btnHome" style="padding:10px 20px;font-size:.95rem"></button>
+  </div>
+</section>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box">
+    <div id="modalGate">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-math" id="modalMath"></div>
+      <input class="modal-input" type="number" id="modalInput" inputmode="numeric" min="0" max="99">
+      <div class="modal-error" id="modalError"></div>
+      <div class="modal-btns">
+        <button class="btn-secondary" id="modalCancel"></button>
+        <button class="btn-primary" id="modalOk" style="padding:10px 24px;font-size:1rem"></button>
+      </div>
+    </div>
+    <div class="modal-parents-content" id="modalParentsContent">
+      <div class="modal-title" id="parentsTitle"></div>
+      <div class="parents-info" id="parentsInfo"></div>
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn-primary" id="parentsClose" style="padding:10px 24px;font-size:1rem"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas class="confetti-wrap" id="confettiCanvas" style="display:none"></canvas>
+
+<script>
+var T = {
+  fr: {
+    title: "Detectif des Motifs",
+    subtitle: "Trouve ce qui vient ensuite dans la suite !",
+    play: "Jouer !",
+    parentsLink: "Pour les parents",
+    levelLabel: function(n){ return "Niveau " + n; },
+    scoreLabel: function(s){ return "Etoile " + s; },
+    patternLabel: "Quelle est la suite ?",
+    choicesLabel: "Choisis la bonne reponse :",
+    feedbackOk: ["Super !","Bravo !","Excellent !","Parfait !","Genial !","Bien joue !"],
+    feedbackKo: "Essaie encore !",
+    successTitle: "Mission accomplie !",
+    successMsg: function(n){ return "Tu as complete " + n + " motifs ! Tu es un vrai detective !"; },
+    replay: "Rejouer",
+    nextLevel: "Niveau suivant",
+    home: "Accueil",
+    modalTitle: "Espace parents",
+    modalBody: "Pour acceder a cet espace, resous ce petit calcul :",
+    modalOk: "Valider",
+    modalCancel: "Annuler",
+    modalError: "Ce n'est pas la bonne reponse, essaie encore !",
+    parentsTitle: "Informations pour les parents",
+    parentsInfo: "<h3>Objectif pedagogique</h3><p>Ce jeu developpe la reconnaissance de motifs et la pensee logique chez les enfants de 5 a 8 ans.</p><h3>Competences travaillees</h3><p>Suites logiques ABAB, AABB, ABC, prediction, memoire visuelle, raisonnement.</p><h3>Securite et confidentialite</h3><p>Aucune donnee personnelle collectee. Aucune publicite. Fonctionne hors-ligne. Progression sauvegardee localement.</p><h3>Projet PGRG IA</h3><p>Jeux educatifs gratuits, bilingues FR/EN, sans publicite, pour les enfants.</p>",
+    parentsClose: "Fermer"
+  },
+  en: {
+    title: "Pattern Detective",
+    subtitle: "Find what comes next in the pattern!",
+    play: "Play!",
+    parentsLink: "For parents",
+    levelLabel: function(n){ return "Level " + n; },
+    scoreLabel: function(s){ return "Stars " + s; },
+    patternLabel: "What comes next?",
+    choicesLabel: "Choose the right answer:",
+    feedbackOk: ["Great!","Awesome!","Excellent!","Perfect!","Amazing!","Well done!"],
+    feedbackKo: "Try again!",
+    successTitle: "Mission complete!",
+    successMsg: function(n){ return "You completed " + n + " patterns! You are a real detective!"; },
+    replay: "Play again",
+    nextLevel: "Next level",
+    home: "Home",
+    modalTitle: "Parent area",
+    modalBody: "To access this area, solve this math problem:",
+    modalOk: "Confirm",
+    modalCancel: "Cancel",
+    modalError: "That's not right, try again!",
+    parentsTitle: "Information for parents",
+    parentsInfo: "<h3>Learning goal</h3><p>This game develops pattern recognition and logical thinking for children aged 5 to 8.</p><h3>Skills practiced</h3><p>Logical sequences ABAB, AABB, ABC, prediction, visual memory, reasoning.</p><h3>Safety and privacy</h3><p>No personal data collected. No ads. Works offline. Progress saved locally.</p><h3>PGRG IA project</h3><p>Free bilingual FR/EN educational games with no advertising, for children.</p>",
+    parentsClose: "Close"
+  }
+};
+
+var STORAGE_KEY = 'pgrg_detective_motifs';
+var lang = (navigator.language||'fr').startsWith('fr') ? 'fr' : 'en';
+var soundOn = true;
+var score = 0;
+var currentLevel = 1;
+var currentPuzzle = 0;
+var PUZZLES_PER_LEVEL = 5;
+var puzzles = [];
+var currentPuzzleData = null;
+var answered = false;
+var parentMath = {a:0,b:0,ans:0};
+var confettiAF = null;
+
+var audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function resumeAudio(){
+  var ctx = getAudioCtx();
+  if(ctx.state==='suspended') ctx.resume();
+}
+function playTone(freq,type,duration,vol,delay){
+  if(!soundOn) return;
+  vol = vol||0.18; delay = delay||0;
+  resumeAudio();
+  var ctx = getAudioCtx();
+  var o = ctx.createOscillator();
+  var g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type; o.frequency.value = freq;
+  var t = ctx.currentTime + delay;
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol, t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t+duration);
+  o.start(t); o.stop(t+duration+0.05);
+}
+function soundCorrect(){ playTone(523,'sine',.15,.2); playTone(659,'sine',.15,.18,.1); playTone(784,'sine',.25,.16,.2); }
+function soundWrong(){ playTone(220,'sawtooth',.12,.1); playTone(196,'sawtooth',.18,.08,.1); }
+function soundSuccess(){ var notes=[523,587,659,698,784,880]; for(var i=0;i<notes.length;i++) playTone(notes[i],'sine',.18,.15,i*0.07); }
+function soundClick(){ playTone(440,'sine',.06,.08); }
+
+var SHAPES = [
+  {id:'circle',   svg:'<circle cx="22" cy="22" r="17" fill="#f97316" stroke="#ea580c" stroke-width="2"/>',                                                                                  labelFR:'rond orange',    labelEN:'orange circle'},
+  {id:'square',   svg:'<rect x="5" y="5" width="34" height="34" rx="5" fill="#0f4c81" stroke="#0a3559" stroke-width="2"/>',                                                                labelFR:'carre bleu',     labelEN:'blue square'},
+  {id:'triangle', svg:'<polygon points="22,4 41,40 3,40" fill="#34c77b" stroke="#1e9e5c" stroke-width="2"/>',                                                                               labelFR:'triangle vert',  labelEN:'green triangle'},
+  {id:'diamond',  svg:'<polygon points="22,3 41,22 22,41 3,22" fill="#ffd23f" stroke="#e0b800" stroke-width="2"/>',                                                                        labelFR:'losange jaune',  labelEN:'yellow diamond'},
+  {id:'star',     svg:'<polygon points="22,2 26.5,16 41,16 29.5,25 33.5,40 22,31 10.5,40 14.5,25 3,16 17.5,16" fill="#e879f9" stroke="#a21caf" stroke-width="1.5"/>',                    labelFR:'etoile rose',    labelEN:'pink star'},
+  {id:'hexagon',  svg:'<polygon points="22,3 38,12 38,32 22,41 6,32 6,12" fill="#7ec3ee" stroke="#0f4c81" stroke-width="2"/>',                                                             labelFR:'hexagone bleu',  labelEN:'blue hexagon'},
+  {id:'heart',    svg:'<path d="M22 37 C22 37 4 26 4 15 C4 9 9 5 15 7 C18 8 22 12 22 12 C22 12 26 8 29 7 C35 5 40 9 40 15 C40 26 22 37 22 37Z" fill="#f87171" stroke="#dc2626" stroke-width="1.5"/>',  labelFR:'coeur rouge',    labelEN:'red heart'},
+  {id:'cross',    svg:'<rect x="16" y="4" width="12" height="36" rx="4" fill="#a78bfa" stroke="#7c3aed" stroke-width="1.5"/><rect x="4" y="16" width="36" height="12" rx="4" fill="#a78bfa" stroke="#7c3aed" stroke-width="1.5"/>',  labelFR:'croix violette', labelEN:'purple cross'}
+];
+
+var SIZE_SMALL=28, SIZE_MED=44, SIZE_BIG=58;
+
+function svgForShape(sh,w,h){ w=w||44;h=h||44; return '<svg viewBox="0 0 44 44" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+sh.svg+'</svg>'; }
+function svgForShapeSize(sh,size){ return '<svg viewBox="0 0 44 44" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+sh.svg+'</svg>'; }
+
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+function rndInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;} return a; }
+
+function generatePuzzle(level){
+  var pool = shuffle(SHAPES.slice());
+  var patternType;
+  if(level<=2) patternType='ABAB';
+  else if(level<=4) patternType='AABB';
+  else if(level<=6) patternType='ABCABC';
+  else if(level<=8) patternType='ABBAABBA';
+  else if(level<=10) patternType='SIZE';
+  else { patternType=rnd(['ABAB','AABB','ABCABC','ABBAABBA','SIZE']); }
+
+  var pattern,answer,distractors,choices;
+
+  if(patternType==='ABAB'){
+    var A=pool[0],B=pool[1];
+    var full=[A,B,A,B,A,B];
+    var cut=rnd([3,4,5]);
+    pattern=full.slice(0,cut);
+    answer=full[cut];
+    distractors=[pool[2],pool[3]];
+    choices=shuffle([answer,distractors[0],distractors[1]]);
+  } else if(patternType==='AABB'){
+    var A=pool[0],B=pool[1];
+    var full=[A,A,B,B,A,A,B,B];
+    var cut=rnd([3,4,5,6]);
+    pattern=full.slice(0,cut);
+    answer=full[cut];
+    distractors=[pool[2],pool[3]];
+    choices=shuffle([answer,distractors[0],distractors[1]]);
+  } else if(patternType==='ABCABC'){
+    var A=pool[0],B=pool[1],C=pool[2];
+    var full=[A,B,C,A,B,C,A,B,C];
+    var cut=rnd([4,5,6,7]);
+    pattern=full.slice(0,cut);
+    answer=full[cut];
+    distractors=[pool[3],pool[4]];
+    choices=shuffle([answer,distractors[0],distractors[1]]);
+  } else if(patternType==='ABBAABBA'){
+    var A=pool[0],B=pool[1];
+    var full=[A,B,B,A,A,B,B,A];
+    var cut=rnd([4,5,6,7]);
+    pattern=full.slice(0,cut);
+    answer=full[cut];
+    distractors=[pool[2],pool[3]];
+    choices=shuffle([answer,distractors[0],distractors[1]]);
+  } else {
+    var A=pool[0];
+    var fullIdx=[0,1,2,0,1,2,0,1,2];
+    var cut=rnd([4,5,6]);
+    pattern=fullIdx.slice(0,cut).map(function(si){ return {shape:A,sizeIdx:si}; });
+    var answerSizeIdx=fullIdx[cut];
+    answer={shape:A,sizeIdx:answerSizeIdx};
+    var wrongSizes=[0,1,2].filter(function(i){ return i!==answerSizeIdx; });
+    choices=shuffle([answer,{shape:A,sizeIdx:wrongSizes[0]},{shape:A,sizeIdx:wrongSizes[1]}]);
+  }
+
+  return {pattern:pattern,answer:answer,choices:choices,patternType:patternType,level:level};
+}
+
+function isAnswerMatch(chosen,answer,pType){
+  if(pType==='SIZE') return chosen.shape.id===answer.shape.id && chosen.sizeIdx===answer.sizeIdx;
+  return chosen.id===answer.id;
+}
+
+function renderElement(el,pType){
+  var div=document.createElement('div');
+  div.className='pattern-cell';
+  if(pType==='SIZE'){
+    var size=el.sizeIdx===0?SIZE_SMALL:(el.sizeIdx===1?SIZE_MED:SIZE_BIG);
+    div.innerHTML=svgForShapeSize(el.shape,size);
+    div.setAttribute('aria-label',lang==='fr'?el.shape.labelFR:el.shape.labelEN);
+  } else {
+    div.innerHTML=svgForShape(el);
+    div.setAttribute('aria-label',lang==='fr'?el.labelFR:el.labelEN);
+  }
+  return div;
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function applyLang(){
+  var t=T[lang];
+  document.documentElement.lang=lang;
+  document.title=t.title+' / Pattern Detective - PGRG IA';
+  function el(id){ return document.getElementById(id); }
+  el('titleMain').textContent=t.title;
+  el('titleSub').textContent=t.subtitle;
+  el('btnPlay').textContent=t.play;
+  el('btnParents').textContent=t.parentsLink;
+  el('btnLang').textContent=lang==='fr'?'EN':'FR';
+  el('levelLabel').textContent=t.levelLabel(currentLevel);
+  el('scoreLabel').textContent=t.scoreLabel(score);
+  el('patternLabel').textContent=t.patternLabel;
+  el('choicesLabel').textContent=t.choicesLabel;
+  el('successTitle').textContent=t.successTitle;
+  el('btnReplay').textContent=t.replay;
+  el('btnNext').textContent=t.nextLevel;
+  el('btnHome').textContent=t.home;
+  el('modalTitle').textContent=t.modalTitle;
+  el('modalBody').textContent=t.modalBody;
+  el('modalOk').textContent=t.modalOk;
+  el('modalCancel').textContent=t.modalCancel;
+  el('parentsTitle').textContent=t.parentsTitle;
+  el('parentsInfo').innerHTML=t.parentsInfo;
+  el('parentsClose').textContent=t.parentsClose;
+}
+
+function loadState(){
+  try{
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){ var s=JSON.parse(raw); if(s.level) currentLevel=s.level; if(s.score!==undefined) score=s.score; }
+  }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY,JSON.stringify({level:currentLevel,score:score})); }catch(e){}
+}
+
+function startLevel(level){
+  currentLevel=level;
+  currentPuzzle=0;
+  puzzles=[];
+  for(var i=0;i<PUZZLES_PER_LEVEL;i++) puzzles.push(generatePuzzle(level));
+  showScreen('screenGame');
+  applyLang();
+  loadPuzzle();
+}
+
+function loadPuzzle(){
+  answered=false;
+  currentPuzzleData=puzzles[currentPuzzle];
+  var t=T[lang];
+  document.getElementById('levelLabel').textContent=t.levelLabel(currentLevel);
+  document.getElementById('scoreLabel').textContent=t.scoreLabel(score);
+  document.getElementById('feedbackBar').textContent='';
+  document.getElementById('feedbackBar').className='feedback-bar';
+  document.getElementById('progressBar').style.width=((currentPuzzle/PUZZLES_PER_LEVEL)*100)+'%';
+
+  var row=document.getElementById('patternRow');
+  row.innerHTML='';
+  var pd=currentPuzzleData;
+
+  for(var i=0;i<pd.pattern.length;i++){
+    var cell=renderElement(pd.pattern[i],pd.patternType);
+    row.appendChild(cell);
+  }
+
+  var arrow=document.createElement('span');
+  arrow.textContent='>';
+  arrow.setAttribute('aria-hidden','true');
+  arrow.style.cssText='font-size:1.5rem;color:var(--slate);margin:0 2px;align-self:center;font-weight:bold';
+  row.appendChild(arrow);
+
+  var qcell=document.createElement('div');
+  qcell.className='pattern-cell question';
+  qcell.textContent='?';
+  qcell.id='questionCell';
+  row.appendChild(qcell);
+
+  var cr=document.getElementById('choicesRow');
+  cr.innerHTML='';
+  for(var j=0;j<pd.choices.length;j++){
+    (function(ch){
+      var btn=document.createElement('button');
+      btn.className='choice-btn';
+      var lbl;
+      if(pd.patternType==='SIZE') lbl=lang==='fr'?ch.shape.labelFR:ch.shape.labelEN;
+      else lbl=lang==='fr'?ch.labelFR:ch.labelEN;
+      btn.setAttribute('aria-label',lbl);
+      if(pd.patternType==='SIZE'){
+        var size=ch.sizeIdx===0?SIZE_SMALL:(ch.sizeIdx===1?SIZE_MED:SIZE_BIG);
+        btn.innerHTML=svgForShapeSize(ch.shape,size);
+      } else {
+        btn.innerHTML=svgForShape(ch,56,56);
+      }
+      btn.addEventListener('click',function(){ handleChoice(ch,btn); });
+      cr.appendChild(btn);
+    })(pd.choices[j]);
+  }
+}
+
+function handleChoice(chosen,btn){
+  if(answered) return;
+  resumeAudio();
+  var pd=currentPuzzleData;
+  var correct=isAnswerMatch(chosen,pd.answer,pd.patternType);
+  var fb=document.getElementById('feedbackBar');
+  var qcell=document.getElementById('questionCell');
+  var t=T[lang];
+  var aria=document.getElementById('ariaLive');
+
+  if(correct){
+    answered=true;
+    score++;
+    saveState();
+    soundCorrect();
+    qcell.textContent='';
+    if(pd.patternType==='SIZE'){
+      var size=pd.answer.sizeIdx===0?SIZE_SMALL:(pd.answer.sizeIdx===1?SIZE_MED:SIZE_BIG);
+      qcell.innerHTML=svgForShapeSize(pd.answer.shape,size);
+    } else {
+      qcell.innerHTML=svgForShape(pd.answer,44,44);
+    }
+    qcell.classList.add('filling');
+    btn.classList.add('correct');
+    var msg=rnd(t.feedbackOk);
+    fb.textContent=msg;
+    fb.className='feedback-bar ok';
+    aria.textContent=msg;
+    document.getElementById('scoreLabel').textContent=t.scoreLabel(score);
+    setTimeout(function(){
+      qcell.classList.remove('filling');
+      qcell.classList.add('filled');
+      advancePuzzle();
+    }, 900);
+  } else {
+    soundWrong();
+    btn.classList.add('wrong');
+    fb.textContent=t.feedbackKo;
+    fb.className='feedback-bar ko';
+    aria.textContent=t.feedbackKo;
+    setTimeout(function(){ btn.classList.remove('wrong'); }, 400);
+  }
+}
+
+function advancePuzzle(){
+  currentPuzzle++;
+  document.getElementById('progressBar').style.width=((currentPuzzle/PUZZLES_PER_LEVEL)*100)+'%';
+  if(currentPuzzle>=PUZZLES_PER_LEVEL){
+    setTimeout(showSuccess, 400);
+  } else {
+    setTimeout(loadPuzzle, 500);
+  }
+}
+
+function showSuccess(){
+  showScreen('screenSuccess');
+  soundSuccess();
+  var t=T[lang];
+  document.getElementById('successMsg').textContent=t.successMsg(PUZZLES_PER_LEVEL);
+  var starsRow=document.getElementById('starsRow');
+  starsRow.innerHTML='';
+  for(var i=0;i<3;i++){
+    (function(idx){
+      var s=document.createElement('span');
+      s.className='star';
+      s.textContent='*';
+      s.style.opacity='0';
+      s.style.fontSize='2.8rem';
+      starsRow.appendChild(s);
+      setTimeout(function(){
+        s.style.opacity='1';
+        s.classList.add('lit');
+        s.textContent='★';
+        s.style.color='#ffd23f';
+      }, 300+idx*200);
+    })(i);
+  }
+  startConfetti();
+  saveState();
+}
+
+function startConfetti(){
+  var canvas=document.getElementById('confettiCanvas');
+  canvas.style.display='block';
+  var ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  var colors=['#f97316','#0f4c81','#ffd23f','#34c77b','#e879f9','#7ec3ee','#f87171'];
+  var particles=[];
+  for(var i=0;i<80;i++){
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*-canvas.height*0.5,
+      r:rndInt(5,12),
+      color:rnd(colors),
+      dx:(Math.random()-.5)*3,
+      dy:rndInt(2,5),
+      rot:Math.random()*360,
+      drot:(Math.random()-.5)*5,
+      shape:rnd(['rect','circle'])
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(var i=0;i<particles.length;i++){
+      var p=particles[i];
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;
+      if(p.shape==='circle'){ ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); }
+      else { ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); }
+      ctx.restore();
+      p.x+=p.dx; p.y+=p.dy; p.rot+=p.drot;
+      if(p.y>canvas.height){ p.y=-20; p.x=Math.random()*canvas.width; }
+    }
+    confettiAF=requestAnimationFrame(draw);
+  }
+  if(confettiAF) cancelAnimationFrame(confettiAF);
+  draw();
+  setTimeout(function(){ cancelAnimationFrame(confettiAF); canvas.style.display='none'; },4000);
+}
+
+function openParentGate(){
+  var a=rndInt(2,9), b=rndInt(2,9);
+  parentMath={a:a,b:b,ans:a*b};
+  document.getElementById('modalMath').textContent=a+' x '+b+' = ?';
+  document.getElementById('modalInput').value='';
+  document.getElementById('modalError').textContent='';
+  document.getElementById('modalGate').style.display='block';
+  document.getElementById('modalParentsContent').classList.remove('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('modalInput').focus(); },100);
+}
+
+function checkGate(){
+  var val=parseInt(document.getElementById('modalInput').value,10);
+  if(val===parentMath.ans){
+    document.getElementById('modalGate').style.display='none';
+    document.getElementById('modalParentsContent').classList.add('open');
+  } else {
+    document.getElementById('modalError').textContent=T[lang].modalError;
+    document.getElementById('modalInput').value='';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+document.getElementById('btnPlay').addEventListener('click',function(){ soundClick(); resumeAudio(); loadState(); startLevel(currentLevel); });
+document.getElementById('btnLang').addEventListener('click',function(){ lang=lang==='fr'?'en':'fr'; soundClick(); applyLang(); if(document.getElementById('screenGame').classList.contains('active')) loadPuzzle(); });
+document.getElementById('btnSound').addEventListener('click',function(){ soundOn=!soundOn; document.getElementById('btnSound').textContent=soundOn?'🔊':'🔇'; if(soundOn) soundClick(); });
+document.getElementById('btnParents').addEventListener('click',function(){ soundClick(); openParentGate(); });
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalOk').addEventListener('click',checkGate);
+document.getElementById('modalInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkGate(); });
+document.getElementById('parentsClose').addEventListener('click',closeModal);
+document.getElementById('btnReplay').addEventListener('click',function(){ soundClick(); startLevel(currentLevel); });
+document.getElementById('btnNext').addEventListener('click',function(){ soundClick(); startLevel(currentLevel+1); });
+document.getElementById('btnHome').addEventListener('click',function(){ soundClick(); showScreen('screenTitle'); });
+document.getElementById('modalOverlay').addEventListener('click',function(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); });
+
+loadState();
+applyLang();
+showScreen('screenTitle');
+</script>
+</body>
+</html>

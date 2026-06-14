@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Machines Simples / Simple Machines — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c;
+  --gold:#ffd23f; --sky:#7ec3ee; --sky-light:#eaf6ff;
+  --slate:#475569; --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#dbeeff 0%,var(--sky-light) 100%);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#topbar .logo-area{display:flex;align-items:center;gap:8px;flex:1}
+#topbar .brand{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.5px}
+.lang-btn{background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:8px;padding:4px 11px;cursor:pointer;font-size:.85rem;font-weight:700;transition:.2s}
+.lang-btn.active{background:#fff;color:var(--blue)}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,.28)}
+#muteBtn{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;border-radius:8px;transition:.2s}
+#muteBtn:hover{background:rgba(255,255,255,.2)}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;min-height:calc(100vh - 56px)}
+.screen.active{display:flex}
+#titleScreen{gap:16px;text-align:center}
+.mascot-wrap{margin-bottom:4px}
+.game-title{font-size:2.2rem;color:var(--blue);line-height:1.1}
+.game-subtitle{font-size:1.05rem;color:var(--slate);max-width:400px}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:16px 44px;font-size:1.3rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:.15s;margin-top:6px}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-parents{background:none;border:2px solid var(--blue);color:var(--blue);border-radius:12px;padding:9px 22px;font-size:.9rem;cursor:pointer;font-weight:700;transition:.2s;margin-top:4px}
+.btn-parents:hover{background:var(--blue);color:#fff}
+#parentModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center}
+#parentModal.open{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:28px;max-width:370px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.modal-box h2{color:var(--blue);margin-bottom:12px}
+.modal-box p{margin-bottom:14px;color:var(--slate);font-size:.95rem}
+#parentQ{font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:10px}
+#parentAns{font-size:1.1rem;padding:9px 14px;border:2px solid var(--sky);border-radius:10px;width:120px;text-align:center;outline:none}
+#parentAns:focus{border-color:var(--blue)}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.btn-blue{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:10px 22px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:.15s}
+.btn-blue:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.btn-cancel{background:#e2e8f0;color:var(--slate);border:none;border-radius:12px;padding:10px 18px;font-size:.95rem;cursor:pointer;font-weight:600}
+#parentError{color:#e53e3e;font-size:.9rem;margin-top:6px;min-height:18px}
+.parent-info{display:none;text-align:left;margin-top:10px;color:var(--slate);font-size:.9rem;line-height:1.6}
+.parent-info h3{color:var(--blue);margin-bottom:8px}
+#gameScreen{padding:12px 8px;gap:14px;justify-content:flex-start}
+.level-header{display:flex;align-items:center;gap:10px;width:100%;max-width:680px;flex-wrap:wrap}
+.level-badge{background:var(--blue);color:#fff;border-radius:12px;padding:5px 14px;font-weight:700;font-size:.9rem}
+.challenge-title{font-size:1rem;color:var(--navy);font-weight:700;flex:1}
+.stars-row{display:flex;gap:3px;font-size:1.3rem}
+.scene-wrap{width:100%;max-width:680px;background:#fff;border-radius:20px;box-shadow:0 4px 18px rgba(15,76,129,.12);overflow:hidden;position:relative}
+.scene-svg{width:100%;display:block}
+.palette{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:680px;width:100%}
+.machine-card{background:#fff;border:3px solid #d1e4f6;border-radius:16px;padding:12px 14px;cursor:pointer;text-align:center;min-width:120px;flex:1;max-width:160px;transition:.18s;user-select:none}
+.machine-card:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:0 4px 14px rgba(249,115,22,.18)}
+.machine-card.selected{border-color:var(--orange);background:#fff8f0;box-shadow:0 4px 14px rgba(249,115,22,.25)}
+.machine-card.correct-flash{border-color:var(--success);background:#edfff5}
+.machine-icon{font-size:2.4rem;display:block;margin-bottom:4px}
+.machine-name{font-size:.85rem;font-weight:700;color:var(--blue)}
+.btn-action{background:var(--orange);color:#fff;border:none;border-radius:14px;padding:13px 36px;font-size:1.1rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:.15s;min-width:200px;min-height:48px}
+.btn-action:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:0 5px 0 var(--orange-dark)}
+.btn-action:not(:disabled):active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.feedback-box{background:#fff;border-radius:16px;padding:14px 20px;max-width:620px;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.1);border-left:5px solid var(--success);display:none;width:100%}
+.feedback-box.visible{display:block}
+.feedback-box.error-fb{border-left-color:var(--orange)}
+.feedback-title{font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.feedback-text{font-size:.9rem;color:var(--slate);line-height:1.5}
+#successScreen{gap:18px;text-align:center}
+.success-stars{font-size:3rem;letter-spacing:4px}
+.success-msg{font-size:1.6rem;color:var(--blue)}
+.success-sub{font-size:1rem;color:var(--slate);max-width:380px}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:.15s;min-height:48px}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.progress-bar-wrap{width:100%;max-width:680px;height:10px;background:#d1e4f6;border-radius:8px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--blue));border-radius:8px;transition:width .4s ease}
+[aria-live]{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media(max-width:480px){.game-title{font-size:1.6rem}.machine-card{min-width:90px;padding:9px 10px}.machine-icon{font-size:1.9rem}.machine-name{font-size:.78rem}.btn-play{padding:14px 32px;font-size:1.15rem}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.float-anim{animation:float 2.4s ease-in-out infinite}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.slide-up{animation:slideUp .35s ease}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <div class="logo-area">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span class="brand">PGRG IA</span>
+  </div>
+  <button class="lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Son">&#128266;</button>
+</div>
+<div aria-live="polite" id="ariaFeedback"></div>
+<div class="screen active" id="titleScreen">
+  <div class="mascot-wrap float-anim">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="70" cy="98" rx="34" ry="28" fill="#ffd23f"/>
+      <circle cx="70" cy="60" r="34" fill="#ffd23f"/>
+      <circle cx="58" cy="55" r="8" fill="#fff"/>
+      <circle cx="82" cy="55" r="8" fill="#fff"/>
+      <circle cx="60" cy="56" r="4.5" fill="#0f172a"/>
+      <circle cx="84" cy="56" r="4.5" fill="#0f172a"/>
+      <circle cx="62" cy="54" r="1.5" fill="#fff"/>
+      <circle cx="86" cy="54" r="1.5" fill="#fff"/>
+      <path d="M58 70 Q70 80 82 70" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <g transform="translate(60,18) scale(0.9)">
+        <circle cx="11" cy="11" r="7" fill="#0f4c81"/>
+        <circle cx="11" cy="11" r="3.5" fill="#eaf6ff"/>
+        <rect x="9" y="2" width="4" height="4" rx="1" fill="#0f4c81"/>
+        <rect x="9" y="16" width="4" height="4" rx="1" fill="#0f4c81"/>
+        <rect x="2" y="9" width="4" height="4" rx="1" fill="#0f4c81"/>
+        <rect x="16" y="9" width="4" height="4" rx="1" fill="#0f4c81"/>
+        <rect x="4" y="4" width="3.5" height="3.5" rx=".8" fill="#0f4c81" transform="rotate(45 5.75 5.75)"/>
+        <rect x="14" y="4" width="3.5" height="3.5" rx=".8" fill="#0f4c81" transform="rotate(45 15.75 5.75)"/>
+        <rect x="4" y="14" width="3.5" height="3.5" rx=".8" fill="#0f4c81" transform="rotate(45 5.75 15.75)"/>
+        <rect x="14" y="14" width="3.5" height="3.5" rx=".8" fill="#0f4c81" transform="rotate(45 15.75 15.75)"/>
+      </g>
+      <g transform="translate(88,88) rotate(-30)">
+        <rect x="0" y="0" width="6" height="22" rx="3" fill="#7ec3ee"/>
+        <ellipse cx="3" cy="0" rx="5" ry="5" fill="#0f4c81"/>
+        <circle cx="3" cy="0" r="2" fill="#eaf6ff"/>
+      </g>
+      <ellipse cx="55" cy="124" rx="12" ry="7" fill="#f97316"/>
+      <ellipse cx="85" cy="124" rx="12" ry="7" fill="#f97316"/>
+    </svg>
+  </div>
+  <h1 class="game-title title-font" id="txtTitle">Machines Simples</h1>
+  <p class="game-subtitle" id="txtSubtitle">Apprends les leviers, poulies, rampes et roues en resolvant de vrais defis de physique !</p>
+  <button class="btn-play" onclick="startGame()" id="btnPlay">&#9654; Jouer</button>
+  <button class="btn-parents" onclick="openParent()" id="btnParents">&#128106; Pour les parents</button>
+</div>
+<div id="parentModal" role="dialog" aria-modal="true" aria-labelledby="parentModalTitle">
+  <div class="modal-box">
+    <h2 id="parentModalTitle">Espace parents</h2>
+    <p id="txtParentIntro">Resoudre ce calcul pour continuer :</p>
+    <div id="parentQ" aria-label="Question de calcul"></div>
+    <input type="number" id="parentAns" aria-label="Votre reponse" min="0" max="999">
+    <div id="parentError" role="alert"></div>
+    <div class="modal-btns">
+      <button class="btn-blue" onclick="checkParent()" id="btnParentOk">OK</button>
+      <button class="btn-cancel" onclick="closeParent()" id="btnParentCancel">Annuler</button>
+    </div>
+    <div class="parent-info" id="parentInfo">
+      <h3 id="txtPITitle">Informations pour les parents</h3>
+      <p id="txtPIContent"></p>
+    </div>
+  </div>
+</div>
+<div class="screen" id="gameScreen">
+  <div class="level-header">
+    <span class="level-badge" id="levelBadge">Niveau 1</span>
+    <span class="challenge-title" id="challengeTitle"></span>
+    <div class="stars-row" id="starsRow" aria-label="Etoiles"></div>
+  </div>
+  <div class="progress-bar-wrap" role="progressbar" aria-label="Progression" id="progressWrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="scene-wrap">
+    <svg id="sceneSVG" class="scene-svg" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div class="palette" id="machinePalette" role="group" aria-label="Choisir une machine"></div>
+  <button class="btn-action" id="btnAction" onclick="doAction()" disabled></button>
+  <div class="feedback-box" id="feedbackBox" role="status">
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-text" id="feedbackText"></div>
+  </div>
+</div>
+<div class="screen" id="successScreen">
+  <div class="success-stars" id="successStars" aria-label="Etoiles obtenues">&#11088;&#11088;&#11088;</div>
+  <h2 class="success-msg title-font" id="successMsg">Bravo !</h2>
+  <p class="success-sub" id="successSub"></p>
+  <div class="success-btns">
+    <button class="btn-play" onclick="nextLevel()" id="btnNext">Niveau suivant &#9654;</button>
+    <button class="btn-secondary" onclick="replayLevel()" id="btnReplay">&#128260; Rejouer</button>
+    <button class="btn-secondary" onclick="goHome()" id="btnHome">&#127968; Accueil</button>
+  </div>
+</div>
+<script>
+var T = {
+  fr: {
+    title: "Machines Simples",
+    subtitle: "Apprends les leviers, poulies, rampes et roues en resolvant de vrais defis de physique !",
+    play: "▶ Jouer",
+    parents: "👪 Pour les parents",
+    parentTitle: "Espace parents",
+    parentIntro: "Resoudre ce calcul pour continuer :",
+    parentOk: "OK",
+    parentCancel: "Annuler",
+    parentErr: "Mauvaise reponse, essaie encore.",
+    piTitle: "Informations pour les parents",
+    piContent: "Ce jeu gratuit, sans pub et sans collecte de donnees apprend a votre enfant (9-12 ans) les machines simples : levier, poulie, plan incline et roue/axe. Il decouvre comment ces outils reduisent l'effort necessaire pour deplacer des objets (physique des forces, avantage mecanique). Aucune donnee n'est transmise a des serveurs. La progression est stockee uniquement sur cet appareil.",
+    levelLabel: "Niveau",
+    btnAction: "Actionner la machine !",
+    btnCheck: "Verifier",
+    btnNext: "Niveau suivant ▶",
+    btnReplay: "🔄 Rejouer",
+    btnHome: "🏠 Accueil",
+    bravo: "Bravo !",
+    excellent: "Excellent !",
+    parfait: "Parfait !",
+    tryAgain: "Essaie encore !",
+    wrongMachine: "Ce n'est pas la bonne machine ici. Regarde bien la situation !",
+    machine_levier: "Levier",
+    machine_poulie: "Poulie",
+    machine_rampe: "Rampe",
+    machine_roue: "Roue & Axe",
+    effort: "effort",
+    levels: [
+      {id:"lever1", machine:"levier", title:"Le levier : souleve la caisse !",
+       scene:"lever", variant:1,
+       task:"Place le levier sous la lourde caisse pour la soulever facilement.",
+       explanation:"Le levier demultiplie ta force ! En appuyant loin du pivot, tu souleves des objets tres lourds avec peu d'effort."},
+      {id:"lever2", machine:"levier", title:"Levier en bascule",
+       scene:"lever", variant:2,
+       task:"Utilise le levier pour equilibrer les deux cotes.",
+       explanation:"Un levier equilibre ! La distance au pivot compte autant que la masse. C'est le principe de la balancoire."},
+      {id:"pulley1", machine:"poulie", title:"La poulie : hisse la boite !",
+       scene:"pulley", variant:1,
+       task:"Attache la poulie en haut et tire la corde pour monter la boite.",
+       explanation:"La poulie change la direction de ta force. Tirer vers le bas pour monter un objet, c'est beaucoup plus facile !"},
+      {id:"pulley2", machine:"poulie", title:"Double poulie - moitie d'effort !",
+       scene:"pulley", variant:2,
+       task:"Utilise deux poulies pour reduire l'effort de moitie.",
+       explanation:"Avec deux poulies, tu n'utilises que la moitie de ta force pour soulever le meme poids. C'est l'avantage mecanique !"},
+      {id:"ramp1", machine:"rampe", title:"La rampe : monte le rocher !",
+       scene:"ramp", variant:1,
+       task:"Installe la rampe pour faire monter le rocher dans le camion.",
+       explanation:"Pousser en montant une rampe douce demande moins d'effort que soulever a la verticale. La distance augmente, mais la force diminue !"},
+      {id:"ramp2", machine:"rampe", title:"Rampe plus douce, moins d'effort",
+       scene:"ramp", variant:2,
+       task:"Choisis la rampe la plus douce pour economiser encore plus d'effort.",
+       explanation:"Plus la rampe est longue et douce, moins il faut de force. C'est pourquoi les routes de montagne font des lacets !"},
+      {id:"wheel1", machine:"roue", title:"La roue : tourne le robinet !",
+       scene:"wheel", variant:1,
+       task:"Utilise une grande roue pour tourner facilement le robinet.",
+       explanation:"Une grande roue donne plus de force au centre. C'est le principe du volant de voiture ou du tournevis a grosse poignee !"},
+      {id:"choose1", machine:"poulie", title:"Choisis la bonne machine !",
+       scene:"choose", variant:1,
+       task:"Quelle machine faut-il utiliser pour hisser une caisse en haut d'un mur ?",
+       explanation:"La poulie ! Elle permet de monter des charges en tirant sur une corde, avec moins d'effort."},
+      {id:"choose2", machine:"rampe", title:"Quelle machine pour la boite ?",
+       scene:"choose", variant:2,
+       task:"Pour faire monter une lourde caisse dans un camion sans la soulever, quelle machine utilises-tu ?",
+       explanation:"La rampe (plan incline) ! Elle transforme un grand effort vertical en un effort plus petit sur une plus longue distance."},
+      {id:"combo1", machine:"combo", title:"Combinaison : rampe + levier",
+       scene:"combo", variant:1,
+       task:"Utilise la rampe pour monter la caisse, puis le levier pour la basculer en place.",
+       explanation:"Bravo ! Les machines simples se combinent pour accomplir des taches complexes. Les machines reelles utilisent toujours plusieurs machines simples ensemble."}
+    ]
+  },
+  en: {
+    title: "Simple Machines",
+    subtitle: "Learn levers, pulleys, ramps and wheels by solving real physics challenges!",
+    play: "▶ Play",
+    parents: "👪 For Parents",
+    parentTitle: "Parent Area",
+    parentIntro: "Solve this calculation to continue:",
+    parentOk: "OK",
+    parentCancel: "Cancel",
+    parentErr: "Wrong answer, try again.",
+    piTitle: "Information for Parents",
+    piContent: "This free, ad-free, data-free game teaches your child (ages 9-12) about simple machines: lever, pulley, inclined plane, and wheel & axle. They discover how these tools reduce the effort needed to move objects (forces physics, mechanical advantage). No data is sent to servers. Progress is stored only on this device.",
+    levelLabel: "Level",
+    btnAction: "Activate the machine!",
+    btnCheck: "Check",
+    btnNext: "Next Level ▶",
+    btnReplay: "🔄 Replay",
+    btnHome: "🏠 Home",
+    bravo: "Great job!",
+    excellent: "Excellent!",
+    parfait: "Perfect!",
+    tryAgain: "Try again!",
+    wrongMachine: "That's not the right machine here. Look carefully at the situation!",
+    machine_levier: "Lever",
+    machine_poulie: "Pulley",
+    machine_rampe: "Ramp",
+    machine_roue: "Wheel & Axle",
+    effort: "effort",
+    levels: [
+      {id:"lever1", machine:"levier", title:"The lever: lift the crate!",
+       scene:"lever", variant:1,
+       task:"Place the lever under the heavy crate to lift it easily.",
+       explanation:"The lever multiplies your force! Pushing far from the pivot lets you lift very heavy objects with little effort."},
+      {id:"lever2", machine:"levier", title:"Lever balance",
+       scene:"lever", variant:2,
+       task:"Use the lever to balance both sides.",
+       explanation:"A balanced lever! Distance from the pivot matters as much as mass. This is the principle behind a seesaw."},
+      {id:"pulley1", machine:"poulie", title:"The pulley: hoist the box!",
+       scene:"pulley", variant:1,
+       task:"Attach the pulley at the top and pull the rope to raise the box.",
+       explanation:"The pulley changes the direction of your force. Pulling down to raise an object is much easier!"},
+      {id:"pulley2", machine:"poulie", title:"Double pulley - half the effort!",
+       scene:"pulley", variant:2,
+       task:"Use two pulleys to cut the effort in half.",
+       explanation:"With two pulleys, you only need half the force to lift the same weight. That's mechanical advantage!"},
+      {id:"ramp1", machine:"rampe", title:"The ramp: roll the boulder!",
+       scene:"ramp", variant:1,
+       task:"Set up the ramp to roll the boulder into the truck.",
+       explanation:"Pushing up a gentle ramp takes less effort than lifting straight up. Distance increases, but force decreases!"},
+      {id:"ramp2", machine:"rampe", title:"Gentler ramp, less effort",
+       scene:"ramp", variant:2,
+       task:"Choose the gentler ramp to save even more effort.",
+       explanation:"The longer and gentler the ramp, the less force needed. That's why mountain roads zigzag!"},
+      {id:"wheel1", machine:"roue", title:"The wheel: turn the valve!",
+       scene:"wheel", variant:1,
+       task:"Use a big wheel to easily turn the valve.",
+       explanation:"A large wheel gives more force at the center. That's the principle of a car steering wheel or a thick-handled screwdriver!"},
+      {id:"choose1", machine:"poulie", title:"Choose the right machine!",
+       scene:"choose", variant:1,
+       task:"Which machine do you need to hoist a crate to the top of a wall?",
+       explanation:"The pulley! It lets you lift loads by pulling a rope, with less effort."},
+      {id:"choose2", machine:"rampe", title:"Which machine for the box?",
+       scene:"choose", variant:2,
+       task:"To load a heavy box into a truck without lifting it, which machine do you use?",
+       explanation:"The ramp (inclined plane)! It turns a large vertical effort into a smaller effort over a longer distance."},
+      {id:"combo1", machine:"combo", title:"Combo: ramp + lever",
+       scene:"combo", variant:1,
+       task:"Use the ramp to bring up the crate, then the lever to tip it into place.",
+       explanation:"Well done! Simple machines combine to accomplish complex tasks. Real machines always use several simple machines together."}
+    ]
+  }
+};
+
+var lang = (navigator.language||"fr").startsWith("fr") ? "fr" : "en";
+var muted = false;
+var currentLevel = 0;
+var selectedMachine = null;
+var actionDone = false;
+var animRunning = false;
+var parentA = 0, parentB = 0;
+var LS_KEY = "pgrg_machines_simples";
+
+function getSave(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){return {};} }
+function setSave(d){ try{localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){} }
+
+var audioCtx = null;
+function getAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playTone(freq,dur,type,vol){
+  if(muted) return;
+  type=type||"sine"; vol=vol||0.15;
+  try{
+    var ctx=getAudio();
+    var o=ctx.createOscillator();
+    var g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){ [523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.22,"triangle",.13);},i*100);}); }
+function playError(){ playTone(220,.28,"square",.09); }
+function playClick(){ playTone(660,.07,"sine",.09); }
+function playClink(){ playTone(880,.14,"triangle",.11); }
+function toggleMute(){ muted=!muted; document.getElementById("muteBtn").textContent=muted?"🔇":"🔊"; }
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById("btnFR").classList.toggle("active",l==="fr");
+  document.getElementById("btnEN").classList.toggle("active",l==="en");
+  renderUI();
+}
+function t(k){ return T[lang][k]||(T["fr"][k]||k); }
+
+function renderUI(){
+  document.getElementById("txtTitle").textContent=t("title");
+  document.getElementById("txtSubtitle").textContent=t("subtitle");
+  document.getElementById("btnPlay").textContent=t("play");
+  document.getElementById("btnParents").textContent=t("parents");
+  document.getElementById("parentModalTitle").textContent=t("parentTitle");
+  document.getElementById("txtParentIntro").textContent=t("parentIntro");
+  document.getElementById("btnParentOk").textContent=t("parentOk");
+  document.getElementById("btnParentCancel").textContent=t("parentCancel");
+  document.getElementById("txtPITitle").textContent=t("piTitle");
+  document.getElementById("txtPIContent").textContent=t("piContent");
+  document.getElementById("btnNext").textContent=t("btnNext");
+  document.getElementById("btnReplay").textContent=t("btnReplay");
+  document.getElementById("btnHome").textContent=t("btnHome");
+  if(document.getElementById("gameScreen").classList.contains("active")) renderLevel();
+}
+
+function showScreen(id){ document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");}); document.getElementById(id).classList.add("active"); }
+function goHome(){ showScreen("titleScreen"); }
+
+function openParent(){
+  parentA=Math.floor(Math.random()*9)+2; parentB=Math.floor(Math.random()*9)+2;
+  document.getElementById("parentQ").textContent=parentA+" x "+parentB+" = ?";
+  document.getElementById("parentAns").value="";
+  document.getElementById("parentError").textContent="";
+  document.getElementById("parentInfo").style.display="none";
+  document.getElementById("parentModal").classList.add("open");
+  setTimeout(function(){document.getElementById("parentAns").focus();},100);
+}
+function closeParent(){ document.getElementById("parentModal").classList.remove("open"); }
+function checkParent(){
+  var v=parseInt(document.getElementById("parentAns").value);
+  if(v===parentA*parentB){
+    document.getElementById("parentInfo").style.display="block";
+    document.getElementById("txtPIContent").textContent=t("piContent");
+    document.getElementById("txtPITitle").textContent=t("piTitle");
+    document.getElementById("parentError").textContent="";
+    playSuccess();
+  } else {
+    document.getElementById("parentError").textContent=t("parentErr");
+    playError();
+  }
+}
+document.getElementById("parentAns").addEventListener("keydown",function(e){if(e.key==="Enter")checkParent();});
+
+function startGame(){
+  playClick();
+  var save=getSave();
+  currentLevel=save.level||0;
+  if(currentLevel>=T[lang].levels.length) currentLevel=0;
+  showScreen("gameScreen");
+  renderLevel();
+}
+
+function getLevels(){ return T[lang].levels; }
+
+function renderLevel(){
+  var levels=getLevels();
+  if(currentLevel>=levels.length){ showSuccessEnd(); return; }
+  var lv=levels[currentLevel];
+  selectedMachine=null; actionDone=false; animRunning=false;
+  document.getElementById("levelBadge").textContent=t("levelLabel")+" "+(currentLevel+1)+"/"+levels.length;
+  document.getElementById("challengeTitle").textContent=lv.title;
+  var save=getSave();
+  var stars=save["stars_"+lv.id]||0;
+  var sh=""; for(var i=0;i<3;i++) sh+="<span>"+(i<stars?"⭐":"☆")+"</span>";
+  document.getElementById("starsRow").innerHTML=sh;
+  var pct=Math.round((currentLevel/levels.length)*100);
+  document.getElementById("progressFill").style.width=pct+"%";
+  drawScene(lv);
+  renderPalette(lv);
+  var btn=document.getElementById("btnAction");
+  btn.textContent=t("btnAction");
+  btn.disabled=true;
+  btn.onclick=doAction;
+  hideFeedback();
+  setAriaFeedback(lv.task);
+}
+
+function renderPalette(lv){
+  var pal=document.getElementById("machinePalette");
+  pal.innerHTML="";
+  var machines;
+  if(lv.machine==="combo"){
+    machines=["levier","poulie","rampe","roue"];
+  } else if(lv.machine==="poulie"||lv.machine==="rampe"||lv.machine==="roue"||lv.machine==="levier"){
+    var all=["levier","poulie","rampe","roue"];
+    var distractors=all.filter(function(m){return m!==lv.machine;});
+    var d=shuffle(distractors).slice(0,2);
+    machines=shuffle([lv.machine].concat(d));
+  } else {
+    machines=["levier","poulie","rampe","roue"];
+  }
+  var icons={levier:"⚖️",poulie:"🪝",rampe:"📐",roue:"⚙️"};
+  machines.forEach(function(m){
+    var card=document.createElement("div");
+    card.className="machine-card";
+    card.setAttribute("role","button");
+    card.setAttribute("tabindex","0");
+    card.setAttribute("aria-pressed","false");
+    card.setAttribute("aria-label",t("machine_"+m));
+    card.innerHTML='<span class="machine-icon">'+icons[m]+'</span><span class="machine-name">'+t("machine_"+m)+'</span>';
+    card.onclick=function(){selectMachine(m,card,lv);};
+    card.onkeydown=function(e){if(e.key===" "||e.key==="Enter")selectMachine(m,card,lv);};
+    pal.appendChild(card);
+  });
+}
+
+function selectMachine(m,cardEl,lv){
+  if(actionDone) return;
+  playClick();
+  selectedMachine=m;
+  document.querySelectorAll(".machine-card").forEach(function(c){c.classList.remove("selected");c.setAttribute("aria-pressed","false");});
+  cardEl.classList.add("selected"); cardEl.setAttribute("aria-pressed","true");
+  cardEl.classList.add("pop"); setTimeout(function(){cardEl.classList.remove("pop");},350);
+  var btn=document.getElementById("btnAction");
+  btn.disabled=false; btn.textContent=t("btnAction");
+  hideFeedback();
+}
+
+function doAction(){
+  if(animRunning||!selectedMachine) return;
+  var levels=getLevels(); var lv=levels[currentLevel];
+  var correct=isCorrect(lv,selectedMachine);
+  if(correct){
+    animRunning=true; actionDone=true; playSuccess();
+    runAnimation(lv,function(){
+      var save=getSave();
+      var prev=save["stars_"+lv.id]||0;
+      save["stars_"+lv.id]=Math.max(prev,3);
+      save.level=Math.max(save.level||0,currentLevel+1);
+      setSave(save);
+      showFeedback(true,getSuccessTitle(),lv.explanation);
+      setAriaFeedback(lv.explanation);
+      updateStarsDisplay(3);
+      var btn=document.getElementById("btnAction");
+      btn.disabled=false;
+      btn.textContent="→ "+t("btnNext");
+      btn.onclick=nextLevel;
+      animRunning=false;
+    });
+  } else {
+    playError();
+    showFeedback(false,t("tryAgain"),t("wrongMachine"));
+    setAriaFeedback(t("wrongMachine"));
+    highlightCorrect(lv);
+  }
+}
+
+function isCorrect(lv,m){
+  if(lv.machine==="combo") return m==="levier"||m==="rampe";
+  return m===lv.machine;
+}
+
+function highlightCorrect(lv){
+  var correct=lv.machine==="combo"?"levier":lv.machine;
+  var label=t("machine_"+correct);
+  document.querySelectorAll(".machine-card").forEach(function(c){
+    if(c.querySelector(".machine-name")&&c.querySelector(".machine-name").textContent===label){
+      c.classList.add("correct-flash");
+      setTimeout(function(){c.classList.remove("correct-flash");},1200);
+    }
+  });
+}
+
+function getSuccessTitle(){
+  var msgs=[t("bravo"),t("excellent"),t("parfait")];
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+function updateStarsDisplay(n){
+  var html=""; for(var i=0;i<3;i++) html+="<span>"+(i<n?"⭐":"☆")+"</span>";
+  document.getElementById("starsRow").innerHTML=html;
+}
+
+function showFeedback(ok,title,text){
+  var box=document.getElementById("feedbackBox");
+  box.style.display="block";
+  box.classList.toggle("error-fb",!ok);
+  box.classList.add("visible","slide-up");
+  document.getElementById("feedbackTitle").textContent=title;
+  document.getElementById("feedbackText").textContent=text;
+}
+function hideFeedback(){
+  var box=document.getElementById("feedbackBox");
+  box.style.display="none";
+  box.classList.remove("visible","error-fb","slide-up");
+}
+function setAriaFeedback(msg){ document.getElementById("ariaFeedback").textContent=msg; }
+
+function nextLevel(){
+  playClick();
+  var levels=getLevels();
+  if(currentLevel>=levels.length-1){ showSuccessEnd(); return; }
+  currentLevel++;
+  var save=getSave(); save.level=Math.max(save.level||0,currentLevel); setSave(save);
+  renderLevel();
+}
+function replayLevel(){ playClick(); renderLevel(); }
+
+function showSuccessEnd(){
+  var save=getSave(); var total=0; var max=0;
+  getLevels().forEach(function(lv){total+=(save["stars_"+lv.id]||0);max+=3;});
+  var pct=Math.round((total/max)*100);
+  document.getElementById("successStars").textContent=total>=max?"⭐⭐⭐":total>=max*0.6?"⭐⭐":"⭐";
+  document.getElementById("successMsg").textContent=lang==="fr"?"Tu as tout termine ! 🎉":"You finished everything! 🎉";
+  document.getElementById("successSub").textContent=(lang==="fr"?"Score : "+total+"/"+max+" etoiles ("+pct+"%). Tu connais maintenant les 4 machines simples : levier, poulie, rampe et roue. Les ingenieurs les utilisent dans toutes les machines du monde !":"Score: "+total+"/"+max+" stars ("+pct+"%). You now know the 4 simple machines: lever, pulley, ramp, and wheel. Engineers use them in every machine in the world!");
+  showScreen("successScreen"); playSuccess();
+  var s2=getSave(); s2.level=0; setSave(s2);
+}
+
+/* SVG HELPERS */
+function ns(tag){ return document.createElementNS("http://www.w3.org/2000/svg",tag); }
+function addRect(svg,x,y,w,h,fill,extra){
+  var r=ns("rect"); r.setAttribute("x",x); r.setAttribute("y",y); r.setAttribute("width",w); r.setAttribute("height",h); r.setAttribute("fill",fill);
+  if(extra){Object.keys(extra).forEach(function(k){r.setAttribute(k,extra[k]);});} svg.appendChild(r); return r;
+}
+function addCircle(svg,cx,cy,r,fill){
+  var c=ns("circle"); c.setAttribute("cx",cx); c.setAttribute("cy",cy); c.setAttribute("r",r); c.setAttribute("fill",fill); svg.appendChild(c); return c;
+}
+function addLine(svg,x1,y1,x2,y2,stroke,sw){
+  var l=ns("line"); l.setAttribute("x1",x1); l.setAttribute("y1",y1); l.setAttribute("x2",x2); l.setAttribute("y2",y2); l.setAttribute("stroke",stroke); l.setAttribute("stroke-width",sw||2); l.setAttribute("stroke-linecap","round"); svg.appendChild(l); return l;
+}
+function addText(svg,x,y,text,size,fill){
+  var t=ns("text"); t.setAttribute("x",x); t.setAttribute("y",y); t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
+  t.setAttribute("font-size",size||16); t.setAttribute("font-family","Nunito,system-ui,sans-serif");
+  if(fill) t.setAttribute("fill",fill); t.textContent=text; svg.appendChild(t); return t;
+}
+function addPoly(svg,points,fill,opacity){
+  var p=ns("polygon"); p.setAttribute("points",points); p.setAttribute("fill",fill); if(opacity) p.setAttribute("opacity",opacity); svg.appendChild(p); return p;
+}
+function drawArrow(svg,x1,y1,x2,y2,color,label){
+  addLine(svg,x1,y1,x2,y2,color,2.5);
+  var angle=Math.atan2(y2-y1,x2-x1); var ah=12;
+  var ax1=x2-ah*Math.cos(angle-0.4); var ay1=y2-ah*Math.sin(angle-0.4);
+  var ax2=x2-ah*Math.cos(angle+0.4); var ay2=y2-ah*Math.sin(angle+0.4);
+  var arr=ns("polygon"); arr.setAttribute("points",x2+","+y2+" "+ax1+","+ay1+" "+ax2+","+ay2); arr.setAttribute("fill",color); svg.appendChild(arr);
+  if(label) addText(svg,(x1+x2)/2,(y1+y2)/2-12,label,12,color);
+}
+function drawGround(svg){ addRect(svg,0,280,680,60,"#8B6E4E"); addRect(svg,0,270,680,14,"#A0845C"); }
+function drawTaskText(svg){
+  var levels=getLevels(); var lv=levels[currentLevel];
+  var txt=ns("text"); txt.setAttribute("x","340"); txt.setAttribute("y","326"); txt.setAttribute("text-anchor","middle");
+  txt.setAttribute("font-size","13"); txt.setAttribute("fill","#475569"); txt.setAttribute("font-family","Nunito,system-ui,sans-serif");
+  txt.textContent=lv?lv.task:""; svg.appendChild(txt);
+}
+function drawPerson(svg,x,y,emoji){
+  addCircle(svg,x,y-30,16,"#ffd23f");
+  addText(svg,x,y-30,emoji||"🙂",16);
+  addRect(svg,x-11,y-14,22,28,"#0f4c81",{rx:5});
+  addLine(svg,x-11,y-10,x-24,y+4,"#0f4c81",4);
+  addLine(svg,x+11,y-10,x+24,y+4,"#0f4c81",4);
+  addRect(svg,x-8,y+14,8,20,"#ffd23f",{rx:4});
+  addRect(svg,x,y+14,8,20,"#ffd23f",{rx:4});
+}
+
+/* SCENE DRAWING */
+function drawScene(lv){
+  var svg=document.getElementById("sceneSVG"); svg.innerHTML="";
+  if(lv.scene==="lever") drawLeverScene(svg,lv.variant,false);
+  else if(lv.scene==="pulley") drawPulleyScene(svg,lv.variant,false);
+  else if(lv.scene==="ramp") drawRampScene(svg,lv.variant,false);
+  else if(lv.scene==="wheel") drawWheelScene(svg,lv.variant,false);
+  else if(lv.scene==="choose") drawChooseScene(svg,lv.variant,false);
+  else if(lv.scene==="combo") drawComboScene(svg,lv.variant,false);
+  drawTaskText(svg);
+}
+
+function drawLeverScene(svg,variant,animated){
+  drawGround(svg);
+  addPoly(svg,"340,270 308,312 372,312","#0f4c81");
+  if(variant===1){
+    var crateY=animated?212:244;
+    addRect(svg,158,crateY,76,56,"#f97316",{rx:8});
+    addText(svg,196,crateY+28,"📦",26);
+    if(!animated){
+      var lev=ns("rect"); lev.setAttribute("x","128"); lev.setAttribute("y","263"); lev.setAttribute("width","424"); lev.setAttribute("height","12"); lev.setAttribute("rx","4"); lev.setAttribute("fill","#7ec3ee"); svg.appendChild(lev);
+      drawArrow(svg,480,222,480,260,"#34c77b",lang==="fr"?"Force":"Force");
+    } else {
+      var lev2=ns("rect"); lev2.setAttribute("x","128"); lev2.setAttribute("y","262"); lev2.setAttribute("width","424"); lev2.setAttribute("height","12"); lev2.setAttribute("rx","4"); lev2.setAttribute("fill","#7ec3ee"); lev2.setAttribute("transform","rotate(-10 340 270)"); svg.appendChild(lev2);
+      addText(svg,480,196,"✅",28);
+      addText(svg,480,225,lang==="fr"?"Facile !":"Easy!",14,"#34c77b");
+    }
+  } else {
+    var lev3=ns("rect"); lev3.setAttribute("x","128"); lev3.setAttribute("y","262"); lev3.setAttribute("width","424"); lev3.setAttribute("height","12"); lev3.setAttribute("rx","4"); lev3.setAttribute("fill","#7ec3ee"); svg.appendChild(lev3);
+    addRect(svg,178,218,62,46,"#f97316",{rx:8});
+    addText(svg,209,242,"⚖",22,"#0f172a");
+    addRect(svg,440,234,54,30,"#ffd23f",{rx:8});
+    addText(svg,467,250,"💰",18);
+    if(animated){ addText(svg,340,196,"✅ "+(lang==="fr"?"Equilibre !":"Balanced!"),16,"#34c77b"); }
+    else { addText(svg,340,220,"?",28,"#0f4c81"); }
+  }
+}
+
+function drawPulleyScene(svg,variant,animated){
+  drawGround(svg);
+  addRect(svg,100,38,480,18,"#7ec3ee",{rx:4});
+  if(variant===1){
+    addCircle(svg,340,68,22,"#0f4c81"); addCircle(svg,340,68,14,"#eaf6ff");
+    addLine(svg,340,90,260,250,"#ffd23f",3);
+    addLine(svg,340,90,410,180,"#ffd23f",3);
+    var bY=animated?155:244;
+    addRect(svg,220,bY,80,58,"#f97316",{rx:8}); addText(svg,260,bY+29,"📦",24);
+    drawPerson(svg,440,animated?196:248,animated?"💪":"🙂");
+    if(animated) addText(svg,440,160,lang==="fr"?"Moins d'effort !":"Less effort!",13,"#34c77b");
+  } else {
+    addCircle(svg,300,68,22,"#0f4c81"); addCircle(svg,300,68,14,"#eaf6ff");
+    addCircle(svg,390,118,18,"#0f4c81"); addCircle(svg,390,118,11,"#eaf6ff");
+    addLine(svg,300,90,300,220,"#ffd23f",3);
+    addLine(svg,390,136,390,220,"#ffd23f",3);
+    addLine(svg,300,90,390,136,"#ffd23f",3);
+    var bY2=animated?138:220;
+    addRect(svg,260,bY2,80,58,"#f97316",{rx:8}); addText(svg,300,bY2+29,"📦",24);
+    if(animated){ addText(svg,466,160,"½ "+(lang==="fr"?"effort !":"effort!"),14,"#34c77b"); drawPerson(svg,466,194,"😄"); }
+    else { drawPerson(svg,466,232,"🤔"); }
+  }
+}
+
+function drawRampScene(svg,variant,animated){
+  drawGround(svg);
+  addRect(svg,430,188,200,84,"#475569",{rx:10});
+  addRect(svg,500,163,130,30,"#7ec3ee",{rx:6});
+  addCircle(svg,465,278,22,"#222"); addCircle(svg,465,278,12,"#888");
+  addCircle(svg,590,278,22,"#222"); addCircle(svg,590,278,12,"#888");
+  addText(svg,500,232,"🚛",32);
+  if(variant===1){
+    addPoly(svg,"168,270 430,188 430,270","#7ec3ee","0.8");
+    var bX=animated?390:220; var bY=animated?200:256;
+    addCircle(svg,bX,bY,26,"#8B6E4E");
+    addText(svg,bX,bY+2,"🪨",22);
+    if(animated){ addText(svg,300,165,lang==="fr"?"Avec rampe = facile !":"With ramp = easy!",14,"#34c77b"); }
+    else { drawArrow(svg,260,240,380,210,"#0f4c81",""); }
+  } else {
+    addPoly(svg,"300,270 430,188 430,270","#f97316","0.5");
+    addPoly(svg,"80,270 430,188 430,270","#34c77b","0.7");
+    addText(svg,370,248,"❌",17);
+    addText(svg,200,248,animated?"✅":"🟢",17);
+    addText(svg,200,222,lang==="fr"?"Rampe douce":"Gentle ramp",12,"#0f4c81");
+    addText(svg,370,222,lang==="fr"?"Trop raide":"Too steep",12,"#e53e3e");
+    if(animated){
+      addCircle(svg,280,218,22,"#8B6E4E"); addText(svg,280,218+2,"🪨",18);
+      addText(svg,230,170,lang==="fr"?"Moins d'effort !":"Less effort!",14,"#34c77b");
+    }
+  }
+}
+
+function drawWheelScene(svg,variant,animated){
+  drawGround(svg);
+  addRect(svg,308,100,64,170,"#475569",{rx:8});
+  var r=animated?54:28;
+  addCircle(svg,340,140,r,"#0f4c81"); addCircle(svg,340,140,r-10,"#7ec3ee");
+  for(var i=0;i<8;i++){
+    var ang=(i/8)*Math.PI*2+(animated?0.5:0);
+    addLine(svg,340,140,340+r*Math.cos(ang),140+r*Math.sin(ang),"#0f4c81",2.5);
+  }
+  addText(svg,340,174,"🚰",28);
+  if(animated){
+    addText(svg,340,58,lang==="fr"?"Facile a tourner !":"Easy to turn!",15,"#34c77b");
+    addText(svg,500,200,"✅",26);
+    drawArrow(svg,208,140,278,140,"#34c77b","←");
+    drawArrow(svg,472,140,402,140,"#34c77b","→");
+  } else {
+    addText(svg,500,200,"💪",26);
+    addText(svg,500,228,lang==="fr"?"Difficile":"Hard",13,"#e53e3e");
+  }
+}
+
+function drawChooseScene(svg,variant,animated){
+  drawGround(svg);
+  if(variant===1){
+    addRect(svg,278,40,124,232,"#d1e4f6",{rx:4});
+    addRect(svg,160,210,80,62,"#f97316",{rx:8}); addText(svg,200,248,"📦",26);
+    addText(svg,340,158,"?",36,"#0f4c81");
+    addText(svg,340,118,lang==="fr"?"Hisser en haut":"Hoist to top",14,"#0f4c81");
+    if(animated){
+      addCircle(svg,340,58,22,"#0f4c81"); addCircle(svg,340,58,14,"#eaf6ff");
+      addLine(svg,340,80,260,200,"#ffd23f",3);
+      addText(svg,200,180,"✅",22);
+    }
+  } else {
+    addRect(svg,430,188,200,84,"#475569",{rx:10}); addCircle(svg,465,278,22,"#222"); addCircle(svg,590,278,22,"#222");
+    addText(svg,500,234,"🚛",32);
+    addRect(svg,160,218,80,54,"#f97316",{rx:8}); addText(svg,200,252,"📦",24);
+    addText(svg,310,228,"?",36,"#0f4c81");
+    addText(svg,310,198,lang==="fr"?"Charger":"Load it",14,"#0f4c81");
+    if(animated){
+      addPoly(svg,"168,270 430,188 430,270","#34c77b","0.75");
+      addCircle(svg,370,208,20,"#f97316"); addText(svg,370,208+2,"📦",16);
+      addText(svg,280,165,lang==="fr"?"Avec rampe !":"With ramp!",14,"#34c77b");
+    }
+  }
+}
+
+function drawComboScene(svg,variant,animated){
+  drawGround(svg);
+  addRect(svg,430,138,152,134,"#7ec3ee",{rx:8});
+  addPoly(svg,"100,270 430,138 430,270","#34c77b","0.65");
+  if(animated){
+    addText(svg,340,78,lang==="fr"?"Combo parfait !":"Perfect combo!",16,"#34c77b");
+    addText(svg,505,200,"✅",30);
+    var lev=ns("rect"); lev.setAttribute("x","430"); lev.setAttribute("y","124"); lev.setAttribute("width","130"); lev.setAttribute("height","10"); lev.setAttribute("rx","4"); lev.setAttribute("fill","#7ec3ee"); lev.setAttribute("transform","rotate(-15 495 138)"); svg.appendChild(lev);
+    addText(svg,340,210,"⚖️",30);
+  } else {
+    addText(svg,505,196,"📦",32);
+    addText(svg,310,200,"⚖️",32);
+    addText(svg,320,176,lang==="fr"?"+ levier":"+ lever",14,"#0f4c81");
+  }
+}
+
+/* ANIMATION */
+function runAnimation(lv,cb){
+  if(lv.scene==="lever") animScene(function(svg){drawLeverScene(svg,lv.variant,true);},cb);
+  else if(lv.scene==="pulley") animScene(function(svg){drawPulleyScene(svg,lv.variant,true);},cb);
+  else if(lv.scene==="ramp") animScene(function(svg){drawRampScene(svg,lv.variant,true);},cb);
+  else if(lv.scene==="wheel") animScene(function(svg){drawWheelScene(svg,lv.variant,true);},cb);
+  else if(lv.scene==="choose") animScene(function(svg){drawChooseScene(svg,lv.variant,true);},cb);
+  else if(lv.scene==="combo") animScene(function(svg){drawComboScene(svg,lv.variant,true);},cb);
+  else cb();
+}
+function animScene(drawFn,cb){
+  var svg=document.getElementById("sceneSVG"); svg.innerHTML="";
+  drawFn(svg); drawTaskText(svg); playClink();
+  setTimeout(cb,1000);
+}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+  return a;
+}
+
+document.addEventListener("keydown",function(e){ if(e.key==="Enter"&&document.activeElement&&document.activeElement.classList.contains("machine-card")) document.activeElement.click(); });
+
+renderUI();
+</script>
+</body>
+</html>

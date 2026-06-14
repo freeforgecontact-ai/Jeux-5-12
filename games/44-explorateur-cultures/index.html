@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Explorateur des Cultures / Culture Explorer — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--sky-light) 0%,#d0eeff 100%);
+  min-height:100vh;
+  color:var(--navy);
+  overflow-x:hidden;
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.25);}
+#topbar .brand{display:flex;align-items:center;gap:10px;}
+#topbar .brand .brand-text{font-family:'Fredoka','Nunito',sans-serif;font-size:1.1rem;font-weight:700;line-height:1.1;}
+#topbar .brand .brand-text span{color:var(--gold);}
+.top-btns{display:flex;gap:6px;align-items:center;}
+.lang-btn{background:#fff2;border:2px solid #fff4;color:#fff;padding:5px 12px;border-radius:20px;cursor:pointer;font-size:.85rem;font-weight:700;transition:.2s;}
+.lang-btn.active,.lang-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+.mute-btn{background:none;border:2px solid #fff4;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:1.3rem;color:#fff;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.mute-btn:hover{background:#fff3;}
+.screen{display:none;padding:20px 14px 30px;max-width:700px;margin:0 auto;}
+.screen.active{display:block;}
+#screen-title{text-align:center;}
+.mascot-wrap{margin:20px auto 10px;display:flex;justify-content:center;}
+.game-title{font-size:2.2rem;color:var(--blue);text-shadow:0 2px 0 var(--sky);}
+.game-sub{font-size:1.05rem;color:var(--slate);margin:6px 0 22px;}
+.btn-play{background:var(--orange);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1.5rem;padding:16px 50px;border-radius:50px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:.15s;display:inline-block;margin-bottom:16px;}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{background:none;border:2px solid var(--slate);color:var(--slate);padding:8px 22px;border-radius:20px;cursor:pointer;font-size:.9rem;transition:.2s;margin-top:6px;}
+.btn-parents:hover{background:var(--slate);color:#fff;}
+#screen-levels{text-align:center;}
+.level-title{font-size:1.6rem;color:var(--blue);margin-bottom:6px;}
+.level-sub{color:var(--slate);margin-bottom:22px;}
+.level-cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:10px;}
+.level-card{background:#fff;border-radius:20px;padding:20px 24px;box-shadow:0 4px 16px rgba(15,76,129,.13);cursor:pointer;transition:.2s;min-width:180px;border:3px solid transparent;text-align:center;}
+.level-card:hover{transform:translateY(-4px);border-color:var(--orange);box-shadow:0 8px 24px rgba(249,115,22,.2);}
+.level-card .lc-icon{font-size:2.8rem;margin-bottom:8px;}
+.level-card .lc-name{font-family:'Fredoka','Nunito',sans-serif;font-size:1.15rem;color:var(--blue);font-weight:700;}
+.level-card .lc-desc{font-size:.82rem;color:var(--slate);margin-top:4px;}
+.level-card .lc-stars{color:var(--gold);font-size:1.1rem;margin-top:6px;}
+#screen-game{text-align:center;}
+.progress-bar-wrap{background:#d0eeff;border-radius:20px;height:14px;margin:0 0 18px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:20px;transition:width .5s;}
+.question-header{font-size:1.25rem;color:var(--blue);margin-bottom:6px;font-family:'Fredoka','Nunito',sans-serif;}
+.question-sub{font-size:.9rem;color:var(--slate);margin-bottom:18px;}
+.discover-card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 4px 20px rgba(15,76,129,.12);margin-bottom:20px;text-align:center;}
+.discover-emoji{font-size:4rem;margin-bottom:8px;display:block;}
+.discover-name{font-size:1.4rem;font-weight:700;color:var(--navy);}
+.discover-country{font-size:1rem;color:var(--blue);margin:4px 0;}
+.discover-desc{font-size:.9rem;color:var(--slate);line-height:1.5;margin-top:8px;}
+.btn-next{background:var(--blue);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1.1rem;padding:13px 36px;border-radius:40px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:.15s;margin-top:10px;}
+.btn-next:hover{transform:translateY(-2px);}
+.btn-next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.assoc-question{background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 3px 14px rgba(15,76,129,.1);}
+.assoc-item-big{font-size:3rem;display:block;margin-bottom:6px;}
+.assoc-label{font-size:1.1rem;color:var(--navy);font-weight:700;}
+.choices-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px;}
+.choice-btn{background:#fff;border:3px solid var(--sky);color:var(--navy);border-radius:16px;padding:14px 10px;cursor:pointer;font-size:.92rem;font-weight:700;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:80px;justify-content:center;}
+.choice-btn .c-flag{font-size:1.8rem;}
+.choice-btn:hover{border-color:var(--orange);background:#fff7f0;}
+.choice-btn.correct{border-color:var(--success);background:#eefff6;color:#1a7a4a;}
+.choice-btn.wrong{border-color:#e53e3e;background:#fff0f0;color:#9b2020;}
+.choice-btn:disabled{cursor:default;}
+.quiz-q{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 3px 14px rgba(15,76,129,.1);font-size:1.1rem;color:var(--navy);font-weight:700;}
+.quiz-emoji{font-size:3.5rem;display:block;margin-bottom:8px;}
+.quiz-choices{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.quiz-btn{background:#fff;border:3px solid var(--sky);color:var(--navy);border-radius:14px;padding:13px 16px;cursor:pointer;font-size:.97rem;font-weight:700;transition:.2s;text-align:left;display:flex;align-items:center;gap:10px;}
+.quiz-btn:hover{border-color:var(--orange);background:#fff7f0;}
+.quiz-btn.correct{border-color:var(--success);background:#eefff6;color:#1a7a4a;}
+.quiz-btn.wrong{border-color:#e53e3e;background:#fff0f0;color:#9b2020;}
+.quiz-btn:disabled{cursor:default;}
+.feedback-banner{padding:12px 20px;border-radius:14px;font-weight:700;font-size:1rem;margin-bottom:14px;transition:all .3s;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.feedback-banner.correct{background:#eefff6;color:#1a7a4a;border:2px solid var(--success);}
+.feedback-banner.wrong{background:#fff0f0;color:#9b2020;border:2px solid #e53e3e;}
+.feedback-banner.hidden{visibility:hidden;}
+#aria-live{position:absolute;left:-9999px;}
+.score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:.9rem;color:var(--slate);}
+.score-row .score-val{color:var(--orange);font-weight:700;font-size:1.05rem;}
+#screen-success{text-align:center;}
+.success-title{font-size:2rem;color:var(--blue);margin:10px 0;}
+.stars-row{font-size:3rem;margin:12px 0;}
+.success-msg{font-size:1rem;color:var(--slate);margin-bottom:22px;}
+.success-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+.btn-secondary{background:var(--blue);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1rem;padding:12px 28px;border-radius:30px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:.15s;}
+.btn-secondary:hover{transform:translateY(-2px);}
+#screen-parents{text-align:center;}
+.parents-box{background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 4px 18px rgba(15,76,129,.1);max-width:500px;margin:0 auto;}
+.parents-title{font-size:1.5rem;color:var(--blue);margin-bottom:14px;}
+.parents-math{font-size:1.2rem;margin:16px 0 8px;color:var(--navy);}
+.parents-input{border:3px solid var(--sky);border-radius:12px;padding:10px 16px;font-size:1.2rem;width:120px;text-align:center;outline:none;font-family:inherit;}
+.parents-input:focus{border-color:var(--orange);}
+.parents-error{color:#c0392b;font-size:.9rem;margin-top:6px;min-height:20px;}
+.parents-info{text-align:left;margin-top:18px;font-size:.93rem;color:var(--slate);line-height:1.7;}
+.parents-info strong{color:var(--blue);}
+.btn-back{background:var(--slate);color:#fff;border:none;font-family:'Fredoka','Nunito',sans-serif;font-size:1rem;padding:11px 28px;border-radius:30px;cursor:pointer;margin-top:18px;transition:.2s;box-shadow:0 3px 0 #2d3748;}
+.btn-back:hover{opacity:.9;}
+@media(max-width:480px){.choices-grid{grid-template-columns:1fr 1fr;}.game-title{font-size:1.6rem;}.discover-emoji{font-size:3rem;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <div class="brand-text">PGRG <span>IA</span></div>
+  </div>
+  <div class="top-btns">
+    <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="mute-btn" id="btn-mute" onclick="toggleMute()" title="Son/Mute">🔊</button>
+  </div>
+</div>
+<div aria-live="polite" id="aria-live"></div>
+
+<div class="screen active" id="screen-title">
+  <div class="mascot-wrap">
+    <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mascotte explorateur globe">
+      <circle cx="80" cy="95" r="58" fill="#7ec3ee" stroke="#0f4c81" stroke-width="3"/>
+      <ellipse cx="62" cy="85" rx="17" ry="21" fill="#34c77b" opacity=".85"/>
+      <ellipse cx="97" cy="79" rx="20" ry="16" fill="#34c77b" opacity=".85"/>
+      <ellipse cx="88" cy="108" rx="13" ry="11" fill="#f97316" opacity=".75"/>
+      <ellipse cx="55" cy="114" rx="9" ry="7" fill="#ffd23f" opacity=".8"/>
+      <path d="M24 95 Q80 83 136 95" stroke="#0f4c81" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M29 115 Q80 103 131 115" stroke="#0f4c81" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M29 75 Q80 63 131 75" stroke="#0f4c81" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M80 37 Q100 66 100 95 Q100 124 80 153" stroke="#0f4c81" stroke-width="1.5" fill="none" opacity=".4"/>
+      <circle cx="80" cy="95" r="58" fill="none" stroke="#0f4c81" stroke-width="3"/>
+      <ellipse cx="80" cy="40" rx="35" ry="9" fill="#f97316"/>
+      <rect x="57" y="31" width="46" height="21" rx="8" fill="#ea580c"/>
+      <rect x="65" y="27" width="30" height="7" rx="4" fill="#ffd23f"/>
+      <circle cx="80" cy="53" r="21" fill="#ffd23f" stroke="#ea580c" stroke-width="2"/>
+      <circle cx="73" cy="50" r="3" fill="#0f172a"/>
+      <circle cx="87" cy="50" r="3" fill="#0f172a"/>
+      <circle cx="74" cy="49" r="1" fill="#fff"/>
+      <circle cx="88" cy="49" r="1" fill="#fff"/>
+      <path d="M73 60 Q80 67 87 60" stroke="#ea580c" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="108" cy="145" r="9" fill="none" stroke="#0f4c81" stroke-width="3"/>
+      <circle cx="108" cy="145" r="6" fill="#eaf6ff" opacity=".6"/>
+      <line x1="115" y1="152" x2="122" y2="159" stroke="#0f4c81" stroke-width="3" stroke-linecap="round"/>
+      <path d="M99 143 Q92 131 87 122" stroke="#ffd23f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 class="game-title title-font" id="t-main-title"></h1>
+  <p class="game-sub" id="t-main-sub"></p>
+  <br>
+  <button class="btn-play" onclick="showLevels()" id="t-btn-play"></button>
+  <br><br>
+  <button class="btn-parents" onclick="showParents()" id="t-btn-parents"></button>
+</div>
+
+<div class="screen" id="screen-levels">
+  <h2 class="level-title title-font" id="t-levels-title"></h2>
+  <p class="level-sub" id="t-levels-sub"></p>
+  <div class="level-cards" id="level-cards-container"></div>
+</div>
+
+<div class="screen" id="screen-game">
+  <div class="score-row">
+    <span id="t-score-label"></span>
+    <span class="score-val" id="score-display">0</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+  <div class="question-header title-font" id="question-header"></div>
+  <div class="question-sub" id="question-sub"></div>
+  <div class="feedback-banner hidden" id="feedback-banner" role="status"></div>
+  <div id="game-area"></div>
+</div>
+
+<div class="screen" id="screen-success">
+  <div class="stars-row" id="success-stars">⭐⭐⭐</div>
+  <h2 class="success-title title-font" id="t-success-title"></h2>
+  <p class="success-msg" id="t-success-msg"></p>
+  <div class="success-btns">
+    <button class="btn-play" onclick="replayLevel()" id="t-btn-replay"></button>
+    <button class="btn-secondary" onclick="showLevels()" id="t-btn-home"></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-parents">
+  <div class="parents-box">
+    <h2 class="parents-title title-font" id="t-parents-title"></h2>
+    <p id="t-parents-intro"></p>
+    <p class="parents-math" id="parents-math-q"></p>
+    <input class="parents-input" type="number" id="parents-math-input" min="0" max="200" placeholder="?">
+    <p class="parents-error" id="parents-error"></p>
+    <div id="parents-info-section" style="display:none">
+      <div class="parents-info" id="t-parents-info"></div>
+    </div>
+    <br>
+    <button class="btn-back" onclick="showTitle()" id="t-btn-back"></button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    mainTitle:"Explorateur des Cultures",
+    mainSub:"Voyage autour du monde et decouvre les richesses de chaque culture !",
+    btnPlay:"Jouer !",
+    btnParents:"Pour les parents",
+    levelsTitle:"Choisis ta mission !",
+    levelsSub:"3 facons de voyager autour du monde",
+    levels:[
+      {name:"Decouverte",desc:"Explore les cultures du monde",icon:"🌍",mode:"discover"},
+      {name:"Associations",desc:"Relie chaque element a son pays",icon:"🔗",mode:"assoc"},
+      {name:"Quiz",desc:"Teste tes connaissances !",icon:"🧠",mode:"quiz"}
+    ],
+    scoreLabel:"Points :",
+    btnNext:"Suivant",
+    btnNextDiscover:"Decouvrir",
+    feedCorrect:["Bravo ! 🎉","Super ! 🌟","Excellent ! ✨","Fantastique ! 🎊","Parfait ! 💫"],
+    feedWrong:["Pas tout a fait... essaie encore !","Oups ! Mais tu apprends !","Presque ! Continue !"],
+    successTitle:"Mission accomplie !",
+    successMsg:"Tu es un vrai explorateur des cultures !",
+    btnReplay:"Rejouer",
+    btnHome:"Choisir un niveau",
+    parentsTitle:"Porte parentale",
+    parentsIntro:"Resous ce calcul pour acceder aux infos parents :",
+    parentsInfo:"<strong>Competence visee :</strong> Ouverture sur le monde, decouverte des cultures, respect de la diversite.<br><br><strong>Contenu :</strong> Plats typiques, fetes et celebrations, instruments de musique, salutations — presentes de facon positive et respectueuse, sans stereotype caricatural.<br><br><strong>Donnees :</strong> Aucune collecte, aucun compte, aucune publicite. La progression est sauvegardee uniquement sur cet appareil.<br><br><strong>Public :</strong> 7-12 ans. Bilingue francais/anglais. Utilisable 100% hors-ligne.",
+    btnBack:"Retour",
+    parentsError:"Ce n'est pas le bon resultat, reessaie !",
+    discoverLabel:"Carte culturelle",
+    assocInstruction:"Quel pays correspond a cet element ?",
+    quizInstruction:"Choisis la bonne reponse !",
+    quizSub:"D'ou vient cet element culturel ?",
+    stars3:"Tu as tout reussi !",
+    stars2:"Tres bien !",
+    stars1:"Continue comme ca !"
+  },
+  en:{
+    mainTitle:"Culture Explorer",
+    mainSub:"Travel around the world and discover the richness of every culture!",
+    btnPlay:"Play!",
+    btnParents:"For parents",
+    levelsTitle:"Choose your mission!",
+    levelsSub:"3 ways to travel the world",
+    levels:[
+      {name:"Discovery",desc:"Explore world cultures",icon:"🌍",mode:"discover"},
+      {name:"Matching",desc:"Match each item to its country",icon:"🔗",mode:"assoc"},
+      {name:"Quiz",desc:"Test your knowledge!",icon:"🧠",mode:"quiz"}
+    ],
+    scoreLabel:"Points:",
+    btnNext:"Next",
+    btnNextDiscover:"Discover",
+    feedCorrect:["Great! 🎉","Awesome! 🌟","Excellent! ✨","Fantastic! 🎊","Perfect! 💫"],
+    feedWrong:["Not quite... try again!","Oops! But you're learning!","Almost! Keep going!"],
+    successTitle:"Mission complete!",
+    successMsg:"You're a true culture explorer!",
+    btnReplay:"Play again",
+    btnHome:"Choose a level",
+    parentsTitle:"Parental gate",
+    parentsIntro:"Solve this calculation to access parent info:",
+    parentsInfo:"<strong>Skill targeted:</strong> Global awareness, cultural discovery, respect for diversity.<br><br><strong>Content:</strong> Typical dishes, festivals and celebrations, musical instruments, greetings — presented positively and respectfully, without caricature stereotypes.<br><br><strong>Data:</strong> No data collection, no accounts, no advertising. Progress is saved only on this device.<br><br><strong>Audience:</strong> Ages 7-12. Bilingual French/English. Works 100% offline.",
+    btnBack:"Back",
+    parentsError:"That's not right, try again!",
+    discoverLabel:"Cultural card",
+    assocInstruction:"Which country does this element belong to?",
+    quizInstruction:"Choose the right answer!",
+    quizSub:"Where does this cultural element come from?",
+    stars3:"You got everything right!",
+    stars2:"Very well done!",
+    stars1:"Keep it up!"
+  }
+};
+
+var CULTURES=[
+  {emoji:"🍣",fr:{name:"Sushi",country:"Japon",desc:"Le sushi est un plat japonais traditionnel a base de riz vinaigre et de poisson cru ou cuit.",cat:"plat"},en:{name:"Sushi",country:"Japan",desc:"Sushi is a traditional Japanese dish made of vinegared rice with raw or cooked fish.",cat:"dish"},flag:"🇯🇵",key:"Japan"},
+  {emoji:"🥙",fr:{name:"Falafel",country:"Liban",desc:"Le falafel est une boulette de pois chiches frite, populaire dans tout le Moyen-Orient.",cat:"plat"},en:{name:"Falafel",country:"Lebanon",desc:"Falafel is a fried chickpea ball, popular throughout the Middle East.",cat:"dish"},flag:"🇱🇧",key:"Lebanon"},
+  {emoji:"🥘",fr:{name:"Paella",country:"Espagne",desc:"La paella est un plat espagnol au riz safrané, cuit dans une grande poele avec legumes et fruits de mer.",cat:"plat"},en:{name:"Paella",country:"Spain",desc:"Paella is a Spanish rice dish cooked in a large pan with saffron, vegetables and seafood.",cat:"dish"},flag:"🇪🇸",key:"Spain"},
+  {emoji:"🌮",fr:{name:"Taco",country:"Mexique",desc:"Le taco est une tortilla de mais garnie de viande, legumes et salsa, embleme de la cuisine mexicaine.",cat:"plat"},en:{name:"Taco",country:"Mexico",desc:"A taco is a corn tortilla filled with meat, vegetables and salsa, an icon of Mexican cuisine.",cat:"dish"},flag:"🇲🇽",key:"Mexico"},
+  {emoji:"🍛",fr:{name:"Curry",country:"Inde",desc:"Le curry est un plat epice originaire d'Inde, prepare avec un melange d'epices aromatiques.",cat:"plat"},en:{name:"Curry",country:"India",desc:"Curry is a spiced dish from India, prepared with a blend of aromatic spices.",cat:"dish"},flag:"🇮🇳",key:"India"},
+  {emoji:"🥐",fr:{name:"Croissant",country:"France",desc:"Le croissant est une viennoiserie francaise en pate feuilletee en forme de demi-lune.",cat:"plat"},en:{name:"Croissant",country:"France",desc:"A croissant is a French pastry made of flaky dough in a crescent shape.",cat:"dish"},flag:"🇫🇷",key:"France"},
+  {emoji:"🍜",fr:{name:"Pho",country:"Vietnam",desc:"Le pho est une soupe vietnamienne a base de bouillon de boeuf, de nouilles de riz et d'herbes fraiches.",cat:"plat"},en:{name:"Pho",country:"Vietnam",desc:"Pho is a Vietnamese soup made with beef broth, rice noodles and fresh herbs.",cat:"dish"},flag:"🇻🇳",key:"Vietnam"},
+  {emoji:"🫔",fr:{name:"Burrito",country:"Mexique",desc:"Le burrito est une tortilla de farine roulee garnie de haricots, riz, viande et fromage.",cat:"plat"},en:{name:"Burrito",country:"Mexico",desc:"A burrito is a flour tortilla rolled with beans, rice, meat and cheese.",cat:"dish"},flag:"🇲🇽",key:"Mexico2"},
+  {emoji:"🎆",fr:{name:"Nouvel An Chinois",country:"Chine",desc:"Le Nouvel An chinois est celebre avec des lanternes, des danses du dragon et des feux d'artifice.",cat:"fete"},en:{name:"Chinese New Year",country:"China",desc:"Chinese New Year is celebrated with lanterns, dragon dances and fireworks.",cat:"festival"},flag:"🇨🇳",key:"China"},
+  {emoji:"🪔",fr:{name:"Diwali",country:"Inde",desc:"Diwali est la fete des lumieres en Inde. Des milliers de petites lampes illuminent les maisons.",cat:"fete"},en:{name:"Diwali",country:"India",desc:"Diwali is the festival of lights in India. Thousands of lamps light up homes.",cat:"festival"},flag:"🇮🇳",key:"India2"},
+  {emoji:"🎭",fr:{name:"Carnaval de Rio",country:"Bresil",desc:"Le Carnaval de Rio est la plus grande fete du Bresil, avec des sambas et des costumes colores.",cat:"fete"},en:{name:"Rio Carnival",country:"Brazil",desc:"Rio Carnival is Brazil's biggest festival, with samba music and colorful costumes.",cat:"festival"},flag:"🇧🇷",key:"Brazil"},
+  {emoji:"🌸",fr:{name:"Hanami",country:"Japon",desc:"Hanami signifie regarder les fleurs. Au printemps, les Japonais pique-niquent sous les cerisiers.",cat:"fete"},en:{name:"Hanami",country:"Japan",desc:"Hanami means flower viewing. In spring, Japanese people picnic under blooming cherry trees.",cat:"festival"},flag:"🇯🇵",key:"Japan2"},
+  {emoji:"🎊",fr:{name:"Nowruz",country:"Iran",desc:"Nowruz est le Nouvel An persan, celebre le 21 mars avec des tables decorees et des visites en famille.",cat:"fete"},en:{name:"Nowruz",country:"Iran",desc:"Nowruz is the Persian New Year, celebrated on March 21 with decorated tables and family visits.",cat:"festival"},flag:"🇮🇷",key:"Iran"},
+  {emoji:"🎑",fr:{name:"Fete de la Lune",country:"Chine",desc:"La fete de la Lune (Zhong Qiu) est celebree en automne avec des gateau de lune et des lanternes.",cat:"fete"},en:{name:"Moon Festival",country:"China",desc:"The Moon Festival (Zhong Qiu) is celebrated in autumn with mooncakes and lanterns.",cat:"festival"},flag:"🇨🇳",key:"China2"},
+  {emoji:"🪘",fr:{name:"Djembe",country:"Afrique de l'Ouest",desc:"Le djembe est un tambour africain joue a la main, present dans les celebrations communautaires.",cat:"instrument"},en:{name:"Djembe",country:"West Africa",desc:"The djembe is an African hand drum, present in community celebrations.",cat:"instrument"},flag:"🌍",key:"WestAfrica"},
+  {emoji:"🎻",fr:{name:"Violon celtique",country:"Irlande",desc:"Le violon celtique est au coeur de la musique traditionnelle irlandaise, joue lors des sessions en pub.",cat:"instrument"},en:{name:"Celtic fiddle",country:"Ireland",desc:"The Celtic fiddle is at the heart of Irish traditional music, played at pub sessions.",cat:"instrument"},flag:"🇮🇪",key:"Ireland"},
+  {emoji:"🪗",fr:{name:"Accordeon",country:"France",desc:"L'accordeon est populaire en France. Il produit de la musique en comprimant et etirant son soufflet.",cat:"instrument"},en:{name:"Accordion",country:"France",desc:"The accordion is popular in France. It makes music by compressing and expanding its bellows.",cat:"instrument"},flag:"🇫🇷",key:"France2"},
+  {emoji:"🪕",fr:{name:"Sitar",country:"Inde",desc:"Le sitar est un instrument a cordes de l'Inde classique, reconnaissable a son long manche.",cat:"instrument"},en:{name:"Sitar",country:"India",desc:"The sitar is a stringed instrument from classical India, recognizable by its long neck.",cat:"instrument"},flag:"🇮🇳",key:"India3"},
+  {emoji:"🎷",fr:{name:"Tuba",country:"Allemagne",desc:"Le tuba est un grand instrument de la fanfare classique allemande, a vent en cuivre.",cat:"instrument"},en:{name:"Tuba",country:"Germany",desc:"The tuba is a large brass wind instrument from the German classical brass band.",cat:"instrument"},flag:"🇩🇪",key:"Germany"},
+  {emoji:"🙏",fr:{name:"Namaste",country:"Inde",desc:"Namaste est une salutation indienne les mains jointes, signifiant Je salue la lumiere en toi.",cat:"salutation"},en:{name:"Namaste",country:"India",desc:"Namaste is an Indian greeting with hands joined, meaning I bow to the light in you.",cat:"greeting"},flag:"🇮🇳",key:"India4"},
+  {emoji:"🤝",fr:{name:"Hongi",country:"Nouvelle-Zelande",desc:"Le Hongi est la salutation maorie : on presse son nez et son front contre ceux de l'autre.",cat:"salutation"},en:{name:"Hongi",country:"New Zealand",desc:"The Hongi is the Maori greeting: pressing nose and forehead together to share the breath of life.",cat:"greeting"},flag:"🇳🇿",key:"NewZealand"},
+  {emoji:"👋",fr:{name:"Wai",country:"Thailande",desc:"Le Wai est la salutation thailandaise : les paumes jointes devant la poitrine avec une legere inclinaison.",cat:"salutation"},en:{name:"Wai",country:"Thailand",desc:"The Wai is the Thai greeting: palms together in front of the chest with a slight bow.",cat:"greeting"},flag:"🇹🇭",key:"Thailand"},
+  {emoji:"💐",fr:{name:"Salaam",country:"Monde arabe",desc:"Salaam signifie La paix soit sur toi, une salutation chaleureuse utilisee de l'Atlantique a l'Asie.",cat:"salutation"},en:{name:"Salaam",country:"Arab world",desc:"Salaam means Peace be upon you, a warm greeting used from the Atlantic to Asia.",cat:"greeting"},flag:"🌙",key:"ArabWorld"},
+  {emoji:"🎎",fr:{name:"Poupee Kokeshi",country:"Japon",desc:"La kokeshi est une poupee traditionnelle japonaise en bois, symbole de chance et de bonheur.",cat:"art"},en:{name:"Kokeshi doll",country:"Japan",desc:"The kokeshi is a traditional Japanese wooden doll, a symbol of luck and happiness.",cat:"art"},flag:"🇯🇵",key:"Japan3"},
+];
+
+function shuffle(arr){
+  var a=arr.slice(),i,j,t;
+  for(i=a.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+var STORAGE_KEY="pgrg_cultures";
+var lang=(navigator.language||"fr").startsWith("fr")?"fr":"en";
+var muted=false;
+var currentScreen="title";
+var currentMode="discover";
+var gameItems=[];
+var gameIndex=0;
+var score=0;
+var correctCount=0;
+var totalQuestions=0;
+var parentsMathA=0,parentsMathB=0;
+var progress={stars:{discover:0,assoc:0,quiz:0}};
+
+try{var s=localStorage.getItem(STORAGE_KEY);if(s)progress=JSON.parse(s);}catch(e){}
+
+function saveProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress));}catch(e){}}
+
+var audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;
+  dur=dur||0.18;type=type||"sine";vol=vol||0.2;
+  try{
+    var ctx=getAudio(),osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){if(muted)return;[523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.2,"sine",.18);},i*90);});}
+function playCorrect(){if(muted)return;playTone(660,.12,"sine",.18);setTimeout(function(){playTone(880,.18,"sine",.15);},120);}
+function playWrong(){if(muted)return;playTone(220,.25,"sawtooth",.1);}
+function playClick(){if(muted)return;playTone(440,.08,"sine",.12);}
+function toggleMute(){muted=!muted;document.getElementById("btn-mute").textContent=muted?"🔇":"🔊";}
+
+function setLang(l){
+  lang=l;
+  document.getElementById("btn-fr").className="lang-btn"+(l==="fr"?" active":"");
+  document.getElementById("btn-en").className="lang-btn"+(l==="en"?" active":"");
+  renderCurrentScreen();
+}
+
+function tl(key){return T[lang][key];}
+
+function renderCurrentScreen(){
+  if(currentScreen==="title")renderTitle();
+  else if(currentScreen==="levels")renderLevels();
+  else if(currentScreen==="game")renderGameHeader();
+  else if(currentScreen==="success")renderSuccess();
+  else if(currentScreen==="parents")renderParents();
+}
+
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  document.getElementById("screen-"+name).classList.add("active");
+  currentScreen=name;
+}
+
+function showTitle(){showScreen("title");renderTitle();}
+function renderTitle(){
+  document.getElementById("t-main-title").textContent=tl("mainTitle");
+  document.getElementById("t-main-sub").textContent=tl("mainSub");
+  document.getElementById("t-btn-play").textContent=tl("btnPlay");
+  document.getElementById("t-btn-parents").textContent=tl("btnParents");
+}
+
+function showLevels(){playClick();showScreen("levels");renderLevels();}
+function renderLevels(){
+  document.getElementById("t-levels-title").textContent=tl("levelsTitle");
+  document.getElementById("t-levels-sub").textContent=tl("levelsSub");
+  var container=document.getElementById("level-cards-container");
+  container.innerHTML="";
+  var levels=T[lang].levels;
+  levels.forEach(function(lv){
+    var stars=progress.stars[lv.mode]||0;
+    var starsHtml="⭐".repeat(stars)+"☆".repeat(3-stars);
+    var card=document.createElement("div");
+    card.className="level-card";
+    card.setAttribute("role","button");
+    card.setAttribute("tabindex","0");
+    card.setAttribute("aria-label",lv.name);
+    card.innerHTML='<div class="lc-icon">'+lv.icon+'</div><div class="lc-name">'+lv.name+'</div><div class="lc-desc">'+lv.desc+'</div><div class="lc-stars">'+starsHtml+'</div>';
+    card.onclick=function(){playClick();startGame(lv.mode);};
+    card.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){playClick();startGame(lv.mode);}};
+    container.appendChild(card);
+  });
+}
+
+function startGame(mode){
+  currentMode=mode;
+  score=0;correctCount=0;gameIndex=0;
+  var pool=shuffle(CULTURES);
+  if(mode==="discover"){
+    gameItems=pool.slice(0,8);
+    totalQuestions=gameItems.length;
+  } else if(mode==="assoc"){
+    gameItems=pool.slice(0,10).map(function(item){
+      var others=CULTURES.filter(function(c){return c.key!==item.key;});
+      var distract=shuffle(others).slice(0,3).map(function(c){return {flag:c.flag,country:c[lang].country,key:c.key};});
+      var correct={flag:item.flag,country:item[lang].country,key:item.key};
+      return {item:item,choices:shuffle([correct].concat(distract)),correctKey:item.key};
+    });
+    totalQuestions=gameItems.length;
+  } else {
+    gameItems=pool.slice(0,10).map(function(item){
+      var others=CULTURES.filter(function(c){return c.key!==item.key;});
+      var distract=shuffle(others).slice(0,3);
+      return {item:item,choices:shuffle([item].concat(distract))};
+    });
+    totalQuestions=gameItems.length;
+  }
+  showScreen("game");
+  renderGameHeader();
+  renderQuestion();
+}
+
+function renderGameHeader(){
+  document.getElementById("t-score-label").textContent=tl("scoreLabel");
+  document.getElementById("score-display").textContent=score;
+  updatePB();
+}
+
+function updatePB(){
+  var pct=totalQuestions>0?Math.round((gameIndex/totalQuestions)*100):0;
+  document.getElementById("progress-bar").style.width=pct+"%";
+}
+
+function renderQuestion(){
+  document.getElementById("score-display").textContent=score;
+  updatePB();
+  hideFeedback();
+  var area=document.getElementById("game-area");
+  area.innerHTML="";
+  if(currentMode==="discover")renderDiscover(area);
+  else if(currentMode==="assoc")renderAssoc(area);
+  else renderQuiz(area);
+}
+
+function renderDiscover(area){
+  if(gameIndex>=gameItems.length){endGame();return;}
+  var item=gameItems[gameIndex];
+  var d=item[lang];
+  document.getElementById("question-header").textContent=tl("discoverLabel");
+  document.getElementById("question-sub").textContent=(lang==="fr"?"Clique pour decouvrir la culture suivante !":"Click to discover the next culture!");
+  var card=document.createElement("div");
+  card.className="discover-card";
+  card.innerHTML='<span class="discover-emoji" role="img" aria-label="'+d.name+'">'+item.emoji+'</span><div class="discover-name">'+d.name+'</div><div class="discover-country">'+item.flag+' '+d.country+'</div><div class="discover-desc">'+d.desc+'</div>';
+  var btn=document.createElement("button");
+  btn.className="btn-next";
+  btn.textContent=gameIndex<gameItems.length-1?tl("btnNextDiscover"):tl("btnNext");
+  btn.onclick=function(){playClick();score+=10;document.getElementById("score-display").textContent=score;gameIndex++;if(gameIndex>=gameItems.length)endGame();else renderQuestion();};
+  area.appendChild(card);
+  area.appendChild(btn);
+}
+
+function renderAssoc(area){
+  if(gameIndex>=gameItems.length){endGame();return;}
+  var g=gameItems[gameIndex];
+  var d=g.item[lang];
+  document.getElementById("question-header").textContent=tl("assocInstruction");
+  document.getElementById("question-sub").textContent=(lang==="fr"?"Categorie : ":"Category: ")+d.cat;
+  var qcard=document.createElement("div");
+  qcard.className="assoc-question";
+  qcard.innerHTML='<span class="assoc-item-big" role="img" aria-label="'+d.name+'">'+g.item.emoji+'</span><div class="assoc-label">'+d.name+'</div>';
+  var grid=document.createElement("div");
+  grid.className="choices-grid";
+  g.choices.forEach(function(ch){
+    var btn=document.createElement("button");
+    btn.className="choice-btn";
+    btn.innerHTML='<span class="c-flag">'+ch.flag+'</span><span>'+ch.country+'</span>';
+    btn.setAttribute("aria-label",ch.country);
+    btn.onclick=function(){handleAssocChoice(btn,ch,g,grid);};
+    grid.appendChild(btn);
+  });
+  area.appendChild(qcard);
+  area.appendChild(grid);
+}
+
+function handleAssocChoice(btn,ch,g,grid){
+  var isCorrect=ch.key===g.correctKey;
+  grid.querySelectorAll("button").forEach(function(b){b.disabled=true;});
+  if(isCorrect){
+    btn.classList.add("correct");
+    score+=20;correctCount++;
+    playCorrect();showFeedback(true);
+  } else {
+    btn.classList.add("wrong");
+    grid.querySelectorAll("button").forEach(function(b){
+      if(b.getAttribute("aria-label")===g.item[lang].country) b.classList.add("correct");
+    });
+    playWrong();showFeedback(false);
+  }
+  document.getElementById("score-display").textContent=score;
+  setTimeout(function(){gameIndex++;if(gameIndex>=gameItems.length)endGame();else renderQuestion();},1500);
+}
+
+function renderQuiz(area){
+  if(gameIndex>=gameItems.length){endGame();return;}
+  var g=gameItems[gameIndex];
+  var d=g.item[lang];
+  document.getElementById("question-header").textContent=tl("quizInstruction");
+  document.getElementById("question-sub").textContent=tl("quizSub");
+  var qcard=document.createElement("div");
+  qcard.className="quiz-q";
+  qcard.innerHTML='<span class="quiz-emoji" role="img" aria-label="'+d.name+'">'+g.item.emoji+'</span>'+d.name;
+  var qlist=document.createElement("div");
+  qlist.className="quiz-choices";
+  g.choices.forEach(function(ch){
+    var cd=ch[lang];
+    var btn=document.createElement("button");
+    btn.className="quiz-btn";
+    btn.innerHTML='<span>'+ch.flag+'</span><span>'+cd.country+'</span>';
+    btn.setAttribute("aria-label",cd.country);
+    btn.onclick=function(){handleQuizChoice(btn,ch,g,qlist);};
+    qlist.appendChild(btn);
+  });
+  area.appendChild(qcard);
+  area.appendChild(qlist);
+}
+
+function handleQuizChoice(btn,ch,g,qlist){
+  var isCorrect=ch.key===g.item.key;
+  qlist.querySelectorAll("button").forEach(function(b){b.disabled=true;});
+  if(isCorrect){
+    btn.classList.add("correct");
+    score+=20;correctCount++;
+    playCorrect();showFeedback(true);
+  } else {
+    btn.classList.add("wrong");
+    var correctCountry=g.item[lang].country;
+    qlist.querySelectorAll("button").forEach(function(b){
+      if(b!==btn&&b.getAttribute("aria-label")===correctCountry) b.classList.add("correct");
+    });
+    playWrong();showFeedback(false);
+  }
+  document.getElementById("score-display").textContent=score;
+  setTimeout(function(){gameIndex++;if(gameIndex>=gameItems.length)endGame();else renderQuestion();},1500);
+}
+
+function showFeedback(correct){
+  var el=document.getElementById("feedback-banner");
+  el.classList.remove("hidden","correct","wrong");
+  var msgs=correct?tl("feedCorrect"):tl("feedWrong");
+  el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  el.classList.add(correct?"correct":"wrong");
+  document.getElementById("aria-live").textContent=el.textContent;
+}
+function hideFeedback(){
+  var el=document.getElementById("feedback-banner");
+  el.classList.add("hidden");
+  el.classList.remove("correct","wrong");
+}
+
+function endGame(){
+  var stars=1;
+  if(currentMode==="discover"){stars=3;}
+  else {
+    var pct=totalQuestions>0?correctCount/totalQuestions:0;
+    if(pct>=0.8)stars=3;else if(pct>=0.5)stars=2;else stars=1;
+  }
+  var prev=progress.stars[currentMode]||0;
+  if(stars>prev)progress.stars[currentMode]=stars;
+  saveProgress();
+  playSuccess();
+  showScreen("success");
+  renderSuccess(stars);
+}
+
+function renderSuccess(stars){
+  if(stars===undefined)stars=progress.stars[currentMode]||1;
+  document.getElementById("success-stars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);
+  document.getElementById("t-success-title").textContent=tl("successTitle");
+  var msg=stars===3?tl("stars3"):stars===2?tl("stars2"):tl("stars1");
+  document.getElementById("t-success-msg").textContent=msg+" "+tl("successMsg");
+  document.getElementById("t-btn-replay").textContent=tl("btnReplay");
+  document.getElementById("t-btn-home").textContent=tl("btnHome");
+}
+
+function replayLevel(){playClick();startGame(currentMode);}
+
+function showParents(){
+  playClick();
+  parentsMathA=Math.floor(Math.random()*9)+2;
+  parentsMathB=Math.floor(Math.random()*9)+1;
+  showScreen("parents");
+  renderParents();
+}
+function renderParents(){
+  document.getElementById("t-parents-title").textContent=tl("parentsTitle");
+  document.getElementById("t-parents-intro").textContent=tl("parentsIntro");
+  document.getElementById("parents-math-q").textContent=parentsMathA+" x "+parentsMathB+" = ?";
+  document.getElementById("parents-error").textContent="";
+  document.getElementById("parents-info-section").style.display="none";
+  document.getElementById("parents-math-input").value="";
+  document.getElementById("t-parents-info").innerHTML=tl("parentsInfo");
+  document.getElementById("t-btn-back").textContent=tl("btnBack");
+}
+function checkParentsMath(){
+  var val=parseInt(document.getElementById("parents-math-input").value);
+  if(val===parentsMathA*parentsMathB){
+    document.getElementById("parents-error").textContent="";
+    document.getElementById("parents-info-section").style.display="block";
+  } else if(!isNaN(val)){
+    document.getElementById("parents-error").textContent=tl("parentsError");
+  }
+}
+document.getElementById("parents-math-input").addEventListener("keydown",function(e){if(e.key==="Enter")checkParentsMath();});
+document.getElementById("parents-math-input").addEventListener("change",checkParentsMath);
+
+setLang(lang);
+showTitle();
+</script>
+</body>
+</html>

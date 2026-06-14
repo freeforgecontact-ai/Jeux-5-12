@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Circuit Logique / Logic Circuit — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,#eaf6ff 0%,#dbeeff 100%);
+  min-height:100vh;
+  color:var(--navy);
+  overflow-x:hidden;
+}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--blue);color:#fff;padding:8px 16px;
+  position:sticky;top:0;z-index:100;gap:8px;flex-wrap:wrap;
+}
+#topbar-left{display:flex;align-items:center;gap:10px;}
+#topbar-right{display:flex;align-items:center;gap:6px;}
+.brand-text{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;color:#fff;}
+.btn-lang{
+  background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);
+  color:#fff;border-radius:20px;padding:4px 14px;font-size:0.9rem;cursor:pointer;
+  min-width:48px;min-height:36px;font-weight:700;transition:background 0.2s;
+}
+.btn-lang.active{background:var(--orange);border-color:var(--orange-dark);}
+.btn-lang:hover{background:rgba(255,255,255,0.3);}
+#btn-mute{
+  background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);
+  color:#fff;border-radius:50%;width:40px;height:40px;font-size:1.3rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  min-width:40px;min-height:40px;transition:background 0.2s;
+}
+#btn-mute:hover{background:rgba(255,255,255,0.3);}
+.screen{display:none;padding:20px 16px;max-width:900px;margin:0 auto;}
+.screen.active{display:block;}
+#screen-title{text-align:center;padding-top:10px;}
+.mascot-container{margin:16px auto;width:160px;}
+.game-title{font-size:2.2rem;color:var(--blue);line-height:1.1;margin:10px 0 6px;}
+.game-subtitle{font-size:1.1rem;color:var(--slate);margin-bottom:24px;}
+.btn-play{
+  background:var(--orange);color:#fff;border:none;border-radius:24px;
+  font-size:1.4rem;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-weight:700;padding:14px 48px;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);transition:transform 0.1s,box-shadow 0.1s;
+  display:inline-block;min-height:56px;
+}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark);}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{
+  display:inline-block;margin-top:18px;color:var(--slate);font-size:0.9rem;
+  background:none;border:none;cursor:pointer;text-decoration:underline;
+}
+#screen-parent{text-align:center;}
+.parent-box{
+  background:#fff;border-radius:20px;padding:28px;max-width:420px;
+  margin:20px auto;box-shadow:0 4px 24px rgba(0,0,0,0.08);
+}
+.parent-box h2{color:var(--blue);margin-bottom:12px;}
+#parent-question{font-size:1.3rem;margin:16px 0;font-weight:700;}
+#parent-input{
+  font-size:1.2rem;padding:10px 16px;border-radius:12px;
+  border:2px solid var(--sky);width:120px;text-align:center;
+  outline:none;
+}
+#parent-input:focus{border-color:var(--blue);}
+#parent-feedback{min-height:24px;color:crimson;margin-top:8px;font-weight:700;}
+.btn-blue{
+  background:var(--blue);color:#fff;border:none;border-radius:20px;
+  padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);min-height:48px;margin-top:12px;
+  font-family:'Nunito',system-ui,sans-serif;transition:transform 0.1s;
+}
+.btn-blue:hover{transform:translateY(-1px);}
+.btn-blue:active{transform:translateY(2px);}
+.parent-info{
+  background:var(--sky-light);border-radius:16px;padding:20px;
+  max-width:500px;margin:16px auto;text-align:left;font-size:0.95rem;
+  line-height:1.6;
+}
+.parent-info h3{color:var(--blue);margin-bottom:8px;}
+#screen-game{padding:12px 16px;}
+.game-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;flex-wrap:wrap;gap:8px;
+}
+.level-badge{
+  background:var(--blue);color:#fff;border-radius:20px;
+  padding:6px 18px;font-weight:700;font-size:1rem;
+}
+.score-display{
+  background:var(--gold);color:var(--navy);border-radius:20px;
+  padding:6px 18px;font-weight:700;font-size:1rem;
+}
+.objective-box{
+  background:#fff;border-radius:16px;padding:14px 18px;
+  margin-bottom:14px;border-left:5px solid var(--orange);
+  font-size:1.05rem;font-weight:700;color:var(--navy);
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.gate-explain{
+  background:var(--sky-light);border-radius:12px;padding:10px 14px;
+  margin-bottom:12px;font-size:0.92rem;color:var(--slate);
+  border:1px solid var(--sky);
+}
+.circuit-area{
+  background:#fff;border-radius:20px;padding:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom:14px;overflow:auto;
+}
+#circuit-svg{display:block;margin:0 auto;max-width:100%;}
+.switch-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.switch-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;min-width:64px;padding:4px;
+}
+.switch-visual{
+  width:64px;height:36px;border-radius:18px;border:3px solid #cbd5e1;
+  position:relative;background:#e2e8f0;transition:background 0.3s,border-color 0.3s;
+  display:flex;align-items:center;padding:3px;
+}
+.switch-visual::after{
+  content:'';width:28px;height:28px;border-radius:50%;background:#94a3b8;
+  transition:transform 0.3s,background 0.3s;display:block;
+}
+.switch-btn.on .switch-visual{background:var(--success);border-color:#22a362;}
+.switch-btn.on .switch-visual::after{background:#fff;transform:translateX(28px);}
+.switch-label{font-size:0.95rem;font-weight:700;color:var(--slate);}
+.switch-state{font-size:0.8rem;font-weight:700;padding:2px 10px;border-radius:10px;background:#e2e8f0;color:var(--slate);}
+.switch-btn.on .switch-state{background:var(--success);color:#fff;}
+.gate-choice-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.gate-choice-btn{
+  background:#fff;border:3px solid #cbd5e1;border-radius:14px;
+  padding:10px 20px;font-size:1rem;font-weight:700;cursor:pointer;
+  min-height:48px;min-width:90px;transition:border-color 0.2s,background 0.2s;
+  color:var(--navy);
+}
+.gate-choice-btn:hover{border-color:var(--blue);background:var(--sky-light);}
+.gate-choice-btn.selected{border-color:var(--orange);background:#fff3e0;}
+#feedback-area{
+  text-align:center;min-height:56px;font-size:1.1rem;font-weight:700;
+  padding:8px;
+}
+.feedback-correct{color:var(--success);}
+.feedback-wrong{color:#ef4444;}
+.feedback-hint{color:var(--orange-dark);}
+#screen-result{text-align:center;padding:30px 16px;}
+.stars-row{font-size:3rem;margin:16px 0;}
+.result-title{font-size:1.8rem;color:var(--blue);margin-bottom:8px;}
+.result-sub{color:var(--slate);margin-bottom:24px;font-size:1rem;}
+.result-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-action{
+  background:var(--orange);color:#fff;border:none;border-radius:20px;
+  padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--orange-dark);min-height:48px;
+  font-family:'Nunito',system-ui,sans-serif;transition:transform 0.1s;
+}
+.btn-action:hover{transform:translateY(-1px);}
+.btn-action.secondary{background:var(--blue);box-shadow:0 4px 0 var(--blue-dark);}
+.progress-row{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
+.prog-dot{
+  width:14px;height:14px;border-radius:50%;background:#cbd5e1;
+  transition:background 0.3s;flex-shrink:0;
+}
+.prog-dot.done{background:var(--gold);}
+.prog-dot.current{background:var(--orange);}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+.pop-anim{animation:pop 0.4s ease forwards;display:inline-block;}
+@media(max-width:500px){
+  .game-title{font-size:1.7rem;}
+  .switch-visual{width:54px;}
+  .switch-btn.on .switch-visual::after{transform:translateX(18px);}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span class="brand-text">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">🔊</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<div id="screen-title" class="screen active">
+  <div class="mascot-container">
+    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" width="160" height="160" aria-label="Robot mascotte">
+      <rect x="40" y="70" width="80" height="70" rx="12" fill="#0f4c81"/>
+      <rect x="48" y="28" width="64" height="48" rx="12" fill="#7ec3ee"/>
+      <line x1="80" y1="28" x2="80" y2="12" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="80" cy="10" r="6" fill="#f97316"/>
+      <rect x="60" y="42" width="16" height="10" rx="4" fill="#fff"/>
+      <rect x="84" y="42" width="16" height="10" rx="4" fill="#fff"/>
+      <circle cx="68" cy="47" r="4" fill="#0f4c81"/>
+      <circle cx="92" cy="47" r="4" fill="#0f4c81"/>
+      <path d="M65 62 Q80 72 95 62" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <rect x="55" y="82" width="50" height="34" rx="8" fill="#0a3559"/>
+      <circle cx="68" cy="92" r="5" fill="#34c77b"/>
+      <circle cx="80" cy="92" r="5" fill="#ffd23f"/>
+      <circle cx="92" cy="92" r="5" fill="#f97316"/>
+      <text x="80" y="114" text-anchor="middle" font-size="11" fill="#7ec3ee" font-family="monospace" font-weight="bold">AND</text>
+      <rect x="20" y="75" width="20" height="10" rx="5" fill="#0f4c81"/>
+      <rect x="120" y="75" width="20" height="10" rx="5" fill="#0f4c81"/>
+      <circle cx="16" cy="80" r="8" fill="#7ec3ee"/>
+      <circle cx="144" cy="80" r="8" fill="#7ec3ee"/>
+      <rect x="55" y="138" width="20" height="18" rx="6" fill="#0a3559"/>
+      <rect x="85" y="138" width="20" height="18" rx="6" fill="#0a3559"/>
+      <rect x="50" y="152" width="28" height="8" rx="4" fill="#0f4c81"/>
+      <rect x="82" y="152" width="28" height="8" rx="4" fill="#0f4c81"/>
+    </svg>
+  </div>
+  <h1 class="game-title title-font" id="t-game-title">Circuit Logique</h1>
+  <p class="game-subtitle" id="t-game-subtitle">Apprends la logique des ordinateurs !</p>
+  <button class="btn-play" onclick="startGame()" id="t-btn-play">Jouer ▶</button>
+  <br>
+  <button class="btn-parents" onclick="showParentGate()" id="t-btn-parents">👩‍👦 Pour les parents</button>
+</div>
+
+<div id="screen-parent" class="screen">
+  <div class="parent-box">
+    <h2 id="t-parent-gate-title">Espace parents</h2>
+    <p id="t-parent-gate-desc">Répondez à cette petite question pour continuer :</p>
+    <div id="parent-question"></div>
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+      <input id="parent-input" type="number" min="0" max="999" inputmode="numeric" placeholder="?">
+      <button class="btn-blue" onclick="checkParent()" id="t-parent-check">Valider</button>
+    </div>
+    <div id="parent-feedback"></div>
+  </div>
+  <div id="parent-info-box" class="parent-info" style="display:none;">
+    <h3 id="t-parent-info-title">À propos de ce jeu</h3>
+    <p id="t-parent-info-text"></p>
+  </div>
+  <div style="text-align:center;margin-top:12px;">
+    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-parent-back">← Retour</button>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="level-badge" id="level-badge">Niveau 1</div>
+    <div class="score-display">⭐ <span id="score-val">0</span></div>
+  </div>
+  <div class="progress-row" id="progress-row"></div>
+  <div class="objective-box" id="objective-box"></div>
+  <div class="gate-explain" id="gate-explain"></div>
+  <div class="circuit-area">
+    <svg id="circuit-svg" viewBox="0 0 480 200" width="480" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Circuit logique"></svg>
+  </div>
+  <div class="switch-row" id="switch-row"></div>
+  <div class="gate-choice-row" id="gate-choice-row" style="display:none;"></div>
+  <div id="feedback-area" aria-live="polite"></div>
+  <div style="text-align:center;margin-top:8px;">
+    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-btn-home">🏠 Accueil</button>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="stars-row" id="result-stars">⭐⭐⭐</div>
+  <h2 class="result-title title-font" id="t-result-title">Bravo !</h2>
+  <p class="result-sub" id="t-result-sub"></p>
+  <div class="result-btns">
+    <button class="btn-action secondary" onclick="showScreen('screen-title')" id="t-result-home">🏠 Accueil</button>
+    <button class="btn-action secondary" onclick="replayLevel()" id="t-result-replay">🔄 Rejouer</button>
+    <button class="btn-action" onclick="nextLevel()" id="t-result-next">Niveau suivant →</button>
+  </div>
+</div>
+
+<script>
+var T={
+  fr:{
+    gameTitle:'Circuit Logique',gameSubtitle:'Apprends la logique des ordinateurs !',
+    btnPlay:'Jouer ▶',btnParents:'👩‍👦 Pour les parents',
+    parentGateTitle:'Espace parents',parentGateDesc:'Répondez à cette petite question pour continuer :',
+    parentCheck:'Valider',parentBack:'← Retour',parentWrong:'Mauvaise réponse, réessayez.',
+    parentInfoTitle:'À propos de ce jeu',
+    parentInfoText:'Circuit Logique apprend aux enfants (10-12 ans) les bases de la logique booléenne : portes ET, OU et NON. Ces concepts sont au cœur de tous les ordinateurs. Le jeu est 100% hors-ligne, sans publicité, sans collecte de données. Progression sauvegardée localement. Aucun compte requis.',
+    levelLabel:'Niveau',objectiveLabel:'Objectif :',
+    switchLabel:'Interrupteur',on:'1 — ALLUMÉ',off:'0 — ÉTEINT',
+    btnHome:'🏠 Accueil',
+    resultTitle:'Bravo !',resultSub:'Tu as complété ce niveau !',
+    resultReplay:'🔄 Rejouer',resultNext:'Niveau suivant →',resultHome:'🏠 Accueil',
+    feedbackCorrect:'✅ Parfait ! L\'ampoule s\'allume !',
+    feedbackOff:'✅ Parfait ! L\'ampoule est éteinte !',
+    feedbackWrong:'❌ Pas encore… Essaie un autre interrupteur !',
+    feedbackGateCorrect:'✅ Bonne porte ! Excellent !',
+    feedbackGateWrong:'❌ Pas la bonne porte. Réessaie !',
+    tryAgain:'Essaie encore !',
+    gateNOTTitle:'Porte NON (NOT)',gateNOTExplain:'La porte NON inverse le signal. Entrée 1 → Sortie 0. Entrée 0 → Sortie 1. Comme un interrupteur à l\'envers !',
+    gateANDTitle:'Porte ET (AND)',gateANDExplain:'La porte ET : la sortie est 1 seulement si LES DEUX entrées sont 1. Les deux doivent être allumés.',
+    gateORTitle:'Porte OU (OR)',gateORExplain:'La porte OU : la sortie est 1 si AU MOINS UNE entrée est 1. Un seul suffit !',
+    gateComboExplain:'Deux portes en série ! Applique les règles une par une.',
+    objTurnOn:'Allume l\'ampoule ! 💡',objTurnOff:'Éteins l\'ampoule ! 🔌',
+    objChooseGate:'Choisis la bonne porte logique pour allumer l\'ampoule ! 💡',
+    chooseGate:'Quelle porte choisir ?',
+    switchA:'Interrupteur A',switchB:'Interrupteur B',switchC:'Interrupteur C',
+    bulbOn:'Ampoule allumée',bulbOff:'Ampoule éteinte',
+  },
+  en:{
+    gameTitle:'Logic Circuit',gameSubtitle:'Learn how computers think!',
+    btnPlay:'Play ▶',btnParents:'👩‍👦 For Parents',
+    parentGateTitle:'Parent Zone',parentGateDesc:'Answer this quick question to continue:',
+    parentCheck:'Submit',parentBack:'← Back',parentWrong:'Wrong answer, please try again.',
+    parentInfoTitle:'About this game',
+    parentInfoText:'Logic Circuit teaches children (ages 10-12) the basics of Boolean logic: NOT, AND, and OR gates. These concepts power every computer and digital device. 100% offline, ad-free, no data collection. Progress saved locally. No account needed.',
+    levelLabel:'Level',objectiveLabel:'Objective:',
+    switchLabel:'Switch',on:'1 — ON',off:'0 — OFF',
+    btnHome:'🏠 Home',
+    resultTitle:'Well done!',resultSub:'You completed this level!',
+    resultReplay:'🔄 Replay',resultNext:'Next Level →',resultHome:'🏠 Home',
+    feedbackCorrect:'✅ Perfect! The bulb lights up!',
+    feedbackOff:'✅ Perfect! The bulb is off!',
+    feedbackWrong:'❌ Not yet… Try another switch!',
+    feedbackGateCorrect:'✅ Right gate! Excellent!',
+    feedbackGateWrong:'❌ Not the right gate. Try again!',
+    tryAgain:'Try again!',
+    gateNOTTitle:'NOT Gate',gateNOTExplain:'The NOT gate flips the signal. Input 1 → Output 0. Input 0 → Output 1. Like a reverse switch!',
+    gateANDTitle:'AND Gate',gateANDExplain:'The AND gate: output is 1 only if BOTH inputs are 1. Both must be ON.',
+    gateORTitle:'OR Gate',gateORExplain:'The OR gate: output is 1 if AT LEAST ONE input is 1. Just one is enough!',
+    gateComboExplain:'Two gates in a row! Apply the rules one at a time.',
+    objTurnOn:'Turn the bulb ON! 💡',objTurnOff:'Turn the bulb OFF! 🔌',
+    objChooseGate:'Choose the right logic gate to light the bulb! 💡',
+    chooseGate:'Which gate?',
+    switchA:'Switch A',switchB:'Switch B',switchC:'Switch C',
+    bulbOn:'Bulb ON',bulbOff:'Bulb OFF',
+  }
+};
+
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var score=0;
+var currentLevelIdx=0;
+var parentQ={a:0,b:0,ans:0};
+var switchStates=[];
+var currentLevel=null;
+var selectedGate=null;
+var wrongCount=0;
+var audioCtx=null;
+var LS_KEY='pgrg_circuit_logique';
+
+var LEVELS=[
+  {id:1,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:0},
+  {id:2,gateType:'NOT',mode:'switch',inputs:[0],targetOutput:1},
+  {id:3,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:1},
+  {id:4,gateType:'AND',mode:'switch',inputs:[0,0],targetOutput:1},
+  {id:5,gateType:'AND',mode:'switch',inputs:[1,0],targetOutput:1},
+  {id:6,gateType:'AND',mode:'switch',inputs:[1,1],targetOutput:0},
+  {id:7,gateType:'AND',mode:'switch',inputs:[0,1],targetOutput:1},
+  {id:8,gateType:'OR',mode:'switch',inputs:[0,0],targetOutput:1},
+  {id:9,gateType:'OR',mode:'switch',inputs:[1,0],targetOutput:0},
+  {id:10,gateType:'OR',mode:'switch',inputs:[0,1],targetOutput:1},
+  {id:11,gateType:'OR',mode:'switch',inputs:[1,1],targetOutput:1},
+  {id:12,gateType:'CHOOSE',mode:'gate',inputs:[1],targetOutput:0,choices:['NOT','AND','OR']},
+  {id:13,gateType:'CHOOSE',mode:'gate',inputs:[1,1],targetOutput:1,choices:['NOT','AND','OR']},
+  {id:14,gateType:'CHOOSE',mode:'gate',inputs:[1,0],targetOutput:1,choices:['AND','OR']},
+  {id:15,gateType:'CHOOSE',mode:'gate',inputs:[0,0],targetOutput:0,choices:['AND','OR']},
+  {id:16,gateType:'AND_NOT',mode:'switch',inputs:[1,1],targetOutput:1},
+  {id:17,gateType:'AND_NOT',mode:'switch',inputs:[0,1],targetOutput:0},
+  {id:18,gateType:'OR_NOT',mode:'switch',inputs:[0,0],targetOutput:0},
+  {id:19,gateType:'OR_NOT',mode:'switch',inputs:[1,0],targetOutput:1},
+  {id:20,gateType:'AND_OR',mode:'switch',inputs:[0,1,1],targetOutput:1},
+];
+
+function loadProgress(){
+  try{var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');if(d.score!==undefined)score=d.score;if(d.level!==undefined)currentLevelIdx=Math.min(d.level,LEVELS.length-1);}catch(e){}
+}
+function saveProgress(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({score:score,level:currentLevelIdx}));}catch(e){}
+}
+
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;type=type||'sine';vol=vol||0.15;
+  try{var ctx=getAudioCtx();var osc=ctx.createOscillator();var gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=freq;osc.type=type;gain.gain.setValueAtTime(vol,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);osc.start();osc.stop(ctx.currentTime+dur);}catch(e){}
+}
+function playSuccess(){playTone(523,0.12);setTimeout(function(){playTone(659,0.12);},150);setTimeout(function(){playTone(784,0.22);},300);}
+function playError(){playTone(180,0.15,'sawtooth',0.08);}
+function playClick(){playTone(440,0.06,'sine',0.08);}
+function playSwitchOn(){playTone(600,0.07,'square',0.05);}
+function playSwitchOff(){playTone(320,0.07,'square',0.05);}
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';}
+
+function tr(k){return(T[lang]||T.fr)[k]||k;}
+function setLang(l){
+  lang=l;document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  renderUI();
+}
+function renderUI(){
+  var ids={
+    't-game-title':'gameTitle','t-game-subtitle':'gameSubtitle','t-btn-play':'btnPlay',
+    't-btn-parents':'btnParents','t-parent-gate-title':'parentGateTitle','t-parent-gate-desc':'parentGateDesc',
+    't-parent-check':'parentCheck','t-parent-back':'parentBack','t-parent-info-title':'parentInfoTitle',
+    't-parent-info-text':'parentInfoText','t-btn-home':'btnHome','t-result-title':'resultTitle',
+    't-result-replay':'resultReplay','t-result-next':'resultNext','t-result-home':'resultHome'
+  };
+  Object.keys(ids).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=tr(ids[id]);});
+  if(document.getElementById('screen-game').classList.contains('active')&&currentLevel)renderLevel();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showParentGate(){
+  var a=Math.floor(Math.random()*9)+2;var b=Math.floor(Math.random()*9)+2;
+  parentQ={a:a,b:b,ans:a*b};
+  document.getElementById('parent-question').textContent=a+' × '+b+' = ?';
+  document.getElementById('parent-input').value='';
+  document.getElementById('parent-feedback').textContent='';
+  document.getElementById('parent-info-box').style.display='none';
+  showScreen('screen-parent');
+}
+function checkParent(){
+  var val=parseInt(document.getElementById('parent-input').value,10);
+  if(val===parentQ.ans){
+    document.getElementById('parent-feedback').textContent='✅';
+    document.getElementById('parent-feedback').style.color='green';
+    document.getElementById('parent-info-box').style.display='block';
+  }else{
+    document.getElementById('parent-feedback').textContent=tr('parentWrong');
+    document.getElementById('parent-feedback').style.color='crimson';
+    playError();
+  }
+}
+
+function evalNOT(a){return a===1?0:1;}
+function evalAND(a,b){return(a===1&&b===1)?1:0;}
+function evalOR(a,b){return(a===1||b===1)?1:0;}
+function evalCircuit(gateType,sw){
+  if(gateType==='NOT')return evalNOT(sw[0]);
+  if(gateType==='AND')return evalAND(sw[0],sw[1]);
+  if(gateType==='OR')return evalOR(sw[0],sw[1]);
+  if(gateType==='AND_NOT')return evalNOT(evalAND(sw[0],sw[1]));
+  if(gateType==='OR_NOT')return evalNOT(evalOR(sw[0],sw[1]));
+  if(gateType==='AND_OR')return evalOR(evalAND(sw[0],sw[1]),sw[2]);
+  return 0;
+}
+
+function wireColor(on){return on===1?'#34c77b':'#94a3b8';}
+function gateBox(x,y,gateType,active){
+  var bg=active?'#d1fae5':'#f1f5f9';
+  var border=active?'#34c77b':'#cbd5e1';
+  var tc=active?'#065f46':'#475569';
+  var shapes={
+    'NOT':'<polygon points="'+x+','+(y-20)+' '+(x+34)+','+y+' '+x+','+(y+20)+'" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><circle cx="'+(x+40)+'" cy="'+y+'" r="6" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+15)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">NOT</text>',
+    'AND':'<path d="M'+x+','+(y-22)+' L'+(x+18)+','+(y-22)+' Q'+(x+44)+','+(y-22)+' '+(x+44)+','+y+' Q'+(x+44)+','+(y+22)+' '+(x+18)+','+(y+22)+' L'+x+','+(y+22)+' Z" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+21)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">AND</text>',
+    'OR':'<path d="M'+x+','+(y-22)+' Q'+(x+12)+','+(y-22)+' '+(x+44)+','+y+' Q'+(x+12)+','+(y+22)+' '+x+','+(y+22)+' Q'+(x+16)+','+y+' '+x+','+(y-22)+' Z" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+24)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">OR</text>'
+  };
+  return shapes[gateType]||'<rect x="'+x+'" y="'+(y-22)+'" width="44" height="44" rx="8" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+22)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">'+gateType+'</text>';
+}
+function gateEndX(gateType){
+  if(gateType==='NOT')return 46;
+  return 44;
+}
+
+function bulbSVG(x,y,lit){
+  var glow=lit?'#ffd23f':'#cbd5e1';
+  var body=lit?'#fef9c3':'#f1f5f9';
+  var stem=lit?'#f97316':'#94a3b8';
+  var rays='';
+  if(lit){
+    var angles=[0,45,90,135,180,225,270,315];
+    angles.forEach(function(a){
+      var r=a*Math.PI/180;
+      rays+='<line x1="'+(x+Math.cos(r)*22)+'" y1="'+(y+Math.sin(r)*22)+'" x2="'+(x+Math.cos(r)*32)+'" y2="'+(y+Math.sin(r)*32)+'" stroke="'+glow+'" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>';
+    });
+  }
+  return rays+
+    '<circle cx="'+x+'" cy="'+y+'" r="20" fill="'+body+'" stroke="'+glow+'" stroke-width="3"/>'+
+    '<path d="M'+(x-7)+','+(y+12)+' Q'+(x-7)+','+(y+19)+' '+(x-3)+','+(y+21)+' L'+(x+3)+','+(y+21)+' Q'+(x+7)+','+(y+19)+' '+(x+7)+','+(y+12)+'" fill="'+stem+'"/>'+
+    '<line x1="'+(x-4)+'" y1="'+(y+22)+'" x2="'+(x+4)+'" y2="'+(y+22)+'" stroke="'+stem+'" stroke-width="3" stroke-linecap="round"/>'+
+    '<line x1="'+(x-4)+'" y1="'+(y+26)+'" x2="'+(x+4)+'" y2="'+(y+26)+'" stroke="'+stem+'" stroke-width="3" stroke-linecap="round"/>'+
+    '<text x="'+x+'" y="'+(y+6)+'" text-anchor="middle" font-size="'+(lit?20:16)+'" dominant-baseline="middle">'+(lit?'💡':'⚫')+'</text>'+
+    '<text x="'+x+'" y="'+(y+42)+'" text-anchor="middle" font-size="10" fill="'+(lit?'#065f46':'#94a3b8')+'" font-weight="bold">'+(lit?tr('bulbOn'):tr('bulbOff'))+'</text>';
+}
+
+function drawCircuit(gateType,sw,targetOutput){
+  var svg=document.getElementById('circuit-svg');
+  var isLit=evalCircuit(gateType,sw)===1;
+  var midY=100;
+  var html='';
+
+  if(gateType==='NOT'){
+    var wc=wireColor(sw[0]);
+    var gOut=evalNOT(sw[0]);var wcO=wireColor(gOut);
+    html+='<line x1="90" y1="'+midY+'" x2="155" y2="'+midY+'" stroke="'+wc+'" stroke-width="4" stroke-linecap="round"/>';
+    html+=gateBox(155,midY,'NOT',gOut===1);
+    html+='<line x1="201" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="83" y="'+(midY-26)+'" text-anchor="middle" font-size="14" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
+    html+='<text x="83" y="'+(midY-10)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+(sw[0]===1?'allumé':'éteint')+'</text>';
+    html+=bulbSVG(375,midY,isLit);
+  } else if(gateType==='AND'||gateType==='OR'){
+    var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);
+    var gOut=evalCircuit(gateType,sw);var wcO=wireColor(gOut);
+    var topY=75;var botY=125;
+    html+='<line x1="70" y1="'+topY+'" x2="155" y2="'+topY+'" stroke="'+wc0+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="70" y1="'+botY+'" x2="155" y2="'+botY+'" stroke="'+wc1+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="155" y1="'+topY+'" x2="155" y2="'+botY+'" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>';
+    html+='<text x="58" y="'+(topY-16)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
+    html+='<text x="58" y="'+(topY-2)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+(sw[0]===1?'allumé':'éteint')+'</text>';
+    html+='<text x="58" y="'+(botY+14)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">B='+(sw[1]===1?'1':'0')+'</text>';
+    html+='<text x="58" y="'+(botY+28)+'" text-anchor="middle" font-size="11" fill="'+(sw[1]===1?'#34c77b':'#94a3b8')+'">'+(sw[1]===1?'allumé':'éteint')+'</text>';
+    html+=gateBox(155,midY,gateType,gOut===1);
+    html+='<line x1="199" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+=bulbSVG(375,midY,isLit);
+  } else if(gateType==='CHOOSE'){
+    var sw0=sw[0];var sw1=sw.length>1?sw[1]:null;
+    var wc0=wireColor(sw0);
+    var gOut=selectedGate?evalCircuit(selectedGate,sw):0;
+    var wcO=selectedGate?wireColor(gOut):'#cbd5e1';
+    var currentlyLit=selectedGate?(gOut===1):false;
+    var gLabel=selectedGate||'?';
+    var gBg=selectedGate?'#fff3e0':'#f8fafc';
+    var gBorder=selectedGate?'#f97316':'#cbd5e1';
+    if(sw1!==null){
+      var wc1=wireColor(sw1);var topY=75;var botY=125;
+      html+='<line x1="70" y1="'+topY+'" x2="155" y2="'+topY+'" stroke="'+wc0+'" stroke-width="4" stroke-linecap="round"/>';
+      html+='<line x1="70" y1="'+botY+'" x2="155" y2="'+botY+'" stroke="'+wc1+'" stroke-width="4" stroke-linecap="round"/>';
+      html+='<line x1="155" y1="'+topY+'" x2="155" y2="'+botY+'" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>';
+      html+='<text x="58" y="'+(topY-16)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">A='+(sw0===1?'1':'0')+'</text>';
+      html+='<text x="58" y="'+(botY+14)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">B='+(sw1===1?'1':'0')+'</text>';
+      html+='<rect x="155" y="'+(midY-26)+'" width="48" height="52" rx="10" fill="'+gBg+'" stroke="'+gBorder+'" stroke-width="3"/>';
+      html+='<text x="179" y="'+(midY+7)+'" text-anchor="middle" font-size="15" fill="'+(selectedGate?'#c2410c':'#94a3b8')+'" font-family="monospace" font-weight="bold">'+gLabel+'</text>';
+      html+='<line x1="203" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+      html+=bulbSVG(375,midY,currentlyLit);
+    } else {
+      html+='<line x1="90" y1="'+midY+'" x2="155" y2="'+midY+'" stroke="'+wc0+'" stroke-width="4" stroke-linecap="round"/>';
+      html+='<text x="75" y="'+(midY-26)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">A='+(sw0===1?'1':'0')+'</text>';
+      html+='<rect x="155" y="'+(midY-26)+'" width="48" height="52" rx="10" fill="'+gBg+'" stroke="'+gBorder+'" stroke-width="3"/>';
+      html+='<text x="179" y="'+(midY+7)+'" text-anchor="middle" font-size="15" fill="'+(selectedGate?'#c2410c':'#94a3b8')+'" font-family="monospace" font-weight="bold">'+gLabel+'</text>';
+      html+='<line x1="203" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+      html+=bulbSVG(375,midY,currentlyLit);
+    }
+  } else if(gateType==='AND_NOT'){
+    var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);
+    var andOut=evalAND(sw[0],sw[1]);var notOut=evalNOT(andOut);
+    var wcM=wireColor(andOut);var wcO=wireColor(notOut);
+    var topY=75;var botY=125;
+    html+='<line x1="50" y1="'+topY+'" x2="120" y2="'+topY+'" stroke="'+wc0+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="50" y1="'+botY+'" x2="120" y2="'+botY+'" stroke="'+wc1+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="120" y1="'+topY+'" x2="120" y2="'+botY+'" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>';
+    html+='<text x="38" y="'+(topY-12)+'" text-anchor="middle" font-size="12" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
+    html+='<text x="38" y="'+(botY+16)+'" text-anchor="middle" font-size="12" fill="#475569" font-weight="bold">B='+(sw[1]===1?'1':'0')+'</text>';
+    html+=gateBox(120,midY,'AND',andOut===1);
+    html+='<line x1="164" y1="'+midY+'" x2="198" y2="'+midY+'" stroke="'+wcM+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="181" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">'+andOut+'</text>';
+    html+=gateBox(198,midY,'NOT',notOut===1);
+    html+='<line x1="244" y1="'+midY+'" x2="330" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+=bulbSVG(362,midY,isLit);
+  } else if(gateType==='OR_NOT'){
+    var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);
+    var orOut=evalOR(sw[0],sw[1]);var notOut=evalNOT(orOut);
+    var wcM=wireColor(orOut);var wcO=wireColor(notOut);
+    var topY=75;var botY=125;
+    html+='<line x1="50" y1="'+topY+'" x2="120" y2="'+topY+'" stroke="'+wc0+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="50" y1="'+botY+'" x2="120" y2="'+botY+'" stroke="'+wc1+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<line x1="120" y1="'+topY+'" x2="120" y2="'+botY+'" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>';
+    html+='<text x="38" y="'+(topY-12)+'" text-anchor="middle" font-size="12" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
+    html+='<text x="38" y="'+(botY+16)+'" text-anchor="middle" font-size="12" fill="#475569" font-weight="bold">B='+(sw[1]===1?'1':'0')+'</text>';
+    html+=gateBox(120,midY,'OR',orOut===1);
+    html+='<line x1="164" y1="'+midY+'" x2="198" y2="'+midY+'" stroke="'+wcM+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="181" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">'+orOut+'</text>';
+    html+=gateBox(198,midY,'NOT',notOut===1);
+    html+='<line x1="244" y1="'+midY+'" x2="330" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+=bulbSVG(362,midY,isLit);
+  } else if(gateType==='AND_OR'){
+    var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);var wc2=wireColor(sw[2]);
+    var andOut=evalAND(sw[0],sw[1]);var orOut=evalOR(andOut,sw[2]);
+    var wcM=wireColor(andOut);var wcO=wireColor(orOut);
+    html+='<line x1="28" y1="65" x2="95" y2="65" stroke="'+wc0+'" stroke-width="3" stroke-linecap="round"/>';
+    html+='<line x1="28" y1="92" x2="95" y2="92" stroke="'+wc1+'" stroke-width="3" stroke-linecap="round"/>';
+    html+='<line x1="95" y1="65" x2="95" y2="92" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="3"/>';
+    html+='<text x="18" y="60" text-anchor="middle" font-size="11" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
+    html+='<text x="18" y="87" text-anchor="middle" font-size="11" fill="#475569" font-weight="bold">B='+(sw[1]===1?'1':'0')+'</text>';
+    html+=gateBox(95,78,'AND',andOut===1);
+    html+='<line x1="139" y1="78" x2="200" y2="78" stroke="'+wcM+'" stroke-width="3" stroke-linecap="round"/>';
+    html+='<line x1="28" y1="130" x2="200" y2="130" stroke="'+wc2+'" stroke-width="3" stroke-linecap="round"/>';
+    html+='<line x1="200" y1="78" x2="200" y2="130" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="3"/>';
+    html+='<text x="18" y="125" text-anchor="middle" font-size="11" fill="#475569" font-weight="bold">C='+(sw[2]===1?'1':'0')+'</text>';
+    html+='<text x="170" y="72" text-anchor="middle" font-size="10" fill="#475569">'+andOut+'</text>';
+    html+=gateBox(200,midY,'OR',orOut===1);
+    html+='<line x1="244" y1="'+midY+'" x2="315" y2="'+midY+'" stroke="'+wcO+'" stroke-width="3" stroke-linecap="round"/>';
+    html+=bulbSVG(348,midY,isLit);
+  }
+  svg.innerHTML=html;
+}
+
+function startGame(){
+  playClick();loadProgress();
+  showScreen('screen-game');
+  loadLevel(currentLevelIdx);
+}
+
+function loadLevel(idx){
+  if(idx>=LEVELS.length){showFinalResult();return;}
+  currentLevelIdx=idx;currentLevel=LEVELS[idx];
+  switchStates=currentLevel.inputs.slice();selectedGate=null;wrongCount=0;
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('level-badge').textContent=tr('levelLabel')+' '+currentLevel.id;
+  var pr=document.getElementById('progress-row');pr.innerHTML='';
+  LEVELS.forEach(function(lv,i){
+    var dot=document.createElement('div');
+    dot.className='prog-dot'+(i<idx?' done':'')+(i===idx?' current':'');
+    dot.title=tr('levelLabel')+' '+lv.id;
+    pr.appendChild(dot);
+  });
+  renderLevel();
+}
+
+function renderLevel(){
+  if(!currentLevel)return;
+  var lv=currentLevel;
+  var objText='';
+  if(lv.mode==='gate'){objText=tr('objChooseGate');}
+  else{objText=lv.targetOutput===1?tr('objTurnOn'):tr('objTurnOff');}
+  document.getElementById('objective-box').innerHTML='<strong>'+tr('objectiveLabel')+'</strong> '+objText;
+
+  var explain='';
+  if(lv.gateType==='NOT')explain='<strong>'+tr('gateNOTTitle')+'</strong> — '+tr('gateNOTExplain');
+  else if(lv.gateType==='AND')explain='<strong>'+tr('gateANDTitle')+'</strong> — '+tr('gateANDExplain');
+  else if(lv.gateType==='OR')explain='<strong>'+tr('gateORTitle')+'</strong> — '+tr('gateORExplain');
+  else if(lv.gateType==='AND_NOT')explain='<strong>'+tr('gateANDTitle')+'</strong> + <strong>'+tr('gateNOTTitle')+'</strong> — '+tr('gateComboExplain');
+  else if(lv.gateType==='OR_NOT')explain='<strong>'+tr('gateORTitle')+'</strong> + <strong>'+tr('gateNOTTitle')+'</strong> — '+tr('gateComboExplain');
+  else if(lv.gateType==='AND_OR')explain='<strong>'+tr('gateANDTitle')+'</strong> + <strong>'+tr('gateORTitle')+'</strong> — '+tr('gateComboExplain');
+  else if(lv.gateType==='CHOOSE'){
+    if(lv.inputs.length===1)explain='<strong>'+tr('gateNOTTitle')+'</strong> | <strong>'+tr('gateANDTitle')+'</strong> | <strong>'+tr('gateORTitle')+'</strong>';
+    else explain='<strong>'+tr('gateANDTitle')+'</strong> | <strong>'+tr('gateORTitle')+'</strong>';
+  }
+  document.getElementById('gate-explain').innerHTML=explain;
+
+  drawCircuit(lv.gateType,switchStates,lv.targetOutput);
+
+  var switchRow=document.getElementById('switch-row');
+  switchRow.innerHTML='';switchRow.style.display='flex';
+  if(lv.mode==='switch'){
+    var labels=['A','B','C'];
+    switchStates.forEach(function(st,i){
+      var btn=document.createElement('button');
+      btn.className='switch-btn'+(st===1?' on':'');
+      btn.setAttribute('aria-label',tr('switchLabel')+' '+labels[i]+': '+(st===1?tr('on'):tr('off')));
+      btn.setAttribute('aria-pressed',st===1?'true':'false');
+      btn.innerHTML='<div class="switch-label">'+labels[i]+'</div><div class="switch-visual"></div><div class="switch-state">'+(st===1?tr('on'):tr('off'))+'</div>';
+      (function(idx){btn.addEventListener('click',function(){toggleSwitch(idx);});})(i);
+      switchRow.appendChild(btn);
+    });
+  } else {
+    switchRow.style.display='none';
+  }
+
+  var gateRow=document.getElementById('gate-choice-row');
+  if(lv.mode==='gate'){
+    gateRow.style.display='flex';gateRow.innerHTML='';
+    var title=document.createElement('div');
+    title.style.cssText='width:100%;text-align:center;font-weight:700;color:var(--slate);margin-bottom:4px;font-size:1rem;';
+    title.textContent=tr('chooseGate');
+    gateRow.appendChild(title);
+    lv.choices.forEach(function(gate){
+      var btn=document.createElement('button');
+      btn.className='gate-choice-btn'+(selectedGate===gate?' selected':'');
+      btn.textContent=gate;
+      btn.setAttribute('aria-pressed',selectedGate===gate?'true':'false');
+      btn.addEventListener('click',function(){chooseGate(gate);});
+      gateRow.appendChild(btn);
+    });
+  } else {
+    gateRow.style.display='none';
+  }
+  document.getElementById('feedback-area').innerHTML='';
+}
+
+function toggleSwitch(idx){
+  switchStates[idx]=switchStates[idx]===1?0:1;
+  if(switchStates[idx]===1)playSwitchOn();else playSwitchOff();
+  var switchRow=document.getElementById('switch-row');
+  var btns=switchRow.querySelectorAll('.switch-btn');
+  var btn=btns[idx];
+  if(btn){
+    btn.classList.toggle('on',switchStates[idx]===1);
+    btn.querySelector('.switch-state').textContent=switchStates[idx]===1?tr('on'):tr('off');
+    btn.setAttribute('aria-pressed',switchStates[idx]===1?'true':'false');
+    btn.setAttribute('aria-label',tr('switchLabel')+' '+['A','B','C'][idx]+': '+(switchStates[idx]===1?tr('on'):tr('off')));
+  }
+  drawCircuit(currentLevel.gateType,switchStates,currentLevel.targetOutput);
+  checkAnswer(true);
+}
+
+function chooseGate(gate){
+  selectedGate=gate;playClick();
+  document.querySelectorAll('.gate-choice-btn').forEach(function(b){
+    b.classList.toggle('selected',b.textContent===gate);
+    b.setAttribute('aria-pressed',b.textContent===gate?'true':'false');
+  });
+  drawCircuit(currentLevel.gateType,switchStates,currentLevel.targetOutput);
+  checkAnswer(false);
+}
+
+function checkAnswer(auto){
+  var lv=currentLevel;var output;
+  if(lv.mode==='gate'){if(!selectedGate)return;output=evalCircuit(selectedGate,switchStates);}
+  else{output=evalCircuit(lv.gateType,switchStates);}
+  var correct=(output===lv.targetOutput);
+  var fb=document.getElementById('feedback-area');
+  if(correct){
+    var msg;
+    if(lv.mode==='gate')msg=tr('feedbackGateCorrect');
+    else msg=(lv.targetOutput===1?tr('feedbackCorrect'):tr('feedbackOff'));
+    fb.innerHTML='<span class="feedback-correct pop-anim">'+msg+'</span>';
+    document.getElementById('aria-live').textContent=msg;
+    playSuccess();
+    score+=Math.max(1,3-wrongCount);
+    document.getElementById('score-val').textContent=score;
+    saveProgress();
+    setTimeout(function(){showLevelResult();},1500);
+  } else {
+    if(!auto){
+      wrongCount++;
+      var msg=lv.mode==='gate'?tr('feedbackGateWrong'):tr('feedbackWrong');
+      fb.innerHTML='<span class="feedback-wrong">'+msg+'</span>';
+      document.getElementById('aria-live').textContent=msg;
+      playError();
+    } else if(wrongCount>=3){
+      fb.innerHTML='<span class="feedback-hint">💡 '+tr('tryAgain')+'</span>';
+    }
+  }
+}
+
+function showLevelResult(){
+  var stars=score>LEVELS.length*2?'⭐⭐⭐':score>LEVELS.length?'⭐⭐':'⭐';
+  document.getElementById('result-stars').textContent=stars;
+  document.getElementById('t-result-title').textContent=tr('resultTitle');
+  document.getElementById('t-result-sub').textContent=tr('resultSub')+' — '+tr('levelLabel')+' '+currentLevel.id;
+  var nextBtn=document.getElementById('t-result-next');
+  nextBtn.style.display=currentLevelIdx<LEVELS.length-1?'inline-block':'none';
+  showScreen('screen-result');
+}
+function showFinalResult(){
+  document.getElementById('result-stars').textContent='🏆⭐⭐⭐';
+  document.getElementById('t-result-title').textContent=lang==='fr'?'Félicitations !':'Congratulations!';
+  document.getElementById('t-result-sub').textContent=(lang==='fr'?'Tu as terminé tous les niveaux ! Score : ':'You finished all levels! Score: ')+score;
+  document.getElementById('t-result-next').style.display='none';
+  showScreen('screen-result');
+}
+function nextLevel(){
+  playClick();
+  if(currentLevelIdx<LEVELS.length-1){currentLevelIdx++;saveProgress();showScreen('screen-game');loadLevel(currentLevelIdx);}
+  else{showFinalResult();}
+}
+function replayLevel(){playClick();showScreen('screen-game');loadLevel(currentLevelIdx);}
+
+window.addEventListener('DOMContentLoaded',function(){
+  loadProgress();setLang(lang);
+  document.getElementById('parent-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkParent();});
+});
+</script>
+</body>
+</html>

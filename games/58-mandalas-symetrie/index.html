@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Mandalas & Symétrie / Symmetry Mandalas — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,#eaf6ff 0%,#d4eaff 100%);
+  min-height:100vh;display:flex;flex-direction:column;
+  color:var(--navy);
+}
+#topbar{
+  background:var(--blue);padding:8px 16px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);flex-shrink:0;
+}
+#topbar img{height:34px}
+#brand{color:white;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;font-weight:700;flex:1}
+.lang-btn{
+  background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.4);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.9rem;font-weight:700;
+  min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;
+}
+.lang-btn.active,.lang-btn:hover{background:rgba(255,255,255,0.35)}
+#mute-btn{
+  background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.4);
+  border-radius:8px;padding:6px 10px;cursor:pointer;font-size:1.3rem;
+  min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;
+}
+#mute-btn:hover{background:rgba(255,255,255,0.35)}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.screen.active{display:flex}
+#title-screen{gap:14px;text-align:center}
+.mascot{margin:8px auto}
+h1{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:var(--blue);text-shadow:2px 2px 0 rgba(0,0,0,0.08);}
+.subtitle{font-size:clamp(1rem,3vw,1.4rem);color:var(--slate);margin-top:4px}
+.btn-main{
+  background:var(--orange);color:white;border:none;border-radius:24px;
+  padding:16px 48px;font-size:1.3rem;font-weight:700;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  transition:transform 0.1s;min-height:56px;
+}
+.btn-main:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-main:hover{background:#fb923c}
+.btn-secondary{
+  background:var(--blue);color:white;border:none;border-radius:20px;
+  padding:10px 28px;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);transition:transform 0.1s;min-height:48px;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+.btn-secondary:hover{background:#1a5c96}
+.parents-link{
+  color:var(--slate);text-decoration:underline;cursor:pointer;font-size:0.9rem;
+  background:none;border:none;font-family:inherit;padding:8px;min-height:44px;
+}
+.parents-link:hover{color:var(--blue)}
+.modal-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.5);z-index:100;display:none;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:20px;padding:28px;max-width:440px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+.modal h2{color:var(--blue);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;margin-bottom:12px}
+.modal p{color:var(--slate);margin-bottom:12px;line-height:1.5}
+.modal input[type=text]{border:2px solid var(--sky);border-radius:12px;padding:10px 14px;font-size:1.1rem;width:100%;margin-bottom:10px;font-family:inherit;}
+.modal input[type=text]:focus{outline:none;border-color:var(--blue)}
+.modal-close{background:var(--slate);color:white;border:none;border-radius:12px;padding:8px 20px;cursor:pointer;font-size:0.95rem;font-weight:700;min-height:44px;float:right;}
+#game-screen{padding:8px;gap:7px;justify-content:flex-start}
+.game-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;}
+.game-title-small{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;color:var(--blue);font-weight:700;}
+#canvas-wrap{
+  position:relative;
+  width:min(75vmin,480px);height:min(75vmin,480px);
+  border-radius:50%;overflow:hidden;
+  box-shadow:0 4px 24px rgba(15,76,129,0.2);
+  background:#fff;flex-shrink:0;cursor:crosshair;
+}
+#drawing-canvas{width:100%;height:100%;touch-action:none;display:block;}
+.tools-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;max-width:520px;}
+.color-swatch{width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
+.color-swatch.active,.color-swatch:hover{transform:scale(1.2);border-color:var(--navy)}
+.tool-btn{background:white;border:2px solid var(--sky);border-radius:12px;padding:8px 14px;cursor:pointer;font-size:1rem;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--slate);}
+.tool-btn.active,.tool-btn:hover{background:var(--sky-light);border-color:var(--blue);color:var(--blue)}
+.axes-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.axis-btn{background:white;border:2px solid var(--sky);border-radius:12px;padding:6px 14px;cursor:pointer;font-size:0.95rem;font-weight:700;color:var(--slate);min-height:44px;min-width:50px;}
+.axis-btn.active{background:var(--blue);color:white;border-color:var(--blue)}
+.axis-btn:hover{background:var(--sky-light);border-color:var(--blue);color:var(--blue)}
+.axis-btn.active:hover{background:var(--blue-dark)}
+.size-row{display:flex;gap:7px;align-items:center;}
+.size-btn{width:36px;height:36px;border-radius:50%;border:2px solid var(--sky);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.size-btn.active,.size-btn:hover{border-color:var(--blue)}
+.size-dot{background:var(--slate);border-radius:50%;display:block}
+.challenge-btn{background:var(--gold);color:var(--navy);border:none;border-radius:14px;padding:8px 16px;cursor:pointer;font-size:0.9rem;font-weight:700;min-height:44px;box-shadow:0 3px 0 #e6b800;}
+.challenge-info{background:var(--gold);color:var(--navy);border-radius:14px;padding:8px 16px;font-size:0.9rem;font-weight:700;text-align:center;max-width:440px;}
+.label{font-size:0.85rem;color:var(--slate);font-weight:700}
+#success-screen{gap:18px;text-align:center}
+.stars{font-size:3rem}
+.success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--blue);}
+.success-msg{color:var(--slate);font-size:1.1rem}
+.btn-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" onerror="this.style.display='none'">
+  <span id="brand">PGRG IA</span>
+  <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Son">🔊</button>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<div class="screen active" id="title-screen">
+  <div class="mascot">
+    <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="56" fill="#eaf6ff" stroke="#7ec3ee" stroke-width="3"/>
+      <g opacity="0.85">
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#f97316" transform="rotate(0,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#ffd23f" transform="rotate(45,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#34c77b" transform="rotate(90,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#7ec3ee" transform="rotate(135,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#f97316" transform="rotate(180,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#ffd23f" transform="rotate(225,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#34c77b" transform="rotate(270,60,60)"/>
+        <ellipse cx="60" cy="28" rx="8" ry="19" fill="#7ec3ee" transform="rotate(315,60,60)"/>
+      </g>
+      <circle cx="60" cy="60" r="22" fill="#ffd23f" stroke="#f97316" stroke-width="2.5"/>
+      <circle cx="53" cy="55" r="4" fill="white"/><circle cx="67" cy="55" r="4" fill="white"/>
+      <circle cx="54" cy="55" r="2" fill="#0f172a"/><circle cx="68" cy="55" r="2" fill="#0f172a"/>
+      <path d="M50 65 Q60 75 70 65" stroke="#0f4c81" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="47" cy="62" r="5" fill="#f97316" opacity="0.4"/>
+      <circle cx="73" cy="62" r="5" fill="#f97316" opacity="0.4"/>
+    </svg>
+  </div>
+  <h1 id="title-h1"></h1>
+  <p class="subtitle" id="title-sub"></p>
+  <button class="btn-main" onclick="showGame()" id="btn-play"></button>
+  <button class="parents-link" onclick="openParents()" id="btn-parents"></button>
+</div>
+
+<div class="screen" id="game-screen">
+  <div class="game-header">
+    <span class="game-title-small" id="game-label"></span>
+    <div class="axes-row">
+      <span class="label" id="label-axes"></span>
+      <button class="axis-btn" data-axes="4" onclick="setAxes(4)">×4</button>
+      <button class="axis-btn" data-axes="6" onclick="setAxes(6)">×6</button>
+      <button class="axis-btn" data-axes="8" onclick="setAxes(8)">×8</button>
+      <button class="axis-btn" data-axes="12" onclick="setAxes(12)">×12</button>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="drawing-canvas"></canvas>
+  </div>
+
+  <div id="challenge-info-box" class="challenge-info" style="display:none"></div>
+
+  <div class="tools-row">
+    <div class="color-swatch active" style="background:#f97316" data-color="#f97316" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#ef4444" data-color="#ef4444" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#a855f7" data-color="#a855f7" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#3b82f6" data-color="#3b82f6" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#34c77b" data-color="#34c77b" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#ffd23f" data-color="#ffd23f" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#0f4c81" data-color="#0f4c81" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#ec4899" data-color="#ec4899" onclick="setColor(this)"></div>
+  </div>
+
+  <div class="tools-row">
+    <button class="tool-btn active" id="tool-draw" onclick="setTool('draw')">✏️</button>
+    <button class="tool-btn" id="tool-erase" onclick="setTool('erase')">🧹</button>
+    <button class="tool-btn" onclick="clearCanvas()">🗑️</button>
+    <div class="size-row">
+      <button class="size-btn" data-size="4" onclick="setBrush(4)"><span class="size-dot" style="width:5px;height:5px"></span></button>
+      <button class="size-btn active" data-size="8" onclick="setBrush(8)"><span class="size-dot" style="width:10px;height:10px"></span></button>
+      <button class="size-btn" data-size="14" onclick="setBrush(14)"><span class="size-dot" style="width:15px;height:15px"></span></button>
+      <button class="size-btn" data-size="22" onclick="setBrush(22)"><span class="size-dot" style="width:21px;height:21px"></span></button>
+    </div>
+    <button class="challenge-btn" onclick="startChallenge()" id="btn-challenge"></button>
+  </div>
+
+  <div class="tools-row">
+    <button class="btn-secondary" onclick="showTitle()" id="btn-home-game"></button>
+  </div>
+</div>
+
+<div class="screen" id="success-screen">
+  <div class="stars">⭐⭐⭐</div>
+  <div class="success-title" id="success-title"></div>
+  <div class="success-msg" id="success-msg"></div>
+  <div class="btn-row">
+    <button class="btn-main" onclick="newChallenge()" id="btn-play-again"></button>
+    <button class="btn-secondary" onclick="showTitle()" id="btn-back-home"></button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-parents">
+  <div class="modal">
+    <h2 id="modal-parents-title"></h2>
+    <p id="modal-parents-q"></p>
+    <input type="text" id="modal-parents-input" inputmode="numeric" pattern="[0-9]*">
+    <p id="modal-parents-error" style="color:#ef4444;font-size:0.9rem;min-height:1.2em"></p>
+    <div id="modal-parents-info" style="display:none">
+      <p id="modal-parents-info-text" style="line-height:1.6"></p>
+    </div>
+    <button class="modal-close" onclick="closeParents()" id="btn-close-modal"></button>
+  </div>
+</div>
+
+<script>
+const T={
+  fr:{
+    title:"Mandalas & Symétrie",subtitle:"Dessine et crée de beaux mandalas !",
+    play:"✨ Jouer !",parents:"Pour les parents",
+    modal_parents_title:"Porte parentale",
+    modal_parents_q_pre:"Combien font ",modal_parents_q_suf:" ?",
+    modal_parents_error:"Ce n'est pas le bon résultat, réessaie !",
+    modal_parents_info:"🎨 Ce jeu apprend la symétrie et les motifs répétitifs à travers la création artistique de mandalas. L'enfant dessine librement et voit son trait dupliqué sur plusieurs axes de symétrie. Aucune donnée collectée. Aucune publicité. Fonctionne hors-ligne.",
+    btn_close:"Fermer",axes_label:"Axes :",game_label:"Mandalas",
+    challenge:"⭐ Mini-défi",home:"🏠 Accueil",
+    success_title:"Bravo !",success_msg:"Tu as complété le motif symétrique !",
+    play_again:"🎨 Nouveau défi",back_home:"🏠 Accueil",
+    challenge_info:"🧩 Complète la moitié manquante ! Dessine dans la partie vide à droite.",
+    challenge_done:"⭐ Défi réussi !",muted:"🔇",unmuted:"🔊",
+  },
+  en:{
+    title:"Mandalas & Symmetry",subtitle:"Draw and create beautiful mandalas!",
+    play:"✨ Play!",parents:"For parents",
+    modal_parents_title:"Parental gate",
+    modal_parents_q_pre:"What is ",modal_parents_q_suf:"?",
+    modal_parents_error:"That's not right, try again!",
+    modal_parents_info:"🎨 This game teaches symmetry and repeating patterns through mandala art creation. The child draws freely and sees their stroke duplicated across multiple axes of symmetry. No data collected. No ads. Works offline.",
+    btn_close:"Close",axes_label:"Axes:",game_label:"Mandalas",
+    challenge:"⭐ Mini-challenge",home:"🏠 Home",
+    success_title:"Well done!",success_msg:"You completed the symmetrical pattern!",
+    play_again:"🎨 New challenge",back_home:"🏠 Home",
+    challenge_info:"🧩 Complete the missing half! Draw in the empty area on the right.",
+    challenge_done:"⭐ Challenge done!",muted:"🔇",unmuted:"🔊",
+  }
+};
+
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let currentColor='#f97316';
+let currentTool='draw';
+let brushSize=8;
+let numAxes=6;
+let isDrawing=false;
+let lastX=null,lastY=null;
+let challengeMode=false;
+let challengeStrokeCount=0;
+let canvas,ctx,cSize=480;
+
+const SK='pgrg_mandalas';
+try{const s=JSON.parse(localStorage.getItem(SK)||'{}');if(s.lang)lang=s.lang;if(s.numAxes)numAxes=s.numAxes;}catch(e){}
+
+let audioCtx=null;
+function getAC(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;
+  try{
+    const ac=getAC();const o=ac.createOscillator();const g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);o.type=type||'sine';
+    o.frequency.value=freq;g.gain.setValueAtTime(vol||0.1,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    o.start();o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+function playDraw(){if(Math.random()<0.12)playTone(300+Math.random()*400,0.06,'sine',0.04);}
+function playSuccess(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.3,'sine',0.1),i*130));}
+function playClick(){playTone(660,0.08,'sine',0.07);}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?T[lang].muted:T[lang].unmuted;}
+
+function setLang(l){lang=l;saveState();renderLang();}
+function saveState(){try{localStorage.setItem(SK,JSON.stringify({lang,numAxes}));}catch(e){}}
+
+function renderLang(){
+  document.documentElement.lang=lang;
+  document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  const t=T[lang];
+  document.getElementById('title-h1').textContent=t.title;
+  document.getElementById('title-sub').textContent=t.subtitle;
+  document.getElementById('btn-play').textContent=t.play;
+  document.getElementById('btn-parents').textContent=t.parents;
+  document.getElementById('label-axes').textContent=t.axes_label;
+  document.getElementById('game-label').textContent=t.game_label;
+  document.getElementById('btn-challenge').textContent=t.challenge;
+  document.getElementById('btn-home-game').textContent=t.home;
+  document.getElementById('success-title').textContent=t.success_title;
+  document.getElementById('success-msg').textContent=t.success_msg;
+  document.getElementById('btn-play-again').textContent=t.play_again;
+  document.getElementById('btn-back-home').textContent=t.back_home;
+  document.getElementById('modal-parents-title').textContent=t.modal_parents_title;
+  document.getElementById('btn-close-modal').textContent=t.btn_close;
+  document.getElementById('mute-btn').textContent=muted?t.muted:t.unmuted;
+  if(challengeMode){const b=document.getElementById('challenge-info-box');if(b)b.textContent=t.challenge_info;}
+  updateAxesBtns();
+}
+
+function updateAxesBtns(){
+  document.querySelectorAll('.axis-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.axes)===numAxes));
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTitle(){challengeMode=false;document.getElementById('challenge-info-box').style.display='none';showScreen('title-screen');}
+function showGame(){showScreen('game-screen');setTimeout(initCanvas,60);}
+function showSuccess(){playSuccess();showScreen('success-screen');announce(T[lang].success_title);}
+function newChallenge(){showGame();setTimeout(startChallenge,200);}
+
+let pA=0,pB=0;
+function openParents(){
+  pA=Math.floor(Math.random()*9)+2;pB=Math.floor(Math.random()*9)+2;
+  const t=T[lang];
+  document.getElementById('modal-parents-q').textContent=t.modal_parents_q_pre+pA+' × '+pB+t.modal_parents_q_suf;
+  document.getElementById('modal-parents-input').value='';
+  document.getElementById('modal-parents-error').textContent='';
+  document.getElementById('modal-parents-info').style.display='none';
+  document.getElementById('modal-parents').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-parents-input').focus(),100);
+}
+function closeParents(){document.getElementById('modal-parents').classList.remove('open');}
+function checkParental(){
+  const v=parseInt(document.getElementById('modal-parents-input').value);
+  if(v===pA*pB){
+    document.getElementById('modal-parents-error').textContent='';
+    document.getElementById('modal-parents-info').style.display='block';
+    document.getElementById('modal-parents-info-text').textContent=T[lang].modal_parents_info;
+  }else{
+    document.getElementById('modal-parents-error').textContent=T[lang].modal_parents_error;
+    document.getElementById('modal-parents-input').value='';
+  }
+}
+document.getElementById('modal-parents-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkParental();});
+document.getElementById('modal-parents').addEventListener('click',e=>{if(e.target===e.currentTarget)closeParents();});
+
+function initCanvas(){
+  canvas=document.getElementById('drawing-canvas');
+  const wrap=document.getElementById('canvas-wrap');
+  const r=wrap.getBoundingClientRect();
+  cSize=Math.floor(Math.min(r.width,r.height));
+  canvas.width=cSize;canvas.height=cSize;
+  ctx=canvas.getContext('2d');
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cSize,cSize);
+  drawGuides();
+  setupEvents();
+  updateAxesBtns();
+}
+
+function drawGuides(){
+  if(!ctx)return;
+  ctx.save();
+  ctx.strokeStyle='rgba(126,195,238,0.2)';ctx.lineWidth=1;ctx.setLineDash([4,8]);
+  const cx=cSize/2,cy=cSize/2;
+  for(let i=0;i<numAxes;i++){
+    const a=Math.PI*i/numAxes;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*cSize,cy+Math.sin(a)*cSize);
+    ctx.lineTo(cx-Math.cos(a)*cSize,cy-Math.sin(a)*cSize);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);ctx.restore();
+}
+
+function setColor(el){
+  currentColor=el.dataset.color;currentTool='draw';
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tool-draw').classList.add('active');
+  document.getElementById('tool-erase').classList.remove('active');
+  playClick();
+}
+function setTool(t){
+  currentTool=t;
+  document.getElementById('tool-draw').classList.toggle('active',t==='draw');
+  document.getElementById('tool-erase').classList.toggle('active',t==='erase');
+  playClick();
+}
+function setBrush(s){
+  brushSize=s;
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.size)===s));
+  playClick();
+}
+function setAxes(n){
+  numAxes=n;updateAxesBtns();saveState();clearCanvas();playClick();
+}
+function clearCanvas(){
+  if(!ctx)return;
+  ctx.clearRect(0,0,cSize,cSize);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cSize,cSize);
+  challengeMode=false;challengeStrokeCount=0;
+  document.getElementById('challenge-info-box').style.display='none';
+  drawGuides();playClick();
+}
+
+function getPos(e){
+  const r=canvas.getBoundingClientRect();
+  const sx=cSize/r.width,sy=cSize/r.height;
+  if(e.touches){return{x:(e.touches[0].clientX-r.left)*sx,y:(e.touches[0].clientY-r.top)*sy};}
+  return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
+}
+
+function drawSym(x1,y1,x2,y2){
+  if(!ctx)return;
+  const cx=cSize/2,cy=cSize/2;
+  const dx1=x1-cx,dy1=y1-cy,dx2=x2-cx,dy2=y2-cy;
+  ctx.save();
+  ctx.lineWidth=currentTool==='erase'?brushSize*2.5:brushSize;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  if(currentTool==='erase'){
+    ctx.globalCompositeOperation='destination-out';ctx.strokeStyle='rgba(0,0,0,1)';
+  }else{
+    ctx.globalCompositeOperation='source-over';ctx.strokeStyle=currentColor;
+  }
+  const step=(2*Math.PI)/numAxes;
+  for(let i=0;i<numAxes;i++){
+    const a=step*i,c=Math.cos(a),s=Math.sin(a);
+    // rotated
+    ctx.beginPath();
+    ctx.moveTo(cx+dx1*c-dy1*s,cy+dx1*s+dy1*c);
+    ctx.lineTo(cx+dx2*c-dy2*s,cy+dx2*s+dy2*c);
+    ctx.stroke();
+    // mirrored (reflect across axis)
+    ctx.beginPath();
+    ctx.moveTo(cx+dx1*c+dy1*s,cy+dx1*s-dy1*c);
+    ctx.lineTo(cx+dx2*c+dy2*s,cy+dx2*s-dy2*c);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation='source-over';ctx.restore();
+}
+
+function onStart(e){e.preventDefault();isDrawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;drawSym(p.x,p.y,p.x+0.1,p.y+0.1);}
+function onMove(e){e.preventDefault();if(!isDrawing)return;const p=getPos(e);drawSym(lastX,lastY,p.x,p.y);lastX=p.x;lastY=p.y;playDraw();}
+function onEnd(e){e.preventDefault();if(!isDrawing)return;isDrawing=false;lastX=null;lastY=null;if(challengeMode){challengeStrokeCount++;checkChallenge();}}
+
+function setupEvents(){
+  ['mousedown','mousemove','mouseup','mouseleave','touchstart','touchmove','touchend'].forEach(ev=>canvas.removeEventListener(ev,handlers[ev]));
+  canvas.addEventListener('mousedown',handlers.mousedown,{passive:false});
+  canvas.addEventListener('mousemove',handlers.mousemove,{passive:false});
+  canvas.addEventListener('mouseup',handlers.mouseup,{passive:false});
+  canvas.addEventListener('mouseleave',handlers.mouseleave,{passive:false});
+  canvas.addEventListener('touchstart',handlers.touchstart,{passive:false});
+  canvas.addEventListener('touchmove',handlers.touchmove,{passive:false});
+  canvas.addEventListener('touchend',handlers.touchend,{passive:false});
+}
+const handlers={
+  mousedown:onStart,mousemove:onMove,mouseup:onEnd,mouseleave:onEnd,
+  touchstart:onStart,touchmove:onMove,touchend:onEnd
+};
+
+// === CHALLENGE PATTERNS ===
+// Each pattern: array of {x,y,c,s} normalized coordinates to draw on left half
+const CHALLENGES=[
+  [
+    {pts:[[0.3,0.35],[0.2,0.4],[0.15,0.5],[0.2,0.6],[0.3,0.65]],color:'#f97316',size:9},
+    {pts:[[0.25,0.38],[0.1,0.5],[0.25,0.62]],color:'#ffd23f',size:7},
+    {pts:[[0.35,0.45],[0.28,0.5],[0.35,0.55]],color:'#34c77b',size:6},
+  ],
+  [
+    {pts:[[0.4,0.2],[0.3,0.35],[0.2,0.5],[0.3,0.65],[0.4,0.8]],color:'#a855f7',size:8},
+    {pts:[[0.35,0.3],[0.15,0.5],[0.35,0.7]],color:'#3b82f6',size:7},
+    {pts:[[0.4,0.4],[0.3,0.5],[0.4,0.6]],color:'#ec4899',size:5},
+  ],
+  [
+    {pts:[[0.38,0.3],[0.25,0.38],[0.18,0.5],[0.25,0.62],[0.38,0.7]],color:'#34c77b',size:10},
+    {pts:[[0.3,0.35],[0.2,0.5],[0.3,0.65]],color:'#7ec3ee',size:7},
+  ],
+  [
+    {pts:[[0.45,0.25],[0.35,0.3],[0.2,0.4],[0.12,0.5],[0.2,0.6],[0.35,0.7],[0.45,0.75]],color:'#ef4444',size:8},
+    {pts:[[0.38,0.35],[0.22,0.5],[0.38,0.65]],color:'#ffd23f',size:9},
+    {pts:[[0.42,0.42],[0.32,0.5],[0.42,0.58]],color:'#0f4c81',size:5},
+  ],
+];
+let chalIdx=0;
+
+function startChallenge(){
+  if(!ctx){showGame();setTimeout(startChallenge,200);return;}
+  clearCanvas();
+  challengeMode=true;challengeStrokeCount=0;
+  const box=document.getElementById('challenge-info-box');
+  box.style.display='block';box.textContent=T[lang].challenge_info;
+  const ch=CHALLENGES[chalIdx%CHALLENGES.length];chalIdx++;
+  // Draw pattern on LEFT half
+  ctx.save();
+  for(const shape of ch){
+    ctx.strokeStyle=shape.color;ctx.lineWidth=shape.size;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();
+    shape.pts.forEach((pt,i)=>{
+      if(i===0)ctx.moveTo(pt[0]*cSize,pt[1]*cSize);
+      else ctx.lineTo(pt[0]*cSize,pt[1]*cSize);
+    });
+    ctx.stroke();
+  }
+  // Dashed divider
+  ctx.strokeStyle='rgba(15,76,129,0.25)';ctx.lineWidth=2;ctx.setLineDash([8,8]);
+  ctx.beginPath();ctx.moveTo(cSize/2,0);ctx.lineTo(cSize/2,cSize);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  playClick();
+  announce(T[lang].challenge_info);
+}
+
+function checkChallenge(){
+  if(!challengeMode||!ctx)return;
+  if(challengeStrokeCount<5)return;
+  // Check right half has significant colored pixels
+  const id=ctx.getImageData(Math.floor(cSize/2)+5,5,Math.floor(cSize/2)-10,cSize-10);
+  let colored=0;
+  for(let i=0;i<id.data.length;i+=4){
+    if(id.data[i+3]>30&&(id.data[i]<235||id.data[i+1]<235||id.data[i+2]<235))colored++;
+  }
+  if(colored>150){
+    challengeMode=false;
+    document.getElementById('challenge-info-box').textContent=T[lang].challenge_done;
+    setTimeout(showSuccess,700);
+  }
+}
+
+function announce(msg){const el=document.getElementById('aria-live');el.textContent='';setTimeout(()=>{el.textContent=msg;},60);}
+
+let rTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(rTimer);rTimer=setTimeout(()=>{
+    if(document.getElementById('game-screen').classList.contains('active')){
+      const prev=ctx?ctx.getImageData(0,0,cSize,cSize):null;const ps=cSize;
+      initCanvas();
+      if(prev&&ctx&&ps>0){
+        const tmp=document.createElement('canvas');tmp.width=ps;tmp.height=ps;
+        tmp.getContext('2d').putImageData(prev,0,0);
+        ctx.drawImage(tmp,0,0,ps,ps,0,0,cSize,cSize);
+      }
+    }
+  },250);
+});
+
+renderLang();
+</script>
+</body>
+</html>

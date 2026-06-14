@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Chasse aux Sons / Sound Hunt — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#d4eeff 0%,#eaf6ff 60%,#fff9e6 100%);min-height:100vh;color:var(--navy);overflow-x:hidden;}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.25);position:sticky;top:0;z-index:100;}
+#topbar .logo-area{display:flex;align-items:center;gap:8px;flex:1;}
+#topbar .logo-area span{color:#fff;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.5px;}
+.top-btn{border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:.85rem;font-weight:700;transition:transform .1s;}
+.top-btn:active{transform:scale(.95);}
+.lang-btn{background:rgba(255,255,255,.18);color:#fff;}
+.lang-btn.active{background:var(--gold);color:var(--navy);}
+#muteBtn{background:rgba(255,255,255,.18);color:#fff;font-size:1.1rem;padding:6px 10px;}
+.screen{display:none;min-height:calc(100vh - 56px);padding:20px 16px;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+#titleScreen{justify-content:center;gap:16px;text-align:center;}
+.mascot-wrap{margin:10px auto;}
+#gameTitle{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:2.4rem;color:var(--blue);line-height:1.1;}
+#gameSubtitle{font-size:1.1rem;color:var(--slate);margin-top:4px;max-width:400px;}
+.btn-play{margin-top:16px;background:var(--orange);color:#fff;border:none;border-radius:30px;padding:16px 48px;font-size:1.4rem;font-weight:800;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Nunito',system-ui,sans-serif;transition:transform .1s;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-secondary{margin-top:8px;background:var(--blue);color:#fff;border:none;border-radius:20px;padding:10px 28px;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#parentsScreen{justify-content:flex-start;gap:14px;max-width:540px;margin:0 auto;}
+.parents-card{background:#fff;border-radius:20px;padding:20px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+.parents-card h2{color:var(--blue);margin-bottom:10px;}
+.parents-card p{color:var(--slate);line-height:1.6;font-size:.98rem;}
+#gateQuestion{font-size:1.3rem;font-weight:700;color:var(--blue);margin:12px 0;}
+#gateInput{border:2px solid var(--sky);border-radius:12px;padding:10px 16px;font-size:1.2rem;width:120px;text-align:center;}
+#gateError{color:#e11d48;font-size:.9rem;margin-top:6px;min-height:20px;}
+#gameScreen{justify-content:flex-start;gap:10px;padding-top:16px;}
+.game-top{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:640px;}
+.level-badge{background:var(--blue);color:#fff;border-radius:12px;padding:6px 14px;font-weight:700;font-size:.9rem;}
+.score-badge{background:var(--gold);color:var(--navy);border-radius:12px;padding:6px 14px;font-weight:700;font-size:.9rem;}
+#soundTarget{background:#fff;border-radius:24px;padding:18px 32px;box-shadow:0 4px 18px rgba(15,76,129,.15);text-align:center;max-width:640px;width:100%;}
+#soundLabel{font-size:1rem;color:var(--slate);margin-bottom:4px;}
+#soundDisplay{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:3rem;color:var(--blue);font-weight:700;letter-spacing:2px;line-height:1.1;}
+#soundSubLabel{font-size:.85rem;color:var(--slate);margin-top:2px;}
+#speakBtn{margin-top:10px;background:var(--sky);color:var(--blue-dark);border:none;border-radius:20px;padding:8px 22px;font-size:1rem;font-weight:700;cursor:pointer;}
+#progressWrap{width:100%;max-width:640px;}
+#progressBar{height:10px;background:#d0e8f8;border-radius:10px;overflow:hidden;margin-top:4px;}
+#progressFill{height:100%;background:var(--success);border-radius:10px;transition:width .4s;}
+#progressText{font-size:.82rem;color:var(--slate);text-align:right;}
+#objectGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px;width:100%;max-width:640px;margin-top:4px;}
+.obj-card{background:#fff;border-radius:20px;padding:14px 6px;text-align:center;cursor:pointer;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.1);transition:transform .15s,box-shadow .15s,opacity .3s;border:3px solid transparent;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;}
+.obj-card:hover{transform:scale(1.05);box-shadow:0 6px 18px rgba(0,0,0,.15);}
+.obj-card.collected{opacity:.35;transform:scale(.85);pointer-events:none;border-color:var(--success);}
+.obj-card.wrong-flash{border-color:#e11d48;background:#fff0f3;animation:shake .35s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.obj-emoji{font-size:2.8rem;line-height:1;}
+.obj-name{font-size:.85rem;font-weight:700;color:var(--navy);}
+#feedback{min-height:40px;font-size:1.15rem;font-weight:700;text-align:center;color:var(--success);font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+#resultScreen{justify-content:center;gap:18px;text-align:center;}
+.stars-row{display:flex;justify-content:center;gap:10px;font-size:3rem;}
+#resultTitle{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--blue);}
+#resultScore{font-size:1.1rem;color:var(--slate);}
+.result-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.confetti-piece{position:fixed;width:10px;height:12px;opacity:0;border-radius:2px;pointer-events:none;z-index:999;animation:confettiFall 1.6s ease-out forwards;}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(340px) rotate(720deg);}}
+#ariaLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+@media(max-width:480px){#gameTitle{font-size:1.8rem;}#objectGrid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;}.obj-emoji{font-size:2.2rem;}#soundDisplay{font-size:2.2rem;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="logo-area">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <button class="top-btn lang-btn active" id="btnFR" onclick="setLang('fr')" aria-label="Francais">FR</button>
+  <button class="top-btn lang-btn" id="btnEN" onclick="setLang('en')" aria-label="English">EN</button>
+  <button class="top-btn" id="muteBtn" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+</div>
+<div id="ariaLive" aria-live="polite" aria-atomic="true"></div>
+<div id="titleScreen" class="screen active">
+  <div class="mascot-wrap">
+    <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="65" cy="80" rx="38" ry="34" fill="#ffd23f"/>
+      <circle cx="65" cy="46" r="32" fill="#ffd23f"/>
+      <ellipse cx="36" cy="24" rx="11" ry="14" fill="#ffd23f"/>
+      <ellipse cx="36" cy="24" rx="6" ry="9" fill="#f9a8d4"/>
+      <ellipse cx="94" cy="24" rx="11" ry="14" fill="#ffd23f"/>
+      <ellipse cx="94" cy="24" rx="6" ry="9" fill="#f9a8d4"/>
+      <circle cx="54" cy="42" r="7" fill="#fff"/>
+      <circle cx="76" cy="42" r="7" fill="#fff"/>
+      <circle cx="56" cy="43" r="4" fill="#0f172a"/>
+      <circle cx="78" cy="43" r="4" fill="#0f172a"/>
+      <circle cx="57" cy="41" r="1.5" fill="#fff"/>
+      <circle cx="79" cy="41" r="1.5" fill="#fff"/>
+      <ellipse cx="65" cy="52" rx="5" ry="3.5" fill="#f97316"/>
+      <path d="M55 59 Q65 68 75 59" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="100" cy="90" r="15" fill="none" stroke="#0f4c81" stroke-width="5"/>
+      <circle cx="100" cy="90" r="10" fill="rgba(126,195,238,.35)"/>
+      <line x1="111" y1="101" x2="122" y2="112" stroke="#0f4c81" stroke-width="5" stroke-linecap="round"/>
+      <path d="M22 70 Q14 65 22 60" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M18 76 Q6 65 18 54" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 class="title-font" id="gameTitle"></h1>
+  <p id="gameSubtitle"></p>
+  <button class="btn-play" onclick="startGame()" id="btnPlay"></button>
+  <button class="btn-secondary" onclick="showParents()" id="btnParents"></button>
+</div>
+<div id="parentsScreen" class="screen">
+  <div class="parents-card" id="gateWrap">
+    <h2 id="gateTitle"></h2>
+    <p id="gateIntro"></p>
+    <div id="gateQuestion"></div>
+    <input type="number" id="gateInput" min="0" max="200" inputmode="numeric" aria-label="Reponse">
+    <div id="gateError"></div>
+    <button class="btn-secondary" style="margin-top:12px" onclick="checkGate()" id="btnGateOk"></button>
+  </div>
+  <div class="parents-card" id="parentsInfo" style="display:none">
+    <h2 id="parentsInfoTitle"></h2>
+    <p id="parentsInfoText"></p>
+    <button class="btn-secondary" style="margin-top:14px" onclick="showScreen('titleScreen')" id="btnBackHome"></button>
+  </div>
+</div>
+<div id="gameScreen" class="screen">
+  <div class="game-top">
+    <div class="level-badge" id="levelBadge"></div>
+    <div class="score-badge" id="scoreBadge"></div>
+  </div>
+  <div id="progressWrap">
+    <div id="progressBar"><div id="progressFill" style="width:0%"></div></div>
+    <div id="progressText"></div>
+  </div>
+  <div id="soundTarget">
+    <div id="soundLabel"></div>
+    <div id="soundDisplay"></div>
+    <div id="soundSubLabel"></div>
+    <button id="speakBtn" onclick="speakTarget()" aria-label="Recouter"></button>
+  </div>
+  <div id="feedback" aria-live="polite"></div>
+  <div id="objectGrid" role="group" aria-label="Objets"></div>
+</div>
+<div id="resultScreen" class="screen">
+  <div class="stars-row" id="starsRow"></div>
+  <h2 class="title-font" id="resultTitle"></h2>
+  <p id="resultScore"></p>
+  <div class="result-btns">
+    <button class="btn-secondary" onclick="startGame()" id="btnReplay"></button>
+    <button class="btn-play" style="font-size:1.1rem;padding:14px 32px" onclick="nextLevel()" id="btnNextLevel"></button>
+    <button class="btn-secondary" onclick="showScreen('titleScreen')" id="btnHome"></button>
+  </div>
+</div>
+<script>
+var DATA={
+  fr:{
+    sounds:[
+      {level:1,sound:'CH',display:'ch',example:'CHat',
+       targets:['🐱','🐛','🎩','🚿','🐛','🏆'],
+       targetNames:['chat','chenille','chapeau','douche','coccinelle','trophee'],
+       targetMatch:[true,true,true,true,false,false]},
+      {level:1,sound:'OU',display:'ou',example:'lOUp',
+       targets:['🐺','🦆','🍮','🐸','🌂','🦋'],
+       targetNames:['loup','poule','gateau','grenouille','parapluie','papillon'],
+       targetMatch:[true,true,false,true,true,false]},
+      {level:1,sound:'AN',display:'an',example:'elephANt',
+       targets:['🐘','🦁','🍊','🦘','🎸','🌱'],
+       targetNames:['elephant','lion','orange','kangourou','guitare','plant'],
+       targetMatch:[true,false,true,false,false,false]},
+      {level:2,sound:'OI',display:'oi',example:'pOIsson',
+       targets:['🐟','🦜','🍐','🐊','🚂','🎱','🐦'],
+       targetNames:['poisson','perroquet','poire','crocodile','train','boule','oiseau'],
+       targetMatch:[true,true,true,false,false,false,true]},
+      {level:2,sound:'EU',display:'eu',example:'fEU',
+       targets:['🔥','🥚','🐢','🌍','🎈','🐦','🎲'],
+       targetNames:['feu','oeuf','tortue','jeu','ballon','oiseau','bleu'],
+       targetMatch:[true,true,false,true,false,false,true]},
+      {level:2,sound:'ON',display:'on',example:'ballON',
+       targets:['🎈','🦁','🍋','🍈','🦜','🚌','🔔'],
+       targetNames:['ballon','lion','citron','melon','perroquet','camion','clocheton'],
+       targetMatch:[true,false,true,true,false,true,true]},
+      {level:3,sound:'IN',display:'in',example:'lapIN',
+       targets:['🐰','🍷','🌷','🐧','🎻','🧁','🦒','🧙'],
+       targetNames:['lapin','vin','moulin','poussin','violon','muffin','girafe','tintin'],
+       targetMatch:[true,true,true,true,false,true,false,true]},
+      {level:3,sound:'AI',display:'ai',example:'mAIson',
+       targets:['🏠','🍓','🌿','🧲','🐋','✈️','🎪','🧹'],
+       targetNames:['maison','fraise','foret','aimant','baleine','avion','fete','balai'],
+       targetMatch:[true,true,false,true,false,false,false,true]},
+      {level:3,sound:'GN',display:'gn',example:'ciGNe',
+       targets:['🦢','🍇','🔔','🦔','🌊','🕷️','🎺','🌋'],
+       targetNames:['cygne','vigne','sonnette','herisson','montagne','araignee','trompette','volcan'],
+       targetMatch:[true,true,false,false,true,true,false,false]}
+    ],
+    ui:{
+      title:'La Chasse aux Sons',
+      subtitle:'Touche les objets dont le nom contient le son !',
+      play:'Jouer !',
+      parents:'Pour les parents',
+      level:'Niveau',
+      score:'Score',
+      soundLabel:'Trouve le son :',
+      soundSub:'Touche les objets dont le nom contient ce son',
+      speakBtn:'🔊 Recouter',
+      progress:'trouves !',
+      feedbackGood:['Super !','Bravo !','Genial !','Excellent !','Ouiii !','Top !','Parfait !'],
+      feedbackWrong:['Essaie encore !','Pas celui-la !','Cherche encore !','Presque !'],
+      feedbackAll:['Tu les as tous trouves !','Parfait !','Incroyable !','Fantastique !'],
+      resultGood:'Felicitations !',
+      resultOk:'Bien joue !',
+      nextLevel:'Niveau suivant',
+      replay:'Rejouer',
+      home:'Accueil',
+      gateTitle:'Zone parents',
+      gateIntro:'Resous ce calcul pour continuer :',
+      gateOk:'Valider',
+      gateError:'Reponse incorrecte. Essaie encore !',
+      parentsTitle:'Pour les parents',
+      parentsText:"La Chasse aux Sons entraine la conscience phonologique : identifier les sons dans les mots. Cette competence fondamentale prepare a la lecture et l'ecriture. Aucune donnee n'est collectee, aucune publicite n'est affichee. La progression est sauvegardee uniquement sur cet appareil.",
+      backHome:'Retour'
+    }
+  },
+  en:{
+    sounds:[
+      {level:1,sound:'SH',display:'sh',example:'SHip',
+       targets:['🚢','🐑','🦈','🐚','🌟','🌸'],
+       targetNames:['ship','sheep','shark','shell','star','shine'],
+       targetMatch:[true,true,true,true,false,true]},
+      {level:1,sound:'OO',display:'oo',example:'mOOn',
+       targets:['🌙','🍄','🦉','🍩','🐢','🥄'],
+       targetNames:['moon','mushroom','goose','donut','turtle','spoon'],
+       targetMatch:[true,true,true,true,false,true]},
+      {level:1,sound:'EE',display:'ee',example:'trEE',
+       targets:['🌳','🐝','🧀','🦁','🎉','🦶'],
+       targetNames:['tree','bee','cheese','lion','feet','knee'],
+       targetMatch:[true,true,true,false,true,true]},
+      {level:2,sound:'CH',display:'ch',example:'CHicken',
+       targets:['🐔','🚂','⛓️','🍫','🎪','🌺','🪑'],
+       targetNames:['chicken','train','chain','chocolate','peach','flower','chair'],
+       targetMatch:[true,false,true,true,true,false,true]},
+      {level:2,sound:'TH',display:'th',example:'THumb',
+       targets:['👍','🌵','🎭','🧵','🐍','🦷','🤔'],
+       targetNames:['thumb','cactus','theater','thread','snake','tooth','think'],
+       targetMatch:[true,false,true,true,false,true,true]},
+      {level:2,sound:'AR',display:'ar',example:'stAR',
+       targets:['⭐','🎸','🚗','🌳','🏺','🦔','🎯'],
+       targetNames:['star','guitar','car','park','jar','hedgehog','target'],
+       targetMatch:[true,true,true,true,true,false,true]},
+      {level:3,sound:'OW',display:'ow',example:'OWl',
+       targets:['🦉','🌻','🐮','👑','🌈','🎠','🏔️','🤹'],
+       targetNames:['owl','flower','cow','crown','rainbow','clown','mountain','down'],
+       targetMatch:[true,true,true,true,false,true,false,true]},
+      {level:3,sound:'IGH',display:'igh',example:'lIGHt',
+       targets:['💡','🌙','🦅','🪁','🌃','🔦','🐟','🥊'],
+       targetNames:['light','night','eagle','kite','city night','flashlight','fish','fight'],
+       targetMatch:[true,true,false,true,true,true,false,true]},
+      {level:3,sound:'AIR',display:'air',example:'hAIR',
+       targets:['💇','🐻','🪑','🎡','✈️','🌬️','🍐','🐑'],
+       targetNames:['hair','bear','chair','fair','airplane','air','pear','hare'],
+       targetMatch:[true,true,true,true,false,true,true,true]}
+    ],
+    ui:{
+      title:'Sound Hunt',
+      subtitle:'Tap the objects whose name contains the sound!',
+      play:'Play!',
+      parents:'For parents',
+      level:'Level',
+      score:'Score',
+      soundLabel:'Find the sound:',
+      soundSub:'Tap objects whose name contains this sound',
+      speakBtn:'🔊 Hear again',
+      progress:'found!',
+      feedbackGood:['Great!','Awesome!','Brilliant!','Yes!','Nice!','Perfect!','Wonderful!'],
+      feedbackWrong:['Try again!','Not that one!','Keep looking!','Almost!'],
+      feedbackAll:['You found them all!','Amazing!','Incredible!','Fantastic!'],
+      resultGood:'Congratulations!',
+      resultOk:'Well done!',
+      nextLevel:'Next level',
+      replay:'Play again',
+      home:'Home',
+      gateTitle:'Parent zone',
+      gateIntro:'Solve this to continue:',
+      gateOk:'OK',
+      gateError:'Incorrect. Try again!',
+      parentsTitle:'For parents',
+      parentsText:'Sound Hunt trains phonological awareness: identifying sounds within words. This fundamental skill prepares children for reading and writing. No data is collected, no ads are shown. Progress is saved only on this device.',
+      backHome:'Back'
+    }
+  }
+};
+
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false;
+var audioCtx=null;
+var gateA=0,gateB=0;
+var state={level:1,totalScore:0,roundScore:0,soundIdx:0,collected:[],wrongAttempts:0,roundCount:0};
+
+function loadState(){
+  try{var s=localStorage.getItem('pgrg_chasse_sons');if(s){var p=JSON.parse(s);state.level=p.level||1;state.totalScore=p.totalScore||0;}}catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem('pgrg_chasse_sons',JSON.stringify({level:state.level,totalScore:state.totalScore}));}catch(e){}
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btnFR').classList.toggle('active',l==='fr');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderUI();
+}
+
+function T(){return DATA[lang].ui;}
+
+function renderUI(){
+  var ui=T();
+  document.getElementById('gameTitle').textContent=ui.title;
+  document.getElementById('gameSubtitle').textContent=ui.subtitle;
+  document.getElementById('btnPlay').textContent=ui.play;
+  document.getElementById('btnParents').textContent=ui.parents;
+  document.getElementById('gateTitle').textContent=ui.gateTitle;
+  document.getElementById('gateIntro').textContent=ui.gateIntro;
+  document.getElementById('btnGateOk').textContent=ui.gateOk;
+  document.getElementById('parentsInfoTitle').textContent=ui.parentsTitle;
+  document.getElementById('parentsInfoText').textContent=ui.parentsText;
+  document.getElementById('btnBackHome').textContent=ui.backHome;
+  document.getElementById('btnReplay').textContent=ui.replay;
+  document.getElementById('btnNextLevel').textContent=ui.nextLevel;
+  document.getElementById('btnHome').textContent=ui.home;
+  if(document.getElementById('gameScreen').classList.contains('active')){refreshGameLabels();}
+}
+
+function refreshGameLabels(){
+  var ui=T();
+  document.getElementById('levelBadge').textContent=ui.level+' '+state.level;
+  document.getElementById('scoreBadge').textContent=ui.score+': '+state.totalScore;
+  document.getElementById('soundLabel').textContent=ui.soundLabel;
+  document.getElementById('soundSubLabel').textContent=ui.soundSub;
+  document.getElementById('speakBtn').textContent=ui.speakBtn;
+}
+
+/* AUDIO */
+function getAudio(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}return audioCtx;}
+function playTone(freq,dur,type,vol){
+  if(muted)return;
+  try{
+    var ctx=getAudio();
+    var o=ctx.createOscillator();var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type||'sine';o.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(vol||0.22,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){playTone(523,.1,'sine',.2);setTimeout(function(){playTone(659,.1,'sine',.2);},110);setTimeout(function(){playTone(784,.22,'sine',.2);},220);}
+function playWrong(){playTone(200,.18,'sawtooth',.1);}
+function playCollectAll(){var notes=[523,587,659,698,784,880];notes.forEach(function(f,i){setTimeout(function(){playTone(f,.15,'sine',.2);},i*75);});}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+/* SPEECH */
+function speak(text,lc){
+  if(muted)return;
+  if(!window.speechSynthesis)return;
+  try{window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang=lc||(lang==='fr'?'fr-FR':'en-US');u.rate=0.85;u.pitch=1.1;window.speechSynthesis.speak(u);}catch(e){}
+}
+function speakTarget(){
+  var r=currentRound();if(!r)return;
+  var lc=lang==='fr'?'fr-FR':'en-US';
+  var txt=lang==='fr'?('Le son '+r.sound+'. Exemple : '+r.example):('The sound '+r.sound+'. Example: '+r.example);
+  speak(txt,lc);
+}
+function speakWord(w){speak(w,lang==='fr'?'fr-FR':'en-US');}
+
+/* SCREENS */
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+
+/* GATE */
+function showParents(){
+  gateA=Math.floor(Math.random()*9)+2;gateB=Math.floor(Math.random()*9)+2;
+  document.getElementById('gateQuestion').textContent=gateA+' x '+gateB+' = ?';
+  document.getElementById('gateInput').value='';document.getElementById('gateError').textContent='';
+  document.getElementById('gateWrap').style.display='block';document.getElementById('parentsInfo').style.display='none';
+  showScreen('parentsScreen');
+}
+function checkGate(){
+  var v=parseInt(document.getElementById('gateInput').value,10);
+  if(v===gateA*gateB){document.getElementById('gateWrap').style.display='none';document.getElementById('parentsInfo').style.display='block';}
+  else{document.getElementById('gateError').textContent=T().gateError;document.getElementById('gateInput').value='';}
+}
+
+/* GAME */
+function getSounds(){
+  return DATA[lang].sounds.filter(function(s){return s.level<=Math.min(state.level,3);});
+}
+function currentRound(){
+  var sounds=getSounds();
+  if(!sounds.length)return null;
+  return sounds[state.soundIdx%sounds.length];
+}
+
+function startGame(){
+  loadState();
+  var sounds=getSounds();
+  state.soundIdx=0;
+  // start from first sound of current level
+  for(var i=0;i<sounds.length;i++){if(sounds[i].level===Math.min(state.level,3)){state.soundIdx=i;break;}}
+  state.roundScore=0;state.collected=[];state.wrongAttempts=0;state.roundCount=0;
+  showScreen('gameScreen');
+  refreshGameLabels();
+  loadRound();
+}
+
+function loadRound(){
+  state.collected=[];state.wrongAttempts=0;
+  var r=currentRound();if(!r)return;
+  document.getElementById('soundDisplay').textContent=r.display;
+  refreshGameLabels();
+  document.getElementById('feedback').textContent='';
+  renderGrid();updateProgress();
+  setTimeout(speakTarget,500);
+}
+
+function renderGrid(){
+  var r=currentRound();if(!r)return;
+  var grid=document.getElementById('objectGrid');grid.innerHTML='';
+  // shuffle display order
+  var indices=r.targets.map(function(_,i){return i;});
+  indices.sort(function(){return Math.random()-.5;});
+  indices.forEach(function(i){
+    var card=document.createElement('div');
+    card.className='obj-card';card.setAttribute('role','button');
+    card.setAttribute('aria-label',r.targetNames[i]);card.setAttribute('tabindex','0');
+    card.dataset.idx=i;
+    if(state.collected.indexOf(i)>=0){card.classList.add('collected');}
+    card.innerHTML='<span class="obj-emoji" aria-hidden="true">'+r.targets[i]+'</span><span class="obj-name">'+r.targetNames[i]+'</span>';
+    card.addEventListener('click',function(){onCardClick(parseInt(this.dataset.idx,10));});
+    card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')onCardClick(parseInt(this.dataset.idx,10));});
+    grid.appendChild(card);
+  });
+}
+
+function updateProgress(){
+  var r=currentRound();if(!r)return;
+  var total=r.targetMatch.filter(Boolean).length;
+  var found=state.collected.filter(function(i){return r.targetMatch[i];}).length;
+  var pct=total>0?(found/total)*100:0;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressText').textContent=found+' / '+total+' '+T().progress;
+}
+
+function onCardClick(idx){
+  var r=currentRound();if(!r)return;
+  if(state.collected.indexOf(idx)>=0)return;
+  speakWord(r.targetNames[idx]);
+  if(r.targetMatch[idx]){
+    state.collected.push(idx);
+    var cards=document.getElementById('objectGrid').querySelectorAll('.obj-card');
+    cards.forEach(function(c){if(parseInt(c.dataset.idx,10)===idx){c.classList.add('collected');burst(c);}});
+    playSuccess();
+    var msg=pick(T().feedbackGood);
+    document.getElementById('feedback').textContent=msg;announce(msg);
+    state.roundScore+=10;state.totalScore+=10;
+    document.getElementById('scoreBadge').textContent=T().score+': '+state.totalScore;
+    updateProgress();
+    var total=r.targetMatch.filter(Boolean).length;
+    var found=state.collected.filter(function(i){return r.targetMatch[i];}).length;
+    if(found>=total){setTimeout(roundComplete,700);}
+  } else {
+    state.wrongAttempts++;playWrong();
+    var cards2=document.getElementById('objectGrid').querySelectorAll('.obj-card');
+    cards2.forEach(function(c){if(parseInt(c.dataset.idx,10)===idx){c.classList.add('wrong-flash');setTimeout(function(){c.classList.remove('wrong-flash');},400);}});
+    var msg2=pick(T().feedbackWrong);document.getElementById('feedback').textContent=msg2;announce(msg2);
+  }
+}
+
+function roundComplete(){
+  playCollectAll();
+  var msg=pick(T().feedbackAll);document.getElementById('feedback').textContent=msg;announce(msg);
+  state.roundCount++;
+  var sounds=getSounds();
+  state.soundIdx=(state.soundIdx+1)%sounds.length;
+  if(state.roundCount>=3){
+    setTimeout(showResult,900);
+  } else {
+    setTimeout(loadRound,1100);
+  }
+}
+
+function showResult(){
+  saveState();
+  var stars=state.wrongAttempts===0?3:state.wrongAttempts<=4?2:1;
+  var row=document.getElementById('starsRow');row.innerHTML='';
+  for(var i=0;i<3;i++){var s=document.createElement('span');s.textContent=i<stars?'⭐':'☆';row.appendChild(s);}
+  document.getElementById('resultTitle').textContent=stars>=2?T().resultGood:T().resultOk;
+  document.getElementById('resultScore').textContent=T().score+': '+state.totalScore;
+  confetti();showScreen('resultScreen');
+}
+
+function nextLevel(){if(state.level<3)state.level++;saveState();startGame();}
+
+/* HELPERS */
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function announce(text){var el=document.getElementById('ariaLive');el.textContent='';setTimeout(function(){el.textContent=text;},50);}
+
+function burst(card){
+  if(!card)return;
+  var rect=card.getBoundingClientRect();
+  var cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  var colors=['#ffd23f','#f97316','#34c77b','#7ec3ee','#0f4c81','#f9a8d4'];
+  for(var i=0;i<10;i++){
+    (function(){
+      var el=document.createElement('div');el.className='confetti-piece';
+      el.style.left=(cx+Math.random()*60-30)+'px';el.style.top=cy+'px';
+      el.style.background=colors[Math.floor(Math.random()*colors.length)];
+      el.style.borderRadius=Math.random()>.5?'50%':'2px';
+      el.style.animationDelay=(Math.random()*.2)+'s';
+      document.body.appendChild(el);setTimeout(function(){el.remove();},2000);
+    })();
+  }
+}
+function confetti(){
+  var colors=['#ffd23f','#f97316','#34c77b','#7ec3ee','#0f4c81','#f9a8d4','#fff'];
+  for(var i=0;i<40;i++){
+    (function(idx){setTimeout(function(){
+      var el=document.createElement('div');el.className='confetti-piece';
+      el.style.left=Math.random()*window.innerWidth+'px';el.style.top='-20px';
+      el.style.background=colors[Math.floor(Math.random()*colors.length)];
+      el.style.width=(8+Math.random()*10)+'px';el.style.height=(10+Math.random()*14)+'px';
+      el.style.borderRadius=Math.random()>.5?'50%':'2px';
+      document.body.appendChild(el);setTimeout(function(){el.remove();},2200);
+    },idx*50);})(i);
+  }
+}
+
+document.getElementById('gateInput').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+
+loadState();renderUI();
+</script>
+</body>
+</html>

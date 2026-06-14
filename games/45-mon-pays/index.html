@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Mon Pays / My Country — PGRG IA</title>
+<style>
+:root {
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#dbeeff 0%,#eaf6ff 60%,#fffbea 100%);min-height:100vh;color:var(--navy);}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--blue);box-shadow:0 3px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:100;}
+#topbar img{height:34px;}
+#brand-text{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:#fff;font-size:1.15rem;font-weight:700;letter-spacing:.5px;flex:1;}
+.lang-btn{background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:8px;padding:5px 11px;font-size:.9rem;font-weight:700;cursor:pointer;transition:.15s;}
+.lang-btn.active,.lang-btn:hover{background:#fff;color:var(--blue);}
+#mute-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 8px;}
+.screen{display:none;flex-direction:column;align-items:center;padding:18px 12px 30px;min-height:calc(100vh - 56px);}
+.screen.active{display:flex;}
+#screen-title{justify-content:center;text-align:center;gap:10px;}
+h1.game-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.3rem;color:var(--blue);line-height:1.1;}
+h1.game-title span{color:var(--orange);}
+.subtitle{font-size:1.05rem;color:var(--slate);margin-bottom:6px;}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:18px;padding:16px 44px;font-size:1.3rem;font-weight:800;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;margin-top:8px;min-width:48px;min-height:48px;transition:.1s;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{background:none;border:none;color:var(--blue);text-decoration:underline;cursor:pointer;font-size:.95rem;margin-top:6px;padding:8px;}
+#screen-parents{justify-content:center;text-align:center;gap:12px;max-width:480px;margin:auto;}
+.parents-box{background:#fff;border-radius:18px;padding:22px 24px;box-shadow:0 4px 18px rgba(15,76,129,.12);max-width:420px;width:100%;}
+.parents-box h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);font-size:1.4rem;margin-bottom:10px;}
+.parents-box p{color:var(--slate);font-size:.97rem;line-height:1.6;}
+#gate-question{font-size:1.1rem;font-weight:700;color:var(--navy);margin:10px 0 4px;}
+#gate-input{font-size:1.2rem;padding:10px 16px;border-radius:10px;border:2px solid var(--blue);width:100px;text-align:center;margin:0 auto;display:block;}
+#gate-error{color:#d00;font-size:.9rem;margin-top:4px;}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);margin-top:6px;min-height:48px;min-width:48px;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+#screen-levels{gap:14px;text-align:center;}
+#screen-levels h2{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.8rem;color:var(--blue);margin-top:6px;}
+.level-cards{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:8px;}
+.level-card{background:#fff;border-radius:16px;padding:18px 22px;box-shadow:0 4px 14px rgba(15,76,129,.13);cursor:pointer;min-width:140px;max-width:180px;text-align:center;border:3px solid transparent;transition:.15s;}
+.level-card:hover,.level-card:focus{border-color:var(--orange);outline:none;}
+.level-card .lv-icon{font-size:2.2rem;}
+.level-card .lv-name{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:var(--blue);margin-top:4px;}
+.level-card .lv-desc{font-size:.82rem;color:var(--slate);margin-top:3px;}
+.level-card .lv-stars{font-size:1.1rem;margin-top:6px;}
+#screen-game{padding:10px 8px 24px;gap:8px;width:100%;}
+#game-header{display:flex;align-items:center;gap:8px;width:100%;max-width:900px;margin:0 auto;}
+#game-header button{background:none;border:none;cursor:pointer;font-size:1.3rem;padding:8px;min-width:44px;min-height:44px;}
+#level-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.2rem;color:var(--blue);font-weight:700;flex:1;text-align:center;}
+#score-display{font-size:1rem;color:var(--slate);font-weight:700;}
+#question-banner{background:var(--blue);color:#fff;border-radius:14px;padding:12px 20px;text-align:center;font-size:1.15rem;font-weight:700;width:100%;max-width:900px;margin:0 auto;}
+#map-area{width:100%;max-width:900px;margin:0 auto;position:relative;}
+#map-svg{width:100%;border-radius:16px;box-shadow:0 4px 18px rgba(15,76,129,.15);}
+#feedback-live{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:2.5rem;font-weight:900;pointer-events:none;opacity:0;transition:opacity .4s;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+#choices-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;max-width:700px;margin:0 auto;}
+.choice-btn{background:#fff;border:2.5px solid var(--blue);border-radius:14px;padding:11px 18px;font-size:1rem;font-weight:700;color:var(--blue);cursor:pointer;min-height:48px;min-width:120px;transition:.12s;font-family:'Nunito',system-ui,sans-serif;}
+.choice-btn:hover{background:var(--sky-light);border-color:var(--orange);}
+.choice-btn.correct{background:var(--success);border-color:var(--success);color:#fff;}
+.choice-btn.wrong{background:#fdd;border-color:#d00;color:#900;}
+#progress-bar-wrap{width:100%;max-width:700px;height:12px;background:#d0e8f8;border-radius:8px;overflow:hidden;margin:2px auto 0;}
+#progress-bar{height:100%;background:linear-gradient(90deg,var(--success),var(--sky));border-radius:8px;transition:width .5s;}
+#screen-win{justify-content:center;text-align:center;gap:12px;}
+#win-stars{font-size:3rem;}
+#win-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;color:var(--orange);}
+#win-msg{color:var(--slate);font-size:1.05rem;}
+.win-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:8px;}
+#tooltip{position:absolute;background:rgba(15,23,42,.92);color:#fff;border-radius:10px;padding:7px 13px;font-size:.93rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;z-index:50;top:0;left:0;}
+.region{cursor:pointer;transition:filter .15s,opacity .15s;}
+.region:hover{filter:brightness(1.15);}
+.region.found{opacity:.55;cursor:default;}
+@keyframes pulse{0%{filter:brightness(1)}50%{filter:brightness(1.7)}100%{filter:brightness(1)}}
+@media(max-width:600px){
+  h1.game-title{font-size:1.7rem;}
+  #question-banner{font-size:1rem;}
+  .choice-btn{font-size:.9rem;padding:9px 12px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+  <span id="brand-text">PGRG IA</span>
+  <button class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Son">&#x1F50A;</button>
+</div>
+
+<div id="screen-title" class="screen active">
+  <svg id="mascot-svg" width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="65" cy="65" r="55" fill="#7ec3ee" stroke="#0f4c81" stroke-width="3"/>
+    <ellipse cx="65" cy="50" rx="36" ry="20" fill="#34c77b" stroke="#0a3559" stroke-width="1.5"/>
+    <ellipse cx="65" cy="68" rx="28" ry="13" fill="#4ade80"/>
+    <g transform="translate(53,32)">
+      <polygon points="12,0 10,5 5,3 8,8 4,11 8,10 7,16 12,13 17,16 16,10 20,11 16,8 19,3 14,5" fill="#f97316"/>
+    </g>
+    <circle cx="53" cy="88" r="6" fill="#fff"/>
+    <circle cx="77" cy="88" r="6" fill="#fff"/>
+    <circle cx="55" cy="89" r="3.5" fill="#0f172a"/>
+    <circle cx="79" cy="89" r="3.5" fill="#0f172a"/>
+    <circle cx="56.5" cy="87.5" r="1.2" fill="#fff"/>
+    <circle cx="80.5" cy="87.5" r="1.2" fill="#fff"/>
+    <path d="M54 98 Q65 108 76 98" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="42" y="20" width="46" height="8" rx="4" fill="#f97316"/>
+    <rect x="50" y="10" width="30" height="12" rx="6" fill="#f97316"/>
+  </svg>
+  <h1 class="game-title" id="title-text">Mon Pays<br><span>My Country</span></h1>
+  <p class="subtitle" id="subtitle-text"></p>
+  <button class="btn-play" id="play-btn" onclick="showLevels()"></button>
+  <button class="btn-parents" id="parents-btn" onclick="startParents()"></button>
+</div>
+
+<div id="screen-parents" class="screen">
+  <div class="parents-box">
+    <h2 id="parents-title"></h2>
+    <p id="gate-desc"></p>
+    <div id="gate-question"></div>
+    <input id="gate-input" type="number" inputmode="numeric" aria-label="Reponse" placeholder="?">
+    <div id="gate-error" role="alert" aria-live="polite"></div>
+    <button class="btn-secondary" style="margin-top:10px" onclick="checkGate()" id="gate-ok-btn"></button>
+  </div>
+  <div id="parents-info" class="parents-box" style="display:none;margin-top:12px;">
+    <h2 id="parents-info-title"></h2>
+    <p id="parents-info-text"></p>
+  </div>
+  <button class="btn-secondary" style="margin-top:12px" onclick="showScreen('screen-title')" id="parents-back-btn"></button>
+</div>
+
+<div id="screen-levels" class="screen">
+  <h2 id="levels-title"></h2>
+  <div class="level-cards" id="level-cards"></div>
+  <button class="btn-secondary" style="margin-top:16px" onclick="showScreen('screen-title')" id="levels-back-btn"></button>
+</div>
+
+<div id="screen-game" class="screen">
+  <div id="game-header">
+    <button onclick="showLevels()" aria-label="Retour">&#x1F3E0;</button>
+    <span id="level-title"></span>
+    <span id="score-display"></span>
+  </div>
+  <div id="question-banner" aria-live="polite"></div>
+  <div id="map-area">
+    <svg id="map-svg" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Carte du Canada"></svg>
+    <div id="tooltip"></div>
+    <div id="feedback-live" role="alert" aria-live="assertive"></div>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="choices-area"></div>
+</div>
+
+<div id="screen-win" class="screen">
+  <div id="win-stars"></div>
+  <div id="win-title"></div>
+  <div id="win-msg"></div>
+  <div class="win-btns">
+    <button class="btn-play" id="win-replay" onclick="replayLevel()"></button>
+    <button class="btn-secondary" id="win-next" onclick="nextLevel()"></button>
+    <button class="btn-secondary" id="win-home" onclick="showLevels()"></button>
+  </div>
+</div>
+
+<script>
+'use strict';
+var T={fr:{play:'Jouer ▶',parents_btn:'Pour les parents',parents_title:'Section parents',gate_desc:'Prouve que tu es un adulte — combien font',gate_ok:'OK',gate_err:'Mauvaise réponse, réessaie !',parents_info_title:'À propos du jeu',parents_info_text:'Mon Pays / My Country développe la géographie locale : provinces et territoires du Canada, grandes villes canadiennes et québécoises, et repères géographiques comme le fleuve Saint-Laurent. Trois niveaux progressifs. Aucune donnée collectée, aucune publicité, 100 % hors-ligne.',parents_back:'← Retour',levels_title:'Choisis un niveau',levels_back:'← Retour',level1_name:'Provinces',level1_desc:'Trouve les provinces et territoires',level2_name:'Grandes villes',level2_desc:'Localise les villes importantes',level3_name:'Fleuves & repères',level3_desc:'Fleuve Saint-Laurent et plus',qprov:'Clique sur : ',qcity:'Où est : ',qriver:'Trouve ce repère : ',correct:'✅ Excellent !',wrong:'❌ Essaie encore !',win_titles:['Super géographe !','Bravo champion(ne) !','Explorateur expert !'],win_msg:'Tu connais bien ton pays !',replay:'\u{1F501} Rejouer',next_level:'▶ Niveau suivant',home:'\u{1F3E0} Accueil',score:'Score',subtitle:'Géographie du Canada / Québec'},en:{play:'Play ▶',parents_btn:'For parents',parents_title:'Parents section',gate_desc:'Prove you are an adult — what is',gate_ok:'OK',gate_err:'Wrong answer, try again!',parents_info_title:'About this game',parents_info_text:'My Country / Mon Pays builds local geography skills: Canadian provinces and territories, major Canadian and Quebec cities, and geographic landmarks like the St. Lawrence River. Three progressive levels. No data collected, no ads, 100% offline.',parents_back:'← Back',levels_title:'Choose a level',levels_back:'← Back',level1_name:'Provinces',level1_desc:'Find the provinces & territories',level2_name:'Major cities',level2_desc:'Locate important cities',level3_name:'Rivers & landmarks',level3_desc:'St. Lawrence River and more',qprov:'Click on: ',qcity:'Where is: ',qriver:'Find this landmark: ',correct:'✅ Excellent!',wrong:'❌ Try again!',win_titles:['Super geographer!','Bravo champion!','Expert explorer!'],win_msg:'You know your country well!',replay:'\u{1F501} Play again',next_level:'▶ Next level',home:'\u{1F3E0} Home',score:'Score',subtitle:'Canada / Quebec Geography'}};
+
+var SAVE_KEY='pgrg_mon_pays';
+var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted=false,audioCtx=null;
+var currentLevel=0,currentQIdx=0,questions=[],score=0,correctCount=0;
+var gateA=0,gateB=0,progress={};
+function loadProg(){try{progress=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')}catch(e){progress={}}}
+function saveProg(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(progress))}catch(e){}}
+loadProg();
+function getAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}return audioCtx}
+function playTone(freq,dur,type,vol){if(muted)return;var ctx=getAudio();if(!ctx)return;type=type||'sine';vol=vol||0.15;var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime);g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);o.start();o.stop(ctx.currentTime+dur)}
+function playCorrect(){playTone(523,.12);setTimeout(function(){playTone(659,.12)},110);setTimeout(function(){playTone(784,.22)},220)}
+function playWrong(){playTone(200,.25,'sawtooth',.1)}
+function playWin(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){playTone(f,.2)},i*120)})}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊'}
+function t(k){return(T[lang]||T.fr)[k]||k}
+function setLang(l){lang=l;document.getElementById('btn-fr').classList.toggle('active',l==='fr');document.getElementById('btn-en').classList.toggle('active',l==='en');renderUI()}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById(id).classList.add('active')}
+
+var PROVS=[
+  {id:'bc',fr:'Colombie-Britannique',en:'British Columbia',abbr:'C.-B.',abbren:'BC',color:'#a8d8ea',
+   d:'M62 90 L88 68 L112 62 L128 72 L134 92 L142 112 L146 138 L140 162 L130 180 L118 196 L104 208 L90 218 L76 212 L64 200 L54 182 L48 158 L46 130 L52 106 Z',cx:96,cy:148},
+  {id:'ab',fr:'Alberta',en:'Alberta',abbr:'Alb.',abbren:'AB',color:'#ffe082',
+   d:'M146 78 L184 70 L194 78 L196 105 L198 135 L198 165 L196 192 L190 218 L178 224 L158 226 L136 222 L130 208 L130 182 L140 162 L146 138 L144 108 Z',cx:166,cy:152},
+  {id:'sk',fr:'Saskatchewan',en:'Saskatchewan',abbr:'Sask.',abbren:'SK',color:'#c5e1a5',
+   d:'M198 70 L240 66 L244 76 L247 106 L249 138 L249 168 L246 196 L240 224 L218 226 L196 222 L190 218 L196 192 L198 165 L198 135 L196 105 Z',cx:222,cy:152},
+  {id:'mb',fr:'Manitoba',en:'Manitoba',abbr:'Man.',abbren:'MB',color:'#b2dfdb',
+   d:'M250 66 L296 65 L302 74 L306 98 L308 126 L310 156 L308 184 L304 206 L296 226 L264 232 L248 226 L240 224 L246 196 L249 168 L249 138 L247 106 Z',cx:279,cy:152},
+  {id:'on',fr:'Ontario',en:'Ontario',abbr:'Ont.',abbren:'ON',color:'#ef9a9a',
+   d:'M310 78 L348 70 L380 74 L406 86 L420 100 L424 116 L418 134 L406 150 L390 164 L370 174 L350 180 L332 176 L318 164 L310 148 L307 128 L306 100 Z',cx:365,cy:128},
+  {id:'qc',fr:'Québec',en:'Quebec',abbr:'Qc',abbren:'QC',color:'#ce93d8',
+   d:'M422 60 L462 54 L502 57 L528 64 L544 80 L550 98 L544 118 L530 136 L512 150 L494 164 L472 176 L452 182 L430 180 L412 170 L400 156 L394 140 L398 124 L410 110 L420 96 Z',cx:476,cy:122},
+  {id:'nb',fr:'Nouveau-Brunswick',en:'New Brunswick',abbr:'N.-B.',abbren:'NB',color:'#80cbc4',
+   d:'M548 150 L566 140 L580 144 L584 160 L580 174 L568 182 L554 184 L540 180 L534 168 L536 156 Z',cx:558,cy:166},
+  {id:'ns',fr:'Nouvelle-Écosse',en:'Nova Scotia',abbr:'N.-É.',abbren:'NS',color:'#ffcc80',
+   d:'M572 178 L592 170 L608 174 L614 186 L610 198 L596 204 L580 202 L568 196 L568 186 Z',cx:590,cy:189},
+  {id:'pei',fr:'Île-du-Prince-Édouard',en:'Prince Edward Island',abbr:'Î.-P.-É.',abbren:'PEI',color:'#f48fb1',
+   d:'M596 157 L616 152 L626 158 L620 167 L606 170 L596 165 Z',cx:610,cy:162},
+  {id:'nl',fr:'Terre-Neuve-et-Labrador',en:'Newfoundland & Labrador',abbr:'T.-N.-L.',abbren:'NL',color:'#81d4fa',
+   d:'M550 62 L598 54 L640 57 L668 70 L680 86 L674 104 L656 118 L636 128 L614 134 L592 138 L570 132 L556 120 L548 106 L546 86 Z',cx:614,cy:94},
+  {id:'yt',fr:'Yukon',en:'Yukon',abbr:'Yn',abbren:'YT',color:'#bcaaa4',
+   d:'M38 44 L78 30 L94 38 L96 56 L88 68 L62 90 L46 82 L36 64 Z',cx:67,cy:57},
+  {id:'nt',fr:'Territoires du Nord-Ouest',en:'Northwest Territories',abbr:'T.N.-O.',abbren:'NT',color:'#b0bec5',
+   d:'M98 34 L200 22 L250 30 L262 44 L250 66 L196 70 L146 78 L112 74 L98 62 L94 46 Z',cx:178,cy:52},
+  {id:'nu',fr:'Nunavut',en:'Nunavut',abbr:'Nt',abbren:'NU',color:'#cfd8dc',
+   d:'M264 22 L424 14 L482 20 L522 30 L534 48 L516 62 L462 54 L422 60 L348 64 L306 62 L264 50 Z',cx:393,cy:40}
+];
+
+var CITIES=[
+  {id:'montreal',fr:'Montréal',en:'Montreal',x:452,y:152,r:9},
+  {id:'quebec-ville',fr:'Québec (ville)',en:'Quebec City',x:494,y:138,r:8},
+  {id:'trois-rivieres',fr:'Trois-Rivières',en:'Trois-Rivières',x:472,y:145,r:7},
+  {id:'ottawa',fr:'Ottawa',en:'Ottawa',x:408,y:152,r:8},
+  {id:'toronto',fr:'Toronto',en:'Toronto',x:388,y:150,r:9},
+  {id:'vancouver',fr:'Vancouver',en:'Vancouver',x:74,y:196,r:9},
+  {id:'calgary',fr:'Calgary',en:'Calgary',x:162,y:188,r:7},
+  {id:'winnipeg',fr:'Winnipeg',en:'Winnipeg',x:266,y:188,r:7},
+  {id:'halifax',fr:'Halifax',en:'Halifax',x:592,y:182,r:7}
+];
+
+var LANDMARKS=[
+  {id:'stlawrence',fr:'Fleuve Saint-Laurent',en:'St. Lawrence River',color:'#1565c0',w:7,
+   d:'M396 152 Q418 154 442 152 Q458 150 472 147 Q490 144 508 141 Q530 138 550 133'},
+  {id:'great-lakes',fr:'Grands Lacs',en:'Great Lakes',color:'#0288d1',w:8,
+   d:'M330 140 Q348 132 364 130 Q380 127 392 134 Q400 140 396 150'},
+  {id:'hudson',fr:"Baie d'Hudson",en:'Hudson Bay',color:'#039be5',w:9,
+   d:'M308 94 Q332 88 358 87 Q380 87 396 95 Q406 104 407 118 Q404 132 396 144'},
+  {id:'rockies',fr:'Montagnes Rocheuses',en:'Rocky Mountains',color:'#607d8b',w:6,
+   d:'M134 92 L142 114 L146 140 L142 164 L136 184'}
+];
+
+var LEVELS=[
+  {id:0,type:'province'},
+  {id:1,type:'city'},
+  {id:2,type:'landmark'}
+];
+
+function drawMap(){
+  var svg=document.getElementById('map-svg');
+  svg.innerHTML='';
+  var bg=svgEl('rect');bg.setAttribute('width','800');bg.setAttribute('height','480');bg.setAttribute('fill','#c9e8f5');bg.setAttribute('rx','16');svg.appendChild(bg);
+  PROVS.forEach(function(p){
+    var el=svgEl('path');
+    el.setAttribute('d',p.d);el.setAttribute('fill',p.color);
+    el.setAttribute('stroke','#fff');el.setAttribute('stroke-width','2');el.setAttribute('stroke-linejoin','round');
+    el.setAttribute('class','region');el.id='prov-'+p.id;el.setAttribute('data-id',p.id);el.setAttribute('data-type','province');
+    el.setAttribute('tabindex','0');el.setAttribute('role','button');el.setAttribute('aria-label',lang==='fr'?p.fr:p.en);
+    svg.appendChild(el);
+    var tx=svgEl('text');tx.setAttribute('x',p.cx);tx.setAttribute('y',p.cy+4);tx.setAttribute('text-anchor','middle');
+    tx.setAttribute('font-size','8');tx.setAttribute('font-weight','bold');tx.setAttribute('fill','#0a3559');tx.setAttribute('pointer-events','none');
+    tx.textContent=lang==='fr'?p.abbr:p.abbren;
+    svg.appendChild(tx);
+  });
+  LANDMARKS.forEach(function(lm){
+    var hit=svgEl('path');hit.setAttribute('d',lm.d);hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','22');hit.setAttribute('fill','none');
+    hit.setAttribute('class','region');hit.setAttribute('data-id',lm.id);hit.setAttribute('data-type','landmark');hit.setAttribute('style','cursor:pointer');
+    svg.appendChild(hit);
+    var el=svgEl('path');el.setAttribute('d',lm.d);el.setAttribute('stroke',lm.color);el.setAttribute('stroke-width',lm.w);el.setAttribute('fill','none');el.setAttribute('stroke-linecap','round');el.setAttribute('stroke-linejoin','round');
+    el.setAttribute('class','region');el.id='lm-'+lm.id;el.setAttribute('data-id',lm.id);el.setAttribute('data-type','landmark');
+    el.setAttribute('tabindex','0');el.setAttribute('role','button');el.setAttribute('aria-label',lang==='fr'?lm.fr:lm.en);
+    svg.appendChild(el);
+  });
+  CITIES.forEach(function(c){
+    var g=svgEl('g');g.setAttribute('class','region');g.id='city-'+c.id;g.setAttribute('data-id',c.id);g.setAttribute('data-type','city');
+    g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',lang==='fr'?c.fr:c.en);
+    var hit=svgEl('circle');hit.setAttribute('cx',c.x);hit.setAttribute('cy',c.y);hit.setAttribute('r','22');hit.setAttribute('fill','transparent');
+    var dot=svgEl('circle');dot.setAttribute('cx',c.x);dot.setAttribute('cy',c.y);dot.setAttribute('r',c.r);dot.setAttribute('fill','#f97316');dot.setAttribute('stroke','#fff');dot.setAttribute('stroke-width','2');dot.setAttribute('pointer-events','none');
+    g.appendChild(hit);g.appendChild(dot);
+    svg.appendChild(g);
+  });
+  var lbl=svgEl('text');lbl.setAttribute('x','400');lbl.setAttribute('y','472');lbl.setAttribute('text-anchor','middle');lbl.setAttribute('font-size','12');lbl.setAttribute('fill','#0f4c81');lbl.setAttribute('font-weight','bold');
+  lbl.textContent=lang==='fr'?'Canada — Vue simplifiée':'Canada — Simplified Map';
+  svg.appendChild(lbl);
+  attachMapEvents();
+}
+function svgEl(tag){return document.createElementNS('http://www.w3.org/2000/svg',tag)}
+
+function attachMapEvents(){
+  var svg=document.getElementById('map-svg');
+  function onClick(e){
+    var el=e.target;var id=el.getAttribute('data-id');var type=el.getAttribute('data-type');
+    if(!id){var p=el.parentElement;if(p){id=p.getAttribute('data-id');type=p.getAttribute('data-type');}}
+    if(id) handleClick(id,type);
+  }
+  function onOver(e){
+    var el=e.target;var id=el.getAttribute('data-id');var type=el.getAttribute('data-type');
+    if(!id){var p=el.parentElement;if(p){id=p.getAttribute('data-id');type=p.getAttribute('data-type');}}
+    if(!id) return;
+    var name='';
+    var prov=PROVS.find(function(x){return x.id===id});
+    if(prov) name=lang==='fr'?prov.fr:prov.en;
+    var city=CITIES.find(function(x){return x.id===id});
+    if(city) name=lang==='fr'?city.fr:city.en;
+    var lm=LANDMARKS.find(function(x){return x.id===id});
+    if(lm) name=lang==='fr'?lm.fr:lm.en;
+    if(name) showTip(e,name);
+  }
+  svg.addEventListener('click',onClick);
+  svg.addEventListener('mouseover',onOver);
+  svg.addEventListener('mouseout',function(){hideTip()});
+  svg.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){onClick(e)}});
+}
+
+function showTip(e,text){
+  var tt=document.getElementById('tooltip');
+  var area=document.getElementById('map-area').getBoundingClientRect();
+  tt.textContent=text;tt.style.opacity='1';
+  var x=e.clientX-area.left,y=e.clientY-area.top;
+  tt.style.left=Math.max(0,x-60)+'px';tt.style.top=Math.max(0,y-36)+'px';
+}
+function hideTip(){document.getElementById('tooltip').style.opacity='0'}
+
+function startLevel(lvl){
+  currentLevel=lvl;score=0;correctCount=0;currentQIdx=0;
+  var type=LEVELS[lvl].type;
+  var raw;
+  if(type==='province') raw=PROVS.map(function(p){return{target:p.id,label:lang==='fr'?p.fr:p.en,type:'province'}});
+  else if(type==='city') raw=CITIES.map(function(c){return{target:c.id,label:lang==='fr'?c.fr:c.en,type:'city'}});
+  else raw=LANDMARKS.map(function(l){return{target:l.id,label:lang==='fr'?l.fr:l.en,type:'landmark'}});
+  questions=shuffle(raw.slice());
+  drawMap();
+  updateScore();
+  renderQ();
+  showScreen('screen-game');
+  var names=[t('level1_name'),t('level2_name'),t('level3_name')];
+  document.getElementById('level-title').textContent=names[lvl];
+}
+function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}return arr}
+
+function renderQ(){
+  if(currentQIdx>=questions.length){showWin();return}
+  var q=questions[currentQIdx];
+  var prefix=q.type==='province'?t('qprov'):q.type==='city'?t('qcity'):t('qriver');
+  document.getElementById('question-banner').textContent=prefix+q.label+' ?';
+  document.getElementById('progress-bar').style.width=((currentQIdx/questions.length)*100)+'%';
+  if(currentLevel===1||currentLevel===2) buildChoices(q);
+  else document.getElementById('choices-area').innerHTML='';
+}
+
+function buildChoices(q){
+  var area=document.getElementById('choices-area');area.innerHTML='';
+  var pool;
+  if(currentLevel===1) pool=CITIES.filter(function(c){return c.id!==q.target});
+  else pool=LANDMARKS.filter(function(l){return l.id!==q.target});
+  var dist=shuffle(pool.slice()).slice(0,3).map(function(d){return{id:d.id,label:lang==='fr'?d.fr:d.en}});
+  var all=shuffle([{id:q.target,label:q.label}].concat(dist));
+  all.forEach(function(ch){
+    var btn=document.createElement('button');btn.className='choice-btn';btn.textContent=ch.label;btn.setAttribute('data-id',ch.id);
+    btn.addEventListener('click',function(){handleClick(ch.id,q.type)});
+    area.appendChild(btn);
+  });
+}
+
+function handleClick(id,type){
+  if(currentQIdx>=questions.length) return;
+  var q=questions[currentQIdx];
+  if(id===q.target){
+    playCorrect();score+=10;correctCount++;
+    flashFeedback(t('correct'));markFound(q.target,q.type);highlightBtn(q.target,true);
+    currentQIdx++;updateScore();
+    setTimeout(function(){if(currentQIdx>=questions.length)showWin();else renderQ()},700);
+  } else {
+    playWrong();flashFeedback(t('wrong'));highlightBtn(id,false);
+    score=Math.max(0,score-2);updateScore();
+    var el=document.getElementById('prov-'+id)||document.getElementById('city-'+id)||document.getElementById('lm-'+id);
+    if(el){el.style.filter='brightness(.65)';setTimeout(function(){el.style.filter=''},400)}
+  }
+}
+
+function highlightBtn(id,correct){
+  document.querySelectorAll('.choice-btn').forEach(function(b){
+    if(b.getAttribute('data-id')===id){
+      b.classList.add(correct?'correct':'wrong');
+      setTimeout(function(){b.classList.remove('correct','wrong')},700);
+    }
+  });
+}
+
+function markFound(id,type){
+  var el=document.getElementById('prov-'+id)||document.getElementById('city-'+id)||document.getElementById('lm-'+id);
+  if(el){el.classList.add('found');el.style.filter='brightness(1.6)';setTimeout(function(){el.style.filter=''},400)}
+}
+
+function flashFeedback(msg){
+  var el=document.getElementById('feedback-live');el.textContent=msg;el.style.opacity='1';
+  setTimeout(function(){el.style.opacity='0'},800);
+}
+
+function updateScore(){document.getElementById('score-display').textContent=t('score')+': '+score}
+
+function showWin(){
+  playWin();
+  var pct=questions.length>0?correctCount/questions.length:1;
+  var stars=pct>=0.9?3:pct>=0.6?2:1;
+  var prev=progress['s'+currentLevel]||0;
+  if(stars>prev){progress['s'+currentLevel]=stars;saveProg()}
+  document.getElementById('win-stars').textContent=stars>=3?'⭐⭐⭐':stars>=2?'⭐⭐':'⭐';
+  var wt=t('win_titles');document.getElementById('win-title').textContent=wt[Math.min(stars-1,2)];
+  document.getElementById('win-msg').textContent=t('win_msg')+' | '+t('score')+': '+score;
+  document.getElementById('win-replay').textContent=t('replay');
+  document.getElementById('win-next').textContent=t('next_level');
+  document.getElementById('win-home').textContent=t('home');
+  document.getElementById('win-next').style.display=currentLevel<2?'':'none';
+  showScreen('screen-win');
+}
+function replayLevel(){startLevel(currentLevel)}
+function nextLevel(){if(currentLevel<2)startLevel(currentLevel+1);else showLevels()}
+
+function startParents(){
+  gateA=Math.floor(Math.random()*8)+2;gateB=Math.floor(Math.random()*8)+2;
+  document.getElementById('gate-question').textContent=gateA+' × '+gateB+' = ?';
+  document.getElementById('gate-input').value='';document.getElementById('gate-error').textContent='';
+  document.getElementById('parents-info').style.display='none';
+  showScreen('screen-parents');renderUI();
+}
+function checkGate(){
+  var v=parseInt(document.getElementById('gate-input').value);
+  if(v===gateA*gateB){document.getElementById('parents-info').style.display='block';document.getElementById('gate-error').textContent=''}
+  else document.getElementById('gate-error').textContent=t('gate_err');
+}
+document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate()});
+
+function showLevels(){renderLevelCards();showScreen('screen-levels')}
+function renderLevelCards(){
+  var c=document.getElementById('level-cards');c.innerHTML='';
+  [{icon:'🗺️',nk:'level1_name',dk:'level1_desc',lvl:0},{icon:'🏙️',nk:'level2_name',dk:'level2_desc',lvl:1},{icon:'🌊',nk:'level3_name',dk:'level3_desc',lvl:2}].forEach(function(lv){
+    var s=progress['s'+lv.lvl]||0;var st=s>=3?'⭐⭐⭐':s>=2?'⭐⭐':s>=1?'⭐':'·';
+    var card=document.createElement('div');card.className='level-card';card.tabIndex=0;
+    card.innerHTML='<div class="lv-icon">'+lv.icon+'</div><div class="lv-name">'+t(lv.nk)+'</div><div class="lv-desc">'+t(lv.dk)+'</div><div class="lv-stars">'+st+'</div>';
+    card.addEventListener('click',function(){startLevel(lv.lvl)});
+    card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')startLevel(lv.lvl)});
+    c.appendChild(card);
+  });
+}
+
+function renderUI(){
+  document.getElementById('subtitle-text').textContent=t('subtitle');
+  document.getElementById('play-btn').textContent=t('play');
+  document.getElementById('parents-btn').textContent=t('parents_btn');
+  document.getElementById('parents-title').textContent=t('parents_title');
+  document.getElementById('gate-desc').textContent=t('gate_desc')+' '+gateA+' × '+gateB+' ?';
+  document.getElementById('gate-ok-btn').textContent=t('gate_ok');
+  document.getElementById('parents-info-title').textContent=t('parents_info_title');
+  document.getElementById('parents-info-text').textContent=t('parents_info_text');
+  document.getElementById('parents-back-btn').textContent=t('parents_back');
+  document.getElementById('levels-title').textContent=t('levels_title');
+  document.getElementById('levels-back-btn').textContent=t('levels_back');
+  renderLevelCards();
+  if(questions.length&&currentQIdx<questions.length) renderQ();
+}
+
+document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+document.getElementById('btn-en').classList.toggle('active',lang==='en');
+renderUI();
+</script>
+</body>
+</html>

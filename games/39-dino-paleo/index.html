@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Dino Paleo / Dino Dig — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,var(--sky-light) 0%,#d4eeff 100%);min-height:100vh;color:var(--navy)}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);padding:6px 14px;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:6px}
+#topbar .brand{display:flex;align-items:center;gap:8px;text-decoration:none}
+#topbar .brand span{color:#fff;font-size:1.1rem;font-weight:700;font-family:'Fredoka',system-ui,sans-serif}
+#topbar .controls{display:flex;gap:6px;align-items:center}
+.btn-lang{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.9rem;font-weight:700;min-width:48px;min-height:48px;transition:.2s}
+.btn-lang.active,.btn-lang:hover{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+#btn-mute{background:none;border:none;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;border-radius:8px;transition:.2s;display:flex;align-items:center;justify-content:center}
+#btn-mute:hover{background:rgba(255,255,255,0.15)}
+.screen{display:none;padding:16px;max-width:700px;margin:0 auto;animation:fadeIn .4s}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#screen-title{text-align:center;padding:24px 16px}
+.mascot-wrap{margin:16px auto;display:flex;justify-content:center}
+.game-title{font-size:2.4rem;color:var(--blue);font-family:'Fredoka',system-ui,sans-serif;line-height:1.1;margin-bottom:8px}
+.game-subtitle{font-size:1.1rem;color:var(--slate);margin-bottom:24px}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:20px;padding:16px 48px;font-size:1.4rem;font-weight:700;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka',system-ui,sans-serif;transition:.15s;min-height:60px;display:inline-block}
+.btn-play:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--orange-dark)}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:10px 24px;font-size:1rem;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);font-weight:700;min-height:48px;transition:.15s;margin-top:12px}
+.btn-secondary:hover{transform:translateY(-1px);box-shadow:0 6px 0 var(--blue-dark)}
+#modal-parents{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+#modal-parents.active{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:28px;max-width:420px;width:90%;text-align:center}
+.modal-box h2{color:var(--blue);margin-bottom:12px;font-size:1.4rem}
+.modal-box p{color:var(--slate);margin-bottom:12px;line-height:1.6}
+#parental-input{font-size:1.2rem;padding:10px;border:2px solid var(--sky);border-radius:10px;width:80px;text-align:center;margin:8px}
+#parental-result{font-size:1rem;color:var(--orange);min-height:24px;margin-top:4px}
+#screen-levels{text-align:center}
+.levels-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:20px}
+.level-card{background:#fff;border-radius:18px;padding:20px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.1);transition:.2s;min-width:180px;border:3px solid transparent}
+.level-card:hover{transform:translateY(-4px);border-color:var(--orange)}
+.level-card.locked{opacity:.5;cursor:not-allowed}
+.level-card .lc-icon{font-size:2.4rem;margin-bottom:8px}
+.level-card .lc-name{font-size:1.1rem;font-weight:700;color:var(--blue)}
+.level-card .lc-desc{font-size:.85rem;color:var(--slate);margin-top:4px}
+.level-card .lc-stars{color:var(--gold);font-size:1.1rem;margin-top:6px}
+#screen-dig{min-height:80vh}
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.game-header h2{color:var(--blue);font-size:1.3rem;font-family:'Fredoka',system-ui,sans-serif}
+.progress-bar-wrap{background:#ddd;border-radius:20px;height:10px;flex:1;max-width:200px;overflow:hidden}
+.progress-bar{background:var(--success);height:100%;border-radius:20px;transition:width .4s}
+.dig-grid-wrap{display:flex;justify-content:center;align-items:flex-start;gap:16px;flex-wrap:wrap}
+#dig-grid{display:grid;gap:4px;background:var(--orange-dark);padding:4px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.dig-cell{width:48px;height:48px;background:#c9974a;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:.2s;position:relative;border:none;-webkit-tap-highlight-color:transparent}
+.dig-cell:hover{background:#b8853a;transform:scale(.97)}
+.dig-cell.revealed{background:#e8d5a0;cursor:default}
+.dig-cell.revealed:hover{transform:none}
+.dig-cell.has-bone.revealed{background:#f5e6c0}
+.bone-found{font-size:1.6rem;animation:popIn .4s}
+@keyframes popIn{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.dig-sidebar{max-width:200px;min-width:160px}
+.bone-tray{background:#fff;border-radius:14px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.bone-tray h3{font-size:.9rem;color:var(--slate);margin-bottom:8px}
+.bone-list{display:flex;flex-wrap:wrap;gap:4px}
+.bone-item{font-size:1.3rem;opacity:.3;transition:.3s}
+.bone-item.found{opacity:1;animation:popIn .4s}
+.dig-hint{background:rgba(255,210,63,.2);border:2px solid var(--gold);border-radius:12px;padding:10px;font-size:.85rem;color:var(--slate);text-align:center}
+#dig-msg{min-height:40px;text-align:center;font-size:1rem;font-weight:700;color:var(--blue);margin-top:10px;transition:.3s}
+#dig-msg.pop{animation:msgPop .4s}
+@keyframes msgPop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+#screen-assemble{}
+.assemble-area{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:flex-start}
+.skeleton-zone{position:relative;background:#fff;border-radius:18px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.1);flex-shrink:0}
+#skeleton-svg{display:block}
+.drop-zone{fill:rgba(15,76,129,0.1);stroke:var(--blue);stroke-width:2;stroke-dasharray:6;cursor:pointer}
+.drop-zone:hover{fill:rgba(15,76,129,0.2)}
+.drop-zone.correct{fill:rgba(52,199,123,0.3);stroke:var(--success);cursor:default}
+.drop-zone.wrong-flash{animation:wrongFlash .5s}
+@keyframes wrongFlash{0%{fill:rgba(255,100,100,0.4)}100%{fill:rgba(15,76,129,0.1)}}
+.bones-palette{background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:130px;max-width:160px}
+.bones-palette h3{font-size:.9rem;color:var(--slate);margin-bottom:10px;font-weight:700}
+.palette-bone{background:var(--sky-light);border:2px solid var(--sky);border-radius:10px;padding:8px;margin-bottom:8px;cursor:pointer;text-align:center;font-size:.9rem;font-weight:700;color:var(--blue);min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;flex-direction:column;width:100%}
+.palette-bone:hover{background:var(--sky);color:#fff}
+.palette-bone.selected{background:var(--orange);color:#fff;border-color:var(--orange-dark)}
+.palette-bone.placed{opacity:.4;cursor:not-allowed;pointer-events:none}
+#assemble-msg{min-height:40px;text-align:center;font-size:1rem;font-weight:700;color:var(--blue);margin-top:10px}
+#assemble-score{text-align:center;font-size:.9rem;color:var(--slate);margin-top:6px}
+#screen-reveal{text-align:center;padding:20px}
+.dino-reveal-svg{margin:0 auto 16px;display:flex;justify-content:center}
+.dino-name{font-size:2rem;color:var(--blue);font-family:'Fredoka',system-ui,sans-serif;margin-bottom:6px}
+.dino-fact{background:#fff;border-radius:16px;padding:16px 20px;font-size:1rem;color:var(--slate);line-height:1.6;margin:12px auto;max-width:420px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.dino-fact .fact-label{font-weight:700;color:var(--orange);display:block;margin-bottom:4px}
+.reveal-stars{font-size:2.5rem;margin:12px 0;letter-spacing:4px;color:var(--gold)}
+.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+#screen-quiz{text-align:center}
+.quiz-question{font-size:1.3rem;color:var(--blue);font-weight:700;margin:16px 0;font-family:'Fredoka',system-ui,sans-serif}
+.quiz-dino-name{font-size:1.8rem;color:var(--orange);font-family:'Fredoka',system-ui,sans-serif;margin-bottom:10px}
+.quiz-img{margin:0 auto 16px;display:flex;justify-content:center}
+.quiz-options{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.quiz-btn{background:#fff;border:3px solid var(--sky);border-radius:16px;padding:14px 28px;font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--blue);min-height:56px;min-width:140px;transition:.2s;font-family:'Fredoka',system-ui,sans-serif}
+.quiz-btn:hover{border-color:var(--orange);color:var(--orange)}
+.quiz-btn.correct-ans{background:var(--success);border-color:var(--success);color:#fff}
+.quiz-btn.wrong-ans{background:#ff6b6b;border-color:#cc0000;color:#fff}
+.quiz-feedback{min-height:48px;font-size:1.1rem;font-weight:700;margin-top:12px;padding:12px;border-radius:12px;transition:.3s}
+.quiz-progress{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.qp-dot{width:14px;height:14px;border-radius:50%;background:#ddd;transition:.3s}
+.qp-dot.done{background:var(--success)}
+.qp-dot.current{background:var(--orange)}
+#quiz-score{font-size:1.1rem;color:var(--slate);margin-top:8px}
+#screen-success{text-align:center;padding:30px 16px}
+.success-title{font-size:2.2rem;color:var(--blue);font-family:'Fredoka',system-ui,sans-serif;margin-bottom:10px}
+.success-stars{font-size:3rem;margin:10px 0;letter-spacing:6px;color:var(--gold)}
+.success-msg{font-size:1.1rem;color:var(--slate);margin-bottom:20px;line-height:1.6}
+#aria-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#eaf6ff}::-webkit-scrollbar-thumb{background:var(--sky);border-radius:4px}
+@media(max-width:480px){
+  .game-title{font-size:1.8rem}
+  .dig-cell{width:40px;height:40px;font-size:1.2rem}
+  .dig-sidebar{max-width:100%;min-width:0;width:100%}
+  .bones-palette{max-width:100%;min-width:0;width:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .bones-palette h3{width:100%}
+  .palette-bone{flex:0 0 auto;min-width:80px;padding:6px 10px;font-size:.8rem;margin-bottom:0;width:auto}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="brand" href="#" onclick="showScreen('title');return false;">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </a>
+  <div class="controls">
+    <button class="btn-lang" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet/Son">&#128266;</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<div id="screen-title" class="screen active">
+  <div class="mascot-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="70" cy="90" rx="32" ry="36" fill="#7ec3ee"/>
+      <path d="M38 108 Q10 115 8 95 Q20 90 38 100Z" fill="#5ab0e0"/>
+      <ellipse cx="85" cy="58" rx="26" ry="22" fill="#7ec3ee"/>
+      <ellipse cx="108" cy="65" rx="14" ry="10" fill="#5ab0e0"/>
+      <circle cx="92" cy="52" r="6" fill="#fff"/>
+      <circle cx="93" cy="52" r="3.5" fill="#0f172a"/>
+      <circle cx="94" cy="51" r="1.2" fill="#fff"/>
+      <path d="M88 46 Q93 43 97 46" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="113" cy="62" rx="2" ry="1.5" fill="#0f172a"/>
+      <path d="M100 70 Q107 75 116 70" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <line x1="105" y1="70" x2="104" y2="74" stroke="#fff" stroke-width="1.5"/>
+      <line x1="109" y1="71" x2="108" y2="75" stroke="#fff" stroke-width="1.5"/>
+      <path d="M45 85 Q30 70 28 55" stroke="#5ab0e0" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <circle cx="26" cy="52" r="6" fill="#5ab0e0"/>
+      <rect x="15" y="28" width="18" height="5" rx="2" fill="#c9974a" transform="rotate(-30 24 30)"/>
+      <rect x="10" y="18" width="6" height="14" rx="2" fill="#f5e6c0" transform="rotate(-30 13 25)"/>
+      <ellipse cx="85" cy="38" rx="24" ry="6" fill="#c9974a"/>
+      <rect x="70" y="18" width="28" height="22" rx="6" fill="#c9974a"/>
+      <rect x="73" y="22" width="12" height="8" rx="2" fill="#e8d5a0"/>
+      <ellipse cx="58" cy="125" rx="12" ry="7" fill="#5ab0e0"/>
+      <ellipse cx="82" cy="126" rx="12" ry="7" fill="#5ab0e0"/>
+      <path d="M48 128 L45 134 M56 131 L54 137 M63 132 L61 138" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+      <path d="M72 132 L70 138 M80 132 L78 138 M88 131 L87 137" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 class="game-title" id="t-title">Dino Paleo</h1>
+  <p class="game-subtitle" id="t-subtitle">Fouille, reconstitue, identifie !</p>
+  <br>
+  <button class="btn-play" onclick="showLevels()" id="t-play">&#129460; Jouer</button>
+  <br>
+  <button class="btn-secondary" onclick="showParents()" id="t-parents">&#128106; Pour les parents</button>
+</div>
+
+<div id="modal-parents" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h2 id="pm-title">Pour les parents</h2>
+    <p id="pm-math"></p>
+    <input type="number" id="parental-input" min="0" max="999" placeholder="?" aria-label="Reponse">
+    <button class="btn-secondary" onclick="checkParental()" id="pm-check">Verifier</button>
+    <div id="parental-result"></div>
+    <div id="parental-info" style="display:none;margin-top:14px">
+      <p id="pm-info"></p>
+      <button class="btn-secondary" onclick="closeParents()" id="pm-close">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-levels" class="screen">
+  <h2 id="ls-title" style="color:var(--blue);font-family:'Fredoka',system-ui,sans-serif;font-size:1.6rem;margin-bottom:6px;margin-top:8px;text-align:center">Choisis ton niveau</h2>
+  <p id="ls-sub" style="text-align:center;color:var(--slate);font-size:.95rem">Tes etoiles sont sauvegardees !</p>
+  <div class="levels-grid" id="levels-grid"></div>
+  <div style="text-align:center;margin-top:18px">
+    <button class="btn-secondary" onclick="showScreen('title')" id="ls-back">Retour</button>
+  </div>
+</div>
+
+<div id="screen-dig" class="screen">
+  <div class="game-header">
+    <h2 id="dig-title-h">&#129460; Fouille !</h2>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="dig-progress" style="width:0%"></div></div>
+    <button class="btn-secondary" style="padding:8px 14px;font-size:.85rem" onclick="showLevels()" id="dig-quit">Quitter</button>
+  </div>
+  <div class="dig-grid-wrap">
+    <div>
+      <div id="dig-grid"></div>
+      <div id="dig-msg" aria-live="polite"></div>
+    </div>
+    <div class="dig-sidebar">
+      <div class="bone-tray">
+        <h3 id="dig-tray-title">Os trouves</h3>
+        <div class="bone-list" id="bone-list"></div>
+      </div>
+      <div class="dig-hint" id="dig-hint">&#129704; Clique sur les cases pour fouiller !</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-assemble" class="screen">
+  <div class="game-header">
+    <h2 id="asm-title-h">&#129429; Reconstitue le squelette</h2>
+    <button class="btn-secondary" style="padding:8px 14px;font-size:.85rem" onclick="showLevels()" id="asm-quit">Quitter</button>
+  </div>
+  <p id="asm-instructions" style="text-align:center;color:var(--slate);font-size:.9rem;margin-bottom:10px"></p>
+  <div class="assemble-area">
+    <div class="skeleton-zone">
+      <svg id="skeleton-svg" width="320" height="260" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="bones-palette">
+      <h3 id="asm-palette-title">Os a placer</h3>
+      <div id="palette-bones"></div>
+    </div>
+  </div>
+  <div id="assemble-msg" aria-live="polite"></div>
+  <div id="assemble-score"></div>
+</div>
+
+<div id="screen-reveal" class="screen">
+  <div class="dino-reveal-svg" id="reveal-dino-svg"></div>
+  <div class="dino-name" id="reveal-name"></div>
+  <div class="reveal-stars" id="reveal-stars"></div>
+  <div class="dino-fact">
+    <span class="fact-label" id="reveal-fact-label">Le saviez-vous ?</span>
+    <span id="reveal-fact"></span>
+  </div>
+  <div class="btn-row">
+    <button class="btn-play" id="reveal-quiz-btn" onclick="startQuizScreen()">&#129504; Quiz</button>
+    <button class="btn-secondary" id="reveal-next-btn" onclick="nextLevelOrHome()">Niveau suivant</button>
+    <button class="btn-secondary" onclick="showScreen('title')" id="reveal-home">Accueil</button>
+  </div>
+</div>
+
+<div id="screen-quiz" class="screen">
+  <div class="game-header">
+    <h2 id="quiz-title-h">&#129504; Quiz Paleontologue</h2>
+    <button class="btn-secondary" style="padding:8px 14px;font-size:.85rem" onclick="showScreen('title')" id="quiz-quit">X</button>
+  </div>
+  <div class="quiz-progress" id="quiz-progress"></div>
+  <div class="quiz-img" id="quiz-dino-svg"></div>
+  <div class="quiz-dino-name" id="quiz-dino-name"></div>
+  <div class="quiz-question" id="quiz-question"></div>
+  <div class="quiz-options" id="quiz-options"></div>
+  <div class="quiz-feedback" id="quiz-feedback"></div>
+  <div id="quiz-score"></div>
+</div>
+
+<div id="screen-success" class="screen">
+  <div class="success-stars" id="suc-stars">&#11088;&#11088;&#11088;</div>
+  <div class="success-title" id="suc-title">Bravo, paleontologue !</div>
+  <div class="success-msg" id="suc-msg"></div>
+  <div class="btn-row">
+    <button class="btn-play" onclick="showLevels()" id="suc-levels">Niveaux</button>
+    <button class="btn-secondary" onclick="showScreen('title')" id="suc-home">Accueil</button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    title:"Dino Paleo",subtitle:"Fouille, reconstitue, identifie !",play:"Jouer",
+    parents:"Pour les parents",pm_title:"Pour les parents",
+    pm_info:"Ce jeu developpe la curiosite scientifique, la patience et la reconnaissance de formes. Les enfants decouvrent plusieurs especes de dinosaures et des faits paleontologiques. Aucune donnee collectee, aucune publicite.",
+    pm_check:"Verifier",pm_close:"Fermer",pm_math_label:"Repondez a cette question :",
+    pm_wrong:"Mauvaise reponse, essayez encore.",
+    ls_title:"Choisis ton niveau",ls_sub:"Tes etoiles sont sauvegardees !",ls_back:"Retour",
+    levels:[{name:"Fouille Douce",desc:"Deterre les os caches",icon:"&#129704;"},{name:"Reconstitution",desc:"Assemble le squelette",icon:"&#129460;"},{name:"Quiz Dino",desc:"Herbivore ou carnivore ?",icon:"&#129504;"}],
+    dig_title:"Fouille le site !",dig_tray:"Os trouves",
+    dig_hint:"Clique sur les cases pour fouiller !",dig_hint2:"Excellent ! Continue !",
+    dig_found:"Os trouve !",dig_all_found:"Tous les os trouves !",dig_already:"Deja fouille ici !",
+    asm_title:"Reconstitue le squelette !",asm_palette:"Os a placer",
+    asm_instructions:"Selectionne un os puis clique sur la zone correspondante du squelette",
+    asm_correct:"Parfait !",asm_wrong:"Essaie encore !",asm_done:"Squelette complet !",
+    reveal_fact_label:"Le saviez-vous ?",reveal_quiz:"Quiz",reveal_next:"Niveau suivant",reveal_home:"Accueil",
+    quiz_title:"Quiz Paleontologue",quiz_quit:"X",
+    quiz_q_type:"Est-il herbivore ou carnivore ?",quiz_q_name:"Quel est ce dinosaure ?",
+    quiz_correct:"Bravo ! C'est exact !",quiz_wrong:"Pas tout a fait... La bonne reponse est :",
+    suc_title:"Bravo, paleontologue !",
+    suc_msg_3:"Tu as termine ce niveau avec 3 etoiles ! Tu es un vrai expert !",
+    suc_msg_2:"Super travail ! 2 etoiles gagnees !",suc_msg_1:"Bien joue ! Continue a t'entrainer !",
+    suc_levels:"Niveaux",suc_home:"Accueil",quit:"Quitter",
+    herbivore:"Herbivore",carnivore:"Carnivore",
+    dinos:{
+      trex:{name:"Tyrannosaurus Rex",fact:"Le T-Rex avait des dents de 20 cm et des bras tres courts ! Il etait l'un des plus grands carnivores terrestres.",type:"carnivore",era:"Cretace (68-66 Ma)"},
+      trice:{name:"Triceratops",fact:"Le Triceratops possedait 3 cornes et une collerette osseuse pour se defendre. C'etait un herbivore paisible.",type:"herbivore",era:"Cretace (68-66 Ma)"},
+      stego:{name:"Stegosaurus",fact:"Les plaques du Stegosaurus sur son dos lui servaient peut-etre a reguler sa temperature !",type:"herbivore",era:"Jurassique (155-150 Ma)"},
+      brachio:{name:"Brachiosaurus",fact:"Le Brachiosaurus avait les pattes avant plus longues que les pattes arriere, comme une girafe geante !",type:"herbivore",era:"Jurassique (154-153 Ma)"},
+      raptor:{name:"Velociraptor",fact:"Le Velociraptor etait de la taille d'une dinde, mais tres rapide et intelligent ! Il chassait en meute.",type:"carnivore",era:"Cretace (75-71 Ma)"},
+      ankylo:{name:"Ankylosaure",fact:"L'Ankylosaure etait protege par une armure d'os et avait une masse au bout de la queue pour se defendre !",type:"herbivore",era:"Cretace (68-66 Ma)"}
+    }
+  },
+  en: {
+    title:"Dino Dig",subtitle:"Dig, build, identify!",play:"Play",
+    parents:"For parents",pm_title:"For parents",
+    pm_info:"This game develops scientific curiosity, patience and shape recognition. Children discover several dinosaur species and paleontological facts. No data collected, no advertising.",
+    pm_check:"Check",pm_close:"Close",pm_math_label:"Answer this question:",
+    pm_wrong:"Wrong answer, try again.",
+    ls_title:"Choose your level",ls_sub:"Your stars are saved!",ls_back:"Back",
+    levels:[{name:"Gentle Dig",desc:"Unearth hidden bones",icon:"&#129704;"},{name:"Assembly",desc:"Build the skeleton",icon:"&#129460;"},{name:"Dino Quiz",desc:"Herbivore or carnivore?",icon:"&#129504;"}],
+    dig_title:"Dig the site!",dig_tray:"Bones found",
+    dig_hint:"Click on cells to dig!",dig_hint2:"Excellent! Keep going!",
+    dig_found:"Bone found!",dig_all_found:"All bones found!",dig_already:"Already dug here!",
+    asm_title:"Assemble the skeleton!",asm_palette:"Bones to place",
+    asm_instructions:"Select a bone then click the matching zone on the skeleton",
+    asm_correct:"Perfect!",asm_wrong:"Try again!",asm_done:"Skeleton complete!",
+    reveal_fact_label:"Did you know?",reveal_quiz:"Quiz",reveal_next:"Next level",reveal_home:"Home",
+    quiz_title:"Paleontologist Quiz",quiz_quit:"X",
+    quiz_q_type:"Is it herbivore or carnivore?",quiz_q_name:"Which dinosaur is this?",
+    quiz_correct:"Correct!",quiz_wrong:"Not quite... The answer is:",
+    suc_title:"Well done, paleontologist!",
+    suc_msg_3:"You completed this level with 3 stars! You're a true expert!",
+    suc_msg_2:"Great work! 2 stars earned!",suc_msg_1:"Nice job! Keep practicing!",
+    suc_levels:"Levels",suc_home:"Home",quit:"Quit",
+    herbivore:"Herbivore",carnivore:"Carnivore",
+    dinos:{
+      trex:{name:"Tyrannosaurus Rex",fact:"T-Rex had 20cm teeth and tiny arms! It was one of the largest land carnivores.",type:"carnivore",era:"Cretaceous (68-66 Ma)"},
+      trice:{name:"Triceratops",fact:"Triceratops had 3 horns and a bony frill to defend itself. It was a peaceful herbivore.",type:"herbivore",era:"Cretaceous (68-66 Ma)"},
+      stego:{name:"Stegosaurus",fact:"The plates on Stegosaurus back may have helped regulate its temperature!",type:"herbivore",era:"Jurassic (155-150 Ma)"},
+      brachio:{name:"Brachiosaurus",fact:"Brachiosaurus had longer front legs than back legs, like a giant giraffe!",type:"herbivore",era:"Jurassic (154-153 Ma)"},
+      raptor:{name:"Velociraptor",fact:"Velociraptor was the size of a turkey, but very fast and clever! It hunted in packs.",type:"carnivore",era:"Cretaceous (75-71 Ma)"},
+      ankylo:{name:"Ankylosaur",fact:"Ankylosaur was protected by bony armor and had a tail club to defend itself!",type:"herbivore",era:"Cretaceous (68-66 Ma)"}
+    }
+  }
+};
+
+var DINO_SVG_DATA = {
+  trex:'<ellipse cx="65" cy="60" rx="28" ry="22" fill="#e57c7c"/><path d="M37 70 Q15 78 12 62 Q24 58 37 65Z" fill="#cc5c5c"/><ellipse cx="90" cy="42" rx="22" ry="16" fill="#e57c7c"/><ellipse cx="110" cy="50" rx="12" ry="8" fill="#cc5c5c"/><circle cx="96" cy="36" r="5" fill="#fff"/><circle cx="97" cy="36" r="3" fill="#111"/><circle cx="98" cy="35" r="1" fill="#fff"/><path d="M104 55 Q110 59 116 55" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="107" y1="55" x2="107" y2="58" stroke="#fff" stroke-width="1.5"/><line x1="111" y1="56" x2="111" y2="59" stroke="#fff" stroke-width="1.5"/><path d="M45 72 Q36 60 38 48" stroke="#cc5c5c" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="56" cy="86" rx="10" ry="6" fill="#cc5c5c"/><ellipse cx="74" cy="88" rx="10" ry="6" fill="#cc5c5c"/>',
+  trice:'<ellipse cx="60" cy="65" rx="34" ry="24" fill="#7ec87e"/><path d="M26 72 Q8 80 6 65 Q18 60 26 68Z" fill="#5bb05b"/><ellipse cx="88" cy="50" rx="20" ry="16" fill="#7ec87e"/><ellipse cx="108" cy="56" rx="10" ry="8" fill="#5bb05b"/><ellipse cx="72" cy="36" rx="22" ry="14" fill="#ff9a7a" opacity=".9"/><line x1="85" y1="38" x2="92" y2="22" stroke="#c9974a" stroke-width="4" stroke-linecap="round"/><line x1="76" y1="34" x2="80" y2="18" stroke="#c9974a" stroke-width="3" stroke-linecap="round"/><line x1="95" y1="45" x2="104" y2="38" stroke="#c9974a" stroke-width="3" stroke-linecap="round"/><circle cx="93" cy="44" r="5" fill="#fff"/><circle cx="94" cy="44" r="3" fill="#111"/><path d="M102 60 Q108 63 114 60" stroke="#5bb05b" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="48" cy="88" rx="10" ry="6" fill="#5bb05b"/><ellipse cx="70" cy="90" rx="10" ry="6" fill="#5bb05b"/>',
+  stego:'<ellipse cx="60" cy="68" rx="38" ry="20" fill="#a07ee8"/><path d="M22 72 Q4 78 2 65 Q16 60 22 68Z" fill="#7c5cc0"/><ellipse cx="88" cy="58" rx="18" ry="14" fill="#a07ee8"/><ellipse cx="105" cy="64" rx="10" ry="7" fill="#7c5cc0"/><polygon points="38,55 42,32 46,55" fill="#f97316" opacity=".9"/><polygon points="50,50 55,26 60,50" fill="#f97316" opacity=".9"/><polygon points="62,50 67,28 72,50" fill="#f97316" opacity=".9"/><polygon points="73,52 77,36 81,52" fill="#f97316" opacity=".9"/><circle cx="92" cy="52" r="5" fill="#fff"/><circle cx="93" cy="52" r="3" fill="#111"/><path d="M100 66 Q105 69 110 66" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="46" cy="87" rx="10" ry="6" fill="#7c5cc0"/><ellipse cx="68" cy="88" rx="10" ry="6" fill="#7c5cc0"/>',
+  brachio:'<ellipse cx="70" cy="78" rx="34" ry="20" fill="#f0c040"/><path d="M36 82 Q18 90 16 75 Q28 70 36 78Z" fill="#d4a82a"/><rect x="88" y="20" width="16" height="52" rx="8" fill="#f0c040"/><ellipse cx="96" cy="18" rx="14" ry="10" fill="#f0c040"/><ellipse cx="108" cy="22" rx="8" ry="6" fill="#d4a82a"/><circle cx="98" cy="14" r="4" fill="#fff"/><circle cx="99" cy="14" r="2.5" fill="#111"/><path d="M104 26 Q108 28 112 26" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="50" cy="96" rx="10" ry="6" fill="#d4a82a"/><ellipse cx="76" cy="97" rx="10" ry="6" fill="#d4a82a"/><ellipse cx="38" cy="94" rx="8" ry="5" fill="#d4a82a"/><ellipse cx="88" cy="94" rx="8" ry="5" fill="#d4a82a"/>',
+  raptor:'<ellipse cx="58" cy="62" rx="22" ry="18" fill="#7ecfe0"/><path d="M36 68 Q16 75 14 60 Q26 55 36 63Z" fill="#5ab5c8"/><ellipse cx="80" cy="48" rx="18" ry="12" fill="#7ecfe0"/><ellipse cx="96" cy="54" rx="10" ry="7" fill="#5ab5c8"/><circle cx="84" cy="42" r="4" fill="#fff"/><circle cx="85" cy="42" r="2.5" fill="#111"/><path d="M91 58 Q96 61 101 58" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M65 76 Q60 88 54 90" stroke="#5ab5c8" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M44 58 Q34 48 36 38" stroke="#5ab5c8" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="48" cy="82" rx="8" ry="5" fill="#5ab5c8"/><ellipse cx="66" cy="83" rx="8" ry="5" fill="#5ab5c8"/>',
+  ankylo:'<ellipse cx="58" cy="68" rx="40" ry="22" fill="#8fa860"/><circle cx="40" cy="58" r="7" fill="#6e8048"/><circle cx="58" cy="52" r="7" fill="#6e8048"/><circle cx="76" cy="55" r="7" fill="#6e8048"/><circle cx="88" cy="60" r="6" fill="#6e8048"/><circle cx="45" cy="76" r="6" fill="#6e8048"/><circle cx="68" cy="72" r="6" fill="#6e8048"/><ellipse cx="88" cy="60" rx="18" ry="13" fill="#8fa860"/><ellipse cx="104" cy="65" rx="10" ry="7" fill="#6e8048"/><circle cx="91" cy="54" r="4" fill="#fff"/><circle cx="92" cy="54" r="2.5" fill="#111"/><path d="M100 68 Q105 71 110 68" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M18 70 Q2 70 -2 65" stroke="#6e8048" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="-2" cy="65" r="8" fill="#6e8048"/><ellipse cx="42" cy="88" rx="9" ry="5" fill="#6e8048"/><ellipse cx="70" cy="90" rx="9" ry="5" fill="#6e8048"/>'
+};
+
+var SKELETON_LAYOUTS = {
+  trex:{color:"#e57c7c",parts:[
+    {id:"skull",  emj:"💀",lFr:"Crane",    lEn:"Skull",    x:210,y:20,w:80,h:55},
+    {id:"spine",  emj:"🦴",lFr:"Colonne",  lEn:"Spine",    x:120,y:50,w:100,h:30},
+    {id:"ribs",   emj:"🫁",lFr:"Cotes",    lEn:"Ribs",     x:120,y:85,w:90,h:55},
+    {id:"pelvis", emj:"🦴",lFr:"Bassin",   lEn:"Pelvis",   x:60,y:100,w:65,h:50},
+    {id:"legR",   emj:"🦵",lFr:"Jambe D",  lEn:"Leg R",    x:30,y:155,w:50,h:75},
+    {id:"legL",   emj:"🦵",lFr:"Jambe G",  lEn:"Leg L",    x:90,y:158,w:50,h:75},
+    {id:"tail",   emj:"➰",lFr:"Queue",    lEn:"Tail",     x:10,y:88, w:55,h:30}
+  ]},
+  trice:{color:"#7ec87e",parts:[
+    {id:"skull",  emj:"💀",lFr:"Crane",      lEn:"Skull",    x:210,y:15,w:90,h:65},
+    {id:"frill",  emj:"🔵",lFr:"Collerette", lEn:"Frill",    x:180,y:5, w:50,h:45},
+    {id:"spine",  emj:"🦴",lFr:"Colonne",    lEn:"Spine",    x:110,y:55,w:100,h:28},
+    {id:"ribs",   emj:"🫁",lFr:"Cotes",      lEn:"Ribs",     x:105,y:85,w:95,h:55},
+    {id:"legR",   emj:"🦵",lFr:"Jambe D",    lEn:"Leg R",    x:40,y:145,w:50,h:80},
+    {id:"legL",   emj:"🦵",lFr:"Jambe G",    lEn:"Leg L",    x:100,y:148,w:50,h:80},
+    {id:"tail",   emj:"➰",lFr:"Queue",      lEn:"Tail",     x:10,y:82, w:55,h:28}
+  ]},
+  stego:{color:"#a07ee8",parts:[
+    {id:"skull",  emj:"💀",lFr:"Crane",   lEn:"Skull",    x:218,y:40,w:80,h:55},
+    {id:"plates", emj:"🔷",lFr:"Plaques", lEn:"Plates",   x:110,y:10,w:115,h:50},
+    {id:"spine",  emj:"🦴",lFr:"Colonne", lEn:"Spine",    x:105,y:62,w:120,h:28},
+    {id:"ribs",   emj:"🫁",lFr:"Cotes",   lEn:"Ribs",     x:108,y:90,w:100,h:50},
+    {id:"legR",   emj:"🦵",lFr:"Jambe D", lEn:"Leg R",    x:45,y:148,w:50,h:80},
+    {id:"legL",   emj:"🦵",lFr:"Jambe G", lEn:"Leg L",    x:110,y:150,w:50,h:80},
+    {id:"tail",   emj:"➰",lFr:"Queue",   lEn:"Tail",     x:10,y:82, w:55,h:28}
+  ]},
+  brachio:{color:"#f0c040",parts:[
+    {id:"skull",  emj:"💀",lFr:"Crane",   lEn:"Skull",   x:232,y:5,  w:70,h:50},
+    {id:"neck",   emj:"🦒",lFr:"Cou",     lEn:"Neck",    x:210,y:55, w:35,h:85},
+    {id:"spine",  emj:"🦴",lFr:"Colonne", lEn:"Spine",   x:105,y:100,w:115,h:25},
+    {id:"ribs",   emj:"🫁",lFr:"Cotes",   lEn:"Ribs",    x:110,y:128,w:100,h:50},
+    {id:"legR",   emj:"🦵",lFr:"Jambe D", lEn:"Leg R",   x:50,y:175, w:46,h:62},
+    {id:"legL",   emj:"🦵",lFr:"Jambe G", lEn:"Leg L",   x:104,y:175,w:46,h:62},
+    {id:"tail",   emj:"➰",lFr:"Queue",   lEn:"Tail",    x:10,y:118, w:55,h:25}
+  ]},
+  raptor:{color:"#7ecfe0",parts:[
+    {id:"skull",  emj:"💀",lFr:"Crane",   lEn:"Skull",   x:210,y:20,w:78,h:50},
+    {id:"spine",  emj:"🦴",lFr:"Colonne", lEn:"Spine",   x:120,y:48,w:100,h:25},
+    {id:"ribs",   emj:"🫁",lFr:"Cotes",   lEn:"Ribs",    x:120,y:75,w:85,h:50},
+    {id:"claw",   emj:"🌙",lFr:"Griffe",  lEn:"Sickle Claw",x:60,y:148,w:55,h:38},
+    {id:"legR",   emj:"🦵",lFr:"Jambe D", lEn:"Leg R",   x:42,y:118,w:44,h:62},
+    {id:"legL",   emj:"🦵",lFr:"Jambe G", lEn:"Leg L",   x:96,y:118,w:44,h:62},
+    {id:"tail",   emj:"➰",lFr:"Queue",   lEn:"Tail",    x:10,y:75, w:55,h:25}
+  ]},
+  ankylo:{color:"#8fa860",parts:[
+    {id:"skull",    emj:"💀",lFr:"Crane",  lEn:"Skull",    x:215,y:28,w:80,h:52},
+    {id:"armor",    emj:"🛡",lFr:"Armure", lEn:"Armor",    x:100,y:42,w:120,h:68},
+    {id:"spine",    emj:"🦴",lFr:"Colonne",lEn:"Spine",    x:100,y:112,w:120,h:22},
+    {id:"legR",     emj:"🦵",lFr:"Jambe D",lEn:"Leg R",    x:42,y:140,w:46,h:68},
+    {id:"legL",     emj:"🦵",lFr:"Jambe G",lEn:"Leg L",    x:100,y:140,w:46,h:68},
+    {id:"tailclub", emj:"🏏",lFr:"Massue", lEn:"Tail Club",x:10,y:110,w:55,h:30}
+  ]}
+};
+
+var BONES_PER_DINO = {
+  trex:   ["💀","🦴","🫁","🦵","🦵","➰"],
+  trice:  ["💀","🔵","🦴","🫁","🦵","🦵","➰"],
+  stego:  ["💀","🔷","🦴","🫁","🦵","🦵","➰"],
+  brachio:["💀","🦒","🦴","🫁","🦵","🦵","➰"],
+  raptor: ["💀","🦴","🫁","🌙","🦵","🦵","➰"],
+  ankylo: ["💀","🛡","🦴","🦵","🦵","🏏"]
+};
+
+var DINO_KEYS = ["trex","trice","stego","brachio","raptor","ankylo"];
+
+var lang = (navigator.language||'fr').startsWith('fr') ? 'fr' : 'en';
+var muted = false;
+var LS_KEY = "pgrg_dino_paleo";
+var progress = {};
+var currentDinoKey = "trex";
+var digState = {};
+var asmState = {};
+var asmSelected = null;
+var quizQuestions = [];
+var quizIdx = 0;
+var quizScore = 0;
+var quizAnswered = false;
+
+function loadProgress() { try { progress = JSON.parse(localStorage.getItem(LS_KEY)||"{}"); } catch(e){ progress={}; } }
+function saveProgress() { try { localStorage.setItem(LS_KEY, JSON.stringify(progress)); } catch(e){} }
+loadProgress();
+
+var audioCtx = null;
+function getAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playSound(type) {
+  if(muted) return;
+  try {
+    var ctx = getAudio();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(type==="dig"){ osc.type="sine"; osc.frequency.setValueAtTime(300,ctx.currentTime); gain.gain.setValueAtTime(.18,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.18); }
+    else if(type==="bone"){ osc.type="triangle"; osc.frequency.setValueAtTime(660,ctx.currentTime); osc.frequency.linearRampToValueAtTime(880,ctx.currentTime+.12); gain.gain.setValueAtTime(.22,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35); }
+    else if(type==="correct"){ osc.type="sine"; osc.frequency.setValueAtTime(523,ctx.currentTime); osc.frequency.setValueAtTime(659,ctx.currentTime+.12); osc.frequency.setValueAtTime(784,ctx.currentTime+.24); gain.gain.setValueAtTime(.22,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.5); }
+    else if(type==="wrong"){ osc.type="sawtooth"; osc.frequency.setValueAtTime(220,ctx.currentTime); gain.gain.setValueAtTime(.1,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3); }
+    else if(type==="win"){
+      var notes=[523,659,784,1047]; var t2=ctx.currentTime;
+      notes.forEach(function(f){ var o2=ctx.createOscillator(); var g2=ctx.createGain(); o2.connect(g2); g2.connect(ctx.destination); o2.type="sine"; o2.frequency.value=f; g2.gain.setValueAtTime(.18,t2); g2.gain.exponentialRampToValueAtTime(.001,t2+.3); o2.start(t2); o2.stop(t2+.32); t2+=.18; });
+      return;
+    }
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.5);
+  } catch(e){}
+}
+function toggleMute() { muted=!muted; document.getElementById('btn-mute').textContent=muted?"🔇":"🔊"; }
+
+function setLang(l) {
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  applyLang();
+}
+function applyLang() {
+  var t=T[lang];
+  setText('t-title',t.title); setText('t-subtitle',t.subtitle); setText('t-play',t.play);
+  setText('t-parents',t.parents); setText('pm-title',t.pm_title); setText('pm-check',t.pm_check);
+  setText('pm-close',t.pm_close); setText('ls-title',t.ls_title); setText('ls-sub',t.ls_sub);
+  setText('ls-back',t.ls_back); setText('reveal-fact-label',t.reveal_fact_label);
+  setText('reveal-quiz-btn',t.reveal_quiz); setText('reveal-next-btn',t.reveal_next);
+  setText('reveal-home',t.reveal_home); setText('quiz-title-h',t.quiz_title);
+  setText('quiz-quit',t.quiz_quit); setText('suc-title',t.suc_title);
+  setText('suc-levels',t.suc_levels); setText('suc-home',t.suc_home);
+  setText('dig-quit',t.quit); setText('asm-quit',t.quit);
+  renderLevelGrid();
+}
+function setText(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+function setHtml(id,val){ var el=document.getElementById(id); if(el) el.innerHTML=val; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-'+id).classList.add('active');
+  var al=document.getElementById('aria-live');
+  if(al){ al.textContent=''; setTimeout(function(){ al.textContent=id; },10); }
+}
+
+function showLevels() { renderLevelGrid(); showScreen('levels'); }
+
+function showParents() {
+  var a=2+Math.floor(Math.random()*9), b=2+Math.floor(Math.random()*9);
+  window._pa=a; window._pb=b;
+  document.getElementById('pm-math').textContent = T[lang].pm_math_label+" "+a+" x "+b+" = ?";
+  document.getElementById('parental-input').value='';
+  document.getElementById('parental-result').textContent='';
+  document.getElementById('parental-info').style.display='none';
+  document.getElementById('modal-parents').classList.add('active');
+}
+function checkParental() {
+  var val=parseInt(document.getElementById('parental-input').value,10);
+  if(val===window._pa*window._pb){
+    document.getElementById('parental-result').textContent='';
+    document.getElementById('parental-info').style.display='block';
+    document.getElementById('pm-info').textContent=T[lang].pm_info;
+  } else {
+    document.getElementById('parental-result').textContent=T[lang].pm_wrong;
+  }
+}
+function closeParents() { document.getElementById('modal-parents').classList.remove('active'); }
+
+function renderLevelGrid() {
+  var t=T[lang];
+  var grid=document.getElementById('levels-grid');
+  grid.innerHTML='';
+  t.levels.forEach(function(lv,i){
+    var unlocked=i===0||(progress['level_'+(i-1)+'_stars']>=1);
+    var stars=progress['level_'+i+'_stars']||0;
+    var card=document.createElement('div');
+    card.className='level-card'+(unlocked?'':' locked');
+    card.setAttribute('role','button'); card.setAttribute('tabindex','0');
+    card.innerHTML='<div class="lc-icon">'+(unlocked?lv.icon:'&#128274;')+'</div>'+
+      '<div class="lc-name">'+lv.name+'</div>'+
+      '<div class="lc-desc">'+lv.desc+'</div>'+
+      '<div class="lc-stars">'+'&#11088;'.repeat(stars)+'&#9734;'.repeat(3-stars)+'</div>';
+    if(unlocked){
+      card.onclick=function(){ startLevel(i); };
+      card.onkeydown=function(e){ if(e.key==='Enter'||e.key===' ') startLevel(i); };
+    }
+    grid.appendChild(card);
+  });
+}
+
+function startLevel(idx) {
+  var saved=progress['current_dino'];
+  if(saved&&DINO_KEYS.indexOf(saved)>=0) currentDinoKey=saved;
+  else { currentDinoKey=DINO_KEYS[Math.floor(Math.random()*DINO_KEYS.length)]; progress['current_dino']=currentDinoKey; saveProgress(); }
+  if(idx===0) startDig();
+  else if(idx===1) startAssemble();
+  else startQuizScreen();
+}
+
+function shuffle(arr) {
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+  return a;
+}
+
+/* ---- DIG ---- */
+function startDig() {
+  var t=T[lang];
+  setText('dig-title-h','Fouille !');
+  setText('dig-tray-title',t.dig_tray);
+  setText('dig-hint',t.dig_hint);
+  document.getElementById('dig-msg').textContent='';
+  var cols=8,rows=6;
+  var bones=BONES_PER_DINO[currentDinoKey];
+  var all=[]; for(var r=0;r<rows;r++) for(var c=0;c<cols;c++) all.push(r*cols+c);
+  var boneCells=shuffle(all).slice(0,bones.length);
+  var bcSet={};
+  boneCells.forEach(function(ci,i){ bcSet[ci]=i; });
+  digState={cols:cols,rows:rows,revealed:{},bcSet:bcSet,bones:bones,bonesFound:[],total:bones.length};
+  renderDigGrid();
+  renderBoneTray();
+  updateDigProgress();
+  showScreen('dig');
+}
+function renderDigGrid() {
+  var st=digState, grid=document.getElementById('dig-grid');
+  grid.style.gridTemplateColumns='repeat('+st.cols+', auto)';
+  grid.innerHTML='';
+  for(var r=0;r<st.rows;r++){
+    for(var c=0;c<st.cols;c++){
+      var idx=r*st.cols+c;
+      var btn=document.createElement('button');
+      btn.className='dig-cell'; btn.dataset.idx=idx;
+      btn.setAttribute('aria-label','Case '+(idx+1));
+      (function(i){ btn.onclick=function(){ digCell(i); }; })(idx);
+      grid.appendChild(btn);
+    }
+  }
+}
+function digCell(idx) {
+  if(digState.revealed[idx]){ setDigMsg(T[lang].dig_already,false); return; }
+  digState.revealed[idx]=true;
+  playSound("dig");
+  var btn=document.querySelector('.dig-cell[data-idx="'+idx+'"]');
+  btn.classList.add('revealed');
+  if(digState.bcSet.hasOwnProperty(idx)){
+    var boneIdx=digState.bcSet[idx];
+    var emj=digState.bones[boneIdx]||'🦴';
+    btn.classList.add('has-bone');
+    btn.innerHTML='<span class="bone-found">'+emj+'</span>';
+    btn.setAttribute('aria-label','Os trouve');
+    digState.bonesFound.push(idx);
+    playSound("bone");
+    setDigMsg(T[lang].dig_found,true);
+    markBoneTray(digState.bonesFound.length-1);
+    updateDigProgress();
+    if(digState.bonesFound.length>=digState.total) setTimeout(function(){ digComplete(); },900);
+  } else {
+    btn.style.background='#d4b57a'; btn.disabled=true;
+  }
+}
+function setDigMsg(msg,good){
+  var el=document.getElementById('dig-msg');
+  el.textContent=msg; el.style.color=good?'var(--success)':'var(--orange)';
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+function renderBoneTray(){
+  var list=document.getElementById('bone-list'); list.innerHTML='';
+  digState.bones.forEach(function(b,i){
+    var sp=document.createElement('span'); sp.className='bone-item'; sp.id='bt-'+i; sp.textContent=b; list.appendChild(sp);
+  });
+}
+function markBoneTray(i){ var el=document.getElementById('bt-'+i); if(el) el.classList.add('found'); }
+function updateDigProgress(){
+  var pct=(digState.bonesFound.length/digState.total)*100;
+  document.getElementById('dig-progress').style.width=pct+'%';
+  if(digState.bonesFound.length>0) setText('dig-hint',T[lang].dig_hint2);
+}
+function digComplete(){
+  playSound("win");
+  if(!progress['level_0_stars']||progress['level_0_stars']<3){ progress['level_0_stars']=3; saveProgress(); }
+  setTimeout(function(){ startAssemble(); },400);
+}
+
+/* ---- ASSEMBLE ---- */
+function startAssemble(){
+  var t=T[lang];
+  setText('asm-title-h',t.asm_title); setText('asm-palette-title',t.asm_palette); setText('asm-instructions',t.asm_instructions);
+  document.getElementById('assemble-msg').textContent=''; document.getElementById('assemble-score').textContent='';
+  var layout=SKELETON_LAYOUTS[currentDinoKey];
+  asmState={layout:layout,placed:{},correct:0,total:layout.parts.length,errors:0};
+  asmSelected=null;
+  renderSkeletonSVG(); renderPaletteBones();
+  showScreen('assemble');
+}
+function renderSkeletonSVG(){
+  var svg=document.getElementById('skeleton-svg');
+  var layout=SKELETON_LAYOUTS[currentDinoKey];
+  svg.innerHTML='';
+  // faded silhouette
+  var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute('opacity','0.15');
+  g.innerHTML='<svg viewBox="0 0 120 100">'+DINO_SVG_DATA[currentDinoKey]+'</svg>';
+  // draw scaled dino silhouette
+  var use=document.createElementNS("http://www.w3.org/2000/svg","g");
+  use.setAttribute('transform','translate(80,80) scale(1.2)');
+  use.setAttribute('opacity','0.15');
+  use.innerHTML=DINO_SVG_DATA[currentDinoKey];
+  svg.appendChild(use);
+  // drop zones
+  layout.parts.forEach(function(part){
+    var rect=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute('x',part.x); rect.setAttribute('y',part.y);
+    rect.setAttribute('width',part.w); rect.setAttribute('height',part.h);
+    rect.setAttribute('rx',8); rect.setAttribute('ry',8);
+    rect.setAttribute('class','drop-zone');
+    rect.setAttribute('id','dz-'+part.id);
+    rect.setAttribute('role','button'); rect.setAttribute('tabindex','0');
+    rect.setAttribute('aria-label',lang==='fr'?part.lFr:part.lEn);
+    (function(pid){ rect.onclick=function(){ dropOnZone(pid); }; rect.onkeydown=function(e){ if(e.key==='Enter'||e.key===' ') dropOnZone(pid); }; })(part.id);
+    svg.appendChild(rect);
+    var txt=document.createElementNS("http://www.w3.org/2000/svg","text");
+    txt.setAttribute('x',part.x+part.w/2); txt.setAttribute('y',part.y+part.h/2+6);
+    txt.setAttribute('text-anchor','middle'); txt.setAttribute('font-size','18');
+    txt.setAttribute('fill','#0f4c81'); txt.setAttribute('pointer-events','none');
+    txt.setAttribute('id','dz-lbl-'+part.id);
+    txt.textContent=part.emj;
+    svg.appendChild(txt);
+  });
+}
+function renderPaletteBones(){
+  var palette=document.getElementById('palette-bones'); palette.innerHTML='';
+  var layout=SKELETON_LAYOUTS[currentDinoKey];
+  var parts=shuffle(layout.parts.slice());
+  parts.forEach(function(part){
+    var btn=document.createElement('button');
+    btn.className='palette-bone'; btn.id='pb-'+part.id;
+    btn.setAttribute('aria-label',lang==='fr'?part.lFr:part.lEn);
+    btn.innerHTML='<span style="font-size:1.4rem">'+part.emj+'</span><span style="font-size:.8rem;color:var(--slate)">'+(lang==='fr'?part.lFr:part.lEn)+'</span>';
+    (function(pid){ btn.onclick=function(){ selectPaletteBone(pid); }; })(part.id);
+    palette.appendChild(btn);
+  });
+}
+function selectPaletteBone(id){
+  if(asmState.placed[id]) return;
+  asmSelected=id;
+  document.querySelectorAll('.palette-bone').forEach(function(b){ b.classList.remove('selected'); });
+  var btn=document.getElementById('pb-'+id); if(btn) btn.classList.add('selected');
+  document.getElementById('assemble-msg').textContent=T[lang].asm_instructions;
+}
+function dropOnZone(zoneId){
+  if(!asmSelected){ document.getElementById('assemble-msg').textContent=T[lang].asm_instructions; return; }
+  if(asmState.placed[zoneId]) return;
+  var t=T[lang];
+  if(asmSelected===zoneId){
+    playSound("correct"); asmState.placed[zoneId]=true; asmState.correct++;
+    var dz=document.getElementById('dz-'+zoneId); if(dz) dz.setAttribute('class','drop-zone correct');
+    var pb=document.getElementById('pb-'+asmSelected); if(pb) pb.classList.add('placed');
+    document.getElementById('assemble-msg').textContent=t.asm_correct;
+    document.getElementById('assemble-score').textContent=asmState.correct+' / '+asmState.total;
+    asmSelected=null;
+    if(asmState.correct>=asmState.total) setTimeout(function(){ assembleComplete(); },700);
+  } else {
+    playSound("wrong"); asmState.errors++;
+    var dz2=document.getElementById('dz-'+zoneId);
+    if(dz2){ dz2.setAttribute('class','drop-zone wrong-flash'); setTimeout(function(){ dz2.setAttribute('class','drop-zone'); },600); }
+    document.getElementById('assemble-msg').textContent=t.asm_wrong;
+  }
+}
+function assembleComplete(){
+  playSound("win");
+  var stars=asmState.errors<=1?3:asmState.errors<=4?2:1;
+  if(!progress['level_1_stars']||progress['level_1_stars']<stars){ progress['level_1_stars']=stars; saveProgress(); }
+  showReveal(stars);
+}
+
+/* ---- REVEAL ---- */
+function showReveal(stars){
+  var t=T[lang]; var dino=t.dinos[currentDinoKey];
+  document.getElementById('reveal-dino-svg').innerHTML='<svg width="160" height="110" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))">'+DINO_SVG_DATA[currentDinoKey]+'</svg>';
+  document.getElementById('reveal-name').textContent=dino.name;
+  document.getElementById('reveal-stars').textContent='&#11088;'.repeat(stars)+'&#9734;'.repeat(3-stars);
+  document.getElementById('reveal-fact').textContent=dino.fact;
+  setText('reveal-fact-label',t.reveal_fact_label);
+  showScreen('reveal');
+}
+function nextLevelOrHome(){
+  var nextIdx=(DINO_KEYS.indexOf(currentDinoKey)+1)%DINO_KEYS.length;
+  progress['current_dino']=DINO_KEYS[nextIdx]; saveProgress();
+  showLevels();
+}
+
+/* ---- QUIZ ---- */
+function buildQuiz(){
+  var t=T[lang]; var d=t.dinos; var qs=[];
+  DINO_KEYS.forEach(function(k){
+    var dino=d[k];
+    var correct=t[dino.type];
+    var wrong=dino.type==='herbivore'?t['carnivore']:t['herbivore'];
+    qs.push({dinoKey:k,question:t.quiz_q_type,dinoName:dino.name,options:shuffle([correct,wrong]),correct:correct});
+    var otherNames=DINO_KEYS.filter(function(x){ return x!==k; }).slice(0,3).map(function(kk){ return d[kk].name; });
+    qs.push({dinoKey:k,question:t.quiz_q_name,dinoName:'???',options:shuffle([dino.name].concat(otherNames)),correct:dino.name});
+  });
+  return shuffle(qs).slice(0,8);
+}
+function startQuizScreen(){
+  var t=T[lang]; setText('quiz-title-h',t.quiz_title);
+  quizQuestions=buildQuiz(); quizIdx=0; quizScore=0; quizAnswered=false;
+  showQuizQuestion(); showScreen('quiz');
+}
+function showQuizQuestion(){
+  if(quizIdx>=quizQuestions.length){ quizComplete(); return; }
+  var q=quizQuestions[quizIdx]; var t=T[lang];
+  var prog=document.getElementById('quiz-progress'); prog.innerHTML='';
+  quizQuestions.forEach(function(_,i){
+    var dot=document.createElement('div');
+    dot.className='qp-dot'+(i<quizIdx?' done':i===quizIdx?' current':'');
+    prog.appendChild(dot);
+  });
+  var silhouette=(q.dinoName==='???');
+  document.getElementById('quiz-dino-svg').innerHTML='<svg width="130" height="100" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" style="'+(silhouette?'filter:brightness(0) contrast(1)':'')+'">'+DINO_SVG_DATA[q.dinoKey]+'</svg>';
+  document.getElementById('quiz-dino-name').textContent=silhouette?(lang==='fr'?'Quel dinosaure ?':'Which dinosaur?'):q.dinoName;
+  document.getElementById('quiz-question').textContent=q.question;
+  document.getElementById('quiz-feedback').textContent='';
+  document.getElementById('quiz-feedback').style.background='transparent';
+  document.getElementById('quiz-score').textContent=quizScore+' / '+quizQuestions.length;
+  quizAnswered=false;
+  var opts=document.getElementById('quiz-options'); opts.innerHTML='';
+  q.options.forEach(function(opt){
+    var btn=document.createElement('button'); btn.className='quiz-btn'; btn.textContent=opt;
+    (function(o,b,qq){ btn.onclick=function(){ answerQuiz(o,b,qq); }; })(opt,btn,q);
+    opts.appendChild(btn);
+  });
+}
+function answerQuiz(answer,btn,q){
+  if(quizAnswered) return;
+  quizAnswered=true;
+  var t=T[lang]; var correct=(answer===q.correct);
+  if(correct){
+    quizScore++; playSound("correct"); btn.classList.add('correct-ans');
+    document.getElementById('quiz-feedback').textContent=t.quiz_correct;
+    document.getElementById('quiz-feedback').style.background='rgba(52,199,123,.15)';
+  } else {
+    playSound("wrong"); btn.classList.add('wrong-ans');
+    document.getElementById('quiz-feedback').textContent=t.quiz_wrong+' '+q.correct;
+    document.getElementById('quiz-feedback').style.background='rgba(255,100,100,.1)';
+    document.querySelectorAll('.quiz-btn').forEach(function(b){ if(b.textContent===q.correct) b.classList.add('correct-ans'); });
+  }
+  document.getElementById('quiz-score').textContent=quizScore+' / '+quizQuestions.length;
+  document.querySelectorAll('.quiz-btn').forEach(function(b){ b.disabled=true; });
+  setTimeout(function(){ quizIdx++; showQuizQuestion(); },1600);
+}
+function quizComplete(){
+  playSound("win");
+  var total=quizQuestions.length;
+  var stars=quizScore>=Math.ceil(total*.85)?3:quizScore>=Math.ceil(total*.6)?2:1;
+  if(!progress['level_2_stars']||progress['level_2_stars']<stars){ progress['level_2_stars']=stars; saveProgress(); }
+  var t=T[lang];
+  document.getElementById('suc-stars').textContent='&#11088;'.repeat(stars)+'&#9734;'.repeat(3-stars);
+  setText('suc-title',t.suc_title); setText('suc-msg',t['suc_msg_'+stars]);
+  setText('suc-levels',t.suc_levels); setText('suc-home',t.suc_home);
+  showScreen('success');
+}
+
+/* ---- INIT ---- */
+setLang(lang);
+document.getElementById('btn-fr').classList.toggle('active',lang==='fr');
+document.getElementById('btn-en').classList.toggle('active',lang==='en');
+document.getElementById('modal-parents').addEventListener('click',function(e){ if(e.target===this) closeParents(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeParents(); });
+</script>
+</body>
+</html>

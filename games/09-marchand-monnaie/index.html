@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Marchand & Monnaie / Coin Market — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81; --blue-dark:#0a3559; --navy:#0f172a;
+  --orange:#f97316; --orange-dark:#ea580c; --gold:#ffd23f;
+  --sky:#7ec3ee; --sky-light:#eaf6ff; --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(135deg,#eaf6ff 0%,#dbeafe 100%);
+  min-height:100vh; color:var(--navy);
+  display:flex; flex-direction:column; align-items:center;
+}
+#topbar{
+  width:100%; background:var(--blue);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:6px 12px; gap:8px; flex-wrap:wrap;
+}
+#topbar-left{display:flex;align-items:center;gap:8px}
+#topbar-brand{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700}
+#topbar-right{display:flex;align-items:center;gap:6px}
+.lang-btn{
+  background:transparent;border:2px solid #fff;color:#fff;
+  border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;
+  cursor:pointer;min-width:48px;min-height:36px;transition:background .2s;
+}
+.lang-btn.active,.lang-btn:hover{background:rgba(255,255,255,.2)}
+#mute-btn{
+  background:transparent;border:none;font-size:1.4rem;cursor:pointer;
+  min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;
+}
+.screen{display:none;flex-direction:column;align-items:center;padding:16px;width:100%;max-width:700px}
+.screen.active{display:flex}
+#title-mascot{margin:16px 0 8px}
+h1{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:var(--blue);font-size:2rem;text-align:center;line-height:1.2;
+}
+.subtitle{color:var(--slate);font-size:1rem;text-align:center;margin:6px 0 18px}
+.btn-play{
+  background:var(--orange);color:#fff;border:none;border-radius:16px;
+  padding:14px 40px;font-size:1.3rem;font-weight:700;cursor:pointer;
+  box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  min-width:180px;min-height:56px;
+}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark)}
+.btn-secondary{
+  background:var(--blue);color:#fff;border:none;border-radius:12px;
+  padding:10px 24px;font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--blue-dark);transition:transform .1s,box-shadow .1s;
+  min-height:48px; margin-top:10px;
+}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark)}
+#level-select{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.level-btn{
+  background:#fff;border:3px solid var(--blue);color:var(--blue);
+  border-radius:14px;padding:12px 20px;font-size:1rem;font-weight:700;
+  cursor:pointer;min-width:140px;min-height:56px;
+  transition:background .15s,color .15s;
+}
+.level-btn.active,.level-btn:hover{background:var(--blue);color:#fff}
+#game-header{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+#game-level-badge{
+  background:var(--blue);color:#fff;border-radius:10px;
+  padding:4px 14px;font-size:.85rem;font-weight:700;
+}
+#game-score{color:var(--slate);font-size:.9rem;font-weight:700}
+#stall{
+  background:#fff;border-radius:20px;padding:14px;
+  box-shadow:0 4px 16px rgba(15,76,129,.12);
+  width:100%;margin-bottom:14px;
+}
+#stall-title{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  color:var(--blue);font-size:1.1rem;font-weight:700;margin-bottom:8px;text-align:center;
+}
+#items-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.item-card{
+  background:var(--sky-light);border:2px solid var(--sky);border-radius:14px;
+  padding:8px 12px;display:flex;flex-direction:column;align-items:center;
+  gap:4px;min-width:80px;font-size:.85rem;
+}
+.item-card .item-emoji{font-size:2rem}
+.item-card .item-name{font-weight:700;color:var(--navy)}
+.item-card .item-price{color:var(--orange);font-weight:700}
+.item-card.selected{border-color:var(--orange);background:#fff3e0}
+#transaction-panel{
+  background:#fff;border-radius:20px;padding:14px;
+  box-shadow:0 4px 16px rgba(15,76,129,.12);
+  width:100%;margin-bottom:14px;
+}
+#transaction-item{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+#transaction-price{font-size:1.1rem;color:var(--orange);font-weight:700}
+#paid-label{font-size:.85rem;color:var(--slate);margin-top:6px}
+#paid-display{
+  font-size:1.3rem;font-weight:700;color:var(--blue);
+  background:var(--sky-light);border-radius:10px;padding:6px 12px;
+  display:inline-block;margin-top:2px;min-width:80px;text-align:center;
+}
+#change-label{font-size:.85rem;color:var(--slate);margin-top:6px}
+#change-needed{
+  font-size:1.3rem;font-weight:700;color:var(--success);
+  background:#f0fdf4;border-radius:10px;padding:6px 12px;
+  display:inline-block;margin-top:2px;
+}
+#coins-section{margin-bottom:14px;width:100%}
+#coins-title{font-size:.9rem;font-weight:700;color:var(--slate);text-align:center;margin-bottom:8px;}
+#coins-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.coin-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;
+  min-width:56px;min-height:72px;padding:4px;
+  border-radius:12px;transition:transform .1s;
+}
+.coin-btn:hover,.coin-btn:focus{transform:scale(1.08)}
+.coin-btn:active{transform:scale(.95)}
+.coin-label{font-size:.7rem;font-weight:700;color:var(--slate)}
+#selection-tray{
+  background:var(--sky-light);border:2px dashed var(--sky);border-radius:14px;
+  padding:10px;width:100%;min-height:60px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+  margin-bottom:14px;
+  position:relative;
+}
+#tray-placeholder{
+  color:#aaa;font-size:.9rem;position:absolute;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;width:100%;height:100%;
+}
+.tray-coin{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  cursor:pointer;padding:3px;border-radius:8px;transition:transform .1s;
+}
+.tray-coin:hover{transform:scale(.9)}
+.tray-coin .coin-label{font-size:.65rem;color:var(--slate)}
+#validate-btn{
+  background:var(--success);color:#fff;border:none;border-radius:14px;
+  padding:12px 32px;font-size:1.1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 #22a05a;transition:transform .1s,box-shadow .1s;
+  min-height:52px;width:100%;max-width:320px;
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+}
+#validate-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #22a05a}
+#validate-btn:disabled{background:#cbd5e1;box-shadow:none;cursor:default}
+#feedback-overlay{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:100;pointer-events:none;
+}
+#feedback-bubble{
+  background:#fff;border-radius:20px;padding:20px 32px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  font-size:1.2rem;font-weight:700;text-align:center;
+  transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:auto;max-width:280px;
+}
+#feedback-bubble.show{transform:scale(1)}
+#feedback-emoji{font-size:3rem;display:block;margin-bottom:6px}
+#customer-area{display:flex;justify-content:center;margin-bottom:10px;}
+#success-stars{font-size:3rem;margin:10px 0;text-align:center}
+#success-msg{
+  font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  font-size:1.5rem;color:var(--blue);text-align:center;margin-bottom:6px;
+}
+#success-sub{color:var(--slate);text-align:center;margin-bottom:18px}
+#success-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#parent-gate{
+  background:#fff;border-radius:20px;padding:24px;
+  box-shadow:0 4px 16px rgba(15,76,129,.1);
+  width:100%;max-width:400px;text-align:center;
+}
+#parent-gate h2{color:var(--blue);margin-bottom:8px}
+#gate-question{font-size:1.1rem;margin:10px 0 6px;font-weight:700}
+#gate-input{
+  border:2px solid var(--sky);border-radius:10px;padding:8px 14px;
+  font-size:1.1rem;width:100px;text-align:center;margin-bottom:8px;
+}
+#gate-err{color:red;font-size:.85rem;min-height:18px}
+#parent-info{background:var(--sky-light);border-radius:14px;padding:14px;text-align:left;margin-top:12px;}
+#parent-info h3{color:var(--blue);margin-bottom:6px}
+#parent-info p{font-size:.9rem;color:var(--slate);line-height:1.5}
+#aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#progress-bar-wrap{width:100%;background:#dbeafe;border-radius:8px;height:10px;margin-bottom:10px}
+#progress-bar{height:10px;background:var(--orange);border-radius:8px;transition:width .4s}
+@media(max-width:480px){
+  h1{font-size:1.5rem}
+  .coin-btn{min-width:48px}
+  #validate-btn{font-size:1rem;padding:10px 20px}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-left">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span id="topbar-brand">PGRG IA</span>
+  </div>
+  <div id="topbar-right">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button id="mute-btn" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+<div id="feedback-overlay" aria-hidden="true">
+  <div id="feedback-bubble">
+    <span id="feedback-emoji"></span>
+    <span id="feedback-text"></span>
+  </div>
+</div>
+
+<!-- TITLE -->
+<div id="screen-title" class="screen active">
+  <div id="title-mascot">
+    <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="10,60 65,20 120,60" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <rect x="10" y="58" width="110" height="6" rx="3" fill="#ea580c"/>
+      <rect x="20" y="64" width="90" height="45" rx="6" fill="#fff" stroke="#7ec3ee" stroke-width="2"/>
+      <rect x="28" y="109" width="8" height="14" rx="3" fill="#0f4c81"/>
+      <rect x="94" y="109" width="8" height="14" rx="3" fill="#0f4c81"/>
+      <text x="34" y="93" font-size="18">&#127822;</text>
+      <text x="57" y="93" font-size="18">&#127819;</text>
+      <text x="80" y="93" font-size="18">&#127827;</text>
+      <circle cx="65" cy="35" r="10" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+      <text x="65" y="40" text-anchor="middle" font-size="11" font-weight="bold" fill="#ea580c">$</text>
+      <rect x="30" y="66" width="70" height="14" rx="4" fill="#eaf6ff" stroke="#7ec3ee" stroke-width="1"/>
+      <text x="65" y="77" text-anchor="middle" font-size="9" font-weight="bold" fill="#0f4c81">MARCH&#201;</text>
+    </svg>
+  </div>
+  <h1 id="title-h1"></h1>
+  <p class="subtitle" id="title-sub"></p>
+  <div id="level-select">
+    <button class="level-btn active" onclick="selectLevel(1)" id="lbtn1"></button>
+    <button class="level-btn" onclick="selectLevel(2)" id="lbtn2"></button>
+    <button class="level-btn" onclick="selectLevel(3)" id="lbtn3"></button>
+  </div>
+  <button class="btn-play" onclick="startGame()" id="btn-jouer"></button>
+  <button class="btn-secondary" onclick="showParentGate()" id="btn-parents"></button>
+</div>
+
+<!-- PARENT GATE -->
+<div id="screen-parent" class="screen">
+  <div id="parent-gate">
+    <h2 id="pg-title"></h2>
+    <p id="pg-desc"></p>
+    <div id="gate-question"></div>
+    <input id="gate-input" type="number" min="0" max="999" inputmode="numeric">
+    <div id="gate-err"></div>
+    <button class="btn-secondary" onclick="checkGate()" id="pg-btn"></button>
+    <div id="parent-info" style="display:none">
+      <h3 id="pi-title"></h3>
+      <p id="pi-desc"></p>
+    </div>
+    <br>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="pg-back"></button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div id="game-header">
+    <div id="game-level-badge"></div>
+    <div id="game-score"></div>
+  </div>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <div id="customer-area">
+    <svg id="customer-svg" width="90" height="110" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+      <rect x="22" y="55" width="46" height="45" rx="12" fill="#7ec3ee"/>
+      <circle cx="45" cy="40" r="24" fill="#fde68a"/>
+      <circle id="eye-l" cx="37" cy="37" r="3" fill="#0f172a"/>
+      <circle id="eye-r" cx="53" cy="37" r="3" fill="#0f172a"/>
+      <path id="cust-mouth" d="M37 48 Q45 55 53 48" stroke="#f97316" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <rect x="10" y="70" width="18" height="22" rx="6" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+      <rect x="14" y="66" width="10" height="8" rx="4" fill="none" stroke="#f97316" stroke-width="2"/>
+    </svg>
+  </div>
+  <div id="stall">
+    <div id="stall-title"></div>
+    <div id="items-grid"></div>
+  </div>
+  <div id="transaction-panel">
+    <div id="transaction-item"></div>
+    <div id="transaction-price"></div>
+    <div id="paid-label"></div>
+    <div id="paid-display">$0.00</div>
+    <div id="change-label" style="display:none"></div>
+    <div id="change-needed" style="display:none"></div>
+  </div>
+  <div id="coins-section">
+    <div id="coins-title"></div>
+    <div id="coins-grid"></div>
+  </div>
+  <div id="selection-tray">
+    <span id="tray-placeholder"></span>
+  </div>
+  <button id="validate-btn" onclick="validateAnswer()" disabled></button>
+</div>
+
+<!-- SUCCESS -->
+<div id="screen-success" class="screen">
+  <div id="success-stars"></div>
+  <div id="success-msg"></div>
+  <div id="success-sub"></div>
+  <div id="success-btns">
+    <button class="btn-secondary" onclick="startGame()" id="btn-replay"></button>
+    <button class="btn-play" onclick="nextLevel()" id="btn-next" style="display:none"></button>
+    <button class="btn-secondary" onclick="showScreen('screen-title')" id="btn-home"></button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr:{
+    title:"Marchand & Monnaie",
+    subtitle:"Apprends a compter l'argent canadien!",
+    lbtn1:"N1 - Payer exact",
+    lbtn2:"N2 - Rendre simple",
+    lbtn3:"N3 - Rendre la monnaie",
+    jouer:"Jouer",
+    parents:"Pour les parents",
+    stallTitle:"L'etal du marche",
+    paidLabel:"Tu as mis :",
+    changeLabel:"Tu dois rendre :",
+    coinsTitle:"Clique sur les pieces ou billets pour les ajouter :",
+    validate:"Valider ✔",
+    trayPlaceholder:"Clique les pieces ci-dessus pour les ajouter ici",
+    levelBadge:function(n){return "Niveau "+n},
+    score:function(c,t){return c+"/"+t+" bonne"+(c>1?"s":"")},
+    feedbackGood:["Parfait ! ⭐","Super ! <3","Bravo ! 👏","Excellent ! 🏆","Bien joué ! ⭐"],
+    feedbackBad:["Essaie encore ! 💪","Presque ! Ressäie","Continue ! Tu y es presque","Pas tout à fait, essaie encore !"],
+    pgTitle:"Coin Parents",
+    pgDesc:"Pour protéger cette section, réponds à cette question :",
+    pgBtn:"Vérifier",
+    pgBack:"Retour",
+    pgErr:"Oups, mauvaise réponse. Essaie encore !",
+    piTitle:"Informations pour les parents",
+    piDesc:"Ce jeu développe la compréhension de la monnaie canadienne ($ et ¢). L'enfant apprend à composer un montant exact ou à rendre la monnaie. Aucune donnée n'est collectée. Aucune publicité. 100% hors-ligne. Progression sauvegardée localement sur cet appareil.",
+    clientPays:"Le client paie avec :",
+    youPay:"Tu paies pour :",
+    successMsg:["Super travail !","Tu es un vrai marchand !","Champion de la monnaie !"],
+    successSub:function(s){return "Tu as réussi "+s+" questions !"},
+    btnReplay:"Rejouer",
+    btnNext:"Niveau suivant",
+    btnHome:"Accueil",
+    currency:function(c){var sign=c<0?"-":"";var val=Math.abs(c);return sign+"$"+(val/100).toFixed(2);}
+  },
+  en:{
+    title:"Coin Market",
+    subtitle:"Learn to count Canadian money!",
+    lbtn1:"L1 - Pay exactly",
+    lbtn2:"L2 - Simple change",
+    lbtn3:"L3 - Make change",
+    jouer:"Play",
+    parents:"For parents",
+    stallTitle:"Market Stall",
+    paidLabel:"You put in:",
+    changeLabel:"Give back:",
+    coinsTitle:"Click coins or bills to add them:",
+    validate:"Confirm ✔",
+    trayPlaceholder:"Click coins above to add them here",
+    levelBadge:function(n){return "Level "+n},
+    score:function(c,t){return c+"/"+t+" correct"},
+    feedbackGood:["Perfect! ⭐","Great job!","Well done! 👏","Excellent! 🏆","Nice work! ⭐"],
+    feedbackBad:["Try again! 💪","Almost! Keep going","So close! Try again","Not quite, try again!"],
+    pgTitle:"Parent Corner",
+    pgDesc:"To protect this section, answer this question:",
+    pgBtn:"Check",
+    pgBack:"Back",
+    pgErr:"Oops, wrong answer. Try again!",
+    piTitle:"For parents",
+    piDesc:"This game develops understanding of Canadian money ($ and cents). Children learn to compose exact amounts or make change. No data collected. No ads. 100% offline. Progress saved locally on this device.",
+    clientPays:"Customer pays with:",
+    youPay:"You pay for:",
+    successMsg:["Great job!","You are a real merchant!","Money champion!"],
+    successSub:function(s){return "You got "+s+" questions right!"},
+    btnReplay:"Play again",
+    btnNext:"Next level",
+    btnHome:"Home",
+    currency:function(c){var sign=c<0?"-":"";var val=Math.abs(c);return sign+"$"+(val/100).toFixed(2);}
+  }
+};
+
+var COINS = [
+  {id:'1c', value:1, label:'1¢', color:'#b87333', shine:'#d4956a', type:'coin'},
+  {id:'5c', value:5, label:'5¢', color:'#a0a0a0', shine:'#d0d0d0', type:'coin'},
+  {id:'10c', value:10, label:'10¢', color:'#888', shine:'#bbb', type:'coin'},
+  {id:'25c', value:25, label:'25¢', color:'#a0a0a0', shine:'#ddd', type:'coin'},
+  {id:'1d', value:100, label:'1$', color:'#c8920e', shine:'#f0c040', type:'coin'},
+  {id:'2d', value:200, label:'2$', color:'#b87333', shine:'#f0c040', type:'coin2'},
+  {id:'5b', value:500, label:'5$', color:'#3a7bbf', shine:'#7ec3ee', type:'bill'},
+  {id:'10b', value:1000, label:'10$', color:'#9c3e2b', shine:'#d48b7a', type:'bill'},
+  {id:'20b', value:2000, label:'20$', color:'#2e7d52', shine:'#5abf8a', type:'bill'}
+];
+
+var ITEMS = [
+  {emoji:'🍎', name:{fr:'Pomme',en:'Apple'}, price:75},
+  {emoji:'🍋', name:{fr:'Citron',en:'Lemon'}, price:50},
+  {emoji:'🍓', name:{fr:'Fraises',en:'Strawberries'}, price:200},
+  {emoji:'🥕', name:{fr:'Carottes',en:'Carrots'}, price:125},
+  {emoji:'🍞', name:{fr:'Pain',en:'Bread'}, price:300},
+  {emoji:'🧃', name:{fr:'Jus',en:'Juice'}, price:150},
+  {emoji:'🍌', name:{fr:'Banane',en:'Banana'}, price:35},
+  {emoji:'🍊', name:{fr:'Orange',en:'Orange'}, price:60},
+  {emoji:'🥜', name:{fr:'Arachides',en:'Peanuts'}, price:85},
+  {emoji:'🍫', name:{fr:'Chocolat',en:'Chocolate'}, price:175},
+  {emoji:'🧁', name:{fr:'Muffin',en:'Muffin'}, price:225},
+  {emoji:'🥝', name:{fr:'Kiwi',en:'Kiwi'}, price:90},
+  {emoji:'🍇', name:{fr:'Raisins',en:'Grapes'}, price:250},
+  {emoji:'🍒', name:{fr:'Cerises',en:'Cherries'}, price:325},
+  {emoji:'🥭', name:{fr:'Mangue',en:'Mango'}, price:350}
+];
+
+var lang = (navigator.language||'fr').startsWith('fr')?'fr':'en';
+var muted = false;
+var currentLevel = 1;
+var currentItem = null;
+var paidAmountCents = 0;
+var selectedCoins = [];
+var correctCount = 0;
+var totalQuestions = 5;
+var questionIndex = 0;
+var clientPaidCents = 0;
+var neededCents = 0;
+var audioCtx = null;
+var LSKEY = 'pgrg_marchand_monnaie';
+var gateA = 0, gateB = 0;
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type){
+  if(muted) return;
+  try{
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(type==='good'){
+      osc.frequency.setValueAtTime(523,ctx.currentTime);
+      osc.frequency.setValueAtTime(659,ctx.currentTime+.1);
+      osc.frequency.setValueAtTime(784,ctx.currentTime+.2);
+      gain.gain.setValueAtTime(.22,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.5);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.5);
+    } else if(type==='coin'){
+      osc.type='triangle';
+      osc.frequency.setValueAtTime(900,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.12,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.18);
+    } else if(type==='bad'){
+      osc.frequency.setValueAtTime(300,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.1);
+      gain.gain.setValueAtTime(.12,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.3);
+    } else if(type==='success'){
+      var freqs=[523,659,784,1047];
+      freqs.forEach(function(f,i){
+        var o2=ctx.createOscillator(); var g2=ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.frequency.value=f;
+        g2.gain.setValueAtTime(.18,ctx.currentTime+i*.12);
+        g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.12+.3);
+        o2.start(ctx.currentTime+i*.12); o2.stop(ctx.currentTime+i*.12+.35);
+      });
+    }
+  }catch(e){}
+}
+
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  renderUI();
+}
+
+function ge(id){return document.getElementById(id);}
+function setText(id,txt){var el=ge(id);if(el)el.textContent=txt;}
+function setHTML(id,html){var el=ge(id);if(el)el.innerHTML=html;}
+
+function renderUI(){
+  var t=T[lang];
+  setText('title-h1',t.title);
+  setText('title-sub',t.subtitle);
+  setText('lbtn1',t.lbtn1);
+  setText('lbtn2',t.lbtn2);
+  setText('lbtn3',t.lbtn3);
+  setText('btn-jouer',t.jouer);
+  setText('btn-parents',t.parents);
+  setText('pg-title',t.pgTitle);
+  setText('pg-desc',t.pgDesc);
+  setText('pg-btn',t.pgBtn);
+  setText('pg-back',t.pgBack);
+  setText('pi-title',t.piTitle);
+  setText('pi-desc',t.piDesc);
+  setText('validate-btn',t.validate);
+  setText('btn-replay',t.btnReplay);
+  setText('btn-home',t.btnHome);
+  setText('btn-next',t.btnNext);
+  setText('tray-placeholder',t.trayPlaceholder);
+  if(ge('coins-title')) setText('coins-title',t.coinsTitle);
+  if(ge('stall-title')) setText('stall-title',t.stallTitle);
+  if(currentItem) updateTransactionPanel();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  ge(id).classList.add('active');
+}
+
+function selectLevel(n){
+  currentLevel=n;
+  document.querySelectorAll('.level-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+}
+
+function startGame(){
+  correctCount=0;
+  questionIndex=0;
+  showScreen('screen-game');
+  nextQuestion();
+}
+
+function nextQuestion(){
+  var pool=getItemsForLevel();
+  currentItem=pool[Math.floor(Math.random()*pool.length)];
+  paidAmountCents=0;
+  selectedCoins=[];
+  clientPaidCents=0;
+  neededCents=0;
+  if(currentLevel>=2){
+    clientPaidCents=pickClientPayment(currentItem.price);
+    neededCents=clientPaidCents-currentItem.price;
+  } else {
+    neededCents=currentItem.price;
+  }
+  updateProgress();
+  renderGameScreen();
+}
+
+function getItemsForLevel(){
+  if(currentLevel===1) return ITEMS.filter(function(i){return i.price<=100;});
+  if(currentLevel===2) return ITEMS.filter(function(i){return i.price<=200;});
+  return ITEMS.filter(function(i){return i.price<=350;});
+}
+
+function pickClientPayment(price){
+  var bills=[2000,1000,500,200,100];
+  for(var i=0;i<bills.length;i++){if(bills[i]>=price) return bills[i];}
+  return Math.ceil(price/100)*100;
+}
+
+function getCoinSetForLevel(){
+  if(currentLevel===1) return COINS.filter(function(c){return ['1c','5c','10c','25c','1d'].indexOf(c.id)>=0;});
+  if(currentLevel===2) return COINS.filter(function(c){return ['1c','5c','10c','25c','1d','2d'].indexOf(c.id)>=0;});
+  return COINS;
+}
+
+function renderGameScreen(){
+  var t=T[lang];
+  setText('game-level-badge',t.levelBadge(currentLevel));
+  setText('game-score',t.score(correctCount,totalQuestions));
+  setText('stall-title',t.stallTitle);
+  var ig=ge('items-grid');
+  ig.innerHTML='<div class="item-card selected">'
+    +'<span class="item-emoji">'+currentItem.emoji+'</span>'
+    +'<span class="item-name">'+currentItem.name[lang]+'</span>'
+    +'<span class="item-price">'+t.currency(currentItem.price)+'</span>'
+    +'</div>';
+  updateTransactionPanel();
+  buildCoinsGrid();
+  renderTray();
+  ge('validate-btn').disabled=true;
+}
+
+function updateTransactionPanel(){
+  var t=T[lang];
+  if(!currentItem) return;
+  var priceStr=t.currency(currentItem.price);
+  if(currentLevel===1){
+    setText('transaction-item',t.youPay+' '+currentItem.emoji+' '+currentItem.name[lang]);
+    setText('transaction-price',priceStr);
+    setText('paid-label',t.paidLabel);
+    ge('paid-display').textContent=t.currency(paidAmountCents);
+    ge('change-label').style.display='none';
+    ge('change-needed').style.display='none';
+  } else {
+    setText('transaction-item',currentItem.emoji+' '+currentItem.name[lang]+' — '+priceStr);
+    setText('transaction-price',t.clientPays+' '+t.currency(clientPaidCents));
+    setText('paid-label',t.paidLabel);
+    ge('paid-display').textContent=t.currency(paidAmountCents);
+    ge('change-label').style.display='block';
+    setText('change-label',t.changeLabel);
+    ge('change-needed').style.display='inline-block';
+    ge('change-needed').textContent=t.currency(neededCents);
+  }
+}
+
+function makeCoinSVG(coin, size){
+  size=size||52;
+  if(coin.type==='bill'){
+    var h=Math.round(size*.55);
+    return '<svg width="'+size+'" height="'+h+'" viewBox="0 0 100 55" xmlns="http://www.w3.org/2000/svg">'
+      +'<rect x="2" y="2" width="96" height="51" rx="7" fill="'+coin.color+'" stroke="'+coin.shine+'" stroke-width="2"/>'
+      +'<rect x="8" y="8" width="84" height="39" rx="4" fill="none" stroke="'+coin.shine+'" stroke-width="1.5" opacity=".5"/>'
+      +'<text x="50" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Nunito,sans-serif">'+coin.label+'</text>'
+      +'</svg>';
+  }
+  if(coin.type==='coin2'){
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">'
+      +'<circle cx="30" cy="30" r="28" fill="'+coin.color+'" stroke="'+coin.shine+'" stroke-width="2.5"/>'
+      +'<circle cx="30" cy="30" r="18" fill="'+coin.shine+'"/>'
+      +'<circle cx="30" cy="30" r="10" fill="'+coin.color+'"/>'
+      +'<text x="30" y="35" text-anchor="middle" font-size="11" font-weight="bold" fill="#fff" font-family="Nunito,sans-serif">'+coin.label+'</text>'
+      +'</svg>';
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">'
+    +'<circle cx="30" cy="30" r="28" fill="'+coin.color+'" stroke="'+coin.shine+'" stroke-width="2"/>'
+    +'<circle cx="30" cy="30" r="22" fill="none" stroke="'+coin.shine+'" stroke-width="1.5" opacity=".5"/>'
+    +'<text x="30" y="35" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff" font-family="Nunito,sans-serif">'+coin.label+'</text>'
+    +'</svg>';
+}
+
+function buildCoinsGrid(){
+  var grid=ge('coins-grid');
+  grid.innerHTML='';
+  setText('coins-title',T[lang].coinsTitle);
+  var coinSet=getCoinSetForLevel();
+  coinSet.forEach(function(coin){
+    var btn=document.createElement('button');
+    btn.className='coin-btn';
+    btn.setAttribute('aria-label',coin.label);
+    var isWide=(coin.type==='bill');
+    var svgW=isWide?72:52;
+    var svgH=isWide?40:52;
+    btn.innerHTML='<div style="width:'+svgW+'px;height:'+svgH+'px">'+makeCoinSVG(coin,svgW)+'</div>'
+      +'<span class="coin-label">'+coin.label+'</span>';
+    btn.onclick=(function(c){return function(){addCoin(c);};})(coin);
+    grid.appendChild(btn);
+  });
+}
+
+function addCoin(coin){
+  playSound('coin');
+  selectedCoins.push(coin.id);
+  paidAmountCents+=coin.value;
+  renderTray();
+  updateTransactionPanel();
+  ge('validate-btn').disabled=(paidAmountCents===0);
+}
+
+function removeCoinAt(idx){
+  var coinId=selectedCoins[idx];
+  var coin=COINS.find(function(c){return c.id===coinId;});
+  paidAmountCents-=coin.value;
+  selectedCoins.splice(idx,1);
+  renderTray();
+  updateTransactionPanel();
+  ge('validate-btn').disabled=(paidAmountCents===0);
+}
+
+function renderTray(){
+  var tray=ge('selection-tray');
+  // clear existing tray coins but keep placeholder span
+  var coins=tray.querySelectorAll('.tray-coin');
+  coins.forEach(function(c){tray.removeChild(c);});
+  var ph=ge('tray-placeholder');
+  if(selectedCoins.length>0){
+    if(ph) ph.style.display='none';
+  } else {
+    if(ph) ph.style.display='';
+  }
+  selectedCoins.forEach(function(coinId,idx){
+    var coin=COINS.find(function(c){return c.id===coinId;});
+    var div=document.createElement('div');
+    div.className='tray-coin';
+    div.setAttribute('role','button');
+    div.setAttribute('aria-label','Retirer '+coin.label);
+    div.setAttribute('tabindex','0');
+    var isWide=(coin.type==='bill');
+    var svgW=isWide?56:38;
+    var svgH=isWide?32:38;
+    div.innerHTML='<div style="width:'+svgW+'px;height:'+svgH+'px">'+makeCoinSVG(coin,svgW)+'</div>'
+      +'<span class="coin-label">'+coin.label+'</span>';
+    (function(i){
+      div.onclick=function(){removeCoinAt(i);};
+      div.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')removeCoinAt(i);};
+    })(idx);
+    tray.appendChild(div);
+  });
+}
+
+function validateAnswer(){
+  var t=T[lang];
+  var correct=false;
+  if(currentLevel===1){
+    correct=(paidAmountCents===currentItem.price);
+  } else {
+    correct=(paidAmountCents===neededCents);
+  }
+  if(correct){
+    correctCount++;
+    playSound('good');
+    setCustomerHappy(true);
+    var msg=t.feedbackGood[Math.floor(Math.random()*t.feedbackGood.length)];
+    showFeedback(true,msg);
+    announce(msg);
+    setTimeout(function(){
+      questionIndex++;
+      updateProgress();
+      if(questionIndex>=totalQuestions){
+        showSuccess();
+      } else {
+        nextQuestion();
+      }
+      setCustomerHappy(null);
+    },1400);
+  } else {
+    playSound('bad');
+    setCustomerHappy(false);
+    var msg2=t.feedbackBad[Math.floor(Math.random()*t.feedbackBad.length)];
+    showFeedback(false,msg2);
+    announce(msg2);
+    setTimeout(function(){
+      paidAmountCents=0;
+      selectedCoins=[];
+      renderTray();
+      updateTransactionPanel();
+      ge('validate-btn').disabled=true;
+      setCustomerHappy(null);
+    },1800);
+  }
+}
+
+function setCustomerHappy(happy){
+  var mouth=ge('cust-mouth');
+  var eyeL=ge('eye-l');
+  var eyeR=ge('eye-r');
+  if(!mouth) return;
+  if(happy===true){
+    mouth.setAttribute('d','M33 47 Q45 60 57 47');
+    eyeL.setAttribute('r','4'); eyeR.setAttribute('r','4');
+  } else if(happy===false){
+    mouth.setAttribute('d','M34 53 Q45 44 56 53');
+    eyeL.setAttribute('r','2'); eyeR.setAttribute('r','2');
+  } else {
+    mouth.setAttribute('d','M37 48 Q45 55 53 48');
+    eyeL.setAttribute('r','3'); eyeR.setAttribute('r','3');
+  }
+}
+
+function showFeedback(good, msg){
+  var bubble=ge('feedback-bubble');
+  ge('feedback-emoji').textContent=good?'🎉':'💭';
+  ge('feedback-text').textContent=msg;
+  bubble.style.background=good?'#f0fdf4':'#fff7ed';
+  bubble.style.border='3px solid '+(good?'#34c77b':'#f97316');
+  bubble.classList.add('show');
+  setTimeout(function(){bubble.classList.remove('show');},1300);
+}
+
+function updateProgress(){
+  var pct=Math.round((questionIndex/totalQuestions)*100);
+  ge('progress-bar').style.width=pct+'%';
+  setText('game-score',T[lang].score(correctCount,totalQuestions));
+}
+
+function announce(msg){
+  ge('aria-live').textContent='';
+  setTimeout(function(){ge('aria-live').textContent=msg;},10);
+}
+
+function showSuccess(){
+  playSound('success');
+  var t=T[lang];
+  var pct=Math.round((correctCount/totalQuestions)*100);
+  var stars='⭐';
+  if(pct>=80) stars='⭐⭐⭐';
+  else if(pct>=60) stars='⭐⭐';
+  setText('success-stars',stars);
+  setText('success-msg',t.successMsg[Math.floor(Math.random()*t.successMsg.length)]);
+  setText('success-sub',t.successSub(correctCount));
+  setText('btn-replay',t.btnReplay);
+  setText('btn-next',t.btnNext);
+  setText('btn-home',t.btnHome);
+  var nextBtn=ge('btn-next');
+  nextBtn.style.display=(currentLevel<3)?'inline-block':'none';
+  saveProgress();
+  showScreen('screen-success');
+}
+
+function nextLevel(){
+  currentLevel=Math.min(3,currentLevel+1);
+  document.querySelectorAll('.level-btn').forEach(function(b,i){b.classList.toggle('active',i===currentLevel-1);});
+  startGame();
+}
+
+function saveProgress(){
+  try{
+    var data=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+    var key='level'+currentLevel;
+    data[key]={correctCount:correctCount,totalQuestions:totalQuestions,ts:Date.now()};
+    data.highLevel=Math.max(data.highLevel||1,currentLevel);
+    localStorage.setItem(LSKEY,JSON.stringify(data));
+  }catch(e){}
+}
+
+function loadProgress(){
+  try{
+    var data=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+    if(data.highLevel) currentLevel=Math.min(3,data.highLevel);
+  }catch(e){}
+}
+
+function showParentGate(){
+  gateA=Math.floor(Math.random()*9)+2;
+  gateB=Math.floor(Math.random()*9)+2;
+  ge('gate-question').textContent=gateA+' x '+gateB+' = ?';
+  ge('gate-input').value='';
+  ge('gate-err').textContent='';
+  ge('parent-info').style.display='none';
+  showScreen('screen-parent');
+}
+
+function checkGate(){
+  var val=parseInt(ge('gate-input').value,10);
+  if(val===gateA*gateB){
+    ge('gate-err').textContent='';
+    ge('parent-info').style.display='block';
+    setText('pi-desc',T[lang].piDesc);
+  } else {
+    setText('gate-err',T[lang].pgErr);
+  }
+}
+
+// init
+loadProgress();
+selectLevel(currentLevel);
+renderUI();
+ge('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+</script>
+</body>
+</html>

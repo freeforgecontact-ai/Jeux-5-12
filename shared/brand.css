@@ -1,0 +1,41 @@
+/* =====================================================================
+   CHARTE PGRG IA — couleurs extraites de https://ia.pgrg.ca
+   Source de vérité des couleurs pour TOUS les jeux et le portail.
+   ===================================================================== */
+:root{
+  --pgrg-blue:#0f4c81;        /* Bleu principal (theme-color du site) */
+  --pgrg-blue-dark:#0a3559;   /* Bleu foncé (titres, ombres) */
+  --pgrg-navy:#0f172a;        /* Texte très foncé */
+  --pgrg-orange:#f97316;      /* Orange d'action (boutons, accent) */
+  --pgrg-orange-dark:#ea580c; /* Orange foncé (ombres de boutons) */
+  --pgrg-gold:#ffd23f;        /* Jaune/or — récompenses, étoiles */
+  --pgrg-sky:#7ec3ee;         /* Bleu ciel — accents clairs */
+  --pgrg-sky-light:#eaf6ff;   /* Fond bleuté très clair */
+  --pgrg-slate:#475569;       /* Texte secondaire */
+  --pgrg-cloud:#f8fafc;       /* Fond clair neutre */
+  --pgrg-white:#ffffff;
+  --pgrg-success:#34c77b;     /* Vert réussite (harmonisé à la palette) */
+  --pgrg-radius:18px;
+  --pgrg-font-title:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
+  --pgrg-font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+
+/* Base réutilisable (portail + écrans communs) */
+.pgrg-btn{
+  font-family:var(--pgrg-font-title); font-weight:600; font-size:1.25rem;
+  background:var(--pgrg-orange); color:#fff; border:none; border-radius:999px;
+  padding:14px 38px; cursor:pointer; box-shadow:0 5px 0 var(--pgrg-orange-dark);
+  transition:transform .08s, box-shadow .08s; min-height:48px;
+}
+.pgrg-btn:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--pgrg-orange-dark); }
+.pgrg-btn--blue{ background:var(--pgrg-blue); box-shadow:0 5px 0 var(--pgrg-blue-dark); }
+.pgrg-card{
+  background:#fff; border-radius:var(--pgrg-radius); padding:18px;
+  box-shadow:0 8px 24px rgba(15,76,129,.12); border:2px solid var(--pgrg-sky-light);
+}
+.pgrg-chip{
+  font-family:var(--pgrg-font-body); background:#fff; color:var(--pgrg-navy);
+  border:3px solid var(--pgrg-sky); border-radius:999px; padding:8px 16px;
+  cursor:pointer; min-height:44px; min-width:44px;
+}
+.pgrg-chip.active{ background:var(--pgrg-blue); color:#fff; border-color:var(--pgrg-blue); }

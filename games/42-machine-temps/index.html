@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Machine à Voyager dans le Temps / Time Machine — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;--orange:#f97316;
+  --orange-dark:#ea580c;--gold:#ffd23f;--sky:#7ec3ee;--sky-light:#eaf6ff;
+  --slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(135deg,var(--sky-light) 0%,#d0ecff 100%);min-height:100vh;color:var(--navy);}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{display:flex;align-items:center;justify-content:space-between;background:var(--blue);color:#fff;padding:8px 16px;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+#topbar .brand{display:flex;align-items:center;gap:8px;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;}
+#topbar .controls{display:flex;gap:6px;align-items:center;}
+button{cursor:pointer;border:none;border-radius:12px;font-family:inherit;font-size:1rem;}
+.btn-lang{background:rgba(255,255,255,0.18);color:#fff;padding:6px 14px;border-radius:10px;font-weight:700;min-width:48px;min-height:48px;transition:background .2s;}
+.btn-lang.active,.btn-lang:hover{background:var(--orange);}
+.btn-mute{background:rgba(255,255,255,0.18);color:#fff;padding:6px 10px;border-radius:10px;font-size:1.3rem;min-width:48px;min-height:48px;}
+.btn-mute:hover{background:rgba(255,255,255,0.3);}
+.screen{display:none;flex-direction:column;align-items:center;padding:20px 12px;min-height:calc(100vh - 60px);}
+.screen.active{display:flex;}
+#screen-title{justify-content:center;gap:18px;text-align:center;}
+.title-main{font-size:clamp(1.6rem,5vw,2.4rem);color:var(--blue);line-height:1.2;}
+.title-sub{font-size:1.1rem;color:var(--slate);max-width:400px;}
+.btn-play{background:var(--orange);color:#fff;font-size:1.3rem;font-weight:800;padding:16px 48px;border-radius:18px;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:60px;min-width:180px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{background:none;color:var(--blue);text-decoration:underline;font-size:.95rem;padding:8px;border-radius:8px;}
+#screen-parents{justify-content:center;gap:16px;max-width:480px;margin:0 auto;text-align:center;}
+.parent-card{background:#fff;border-radius:18px;padding:24px;box-shadow:0 4px 18px rgba(15,76,129,.12);width:100%;max-width:440px;}
+#parent-question{font-size:1.4rem;color:var(--blue);font-weight:700;margin:12px 0;}
+#parent-input{font-size:1.2rem;padding:10px 16px;border:2px solid var(--sky);border-radius:12px;text-align:center;width:120px;font-family:inherit;}
+#parent-error{color:#e53e3e;font-size:.95rem;min-height:20px;}
+.btn-secondary{background:var(--blue);color:#fff;padding:12px 28px;border-radius:14px;box-shadow:0 4px 0 var(--blue-dark);font-weight:700;min-height:48px;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.info-parents{text-align:left;color:var(--slate);font-size:.95rem;line-height:1.6;}
+.info-parents strong{color:var(--navy);}
+#screen-levels{justify-content:flex-start;gap:20px;padding-top:30px;align-items:center;}
+.level-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:700px;}
+.level-card{background:#fff;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 4px 16px rgba(15,76,129,.12);min-width:160px;cursor:pointer;transition:transform .15s,box-shadow .15s;border:3px solid transparent;}
+.level-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(15,76,129,.18);}
+.level-card.unlocked{border-color:var(--sky);}
+.level-card.completed{border-color:var(--success);}
+.level-card.locked{opacity:.5;cursor:not-allowed;}
+.level-icon{font-size:2.4rem;margin-bottom:8px;}
+.level-name{font-size:1.1rem;font-weight:800;color:var(--blue);}
+.level-desc{font-size:.85rem;color:var(--slate);margin-top:4px;}
+.level-stars{font-size:1.2rem;margin-top:6px;min-height:24px;}
+#screen-game{align-items:stretch;gap:12px;max-width:900px;margin:0 auto;width:100%;}
+.game-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.game-info{display:flex;gap:12px;align-items:center;}
+.score-box{background:var(--blue);color:#fff;border-radius:10px;padding:6px 14px;font-weight:700;font-size:1rem;}
+.progress-bar-wrap{flex:1;max-width:200px;background:#c8e8f8;border-radius:8px;height:12px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:var(--orange);border-radius:8px;transition:width .4s;}
+.btn-home{background:var(--blue-dark);color:#fff;padding:8px 16px;border-radius:10px;font-size:.9rem;min-height:48px;}
+.event-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(15,76,129,.12);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:grab;user-select:none;touch-action:none;transition:box-shadow .2s,transform .15s;min-height:140px;min-width:140px;}
+.event-card:hover,.event-card.dragging{box-shadow:0 10px 28px rgba(15,76,129,.22);transform:scale(1.04);}
+.event-card.dragging{cursor:grabbing;z-index:200;opacity:.9;}
+.event-emoji{font-size:2.6rem;}
+.event-title{font-size:1rem;font-weight:700;color:var(--navy);text-align:center;line-height:1.2;}
+.event-info{font-size:.78rem;color:var(--slate);text-align:center;line-height:1.3;}
+#cards-pool{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;min-height:160px;padding:16px;background:rgba(126,195,238,.15);border-radius:16px;border:2px dashed var(--sky);}
+#timeline-slots{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;padding:16px 8px;min-height:200px;}
+.timeline-slot{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:140px;}
+.slot-drop{width:140px;min-height:140px;border:3px dashed var(--sky);border-radius:16px;background:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--sky);transition:background .2s,border-color .2s;position:relative;flex-direction:column;}
+.slot-drop.over{background:rgba(126,195,238,.35);border-color:var(--orange);}
+.slot-drop.filled{border-style:solid;border-color:var(--success);}
+.slot-position{font-size:.75rem;color:var(--slate);font-weight:700;text-align:center;}
+.position-arrow{font-size:1.2rem;color:var(--blue);}
+#feedback-banner{text-align:center;padding:14px 20px;border-radius:14px;font-size:1.1rem;font-weight:700;transition:opacity .3s;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;}
+#feedback-banner.hidden{opacity:0;pointer-events:none;}
+#feedback-banner.ok{background:#d1fae5;color:#065f46;}
+#feedback-banner.err{background:#fee2e2;color:#991b1b;}
+#aria-live{position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;}
+#screen-result{justify-content:center;gap:20px;text-align:center;padding-top:40px;}
+.stars-row{font-size:3rem;letter-spacing:6px;}
+.result-title{font-size:2rem;color:var(--blue);font-weight:800;}
+.result-score{font-size:1.1rem;color:var(--slate);}
+.result-buttons{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.btn-action{background:var(--orange);color:#fff;padding:14px 28px;border-radius:16px;font-size:1.1rem;font-weight:800;box-shadow:0 5px 0 var(--orange-dark);min-height:52px;}
+.btn-action:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+#info-popup{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:500;padding:16px;}
+#info-popup.hidden{display:none;}
+.popup-card{background:#fff;border-radius:20px;padding:24px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25);text-align:center;}
+.popup-emoji{font-size:3rem;margin-bottom:8px;}
+.popup-title{font-size:1.4rem;font-weight:800;color:var(--navy);}
+.popup-year{font-size:1rem;color:var(--orange);font-weight:700;margin:4px 0 12px;}
+.popup-text{font-size:.95rem;color:var(--slate);line-height:1.6;}
+.btn-popup-close{margin-top:16px;background:var(--blue);color:#fff;padding:12px 32px;border-radius:14px;font-weight:700;font-size:1rem;min-height:48px;box-shadow:0 4px 0 var(--blue-dark);}
+#mode-order{display:none;flex-direction:column;gap:16px;width:100%;}
+#mode-order.active{display:flex;}
+.order-instruction{text-align:center;color:var(--slate);font-size:.95rem;}
+#btn-check-order{background:var(--orange);color:#fff;font-size:1.1rem;font-weight:800;padding:12px 32px;border-radius:16px;box-shadow:0 5px 0 var(--orange-dark);min-height:52px;align-self:center;min-width:180px;}
+#btn-check-order:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+@media(max-width:600px){
+  .level-cards{flex-direction:column;align-items:center;}
+  #timeline-slots{flex-direction:column;align-items:center;}
+  .slot-drop{width:100%;max-width:280px;}
+  .event-card{min-width:110px;}
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="controls">
+    <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="btn-lang" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="btn-mute" id="btn-mute" onclick="toggleMute()" aria-label="Mute son">🔊</button>
+  </div>
+</div>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE -->
+<div id="screen-title" class="screen active">
+  <svg width="180" height="190" viewBox="0 0 180 190" xmlns="http://www.w3.org/2000/svg" aria-label="Mascotte machine du temps">
+    <ellipse cx="90" cy="118" rx="56" ry="42" fill="#0f4c81"/>
+    <ellipse cx="90" cy="114" rx="49" ry="36" fill="#7ec3ee"/>
+    <circle cx="90" cy="116" r="24" fill="#eaf6ff" stroke="#ffd23f" stroke-width="3"/>
+    <circle cx="82" cy="112" r="4.5" fill="#0f172a"/>
+    <circle cx="98" cy="112" r="4.5" fill="#0f172a"/>
+    <circle cx="81" cy="111" r="1.8" fill="#fff"/>
+    <circle cx="97" cy="111" r="1.8" fill="#fff"/>
+    <path d="M83 122 Q90 129 97 122" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="90" cy="96" r="11" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+    <line x1="90" y1="96" x2="90" y2="89" stroke="#0f4c81" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="90" y1="96" x2="96" y2="96" stroke="#0f4c81" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="84" y="62" width="12" height="22" rx="6" fill="#0a3559"/>
+    <circle cx="90" cy="57" r="10" fill="#f97316" stroke="#ffd23f" stroke-width="2.5"/>
+    <text x="14" y="72" font-size="20" fill="#ffd23f">★</text>
+    <text x="145" y="84" font-size="15" fill="#ffd23f">✦</text>
+    <text x="22" y="150" font-size="13" fill="#7ec3ee">✦</text>
+    <text x="148" y="156" font-size="20" fill="#ffd23f">★</text>
+    <rect x="66" y="156" width="15" height="20" rx="7" fill="#0a3559"/>
+    <rect x="99" y="156" width="15" height="20" rx="7" fill="#0a3559"/>
+    <ellipse cx="73" cy="177" rx="11" ry="5.5" fill="#475569"/>
+    <ellipse cx="107" cy="177" rx="11" ry="5.5" fill="#475569"/>
+  </svg>
+  <h1 id="title-h1" class="title-main title-font"></h1>
+  <p id="title-sub" class="title-sub"></p>
+  <button class="btn-play" onclick="goLevels()" id="btn-play"></button>
+  <button class="btn-parents" onclick="openParents()" id="btn-parents"></button>
+</div>
+
+<!-- PARENTS -->
+<div id="screen-parents" class="screen">
+  <div class="parent-card">
+    <h2 class="title-font" id="parent-title" style="color:var(--blue);margin-bottom:8px;"></h2>
+    <p id="parent-question"></p>
+    <br>
+    <input type="number" id="parent-input" min="0" max="999" aria-label="Réponse calcul parental">
+    <br><br>
+    <div id="parent-error"></div>
+    <button class="btn-secondary" onclick="checkParent()" id="btn-parent-check"></button>
+  </div>
+  <div class="parent-card info-parents" id="parent-info" style="display:none;">
+    <div id="parent-info-text"></div>
+    <br>
+    <button class="btn-secondary" onclick="goTitle()" id="btn-parent-back"></button>
+  </div>
+</div>
+
+<!-- LEVELS -->
+<div id="screen-levels" class="screen">
+  <h2 class="title-font" id="levels-title" style="color:var(--blue);font-size:1.6rem;"></h2>
+  <div class="level-cards" id="level-cards"></div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-info">
+      <div class="score-box" id="score-box">⭐ 0</div>
+      <div class="progress-bar-wrap" role="progressbar" aria-label="Progression" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div style="font-weight:700;color:var(--blue);font-size:.95rem;" id="round-label"></div>
+    <button class="btn-home" onclick="goTitle()" id="btn-home-game"></button>
+  </div>
+  <div id="feedback-banner" class="hidden" role="status"></div>
+  <div id="mode-order">
+    <p class="order-instruction" id="order-instruction"></p>
+    <div id="cards-pool"></div>
+    <div id="timeline-slots"></div>
+    <button id="btn-check-order" onclick="checkOrder()"></button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <div class="stars-row" id="result-stars"></div>
+  <h2 class="result-title title-font" id="result-title"></h2>
+  <p class="result-score" id="result-score"></p>
+  <div class="result-buttons">
+    <button class="btn-action" onclick="replayLevel()" id="btn-replay"></button>
+    <button class="btn-secondary" onclick="goLevels()" id="btn-levels-result" style="margin-top:0;"></button>
+    <button class="btn-secondary" onclick="nextLevel()" id="btn-next-level" style="display:none;"></button>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="info-popup" class="hidden" role="dialog" aria-modal="true">
+  <div class="popup-card">
+    <div class="popup-emoji" id="popup-emoji"></div>
+    <div class="popup-title" id="popup-title"></div>
+    <div class="popup-year" id="popup-year"></div>
+    <div class="popup-text" id="popup-text"></div>
+    <button class="btn-popup-close" onclick="closePopup()" id="btn-popup-close"></button>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const EVENTS=[
+  {id:'fire',    emoji:'🔥', year:-400000, fr:{name:'La maîtrise du feu',    info:'Il y a 400 000 ans, nos ancêtres apprennent à maîtriser le feu pour se chauffer, cuisiner et se protéger des prédateurs.'},
+                              en:{name:'Mastering fire',         info:'400,000 years ago, our ancestors learned to control fire to stay warm, cook food and protect themselves from predators.'}},
+  {id:'wheel',   emoji:'⚙️', year:-3500,   fr:{name:'La roue',               info:'Inventée vers 3 500 av. J.-C. en Mésopotamie, la roue révolutionne le transport et permet de construire des chariots.'},
+                              en:{name:'The wheel',              info:'Invented around 3,500 BC in Mesopotamia, the wheel revolutionized transport and enabled the building of carts.'}},
+  {id:'writing', emoji:'📜', year:-3200,   fr:{name:'L\'écriture',            info:'Vers 3 200 av. J.-C., les Sumériens inventent l\'écriture cunéiforme pour noter leurs échanges et transmettre le savoir.'},
+                              en:{name:'Writing',                info:'Around 3,200 BC, the Sumerians invented cuneiform writing to record trades and pass on knowledge.'}},
+  {id:'paper',   emoji:'📄', year:105,     fr:{name:'Le papier',              info:'Inventé en Chine vers l\'an 105 après J.-C., le papier rend la diffusion du savoir bien plus facile et légère.'},
+                              en:{name:'Paper',                  info:'Invented in China around 105 AD, paper made spreading knowledge much easier and lighter.'}},
+  {id:'compass', emoji:'🧭', year:1088,    fr:{name:'La boussole',            info:'La boussole chinoise (vers 1088) guide les navigateurs grâce au magnétisme terrestre et ouvre les grandes explorations.'},
+                              en:{name:'The compass',            info:'The Chinese compass (around 1088) guides sailors using Earth\'s magnetism, opening the age of exploration.'}},
+  {id:'print',   emoji:'📖', year:1450,    fr:{name:'L\'imprimerie',          info:'Gutenberg invente l\'imprimerie vers 1450, permettant d\'imprimer des livres en grand nombre et de répandre les idées.'},
+                              en:{name:'The printing press',    info:'Gutenberg invented the printing press around 1450, enabling mass printing of books and spread of ideas.'}},
+  {id:'steam',   emoji:'🚂', year:1769,    fr:{name:'La machine à vapeur',    info:'James Watt améliore la machine à vapeur en 1769, lançant la révolution industrielle et les locomotives.'},
+                              en:{name:'The steam engine',      info:'James Watt improved the steam engine in 1769, launching the Industrial Revolution and steam locomotives.'}},
+  {id:'elec',    emoji:'💡', year:1879,    fr:{name:'L\'ampoule électrique',  info:'Thomas Edison invente l\'ampoule électrique en 1879, apportant la lumière artificielle dans les maisons du monde entier.'},
+                              en:{name:'The light bulb',        info:'Thomas Edison invented the light bulb in 1879, bringing artificial light into homes around the world.'}},
+  {id:'car',     emoji:'🚗', year:1885,    fr:{name:'L\'automobile',          info:'Karl Benz construit la première voiture à moteur en 1885. Elle change notre façon de nous déplacer pour toujours.'},
+                              en:{name:'The automobile',        info:'Karl Benz built the first motor car in 1885, forever changing how we travel.'}},
+  {id:'plane',   emoji:'✈️', year:1903,    fr:{name:'L\'avion',               info:'Les frères Wright réalisent le premier vol motorisé le 17 décembre 1903, ouvrant l\'ère de l\'aviation mondiale.'},
+                              en:{name:'The airplane',          info:'The Wright brothers made the first powered flight on December 17, 1903, opening the age of aviation.'}},
+  {id:'tv',      emoji:'📺', year:1926,    fr:{name:'La télévision',          info:'John Baird présente la première télévision en 1926. Les images voyagent alors par ondes radio jusqu\'à nos maisons.'},
+                              en:{name:'Television',            info:'John Baird demonstrated the first television in 1926. Images traveled by radio waves into our homes.'}},
+  {id:'computer',emoji:'💻', year:1945,    fr:{name:'L\'ordinateur',          info:'Les premiers ordinateurs apparaissent vers 1945. Ils occupaient une salle entière et effectuaient des calculs complexes.'},
+                              en:{name:'The computer',          info:'The first computers appeared around 1945. They filled entire rooms and performed complex calculations.'}},
+  {id:'moon',    emoji:'🌙', year:1969,    fr:{name:'Premiers pas sur la Lune',info:'Le 21 juillet 1969, Neil Armstrong est le premier être humain à marcher sur la Lune lors de la mission Apollo 11.'},
+                              en:{name:'First steps on the Moon',info:'On July 21, 1969, Neil Armstrong became the first human to walk on the Moon during the Apollo 11 mission.'}},
+  {id:'internet',emoji:'🌐', year:1991,    fr:{name:'Internet',               info:'Le World Wide Web ouvre au grand public en 1991. En quelques clics, on peut maintenant accéder à toute l\'information du monde.'},
+                              en:{name:'The Internet',          info:'The World Wide Web opened to the public in 1991. With a few clicks, all the world\'s information became accessible.'}},
+  {id:'phone',   emoji:'📱', year:2007,    fr:{name:'Le smartphone',          info:'Apple lance l\'iPhone en 2007 : un petit ordinateur dans notre poche qui révolutionne notre façon de communiquer.'},
+                              en:{name:'The smartphone',        info:'Apple launched the iPhone in 2007: a tiny computer in our pocket that revolutionized how we communicate.'}},
+];
+
+const LEVELS=[
+  {id:0,cardCount:3,eventIds:['fire','print','internet'],starsNeeded:0,
+   fr:{name:'Niveau 1',desc:'3 cartes — grandes époques'},
+   en:{name:'Level 1',desc:'3 cards — major eras'}},
+  {id:1,cardCount:5,eventIds:['fire','writing','print','elec','internet'],starsNeeded:1,
+   fr:{name:'Niveau 2',desc:'5 cartes — de l\'écriture à internet'},
+   en:{name:'Level 2',desc:'5 cards — writing to internet'}},
+  {id:2,cardCount:8,eventIds:['wheel','writing','compass','print','steam','elec','car','plane','tv','computer','moon','internet'],starsNeeded:2,
+   fr:{name:'Niveau 3',desc:'8 cartes — périodes rapprochées'},
+   en:{name:'Level 3',desc:'8 cards — closer time periods'}},
+];
+
+// ===== I18N =====
+const T={
+  fr:{
+    title:'La Machine à Voyager dans le Temps',subtitle:'Apprends l\'histoire à travers les inventions et les grandes découvertes !',
+    play:'Jouer !',parents:'Pour les parents',parentTitle:'Espace Parents',
+    parentQ:'Combien fait',parentErr:'Mauvaise réponse, essaie encore !',
+    parentInfo:'<strong>Compétence visée :</strong> Frise chronologique — sens du temps, ordre des événements historiques, repères culturels.<br><br><strong>Comment jouer :</strong> L\'enfant glisse ou dépose des cartes d\'inventions pour les replacer dans le bon ordre chronologique sur une frise. Trois niveaux progressifs : 3 cartes (grandes époques), 5 cartes, puis 8 cartes avec des périodes plus rapprochées.<br><br><strong>Double-clic sur une carte :</strong> affiche une petite info historique.<br><br><strong>Confidentialité :</strong> Aucune donnée collectée, aucune publicité, 100 % hors-ligne.<br><br><strong>Source :</strong> PGRG IA — open source, gratuit.',
+    parentBack:'Retour',parentCheck:'Vérifier',levelsTitle:'Choisis un niveau',
+    levelLocked:'Verrouillé',orderInstruction:'Glisse les cartes dans le bon ordre : du plus ANCIEN (gauche/haut) au plus RÉCENT (droite/bas)',
+    btnCheck:'Vérifier l\'ordre',btnHome:'Accueil',
+    feedOk:'🎉 Parfait ! Excellent ordre chronologique !',feedErr:'🔄 Pas tout à fait… Voici le bon ordre !',
+    resultTitle3:'Parfait ! Tu es un vrai historien !',resultTitle2:'Très bien !',resultTitle1:'Bon début !',resultTitle0:'Continue d\'essayer !',
+    scoreLabel:'Score :',replay:'Rejouer',nextLevel:'Niveau suivant',backLevels:'Niveaux',
+    popupClose:'Super, merci !',slotLabel:'Position',
+  },
+  en:{
+    title:'The Time Machine',subtitle:'Learn history through inventions and great discoveries!',
+    play:'Play!',parents:'For parents',parentTitle:'Parent Area',
+    parentQ:'What is',parentErr:'Wrong answer, try again!',
+    parentInfo:'<strong>Skill targeted:</strong> Timeline — sense of time, ordering historical events, cultural landmarks.<br><br><strong>How to play:</strong> The child drags and drops invention cards to put them in the right chronological order on a timeline. Three progressive levels: 3 cards (major eras), 5 cards, then 8 cards with closer time periods.<br><br><strong>Double-click a card</strong> to see a short historical fact.<br><br><strong>Privacy:</strong> No data collected, no ads, 100% offline.<br><br><strong>Source:</strong> PGRG IA — open source, free.',
+    parentBack:'Back',parentCheck:'Check',levelsTitle:'Choose a level',
+    levelLocked:'Locked',orderInstruction:'Drag the cards in order: OLDEST first (left/top) to MOST RECENT (right/bottom)',
+    btnCheck:'Check the order',btnHome:'Home',
+    feedOk:'🎉 Perfect! Excellent chronological order!',feedErr:'🔄 Not quite… Here is the correct order!',
+    resultTitle3:'Perfect! You\'re a real historian!',resultTitle2:'Very good!',resultTitle1:'Good start!',resultTitle0:'Keep trying!',
+    scoreLabel:'Score:',replay:'Play Again',nextLevel:'Next Level',backLevels:'Levels',
+    popupClose:'Got it!',slotLabel:'Position',
+  }
+};
+
+// ===== STATE =====
+const STORAGE_KEY='pgrg_machine_temps';
+let lang=navigator.language.startsWith('fr')?'fr':'en';
+let muted=false;
+let state={stars:[0,0,0]};
+
+let currentLevelIdx=null;
+let currentCards=[];
+let slots=[];
+let score=0;
+
+let dragCard=null;
+let dragOrigin=null;
+let dragClone=null;
+let dragOffX=0,dragOffY=0;
+let touchEv=null,touchSlotOrigin=null;
+
+let parentA=0,parentB=0;
+
+// ===== UTILS =====
+function t(k){return T[lang][k]||k;}
+function formatYear(y){
+  if(y<0)return lang==='fr'?`${Math.abs(y).toLocaleString()} av. J.-C.`:`${Math.abs(y).toLocaleString()} BC`;
+  if(y<500)return lang==='fr'?`an ${y}`:`year ${y}`;
+  return `${y}`;
+}
+function announce(msg){const el=document.getElementById('aria-live');el.textContent='';setTimeout(()=>{el.textContent=msg;},60);}
+
+// ===== AUDIO =====
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,vol,dur,type='sine'){
+  if(muted)return;
+  try{const c=getCtx();const o=c.createOscillator();const g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+  o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}
+}
+function playSuccess(){if(muted)return;[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.07,.3),i*130));}
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';}
+
+// ===== PERSISTENCE =====
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&s.stars)state=s;}catch(e){}}
+
+// ===== LANG =====
+function setLang(l){lang=l;document.getElementById('btn-fr').classList.toggle('active',l==='fr');document.getElementById('btn-en').classList.toggle('active',l==='en');renderCurrentScreen();}
+function renderCurrentScreen(){
+  const ids=['title','parents','levels','game','result'];
+  let cur='title';
+  ids.forEach(id=>{if(document.getElementById('screen-'+id).classList.contains('active'))cur=id;});
+  if(cur==='title')renderTitle();
+  else if(cur==='parents')renderParents();
+  else if(cur==='levels')renderLevels();
+  else if(cur==='game'){renderGameLabels();if(currentLevelIdx!==null)renderOrderMode();}
+  else if(cur==='result')renderResultLabels();
+}
+
+// ===== SCREENS =====
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');}
+function goTitle(){showScreen('title');renderTitle();}
+function goLevels(){showScreen('levels');renderLevels();}
+
+function renderTitle(){
+  document.getElementById('title-h1').textContent=t('title');
+  document.getElementById('title-sub').textContent=t('subtitle');
+  document.getElementById('btn-play').textContent=t('play');
+  document.getElementById('btn-parents').textContent=t('parents');
+}
+
+function openParents(){
+  parentA=Math.floor(Math.random()*9)+2;parentB=Math.floor(Math.random()*9)+2;
+  document.getElementById('parent-info').style.display='none';
+  document.getElementById('parent-input').value='';
+  document.getElementById('parent-error').textContent='';
+  showScreen('parents');renderParents();
+}
+function renderParents(){
+  document.getElementById('parent-title').textContent=t('parentTitle');
+  document.getElementById('parent-question').textContent=`${t('parentQ')} ${parentA} × ${parentB} ?`;
+  document.getElementById('btn-parent-check').textContent=t('parentCheck');
+  document.getElementById('parent-info-text').innerHTML=t('parentInfo');
+  document.getElementById('btn-parent-back').textContent=t('parentBack');
+}
+function checkParent(){
+  const val=parseInt(document.getElementById('parent-input').value);
+  if(val===parentA*parentB){document.getElementById('parent-info').style.display='block';document.getElementById('parent-error').textContent='';playTone(523,.07,.3);}
+  else{document.getElementById('parent-error').textContent=t('parentErr');playTone(200,.08,.25);}
+}
+
+function renderLevels(){
+  document.getElementById('levels-title').textContent=t('levelsTitle');
+  const cont=document.getElementById('level-cards');cont.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const stars=state.stars[i]||0;
+    const prevOk=i===0||((state.stars[i-1]||0)>=lv.starsNeeded);
+    const locked=!prevOk;
+    const div=document.createElement('div');
+    div.className='level-card '+(locked?'locked':(stars>0?'completed':'unlocked'));
+    div.setAttribute('role','button');div.setAttribute('tabindex',locked?'-1':'0');
+    div.setAttribute('aria-label',lv[lang].name+(locked?' — '+t('levelLocked'):''));
+    div.innerHTML=`<div class="level-icon">${i===0?'🕰️':i===1?'⏳':'🔭'}</div>
+      <div class="level-name title-font">${lv[lang].name}</div>
+      <div class="level-desc">${lv[lang].desc}</div>
+      <div class="level-stars">${'⭐'.repeat(stars)+'☆'.repeat(3-stars)}</div>`;
+    if(!locked){div.onclick=()=>startLevel(i);div.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')startLevel(i);};}
+    cont.appendChild(div);
+  });
+}
+
+// ===== GAME =====
+function pickCards(lv){
+  const pool=EVENTS.filter(e=>lv.eventIds.includes(e.id));
+  const shuffled=[...pool].sort(()=>Math.random()-.5);
+  const selected=shuffled.slice(0,lv.cardCount);
+  selected.sort((a,b)=>a.year-b.year);
+  return selected;
+}
+
+function startLevel(idx){
+  currentLevelIdx=idx;
+  const lv=LEVELS[idx];
+  currentCards=pickCards(lv);
+  slots=new Array(currentCards.length).fill(null);
+  score=0;
+  showScreen('game');
+  renderGameLabels();
+  renderOrderMode();
+}
+
+function renderGameLabels(){
+  if(currentLevelIdx===null)return;
+  const lv=LEVELS[currentLevelIdx];
+  document.getElementById('score-box').textContent='⭐ '+score;
+  document.getElementById('round-label').textContent=lv[lang].name;
+  document.getElementById('btn-check-order').textContent=t('btnCheck');
+  document.getElementById('btn-home-game').textContent=t('btnHome');
+  updateProgress();
+}
+function updateProgress(){
+  const filled=slots.filter(s=>s!==null).length;
+  const pct=currentCards.length>0?(filled/currentCards.length)*100:0;
+  const bar=document.getElementById('progress-fill');
+  bar.style.width=pct+'%';
+  bar.parentElement.setAttribute('aria-valuenow',Math.round(pct));
+}
+
+function renderOrderMode(){
+  document.getElementById('order-instruction').textContent=t('orderInstruction');
+  // Pool
+  const pool=document.getElementById('cards-pool');
+  pool.innerHTML='';
+  const shuffled=[...currentCards].sort(()=>Math.random()-.5);
+  shuffled.forEach(ev=>{pool.appendChild(makeCard(ev,true));});
+  // Slots
+  const slotsEl=document.getElementById('timeline-slots');slotsEl.innerHTML='';
+  currentCards.forEach((ev,i)=>{
+    const wrap=document.createElement('div');wrap.className='timeline-slot';
+    const lbl=document.createElement('div');lbl.className='slot-position';lbl.textContent=`${t('slotLabel')} ${i+1}`;
+    const drop=document.createElement('div');drop.className='slot-drop';drop.dataset.slot=i;
+    drop.innerHTML='<span style="font-size:2rem;color:var(--sky)">📅</span>';
+    drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+    drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+    drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');handleDrop(parseInt(drop.dataset.slot));});
+    wrap.appendChild(lbl);wrap.appendChild(drop);slotsEl.appendChild(wrap);
+  });
+  hideFeedback();
+}
+
+function makeCard(ev,draggable,inSlot){
+  const card=document.createElement('div');
+  card.className='event-card';card.dataset.eventId=ev.id;
+  card.innerHTML=`<div class="event-emoji">${ev.emoji}</div><div class="event-title">${ev[lang].name}</div><div class="event-info">${ev[lang].info.substring(0,55)}…</div>`;
+  card.setAttribute('role','button');card.setAttribute('tabindex','0');card.setAttribute('aria-label',ev[lang].name);
+  if(draggable){
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',e=>{dragCard=ev;dragOrigin=inSlot!==undefined?inSlot:'pool';card.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    card.addEventListener('dragend',()=>{card.classList.remove('dragging');dragCard=null;});
+    card.addEventListener('touchstart',e=>handleTouchStart(e,ev,card,inSlot),{passive:false});
+  }
+  card.addEventListener('dblclick',()=>showPopup(ev));
+  return card;
+}
+
+function handleDrop(slotIdx){
+  if(!dragCard)return;
+  const ev=dragCard;
+  // Remove from origin
+  if(dragOrigin==='pool'){
+    const pool=document.getElementById('cards-pool');
+    pool.querySelectorAll('.event-card').forEach(c=>{if(c.dataset.eventId===ev.id)c.remove();});
+  } else if(typeof dragOrigin==='number'){
+    slots[dragOrigin]=null;renderSlot(dragOrigin);
+  }
+  // Displace existing card in target slot
+  if(slots[slotIdx]){
+    const displaced=slots[slotIdx];slots[slotIdx]=null;
+    document.getElementById('cards-pool').appendChild(makeCard(displaced,true));
+  }
+  slots[slotIdx]=ev;renderSlot(slotIdx);updateProgress();hideFeedback();dragCard=null;
+}
+
+function renderSlot(i){
+  const wrap=document.getElementById('timeline-slots').querySelectorAll('.timeline-slot')[i];
+  const drop=wrap.querySelector('.slot-drop');
+  drop.innerHTML='';drop.classList.toggle('filled',slots[i]!==null);
+  if(slots[i]){
+    const ev=slots[i];
+    const mini=makeCard(ev,true,i);
+    mini.querySelector('.event-info').style.fontSize='.7rem';
+    drop.appendChild(mini);
+  } else {
+    drop.innerHTML='<span style="font-size:2rem;color:var(--sky)">📅</span>';
+  }
+}
+
+// ===== POOL DROP =====
+function setupPoolDrop(){
+  const pool=document.getElementById('cards-pool');
+  pool.addEventListener('dragover',e=>{e.preventDefault();pool.style.background='rgba(126,195,238,.3)';});
+  pool.addEventListener('dragleave',()=>{pool.style.background='';});
+  pool.addEventListener('drop',e=>{
+    e.preventDefault();pool.style.background='';
+    if(!dragCard)return;
+    const ev=dragCard;
+    if(typeof dragOrigin==='number'){slots[dragOrigin]=null;renderSlot(dragOrigin);}
+    const exists=[...pool.querySelectorAll('.event-card')].some(c=>c.dataset.eventId===ev.id);
+    if(!exists)pool.appendChild(makeCard(ev,true));
+    updateProgress();hideFeedback();dragCard=null;
+  });
+}
+
+// ===== CHECK =====
+function checkOrder(){
+  const allFilled=slots.every(s=>s!==null);
+  if(!allFilled){showFeedback('⚠️ '+(lang==='fr'?'Remplis toutes les positions !':'Fill all positions!'),'err');return;}
+  let correct=0;
+  slots.forEach((ev,i)=>{if(ev&&ev.id===currentCards[i].id)correct++;});
+  score=correct;
+  document.getElementById('score-box').textContent='⭐ '+score;
+  // Visual feedback on slots
+  document.getElementById('timeline-slots').querySelectorAll('.timeline-slot').forEach((wrap,i)=>{
+    const drop=wrap.querySelector('.slot-drop');
+    if(slots[i]&&slots[i].id===currentCards[i].id){drop.style.borderColor='var(--success)';drop.style.background='#d1fae5';}
+    else{drop.style.borderColor='#f87171';drop.style.background='#fee2e2';}
+  });
+  if(correct===currentCards.length){
+    showFeedback(t('feedOk'),'ok');playSuccess();announce(t('feedOk'));
+    setTimeout(()=>endLevel(correct),1600);
+  } else {
+    showFeedback(t('feedErr'),'err');playTone(260,.08,.3);announce(t('feedErr'));
+    setTimeout(()=>{showCorrectOrder();setTimeout(()=>endLevel(correct),2200);},900);
+  }
+}
+
+function showCorrectOrder(){
+  currentCards.forEach((ev,i)=>{slots[i]=ev;renderSlot(i);});
+  document.getElementById('timeline-slots').querySelectorAll('.timeline-slot').forEach((wrap,i)=>{
+    const drop=wrap.querySelector('.slot-drop');
+    drop.style.borderColor='var(--orange)';drop.style.background='#fff7ed';
+    const yr=document.createElement('div');
+    yr.style.cssText='font-size:.7rem;color:var(--orange);font-weight:700;text-align:center;padding:4px 4px 0;';
+    yr.textContent=formatYear(currentCards[i].year);drop.appendChild(yr);
+  });
+}
+
+function endLevel(correct){
+  const total=currentCards.length;
+  const pct=correct/total;
+  let stars=0;
+  if(pct===1)stars=3;else if(pct>=0.6)stars=2;else if(pct>=0.3)stars=1;
+  const idx=currentLevelIdx;
+  if(stars>(state.stars[idx]||0))state.stars[idx]=stars;
+  saveState();
+  showScreen('result');
+  renderResultLabels(correct,total,stars,idx);
+}
+
+function renderResultLabels(correct,total,stars,idx){
+  if(correct===undefined){
+    document.getElementById('btn-replay').textContent=t('replay');
+    document.getElementById('btn-levels-result').textContent=t('backLevels');
+    document.getElementById('btn-next-level').textContent=t('nextLevel');
+    return;
+  }
+  const msgs=[t('resultTitle0'),t('resultTitle1'),t('resultTitle2'),t('resultTitle3')];
+  document.getElementById('result-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('result-title').textContent=msgs[stars];
+  document.getElementById('result-score').textContent=`${t('scoreLabel')} ${correct} / ${total}`;
+  document.getElementById('btn-replay').textContent=t('replay');
+  document.getElementById('btn-levels-result').textContent=t('backLevels');
+  const nb=document.getElementById('btn-next-level');
+  if(idx<LEVELS.length-1){nb.style.display='';nb.textContent=t('nextLevel');}else{nb.style.display='none';}
+}
+function replayLevel(){if(currentLevelIdx!==null)startLevel(currentLevelIdx);}
+function nextLevel(){if(currentLevelIdx!==null&&currentLevelIdx<LEVELS.length-1)startLevel(currentLevelIdx+1);else goLevels();}
+
+// ===== FEEDBACK =====
+function showFeedback(msg,type){const fb=document.getElementById('feedback-banner');fb.textContent=msg;fb.className=type;fb.classList.remove('hidden');announce(msg);}
+function hideFeedback(){document.getElementById('feedback-banner').classList.add('hidden');}
+
+// ===== POPUP =====
+function showPopup(ev){
+  document.getElementById('popup-emoji').textContent=ev.emoji;
+  document.getElementById('popup-title').textContent=ev[lang].name;
+  document.getElementById('popup-year').textContent=formatYear(ev.year);
+  document.getElementById('popup-text').textContent=ev[lang].info;
+  document.getElementById('btn-popup-close').textContent=t('popupClose');
+  document.getElementById('info-popup').classList.remove('hidden');
+}
+function closePopup(){document.getElementById('info-popup').classList.add('hidden');}
+document.getElementById('info-popup').addEventListener('click',function(e){if(e.target===this)closePopup();});
+
+// ===== TOUCH DRAG =====
+function handleTouchStart(e,ev,cardEl,slotIdx){
+  e.preventDefault();
+  const touch=e.touches[0];
+  touchEv=ev;touchSlotOrigin=slotIdx!==undefined?slotIdx:null;
+  if(dragClone){dragClone.remove();dragClone=null;}
+  const rect=cardEl.getBoundingClientRect();
+  dragOffX=touch.clientX-rect.left;dragOffY=touch.clientY-rect.top;
+  dragClone=cardEl.cloneNode(true);
+  dragClone.style.cssText=`position:fixed;pointer-events:none;z-index:999;width:${rect.width}px;opacity:.88;left:${touch.clientX-dragOffX}px;top:${touch.clientY-dragOffY}px;border:2px solid var(--orange);border-radius:16px;`;
+  document.body.appendChild(dragClone);
+  document.addEventListener('touchmove',onTouchMove,{passive:false});
+  document.addEventListener('touchend',onTouchEnd,{passive:false});
+}
+function onTouchMove(e){
+  e.preventDefault();const touch=e.touches[0];
+  if(dragClone){dragClone.style.left=(touch.clientX-dragOffX)+'px';dragClone.style.top=(touch.clientY-dragOffY)+'px';}
+  document.querySelectorAll('.slot-drop').forEach(el=>el.classList.remove('over'));
+  const el=document.elementFromPoint(touch.clientX,touch.clientY);
+  if(el){const s=el.closest('.slot-drop');if(s)s.classList.add('over');}
+}
+function onTouchEnd(e){
+  document.removeEventListener('touchmove',onTouchMove);
+  document.removeEventListener('touchend',onTouchEnd);
+  const touch=e.changedTouches[0];
+  document.querySelectorAll('.slot-drop').forEach(el=>el.classList.remove('over'));
+  document.getElementById('cards-pool').style.background='';
+  if(dragClone){dragClone.remove();dragClone=null;}
+  if(!touchEv)return;
+  const el=document.elementFromPoint(touch.clientX,touch.clientY);
+  if(!el){touchEv=null;touchSlotOrigin=null;return;}
+  const slotDrop=el.closest('.slot-drop');
+  const pool=el.closest('#cards-pool');
+  if(slotDrop){
+    const idx=parseInt(slotDrop.dataset.slot);
+    // Remove from origin
+    if(touchSlotOrigin!==null){slots[touchSlotOrigin]=null;renderSlot(touchSlotOrigin);}
+    else{const p=document.getElementById('cards-pool');p.querySelectorAll('.event-card').forEach(c=>{if(c.dataset.eventId===touchEv.id)c.remove();});}
+    if(slots[idx]){const d=slots[idx];slots[idx]=null;document.getElementById('cards-pool').appendChild(makeCard(d,true));}
+    slots[idx]=touchEv;renderSlot(idx);updateProgress();hideFeedback();
+  } else if(pool&&touchSlotOrigin!==null){
+    slots[touchSlotOrigin]=null;renderSlot(touchSlotOrigin);
+    const p=document.getElementById('cards-pool');
+    const exists=[...p.querySelectorAll('.event-card')].some(c=>c.dataset.eventId===touchEv.id);
+    if(!exists)p.appendChild(makeCard(touchEv,true));
+    updateProgress();hideFeedback();
+  }
+  touchEv=null;touchSlotOrigin=null;
+}
+
+// ===== INIT =====
+loadState();
+renderTitle();
+// Setup pool drop after DOM is ready
+setupPoolDrop();
+</script>
+</body>
+</html>

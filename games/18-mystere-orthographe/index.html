@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>Le Mystère de l'Orthographe / Spelling Mystery — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;--blue-dark:#0a3559;--navy:#0f172a;
+  --orange:#f97316;--orange-dark:#ea580c;--gold:#ffd23f;
+  --sky:#7ec3ee;--sky-light:#eaf6ff;--slate:#475569;--success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#eaf6ff 0%,#d4ebfc 100%);min-height:100vh;color:var(--navy);}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;}
+.screen.active{display:flex;}
+.topbar{width:100%;background:var(--blue);display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex-shrink:0;}
+.topbar-brand{display:flex;align-items:center;gap:8px;}
+.topbar-brand span{color:#fff;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:6px;}
+.btn-lang,.btn-mute{background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:0.9rem;font-weight:700;min-width:48px;min-height:36px;}
+.btn-lang.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+.btn-mute{font-size:1.2rem;min-width:44px;}
+#screen-title{padding:20px 16px 30px;gap:18px;justify-content:flex-start;}
+.mascot-area{margin-top:10px;}
+.title-main{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:800;color:var(--blue);text-align:center;line-height:1.2;}
+.title-sub{color:var(--slate);font-size:1rem;text-align:center;max-width:380px;}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;padding:16px 40px;font-size:1.3rem;font-weight:800;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;transition:transform .1s,box-shadow .1s;min-height:56px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-parents{background:none;border:2px solid var(--blue);color:var(--blue);border-radius:10px;padding:8px 20px;cursor:pointer;font-size:0.9rem;font-weight:700;min-height:44px;}
+#screen-parental{position:fixed;inset:0;background:rgba(10,30,60,.7);display:none;align-items:center;justify-content:center;z-index:100;}
+#screen-parental.active{display:flex;}
+.modal-box{background:#fff;border-radius:20px;padding:28px;max-width:380px;width:90%;text-align:center;}
+.modal-box h2{color:var(--blue);margin-bottom:12px;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.modal-box p{color:var(--slate);font-size:.95rem;margin-bottom:12px;line-height:1.5;}
+.parental-input{border:2px solid var(--sky);border-radius:10px;padding:10px;font-size:1.2rem;text-align:center;width:140px;margin:8px auto;display:block;}
+.btn-check{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;min-height:44px;}
+.btn-close-modal{background:none;border:2px solid var(--slate);color:var(--slate);border-radius:10px;padding:8px 18px;cursor:pointer;font-size:.9rem;margin-top:8px;min-height:44px;}
+.parental-error{color:#e53e3e;font-size:.85rem;min-height:20px;}
+#screen-game{padding:14px 14px 30px;gap:12px;justify-content:flex-start;}
+.game-header{width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.level-badge{background:var(--blue);color:#fff;border-radius:20px;padding:5px 14px;font-weight:700;font-size:.9rem;}
+.progress-area{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;color:var(--slate);}
+.hearts{font-size:1.2rem;letter-spacing:2px;}
+.score-display{background:var(--gold);color:var(--navy);border-radius:20px;padding:5px 14px;font-weight:800;}
+.detective-scene{width:100%;max-width:520px;background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 18px rgba(15,76,129,.12);position:relative;}
+.question-card{background:var(--sky-light);border:2px solid var(--sky);border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:center;}
+.question-intro{font-size:.85rem;color:var(--slate);margin-bottom:6px;}
+.question-text{font-size:clamp(1rem,3.5vw,1.25rem);font-weight:700;color:var(--navy);line-height:1.4;}
+.blank{display:inline-block;min-width:60px;border-bottom:3px solid var(--blue);padding:0 4px;}
+.question-type-badge{display:inline-block;background:var(--orange);color:#fff;border-radius:8px;padding:2px 10px;font-size:.75rem;font-weight:700;margin-bottom:6px;}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:520px;}
+.choice-btn{background:#fff;border:3px solid var(--sky);border-radius:14px;padding:14px 8px;font-size:clamp(.9rem,2.5vw,1.1rem);font-weight:700;cursor:pointer;color:var(--navy);min-height:60px;transition:all .15s;box-shadow:0 3px 0 #b0d8f5;text-align:center;word-break:break-word;}
+.choice-btn:hover:not(:disabled){border-color:var(--blue);transform:translateY(-2px);box-shadow:0 5px 0 #b0d8f5;}
+.choice-btn.correct{background:var(--success);border-color:var(--success);color:#fff;box-shadow:0 3px 0 #27a367;}
+.choice-btn.wrong{background:#fee2e2;border-color:#e53e3e;color:#c53030;}
+.choice-btn:disabled{cursor:default;}
+.sentence-display{background:var(--sky-light);border:2px solid var(--sky);border-radius:14px;padding:14px;margin-bottom:10px;font-size:clamp(1rem,3vw,1.2rem);line-height:1.8;text-align:center;}
+.word-btn{display:inline-block;background:#fff;border:2px solid var(--sky);border-radius:8px;padding:4px 10px;margin:4px;cursor:pointer;font-size:inherit;font-weight:600;color:var(--navy);transition:all .15s;}
+.word-btn:hover:not(:disabled){border-color:var(--orange);background:#fff8f0;}
+.word-btn.correct-word{background:var(--success);border-color:var(--success);color:#fff;}
+.word-btn.wrong-word{background:#fee2e2;border-color:#e53e3e;color:#c53030;}
+.feedback-area{min-height:48px;text-align:center;font-size:1rem;font-weight:700;padding:8px;border-radius:10px;width:100%;max-width:520px;transition:all .3s;}
+.feedback-area.ok{background:#d1fae5;color:#166534;}
+.feedback-area.ko{background:#fee2e2;color:#c53030;}
+.detective-track{width:100%;max-width:520px;background:#e2effc;border-radius:30px;height:18px;overflow:hidden;position:relative;}
+.detective-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:30px;transition:width .5s ease;}
+.detective-fig{position:absolute;top:50%;transform:translateY(-50%);font-size:1.4rem;transition:left .5s ease;}
+.btn-next{background:var(--orange);color:#fff;border:none;border-radius:14px;padding:12px 36px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);min-height:52px;display:none;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.btn-next:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-next.visible{display:block;}
+#screen-success{padding:20px 16px 30px;gap:16px;text-align:center;justify-content:center;}
+.success-stars{font-size:2.5rem;letter-spacing:4px;}
+.success-title{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2rem;font-weight:800;color:var(--blue);}
+.success-msg{color:var(--slate);font-size:1rem;max-width:340px;}
+.success-score{font-size:1.5rem;font-weight:800;background:var(--gold);color:var(--navy);border-radius:16px;padding:10px 30px;}
+.success-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 24px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);min-height:52px;}
+.clue-ribbon{background:var(--navy);color:var(--gold);border-radius:10px;padding:8px 14px;font-size:.85rem;font-weight:700;text-align:center;max-width:520px;width:100%;}
+#aria-live{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;}
+@keyframes starPop{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.3) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.star-pop{animation:starPop .4s ease forwards;}
+</style>
+</head>
+<body>
+<div id="aria-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TITLE SCREEN -->
+<div id="screen-title" class="screen active" role="main">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+      <span>PGRG IA</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-lang active" id="btn-fr-t" onclick="setLang('fr')" aria-label="Francais">FR</button>
+      <button class="btn-lang" id="btn-en-t" onclick="setLang('en')" aria-label="English">EN</button>
+      <button class="btn-mute" id="btn-mute-t" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+    </div>
+  </div>
+  <div class="mascot-area">
+    <svg width="130" height="155" viewBox="0 0 130 155" aria-hidden="true">
+      <ellipse cx="65" cy="105" rx="38" ry="42" fill="#2d4a7a"/>
+      <ellipse cx="65" cy="113" rx="22" ry="26" fill="#eaf6ff"/>
+      <circle cx="65" cy="58" r="34" fill="#2d4a7a"/>
+      <polygon points="38,32 32,10 50,26" fill="#2d4a7a"/>
+      <polygon points="92,32 98,10 80,26" fill="#2d4a7a"/>
+      <polygon points="40,30 35,14 48,26" fill="#f97316"/>
+      <polygon points="90,30 95,14 82,26" fill="#f97316"/>
+      <ellipse cx="65" cy="62" rx="24" ry="22" fill="#eaf6ff"/>
+      <circle cx="54" cy="57" r="10" fill="#fff"/>
+      <circle cx="76" cy="57" r="10" fill="#fff"/>
+      <circle cx="56" cy="57" r="6" fill="#0f4c81"/>
+      <circle cx="78" cy="57" r="6" fill="#0f4c81"/>
+      <circle cx="58" cy="55" r="2" fill="#fff"/>
+      <circle cx="80" cy="55" r="2" fill="#fff"/>
+      <polygon points="65,65 58,72 72,72" fill="#ffd23f"/>
+      <rect x="34" y="29" width="62" height="8" rx="4" fill="#1a1a2e"/>
+      <rect x="42" y="8" width="46" height="24" rx="6" fill="#1a1a2e"/>
+      <rect x="42" y="27" width="46" height="5" rx="2" fill="#f97316"/>
+      <circle cx="106" cy="120" r="14" fill="none" stroke="#ffd23f" stroke-width="4"/>
+      <line x1="115" y1="130" x2="126" y2="142" stroke="#ffd23f" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="96" cy="113" rx="14" ry="8" fill="#3a5f9a" transform="rotate(-30 96 113)"/>
+      <ellipse cx="51" cy="145" rx="12" ry="5" fill="#ffd23f"/>
+      <ellipse cx="79" cy="145" rx="12" ry="5" fill="#ffd23f"/>
+    </svg>
+  </div>
+  <h1 class="title-main" id="title-main-text"></h1>
+  <p class="title-sub" id="title-sub-text"></p>
+  <button class="btn-play" onclick="startGame()" id="btn-play-t"></button>
+  <button class="btn-parents" onclick="openParental()" id="btn-parents-t"></button>
+</div>
+
+<!-- PARENTAL GATE -->
+<div id="screen-parental" role="dialog" aria-modal="true" aria-labelledby="parental-title">
+  <div class="modal-box">
+    <h2 id="parental-title"></h2>
+    <p id="parental-question-text"></p>
+    <input type="number" class="parental-input" id="parental-answer" placeholder="?" aria-label="Reponse">
+    <div class="parental-error" id="parental-error" role="alert"></div>
+    <button class="btn-check" onclick="checkParental()" id="btn-check-parental"></button>
+    <br>
+    <button class="btn-close-modal" onclick="closeParental()" id="btn-close-parental"></button>
+    <div id="parental-info" style="display:none;margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen" role="main">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+      <span>PGRG IA</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-lang" id="btn-fr-g" onclick="setLang('fr')" aria-label="Francais">FR</button>
+      <button class="btn-lang" id="btn-en-g" onclick="setLang('en')" aria-label="English">EN</button>
+      <button class="btn-mute" id="btn-mute-g" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+    </div>
+  </div>
+  <div class="game-header">
+    <div class="level-badge" id="level-badge-text"></div>
+    <div class="progress-area">
+      <span class="hearts" id="hearts-display"></span>
+      <span class="score-display" id="score-display"></span>
+    </div>
+  </div>
+  <div style="width:100%;max-width:520px;position:relative;margin-top:4px;">
+    <div class="detective-track" aria-hidden="true">
+      <div class="detective-fill" id="detective-fill" style="width:0%"></div>
+    </div>
+    <div class="detective-fig" id="detective-fig" style="left:0%">&#128373;</div>
+  </div>
+  <div class="clue-ribbon" id="clue-ribbon" aria-label="Indice"></div>
+  <div class="detective-scene" id="detective-scene">
+    <div class="question-card" id="question-card">
+      <div id="qtype-badge" class="question-type-badge"></div>
+      <div class="question-intro" id="question-intro"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="sentence-display" id="sentence-display" style="display:none"></div>
+    </div>
+  </div>
+  <div class="choices-grid" id="choices-grid" role="group" aria-label="Choix"></div>
+  <div class="feedback-area" id="feedback-area" role="alert" aria-live="assertive"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()"></button>
+  <button class="btn-secondary" style="margin-top:4px;min-height:44px;font-size:.85rem;" onclick="goHome()" id="btn-home-g"></button>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div id="screen-success" class="screen" role="main">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+      <span>PGRG IA</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-lang" id="btn-fr-s" onclick="setLang('fr')" aria-label="Francais">FR</button>
+      <button class="btn-lang" id="btn-en-s" onclick="setLang('en')" aria-label="English">EN</button>
+      <button class="btn-mute" id="btn-mute-s" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+    </div>
+  </div>
+  <svg width="100" height="100" viewBox="0 0 100 100" class="star-pop" aria-hidden="true">
+    <polygon points="50,8 61,35 90,35 67,54 76,82 50,64 24,82 33,54 10,35 39,35" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
+    <text x="50" y="60" text-anchor="middle" font-size="28">&#128269;</text>
+  </svg>
+  <div class="success-stars" id="success-stars">&#11088;&#11088;&#11088;</div>
+  <div class="success-title" id="success-title"></div>
+  <div class="success-msg" id="success-msg"></div>
+  <div class="success-score" id="success-score"></div>
+  <div class="success-btns">
+    <button class="btn-play" onclick="replayLevel()" id="btn-replay-s"></button>
+    <button class="btn-secondary" onclick="nextLevel()" id="btn-nextlvl-s"></button>
+    <button class="btn-secondary" onclick="goHome()" id="btn-home-s"></button>
+  </div>
+</div>
+
+<script>
+var T = {
+  fr: {
+    gameTitle: "Le Mystere de l'Orthographe",
+    gameSub: "Deviens detective des mots ! Resous les enigmes orthographiques.",
+    btnPlay: "Jouer",
+    btnParents: "Pour les parents",
+    parentalTitle: "Espace Parents",
+    parentalQ: "Pour entrer dans l'espace parents, reponds a cette question :",
+    parentalBtn: "Verifier",
+    parentalClose: "Fermer",
+    parentalInfo: "Ce jeu entraine l'orthographe francaise (mots courants, homophones, accords). Aucune donnee personnelle collectee. Aucune publicite. Progression sauvegardee localement. Concu pour les 8-12 ans.",
+    parentalWrong: "Ce n'est pas ca ! Reessaie.",
+    levelNames: ["Mots courants","Homophones","Accords et Pluriels"],
+    levelLabel: "Niveau",
+    score: "Score",
+    questionIntros: {
+      choose: "Quelle est la bonne orthographe ?",
+      complete: "Complete le mot :",
+      findError: "Clique sur le mot mal orthographie :",
+      homophone: "Choisis le bon mot :",
+      agreement: "Quelle est la bonne forme ?"
+    },
+    qTypeBadge: {
+      choose: "Bonne orthographe",
+      complete: "Mot a completer",
+      findError: "Trouve l'erreur",
+      homophone: "Homophone",
+      agreement: "Accord"
+    },
+    feedbackOk: ["Excellent ! Enigme resolue !","Bravo ! Le detective avance !","Parfait ! Tu as trouve !","Incroyable ! +1 indice !","Super travail !"],
+    feedbackKo: ["Pas tout a fait... La bonne reponse est :","Ce n'est pas ca... C'etait :","Oups ! La bonne reponse est :","Presque ! En fait c'est :"],
+    feedbackHint: "Indice :",
+    btnNext: "Indice suivant",
+    successTitle: "Affaire classee !",
+    successMsg: "Le detective a resolu toutes les enigmes !",
+    btnReplay: "Rejouer",
+    btnNextLvl: "Niveau suivant",
+    btnHome: "Accueil",
+    btnHomeGame: "Accueil",
+    clues: [
+      "Le detective cherche un indice...",
+      "Une piste dans la bibliotheque !",
+      "Vieille lettre dechiffree !",
+      "Une cle cachee trouvee !",
+      "Une piece du puzzle !",
+      "La lampe eclaire l'enigme !",
+      "Le code secret revele !",
+      "L'affaire est presque resolue !",
+      "Le suspect est identifie !",
+      "Affaire classee !"
+    ],
+    starMsg: ["Bon debut, continue !","Bien joue, detective !","Maitre detective !"]
+  },
+  en: {
+    gameTitle: "Spelling Mystery",
+    gameSub: "Become a word detective! Solve the spelling puzzles.",
+    btnPlay: "Play",
+    btnParents: "For Parents",
+    parentalTitle: "Parents Space",
+    parentalQ: "To enter the parents area, answer this question:",
+    parentalBtn: "Check",
+    parentalClose: "Close",
+    parentalInfo: "This game trains English spelling (common words, homophones, plurals). No personal data collected. No ads. Progress saved locally. Designed for ages 8-12.",
+    parentalWrong: "Not quite! Try again.",
+    levelNames: ["Common Words","Homophones","Plurals and Agreements"],
+    levelLabel: "Level",
+    score: "Score",
+    questionIntros: {
+      choose: "Which spelling is correct?",
+      complete: "Complete the word:",
+      findError: "Click the misspelled word:",
+      homophone: "Choose the correct word:",
+      agreement: "Which form is correct?"
+    },
+    qTypeBadge: {
+      choose: "Correct Spelling",
+      complete: "Complete the Word",
+      findError: "Find the Error",
+      homophone: "Homophone",
+      agreement: "Agreement"
+    },
+    feedbackOk: ["Excellent! Clue found!","Great job! Detective advances!","Perfect! You got it!","Amazing! +1 clue!","Super work!"],
+    feedbackKo: ["Not quite... The correct answer is:","That's not it... It was:","Oops! The correct answer is:","Almost! It's actually:"],
+    feedbackHint: "Hint:",
+    btnNext: "Next clue",
+    successTitle: "Case Closed!",
+    successMsg: "The detective solved all the puzzles!",
+    btnReplay: "Play Again",
+    btnNextLvl: "Next Level",
+    btnHome: "Home",
+    btnHomeGame: "Home",
+    clues: [
+      "The detective searches for a clue...",
+      "A lead in the library!",
+      "Old letter deciphered!",
+      "A hidden key found!",
+      "A puzzle piece!",
+      "The lamp lights the mystery!",
+      "The secret code revealed!",
+      "The case is nearly solved!",
+      "The suspect is identified!",
+      "Case Closed!"
+    ],
+    starMsg: ["Good start, keep going!","Well done, detective!","Master detective!"]
+  }
+};
+
+var DATA_FR = [
+  {level:0,type:"choose",question:"Un animal qui ronronne",choices:["un chat","un sha","un chatt"],correct:0,hint:"Il ronronne et attrape les souris."},
+  {level:0,type:"complete",question:"La _aison ou il neige",full:"saison",choices:["saison","maison","raison"],correct:0,hint:"L'hiver est une de ces periodes."},
+  {level:0,type:"choose",question:"Le contraire de grand",choices:["petit","p'tit","peti"],correct:0,hint:"Les fourmis sont tres ___."},
+  {level:0,type:"findError",sentence:["Il","faisait","beaucoups","de","bruit"],errorIndex:2,correct:"beaucoup",hint:"Ce mot ne prend pas de s a la fin."},
+  {level:0,type:"choose",question:"Un repas du matin",choices:["dejeuner","dejuner","dajeuner"],correct:0,hint:"On mange des cereales au ___."},
+  {level:0,type:"complete",question:"Une _omme a croquer",full:"pomme",choices:["pomme","comme","homme"],correct:0,hint:"Fruit rouge ou vert de l'automne."},
+  {level:0,type:"findError",sentence:["Mon","fraire","joue","au","foot"],errorIndex:1,correct:"frere",hint:"Le fils de tes parents, pas toi."},
+  {level:0,type:"choose",question:"On s'en sert pour ecrire",choices:["crayon","craion","crayont"],correct:0,hint:"Jaune et noir, il laisse des traces."},
+  {level:0,type:"findError",sentence:["Elle","mange","une","pomme","vertts"],errorIndex:4,correct:"verte",hint:"Un seul t, et accord feminin."},
+  {level:0,type:"choose",question:"La saison apres l'ete",choices:["automne","autonne","automme"],correct:0,hint:"Les feuilles tombent en ___."},
+  {level:1,type:"homophone",question:"Elle ___ arrivee ce matin.",choices:["est","et","es"],correct:0,hint:"est = verbe etre (il/elle est)."},
+  {level:1,type:"homophone",question:"J'ai mange des cerises ___ des fraises.",choices:["et","est","ai"],correct:0,hint:"et relie deux choses."},
+  {level:1,type:"homophone",question:"Tu ___ vu le film ?",choices:["as","a","ha"],correct:0,hint:"as = tu as (verbe avoir)."},
+  {level:1,type:"homophone",question:"Il va ___ l'ecole.",choices:["a","as","ha"],correct:0,hint:"a ne peut pas se remplacer par avait."},
+  {level:1,type:"homophone",question:"___ tu fatigue ?",choices:["Es","Est","Et"],correct:0,hint:"Es = tu es (verbe etre)."},
+  {level:1,type:"findError",sentence:["Papa","et","maman","sont","arrivé"],errorIndex:4,correct:"arrives",hint:"Le participe s'accorde au pluriel."},
+  {level:1,type:"homophone",question:"Le chien ___ son os depuis une heure.",choices:["ronge","ronj","ronghe"],correct:0,hint:"Il mache quelque chose de dur."},
+  {level:1,type:"homophone",question:"Viens ___ moi !",choices:["avec","avek","avce"],correct:0,hint:"Preposition : en compagnie de."},
+  {level:1,type:"findError",sentence:["Je","suis","aller","au","parc"],errorIndex:2,correct:"alle",hint:"Avec etre, on accorde : je suis alle(e)."},
+  {level:1,type:"homophone",question:"Il ___ chaud aujourd'hui.",choices:["fait","fais","fes"],correct:0,hint:"fait : conjugaison de faire a la 3e personne."},
+  {level:2,type:"agreement",question:"Des cheval___",choices:["chevaux","chevals","chevales"],correct:0,hint:"Le pluriel de cheval est irregulier."},
+  {level:2,type:"agreement",question:"Des bal___",choices:["bals","baux","bales"],correct:0,hint:"Bal fait son pluriel en -s."},
+  {level:2,type:"agreement",question:"Elles sont ___ parties.",choices:["toutes","tous","tout"],correct:0,hint:"Accord feminin pluriel avec elles."},
+  {level:2,type:"findError",sentence:["Les","oiseaux","chantent","dans","le","arbre"],errorIndex:5,correct:"l'arbre",hint:"Devant une voyelle, le devient l'."},
+  {level:2,type:"agreement",question:"Un ___ garcon (devant consonne)",choices:["beau","belle","bel"],correct:0,hint:"Beau devant nom masculin commencant par consonne."},
+  {level:2,type:"findError",sentence:["Ma","soeur","est","tres","gentille"],errorIndex:0,correct:"Ma",hint:"Rien a corriger ici - clique 'Ma' si tu penses que c'est correct !"},
+  {level:2,type:"agreement",question:"Les enfants sont ___ contents.",choices:["tres","trop","fort"],correct:0,hint:"tres : ne change jamais de forme."},
+  {level:2,type:"findError",sentence:["Il","a","manges","toute","la","tarte"],errorIndex:2,correct:"mange",hint:"Avec avoir, le participe ne s'accorde pas avec le sujet."},
+  {level:2,type:"agreement",question:"Des journal___",choices:["journaux","journauxs","journals"],correct:0,hint:"Les noms en -al font -aux au pluriel."},
+  {level:2,type:"findError",sentence:["Les","filles","sont","belle"],errorIndex:3,correct:"belles",hint:"Accord feminin pluriel : belles."}
+];
+
+var DATA_EN = [
+  {level:0,type:"choose",question:"An animal that purrs",choices:["cat","kat","catt"],correct:0,hint:"It meows and chases mice."},
+  {level:0,type:"complete",question:"A _ riend to play with",full:"friend",choices:["friend","frend","freind"],correct:0,hint:"Someone you like to spend time with."},
+  {level:0,type:"choose",question:"Opposite of big",choices:["small","smal","smale"],correct:0,hint:"Ants are very ___."},
+  {level:0,type:"findError",sentence:["She","recieved","a","beautiful","gift"],errorIndex:1,correct:"received",hint:"i before e except after c."},
+  {level:0,type:"choose",question:"A meal in the morning",choices:["breakfast","brekfast","breackfast"],correct:0,hint:"The first meal of the day."},
+  {level:0,type:"complete",question:"A _ olorful rainbow",full:"colorful",choices:["colorful","colorfull","coloreful"],correct:0,hint:"Full of many colors."},
+  {level:0,type:"findError",sentence:["My","freind","is","very","kind"],errorIndex:1,correct:"friend",hint:"i before e except after c."},
+  {level:0,type:"choose",question:"You use it to write",choices:["pencil","pensil","pencill"],correct:0,hint:"Yellow and black, leaves marks."},
+  {level:0,type:"findError",sentence:["The","libary","has","many","books"],errorIndex:1,correct:"library",hint:"There's an r in there: lib-R-ary."},
+  {level:0,type:"choose",question:"The season after summer",choices:["autumn","autum","autunm"],correct:0,hint:"Leaves fall in this season."},
+  {level:1,type:"homophone",question:"I can ___ you from here.",choices:["see","sea","si"],correct:0,hint:"see = to look at something."},
+  {level:1,type:"homophone",question:"The fish swims in the ___.",choices:["sea","see","si"],correct:0,hint:"sea = body of salt water."},
+  {level:1,type:"homophone",question:"___ book is on the table.",choices:["Their","There","They're"],correct:0,hint:"Their shows possession."},
+  {level:1,type:"homophone",question:"Put it over ___, please.",choices:["there","their","they're"],correct:0,hint:"there refers to a place."},
+  {level:1,type:"homophone",question:"___ going to the park.",choices:["They're","Their","There"],correct:0,hint:"They're = They are."},
+  {level:1,type:"homophone",question:"I ___ my bike to school.",choices:["rode","road","rowed"],correct:0,hint:"Past tense of ride."},
+  {level:1,type:"homophone",question:"The car drove down the ___.",choices:["road","rode","rowed"],correct:0,hint:"A path for cars to travel on."},
+  {level:1,type:"findError",sentence:["The","weather","is","to","hot","today"],errorIndex:3,correct:"too",hint:"too means also or excessively."},
+  {level:1,type:"homophone",question:"He ___ the answer.",choices:["knew","new","nu"],correct:0,hint:"knew = past tense of know."},
+  {level:1,type:"homophone",question:"I have ___ siblings.",choices:["two","to","too"],correct:0,hint:"two = the number 2."},
+  {level:2,type:"agreement",question:"More than one child:",choices:["children","childs","childrens"],correct:0,hint:"Irregular plural, no -s added."},
+  {level:2,type:"agreement",question:"More than one mouse:",choices:["mice","mouses","mices"],correct:0,hint:"Irregular plural like child/children."},
+  {level:2,type:"agreement",question:"She ___ been waiting for hours.",choices:["has","have","had"],correct:0,hint:"Subject-verb agreement: she HAS."},
+  {level:2,type:"agreement",question:"They ___ playing football now.",choices:["are","is","am"],correct:0,hint:"Subject-verb: they ARE."},
+  {level:2,type:"findError",sentence:["The","boys","is","playing","outside"],errorIndex:2,correct:"are",hint:"The boys is plural - use are."},
+  {level:2,type:"agreement",question:"More than one leaf:",choices:["leaves","leafs","leafes"],correct:0,hint:"-f changes to -ves in plural."},
+  {level:2,type:"agreement",question:"I ___ not seen that film.",choices:["have","has","had"],correct:0,hint:"First person I uses HAVE."},
+  {level:2,type:"findError",sentence:["Each","of","the","students","have","a","book"],errorIndex:4,correct:"has",hint:"Each is singular - use has."},
+  {level:2,type:"findError",sentence:["She","don't","like","spiders"],errorIndex:1,correct:"doesn't",hint:"Third person singular uses does not don't."},
+  {level:2,type:"agreement",question:"More than one foot:",choices:["feet","foots","feets"],correct:0,hint:"Irregular plural, vowel changes."}
+];
+
+var lang = (navigator.language||"fr").startsWith("fr") ? "fr" : "en";
+var muted = false;
+var currentLevel = 0;
+var currentQIndex = 0;
+var score = 0;
+var hearts = 3;
+var levelQuestions = [];
+var answered = false;
+var parentalA = 0, parentalB = 0;
+var MAX_HEARTS = 3;
+var QUESTIONS_PER_LEVEL = 8;
+var audioCtx = null;
+
+function saveProgress() {
+  try { localStorage.setItem("pgrg_mystere_ortho", JSON.stringify({lang:lang,currentLevel:currentLevel,score:score})); } catch(e) {}
+}
+function loadProgress() {
+  try {
+    var d = JSON.parse(localStorage.getItem("pgrg_mystere_ortho")||"{}");
+    if (d.lang) lang = d.lang;
+    if (typeof d.currentLevel === "number") currentLevel = Math.min(d.currentLevel, 2);
+    if (typeof d.score === "number") score = d.score;
+  } catch(e) {}
+}
+
+function getCtx() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} }
+  return audioCtx;
+}
+function playTone(freq, dur, type, vol) {
+  if (muted) return;
+  type = type||"sine"; vol = vol||0.18;
+  var ctx = getCtx(); if (!ctx) return;
+  var o = ctx.createOscillator();
+  var g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  o.start(); o.stop(ctx.currentTime + dur);
+}
+function playSuccess() { playTone(523,.12);setTimeout(function(){playTone(659,.12);},100);setTimeout(function(){playTone(784,.2);},200); }
+function playWrong() { playTone(200,.2,"sawtooth",.12); }
+function playLevelUp() { var fs=[523,587,659,698,784];fs.forEach(function(f,i){setTimeout(function(){playTone(f,.15);},i*80);}); }
+function toggleMute() {
+  muted = !muted;
+  ["t","g","s"].forEach(function(id){
+    var btn=document.getElementById("btn-mute-"+id);
+    if(btn) btn.textContent = muted ? "🔇" : "🔊";
+  });
+}
+
+function tget(key) {
+  var parts = key.split(".");
+  var obj = T[lang];
+  for (var i=0;i<parts.length;i++) { obj = obj && obj[parts[i]]; }
+  return obj || key;
+}
+
+function setLang(l) {
+  lang = l; saveProgress(); renderUI();
+  if (document.getElementById("screen-game").classList.contains("active")) {
+    loadQuestion();
+  }
+}
+
+function renderUI() {
+  ["t","g","s"].forEach(function(id){
+    var fr=document.getElementById("btn-fr-"+id);
+    var en=document.getElementById("btn-en-"+id);
+    if(fr) fr.classList.toggle("active",lang==="fr");
+    if(en) en.classList.toggle("active",lang==="en");
+  });
+  var tm=document.getElementById("title-main-text"); if(tm) tm.textContent=tget("gameTitle");
+  var ts=document.getElementById("title-sub-text"); if(ts) ts.textContent=tget("gameSub");
+  var bp=document.getElementById("btn-play-t"); if(bp) bp.textContent=tget("btnPlay");
+  var bpar=document.getElementById("btn-parents-t"); if(bpar) bpar.textContent=tget("btnParents");
+  var pt=document.getElementById("parental-title"); if(pt) pt.textContent=tget("parentalTitle");
+  var pbtn=document.getElementById("btn-check-parental"); if(pbtn) pbtn.textContent=tget("parentalBtn");
+  var pcl=document.getElementById("btn-close-parental"); if(pcl) pcl.textContent=tget("parentalClose");
+  var lb=document.getElementById("level-badge-text");
+  if(lb) lb.textContent=tget("levelLabel")+" "+(currentLevel+1)+" - "+(tget("levelNames")[currentLevel]||"");
+  updateHeartsDisplay();
+  var sd=document.getElementById("score-display"); if(sd) sd.textContent="* "+score;
+  var bng=document.getElementById("btn-next"); if(bng) bng.textContent=tget("btnNext");
+  var bhg=document.getElementById("btn-home-g"); if(bhg) bhg.textContent=tget("btnHomeGame");
+  var stit=document.getElementById("success-title"); if(stit) stit.textContent=tget("successTitle");
+  var smsg=document.getElementById("success-msg"); if(smsg) smsg.textContent=tget("successMsg");
+  var br=document.getElementById("btn-replay-s"); if(br) br.textContent=tget("btnReplay");
+  var bnl=document.getElementById("btn-nextlvl-s"); if(bnl) bnl.textContent=tget("btnNextLvl");
+  var bhs=document.getElementById("btn-home-s"); if(bhs) bhs.textContent=tget("btnHome");
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  document.getElementById(id).classList.add("active");
+}
+
+function openParental() {
+  parentalA = Math.floor(Math.random()*9)+2;
+  parentalB = Math.floor(Math.random()*9)+2;
+  var pq=document.getElementById("parental-question-text");
+  if(pq) pq.textContent=tget("parentalQ")+" "+parentalA+" x "+parentalB+" = ?";
+  var pi=document.getElementById("parental-info"); if(pi) pi.style.display="none";
+  var pe=document.getElementById("parental-error"); if(pe) pe.textContent="";
+  var pa=document.getElementById("parental-answer"); if(pa) pa.value="";
+  document.getElementById("screen-parental").classList.add("active");
+}
+function closeParental() { document.getElementById("screen-parental").classList.remove("active"); }
+function checkParental() {
+  var val=parseInt(document.getElementById("parental-answer").value,10);
+  if(val===parentalA*parentalB){
+    document.getElementById("parental-error").textContent="";
+    var pi=document.getElementById("parental-info");
+    pi.style.display="block";
+    pi.innerHTML="<p>"+tget("parentalInfo")+"</p>";
+  } else {
+    document.getElementById("parental-error").textContent=tget("parentalWrong");
+    playWrong();
+  }
+}
+
+function getDataForLang() { return lang==="fr" ? DATA_FR : DATA_EN; }
+
+function shuffle(arr) {
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+
+function startGame() {
+  hearts = MAX_HEARTS;
+  currentQIndex = 0;
+  answered = false;
+  var allData = getDataForLang();
+  var pool = allData.filter(function(q){return q.level===currentLevel;});
+  levelQuestions = shuffle(pool).slice(0, QUESTIONS_PER_LEVEL);
+  showScreen("screen-game");
+  renderUI();
+  updateDetective(0);
+  loadQuestion();
+}
+
+function updateHeartsDisplay() {
+  var hd=document.getElementById("hearts-display"); if(!hd) return;
+  var h="";
+  for(var i=0;i<MAX_HEARTS;i++) h+=(i<hearts)?"❤":"🖤";
+  hd.textContent=h;
+  hd.setAttribute("aria-label",(lang==="fr"?"Vies ":"Lives ")+hearts);
+}
+
+function updateDetective(fraction) {
+  var fill=document.getElementById("detective-fill");
+  var fig=document.getElementById("detective-fig");
+  if(fill) fill.style.width=Math.round(fraction*100)+"%";
+  if(fig) fig.style.left=Math.max(0,Math.min(88,Math.round(fraction*88)))+"%";
+  var clues=tget("clues");
+  var idx=Math.min(Math.floor(fraction*clues.length),clues.length-1);
+  var cr=document.getElementById("clue-ribbon"); if(cr) cr.textContent=clues[idx];
+}
+
+function loadQuestion() {
+  answered=false;
+  var btn=document.getElementById("btn-next"); if(btn) btn.classList.remove("visible");
+  var fa=document.getElementById("feedback-area"); if(fa){fa.textContent="";fa.className="feedback-area";}
+
+  if(currentQIndex>=levelQuestions.length){showSuccess();return;}
+
+  var q=levelQuestions[currentQIndex];
+  updateDetective(currentQIndex/levelQuestions.length);
+
+  var badge=document.getElementById("qtype-badge");
+  if(badge) badge.textContent=tget("qTypeBadge."+q.type)||"";
+  var intro=document.getElementById("question-intro");
+  if(intro) intro.textContent=tget("questionIntros."+q.type)||"";
+
+  var qtext=document.getElementById("question-text");
+  var sdisplay=document.getElementById("sentence-display");
+  var grid=document.getElementById("choices-grid");
+
+  if(q.type==="findError"){
+    if(qtext) qtext.textContent="";
+    if(sdisplay){
+      sdisplay.style.display="block";
+      sdisplay.innerHTML=buildSentenceHTML(q);
+    }
+    if(grid){grid.innerHTML="";grid.style.display="none";}
+  } else {
+    if(sdisplay) sdisplay.style.display="none";
+    if(qtext){
+      if(q.type==="complete"){
+        qtext.innerHTML=q.question.replace("_",'<span class="blank">___</span>');
+      } else {
+        qtext.textContent=q.question;
+      }
+    }
+    if(grid){
+      grid.style.display="grid";
+      grid.innerHTML="";
+      var choiceData=q.choices.map(function(c,i){return{text:c,isCorrect:i===q.correct};});
+      var shuffled=shuffle(choiceData);
+      shuffled.forEach(function(ch){
+        var btn2=document.createElement("button");
+        btn2.className="choice-btn";
+        btn2.textContent=ch.text;
+        btn2.setAttribute("aria-label",ch.text);
+        (function(b,correct,qref){
+          b.onclick=function(){handleChoice(b,correct,qref);};
+        })(btn2,ch.isCorrect,q);
+        grid.appendChild(btn2);
+      });
+    }
+  }
+
+  var sd=document.getElementById("score-display"); if(sd) sd.textContent="* "+score;
+  updateHeartsDisplay();
+  ariaAnnounce((tget("questionIntros."+q.type)||"")+" "+(q.question||((q.sentence||[]).join(" "))||""));
+}
+
+function buildSentenceHTML(q) {
+  return q.sentence.map(function(word,i){
+    return '<button class="word-btn" onclick="handleWordClick(this,'+i+','+i+')" data-idx="'+i+'" aria-label="'+word+'">'+word+'</button>';
+  }).join(" ");
+}
+
+function handleChoice(btn, isCorrect, q) {
+  if(answered) return;
+  answered=true;
+  disableChoices();
+  if(isCorrect){
+    btn.classList.add("correct");
+    showFeedback("ok",null);
+    score+=10;
+    var sd=document.getElementById("score-display"); if(sd) sd.textContent="* "+score;
+    playSuccess();
+    saveProgress();
+  } else {
+    btn.classList.add("wrong");
+    highlightCorrectChoice(q);
+    hearts=Math.max(0,hearts-1);
+    updateHeartsDisplay();
+    showFeedback("ko",q.choices[q.correct]);
+    if(q.hint) showHint(q.hint);
+    playWrong();
+    if(hearts===0){setTimeout(function(){hearts=MAX_HEARTS;updateHeartsDisplay();},1500);}
+  }
+  showNextBtn();
+}
+
+function highlightCorrectChoice(q) {
+  var grid=document.getElementById("choices-grid"); if(!grid) return;
+  var btns=grid.querySelectorAll(".choice-btn");
+  btns.forEach(function(b){if(b.textContent===q.choices[q.correct]) b.classList.add("correct");});
+}
+
+function handleWordClick(btn, idx) {
+  if(answered) return;
+  answered=true;
+  var q=levelQuestions[currentQIndex];
+  var allWords=document.querySelectorAll(".word-btn");
+  allWords.forEach(function(w){w.disabled=true;});
+  var clickedIdx=parseInt(btn.getAttribute("data-idx"),10);
+  if(clickedIdx===q.errorIndex){
+    btn.classList.add("correct-word");
+    showFeedback("ok",null);
+    score+=10;
+    var sd=document.getElementById("score-display"); if(sd) sd.textContent="* "+score;
+    playSuccess();
+    saveProgress();
+  } else {
+    btn.classList.add("wrong-word");
+    allWords.forEach(function(w,i){if(parseInt(w.getAttribute("data-idx"),10)===q.errorIndex) w.classList.add("correct-word");});
+    hearts=Math.max(0,hearts-1);
+    updateHeartsDisplay();
+    showFeedback("ko",q.correct);
+    if(q.hint) showHint(q.hint);
+    playWrong();
+    if(hearts===0){setTimeout(function(){hearts=MAX_HEARTS;updateHeartsDisplay();},1500);}
+  }
+  showNextBtn();
+}
+
+function disableChoices() {
+  var grid=document.getElementById("choices-grid"); if(!grid) return;
+  grid.querySelectorAll(".choice-btn").forEach(function(b){b.disabled=true;});
+}
+
+function showFeedback(type, correctWord) {
+  var fa=document.getElementById("feedback-area"); if(!fa) return;
+  fa.className="feedback-area "+(type==="ok"?"ok":"ko");
+  if(type==="ok"){
+    var msgs=tget("feedbackOk");
+    fa.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  } else {
+    var msgs2=tget("feedbackKo");
+    var base=msgs2[Math.floor(Math.random()*msgs2.length)];
+    fa.textContent=base+(correctWord?" "+correctWord:"");
+  }
+  ariaAnnounce(fa.textContent);
+}
+
+function showHint(hint) {
+  if(!hint) return;
+  var fa=document.getElementById("feedback-area"); if(!fa) return;
+  fa.textContent+=" | "+tget("feedbackHint")+" "+hint;
+}
+
+function showNextBtn() {
+  var btn=document.getElementById("btn-next"); if(btn) btn.classList.add("visible");
+}
+
+function nextQuestion() {
+  currentQIndex++;
+  updateDetective(currentQIndex/levelQuestions.length);
+  loadQuestion();
+}
+
+function goHome() { showScreen("screen-title"); renderUI(); }
+
+function showSuccess() {
+  playLevelUp();
+  updateDetective(1);
+  var total=levelQuestions.length*10;
+  var stars="*";
+  var starIdx=0;
+  if(score>=total*0.9){stars="* * *";starIdx=2;}
+  else if(score>=total*0.6){stars="* *";starIdx=1;}
+  var ss=document.getElementById("success-stars"); if(ss) ss.textContent=stars;
+  var sc=document.getElementById("success-score"); if(sc) sc.textContent=score+" pts";
+  var sm=document.getElementById("success-msg"); if(sm) sm.textContent=(tget("starMsg")[starIdx]||tget("successMsg"));
+  showScreen("screen-success");
+  renderUI();
+  var btnNL=document.getElementById("btn-nextlvl-s");
+  if(btnNL) btnNL.style.display=currentLevel>=2?"none":"";
+}
+
+function replayLevel() { score=0; startGame(); }
+
+function nextLevel() {
+  if(currentLevel<2){currentLevel++;saveProgress();score=0;startGame();}
+  else{goHome();}
+}
+
+function ariaAnnounce(msg) {
+  var el=document.getElementById("aria-live"); if(!el) return;
+  el.textContent="";
+  setTimeout(function(){el.textContent=msg;},50);
+}
+
+loadProgress();
+renderUI();
+showScreen("screen-title");
+</script>
+</body>
+</html>

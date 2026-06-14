@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c81">
+<title>La Pizzeria des Fractions / Fraction Pizzeria — PGRG IA</title>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0a3559;
+  --navy:#0f172a;
+  --orange:#f97316;
+  --orange-dark:#ea580c;
+  --gold:#ffd23f;
+  --sky:#7ec3ee;
+  --sky-light:#eaf6ff;
+  --slate:#475569;
+  --success:#34c77b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#eaf6ff 0%,#d0ebff 100%);min-height:100vh;color:var(--navy);overflow-x:hidden;}
+h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+#topbar{background:var(--blue);color:#fff;display:flex;align-items:center;padding:6px 12px;gap:10px;flex-wrap:wrap;}
+#topbar .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+#topbar .brand span{font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;white-space:nowrap;}
+#topbar .controls{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.lang-btn{background:var(--blue-dark);color:#fff;border:2px solid #fff3;border-radius:8px;padding:4px 10px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:36px;min-width:44px;}
+.lang-btn.active{background:var(--orange);border-color:var(--orange-dark);}
+.lang-btn:hover{opacity:.85;}
+#mute-btn{background:none;border:2px solid #fff3;border-radius:8px;color:#fff;font-size:1.3rem;cursor:pointer;padding:4px 8px;min-height:36px;min-width:44px;display:flex;align-items:center;justify-content:center;}
+#mute-btn:hover{opacity:.8;}
+.screen{display:none;min-height:calc(100vh - 52px);padding:20px 16px;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+#screen-title{justify-content:center;text-align:center;gap:14px;}
+#title-mascot{margin:0 auto 4px;}
+#game-title{font-size:clamp(1.8rem,5vw,2.8rem);color:var(--blue);line-height:1.1;}
+#game-subtitle{font-size:1rem;color:var(--slate);max-width:360px;}
+.btn-play{background:var(--orange);color:#fff;border:none;border-radius:16px;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.4rem;font-weight:700;padding:14px 44px;cursor:pointer;box-shadow:0 5px 0 var(--orange-dark);transition:transform .1s,box-shadow .1s;min-height:56px;min-width:160px;margin-top:6px;}
+.btn-play:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-dark);}
+.btn-play:hover{opacity:.93;}
+.btn-parents{background:none;border:none;color:var(--blue);font-size:.9rem;text-decoration:underline;cursor:pointer;margin-top:4px;padding:6px;min-height:44px;}
+.btn-parents:hover{color:var(--orange);}
+#screen-parents{text-align:center;gap:14px;justify-content:center;}
+.parents-box{background:#fff;border-radius:20px;padding:28px 24px;max-width:420px;width:100%;box-shadow:0 4px 20px #0f4c8122;}
+.parents-box h2{color:var(--blue);margin-bottom:10px;font-size:1.4rem;}
+.parents-box p{color:var(--slate);font-size:.95rem;line-height:1.5;margin-bottom:10px;}
+.gate-question{font-size:1.3rem;font-weight:700;color:var(--navy);margin:10px 0;}
+.gate-input{border:2px solid var(--sky);border-radius:10px;padding:10px 14px;font-size:1.2rem;width:100px;text-align:center;margin:6px 0;outline:none;}
+.gate-input:focus{border-color:var(--blue);}
+.btn-secondary{background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;padding:10px 28px;cursor:pointer;box-shadow:0 4px 0 var(--blue-dark);min-height:48px;margin-top:8px;}
+.btn-secondary:hover{opacity:.9;}
+.btn-secondary:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-dark);}
+.gate-err{color:#e33;font-size:.9rem;min-height:22px;}
+#parents-info{display:none;}
+#parents-info p{margin-bottom:8px;}
+#screen-game{gap:12px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:600px;flex-wrap:wrap;gap:8px;}
+.score-badge{background:var(--blue);color:#fff;border-radius:12px;padding:6px 16px;font-weight:700;font-size:1rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+.level-badge{background:var(--gold);color:var(--navy);border-radius:12px;padding:6px 16px;font-weight:700;font-size:.95rem;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+.progress-bar-wrap{width:100%;max-width:600px;background:#c8e6f7;border-radius:20px;height:14px;overflow:hidden;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--sky),var(--blue));border-radius:20px;transition:width .4s;}
+.customer-area{display:flex;align-items:flex-end;gap:12px;max-width:600px;width:100%;background:#fff;border-radius:20px;padding:14px 18px;box-shadow:0 3px 12px #0f4c8115;}
+.customer-char{flex-shrink:0;}
+.speech-bubble{background:var(--sky-light);border:2px solid var(--sky);border-radius:16px 16px 16px 4px;padding:10px 16px;flex:1;font-size:1.05rem;line-height:1.5;}
+.speech-bubble strong{color:var(--blue);font-size:1.2rem;}
+.pizza-section{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:600px;}
+.pizza-title{font-size:1rem;color:var(--slate);font-weight:700;}
+.pizza-wrap{position:relative;}
+.pizza-wrap svg{display:block;}
+.choices-area{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%;max-width:600px;}
+.choice-btn{background:#fff;border:3px solid var(--sky);border-radius:16px;padding:8px 16px;font-size:1.1rem;font-weight:700;cursor:pointer;min-height:56px;min-width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .15s,background .15s;font-family:'Fredoka','Nunito',system-ui,sans-serif;}
+.choice-btn:hover{border-color:var(--blue);background:var(--sky-light);}
+.choice-btn.correct{border-color:var(--success);background:#eaffef;}
+.choice-btn.wrong{border-color:#e33;background:#fff0f0;}
+.fraction-display{display:flex;flex-direction:column;align-items:center;line-height:1.1;}
+.frac-num{font-size:1.1rem;border-bottom:2px solid currentColor;padding-bottom:1px;}
+.frac-den{font-size:1.1rem;padding-top:1px;}
+.hint-text{color:var(--slate);font-size:.9rem;text-align:center;}
+.feedback-area{min-height:44px;font-size:1.1rem;font-weight:700;text-align:center;padding:6px;border-radius:10px;max-width:500px;width:100%;}
+.feedback-area.ok{color:var(--success);}
+.feedback-area.bad{color:#c0392b;}
+.btn-next{background:var(--orange);color:#fff;border:none;border-radius:12px;font-family:'Fredoka','Nunito',system-ui,sans-serif;font-size:1.1rem;font-weight:700;padding:12px 36px;cursor:pointer;box-shadow:0 4px 0 var(--orange-dark);min-height:52px;min-width:140px;display:none;}
+.btn-next:hover{opacity:.9;}
+.btn-next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-dark);}
+#screen-success{justify-content:center;text-align:center;gap:16px;}
+.success-box{background:#fff;border-radius:24px;padding:32px 24px;max-width:440px;width:100%;box-shadow:0 6px 30px #0f4c8120;}
+.stars-row{font-size:2.5rem;letter-spacing:4px;margin-bottom:6px;}
+.success-title{font-size:1.8rem;color:var(--blue);margin-bottom:6px;}
+.success-score{font-size:1.1rem;color:var(--slate);margin-bottom:16px;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+@keyframes pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pop{animation:pop .35s ease both;}
+.shake{animation:shake .35s ease both;}
+[aria-live]{outline:none;}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.pizza-sector{cursor:pointer;}
+.pizza-sector:hover{opacity:.85;}
+@media(max-width:500px){.customer-area{flex-direction:column;align-items:flex-start;}.speech-bubble{border-radius:16px;}}
+</style>
+</head>
+<body>
+<div id="topbar" role="banner">
+  <div class="brand">
+    <img src="../../brand/logo-pgrg-256.png" alt="PGRG IA" style="height:34px" onerror="this.style.display='none'">
+    <span>PGRG IA</span>
+  </div>
+  <div class="controls">
+    <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')" aria-pressed="true">FR</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')" aria-pressed="false">EN</button>
+    <button id="mute-btn" onclick="toggleMute()" aria-label="Muet">🔊</button>
+  </div>
+</div>
+<div aria-live="polite" id="aria-live" style="position:absolute;left:-9999px;top:0;" tabindex="-1"></div>
+<div id="screen-title" class="screen active" role="main">
+  <div id="title-mascot">
+    <svg width="130" height="160" viewBox="0 0 130 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="65" cy="120" rx="38" ry="30" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+      <rect x="45" y="108" width="40" height="32" rx="6" fill="#eaf6ff" stroke="#7ec3ee" stroke-width="1.5"/>
+      <rect x="60" y="104" width="10" height="8" rx="3" fill="#7ec3ee"/>
+      <ellipse cx="27" cy="118" rx="10" ry="6" fill="#f97316" transform="rotate(-20 27 118)"/>
+      <ellipse cx="103" cy="118" rx="10" ry="6" fill="#f97316" transform="rotate(20 103 118)"/>
+      <circle cx="65" cy="72" r="32" fill="#fde8c8"/>
+      <rect x="42" y="44" width="46" height="18" rx="4" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+      <ellipse cx="65" cy="44" rx="26" ry="12" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+      <ellipse cx="65" cy="35" rx="14" ry="18" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+      <circle cx="55" cy="72" r="5" fill="#fff"/>
+      <circle cx="75" cy="72" r="5" fill="#fff"/>
+      <circle cx="56" cy="72" r="3" fill="#333"/>
+      <circle cx="76" cy="72" r="3" fill="#333"/>
+      <circle cx="57" cy="71" r="1" fill="#fff"/>
+      <circle cx="77" cy="71" r="1" fill="#fff"/>
+      <path d="M55 82 Q65 90 75 82" stroke="#c0622a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="49" cy="79" rx="6" ry="4" fill="#f9b8a0" opacity=".6"/>
+      <ellipse cx="81" cy="79" rx="6" ry="4" fill="#f9b8a0" opacity=".6"/>
+      <polygon points="103,108 118,90 122,112" fill="#ffd23f" stroke="#f97316" stroke-width="1.5"/>
+      <circle cx="112" cy="100" r="2.5" fill="#e33" opacity=".8"/>
+      <circle cx="117" cy="107" r="2" fill="#34c77b" opacity=".8"/>
+    </svg>
+  </div>
+  <h1 id="game-title" class="title-font"></h1>
+  <p id="game-subtitle"></p>
+  <button class="btn-play" id="btn-play" onclick="startGame()"></button>
+  <button class="btn-parents" id="btn-parents-link" onclick="showParents()"></button>
+</div>
+<div id="screen-parents" class="screen" role="main">
+  <div class="parents-box">
+    <h2 id="pg-title"></h2>
+    <div id="gate-section">
+      <p id="pg-gate-intro"></p>
+      <div class="gate-question" id="pg-question"></div>
+      <input class="gate-input" id="gate-input" type="number" inputmode="numeric" min="0" max="999" aria-labelledby="pg-question">
+      <div class="gate-err" id="gate-err" aria-live="assertive"></div>
+      <button class="btn-secondary" id="pg-validate" onclick="checkGate()"></button>
+    </div>
+    <div id="parents-info">
+      <h3 id="pg-info-title" style="color:var(--blue);margin-bottom:10px;"></h3>
+      <p id="pg-info-skill"></p>
+      <p id="pg-info-data"></p>
+      <p id="pg-info-pub"></p>
+    </div>
+    <button class="btn-secondary" id="pg-back" onclick="showTitle()" style="margin-top:14px;"></button>
+  </div>
+</div>
+<div id="screen-game" class="screen" role="main">
+  <div class="game-header">
+    <div class="score-badge" id="score-display"></div>
+    <div class="level-badge" id="level-display"></div>
+  </div>
+  <div class="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+  <div class="customer-area">
+    <div class="customer-char" id="customer-svg" aria-hidden="true"></div>
+    <div class="speech-bubble" id="speech-bubble"></div>
+  </div>
+  <div class="pizza-section">
+    <div class="pizza-title" id="pizza-label"></div>
+    <div class="pizza-wrap" id="pizza-wrap" role="group" aria-label="Pizza"></div>
+    <div class="hint-text" id="hint-text"></div>
+  </div>
+  <div class="choices-area" id="choices-area" role="group" aria-label="Choix"></div>
+  <div class="feedback-area" id="feedback" aria-live="assertive"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()"></button>
+</div>
+<div id="screen-success" class="screen" role="main">
+  <div class="success-box">
+    <div class="stars-row" id="stars-row" aria-hidden="true"></div>
+    <h2 class="success-title title-font" id="success-title"></h2>
+    <p class="success-score" id="success-score"></p>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-replay" onclick="replayLevel()"></button>
+      <button class="btn-play" id="btn-next-level" onclick="nextLevel()" style="font-size:1rem;padding:12px 24px;"></button>
+      <button class="btn-secondary" id="btn-home" onclick="showTitle()"></button>
+    </div>
+  </div>
+</div>
+<script>
+const T={
+  fr:{
+    gameTitle:"La Pizzeria des Fractions",
+    gameSubtitle:"Sers les clients avec les bonnes fractions !",
+    btnPlay:"🍕 Jouer !",
+    btnParents:"Pour les parents",
+    pgTitle:"Espace parents",
+    pgGateIntro:"Pour accéder à l'espace parents, résous ce calcul :",
+    pgValidate:"Valider",
+    pgBack:"Retour",
+    pgErr:"Oups, réessaie !",
+    pgInfoTitle:"La Pizzeria des Fractions",
+    pgInfoSkill:"Compétence visée : comprendre les fractions (parts égales, comparer, additionner) pour les enfants de 8 à 11 ans. 3 niveaux progressifs.",
+    pgInfoData:"Aucune donnée personnelle collectée. Progression sauvegardée uniquement sur cet appareil.",
+    pgInfoPub:"Aucune publicité. Aucun lien externe. Application 100 % hors-ligne.",
+    score:"Score",
+    level:"Niveau",
+    pizzaLabel:"Clique les parts à servir",
+    hintN1:"Clique sur les parts pour colorier la fraction demandée",
+    hintN2:"Choisir la plus grande fraction",
+    hintN3:"Choisir le bon résultat",
+    btnNext:"Suivant ➜",
+    feedbackOk:["Super ! 🎉","Bravo !","Parfait !","Excellent !","Génial !","Bien joué !"],
+    feedbackBad:["Essaie encore !","Presque !","Regarde bien !","Encore un essai !"],
+    customerNames:["Léa","Tom","Sara","Max","Zoé","Alex","Lila","Nino"],
+    orderPre:["Je voudrais","Donne-moi","S'il te plaît,","Pour moi,"],
+    orderPost:["de pizza.","de tarte.","de ma pizza.","s'il te plaît."],
+    compareQ:"Quelle fraction est la plus grande ?",
+    addQ:"Combien font",
+    addQ2:"?",
+    levelNames:["Servir la bonne part","Comparer les fractions","Additionner les fractions"],
+    successTitle:["Niveau réussi !","Bravo champion !","Incroyable !"],
+    scoreLabel:"Score final",
+    btnReplay:"Rejouer",
+    btnNextLevel:"Niveau suivant ➜",
+    btnHome:"Accueil",
+    allDone:"Tous les niveaux terminés ! Expert des fractions ! 🏆",
+    mute:"Muet",
+    unmute:"Son activé",
+  },
+  en:{
+    gameTitle:"Fraction Pizzeria",
+    gameSubtitle:"Serve customers with the right fractions!",
+    btnPlay:"🍕 Play!",
+    btnParents:"For parents",
+    pgTitle:"Parents section",
+    pgGateIntro:"To access the parents section, solve this:",
+    pgValidate:"Confirm",
+    pgBack:"Back",
+    pgErr:"Oops, try again!",
+    pgInfoTitle:"Fraction Pizzeria",
+    pgInfoSkill:"Learning goal: understanding fractions (equal parts, comparing, adding) for children aged 8-11. 3 progressive levels.",
+    pgInfoData:"No personal data collected. Progress saved on this device only.",
+    pgInfoPub:"No ads. No external links. 100% offline app.",
+    score:"Score",
+    level:"Level",
+    pizzaLabel:"Click slices to serve",
+    hintN1:"Click slices to colour the right fraction",
+    hintN2:"Pick the largest fraction",
+    hintN3:"Pick the right result",
+    btnNext:"Next ➜",
+    feedbackOk:["Great! 🎉","Well done!","Perfect!","Excellent!","Amazing!","Nice one!"],
+    feedbackBad:["Try again!","Almost!","Look carefully!","One more try!"],
+    customerNames:["Lily","Tom","Sara","Max","Zoe","Alex","Lila","Nino"],
+    orderPre:["I'd like","Give me","Please,","For me,"],
+    orderPost:["of pizza.","of pie.","of my pizza.","please."],
+    compareQ:"Which fraction is larger?",
+    addQ:"What is",
+    addQ2:"?",
+    levelNames:["Serve the right slice","Compare fractions","Add fractions"],
+    successTitle:["Level complete!","Well done, champ!","Incredible!"],
+    scoreLabel:"Final score",
+    btnReplay:"Play again",
+    btnNextLevel:"Next level ➜",
+    btnHome:"Home",
+    allDone:"All levels done! Fraction expert! 🏆",
+    mute:"Mute",
+    unmute:"Sound on",
+  }
+};
+const SAVE_KEY='pgrg_pizzeria_fractions';
+let lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
+let muted=false;
+let currentLevel=1;
+let score=0;
+let questionIndex=0;
+let totalQ=0;
+let questions=[];
+let currentQ=null;
+let answered=false;
+let selectedSectors=[];
+let gateA=0,gateB=0;
+let customerIndex=0;
+const CUST_COLORS=['#f97316','#7ec3ee','#34c77b','#ffd23f','#a78bfa','#fb7185','#0f4c81','#14b8a6'];
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playBeep(freq,dur,type,vol){
+  type=type||'sine';vol=vol||0.18;
+  if(muted)return;
+  try{
+    var ctx=getAudio();
+    var o=ctx.createOscillator();
+    var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){playBeep(523,.12);setTimeout(function(){playBeep(659,.12);},130);setTimeout(function(){playBeep(784,.2);},260);}
+function playWrong(){playBeep(200,.25,'sawtooth',.09);}
+function playClick(){playBeep(440,.08,'triangle',.1);}
+function playLevelUp(){[523,587,659,784].forEach(function(f,i){setTimeout(function(){playBeep(f,.15);},i*120);});}
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';
+  document.getElementById('mute-btn').setAttribute('aria-label',muted?T[lang].unmute:T[lang].mute);
+}
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-fr').setAttribute('aria-pressed',String(l==='fr'));
+  document.getElementById('btn-en').setAttribute('aria-pressed',String(l==='en'));
+  renderUI();
+}
+function t(k){return T[lang][k];}
+function renderUI(){
+  var s=T[lang];
+  var ids={
+    'game-title':'gameTitle','game-subtitle':'gameSubtitle','btn-play':'btnPlay',
+    'btn-parents-link':'btnParents','pg-title':'pgTitle','pg-gate-intro':'pgGateIntro',
+    'pg-validate':'pgValidate','pg-back':'pgBack','pg-info-title':'pgInfoTitle',
+    'pg-info-skill':'pgInfoSkill','pg-info-data':'pgInfoData','pg-info-pub':'pgInfoPub',
+    'pizza-label':'pizzaLabel','btn-next':'btnNext',
+    'btn-replay':'btnReplay','btn-next-level':'btnNextLevel','btn-home':'btnHome'
+  };
+  Object.keys(ids).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.textContent=s[ids[id]];
+  });
+  var lvlEl=document.getElementById('level-display');
+  if(lvlEl)lvlEl.textContent=s.level+' '+currentLevel+' — '+s.levelNames[currentLevel-1];
+  var scEl=document.getElementById('score-display');
+  if(scEl)scEl.textContent=s.score+' : '+score;
+  var hintEl=document.getElementById('hint-text');
+  if(hintEl)hintEl.textContent=currentLevel===1?s.hintN1:currentLevel===2?s.hintN2:s.hintN3;
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+function showTitle(){renderUI();showScreen('screen-title');}
+function showParents(){
+  gateA=3+Math.floor(Math.random()*8);
+  gateB=2+Math.floor(Math.random()*9);
+  document.getElementById('pg-question').textContent=gateA+' × '+gateB+' = ?';
+  document.getElementById('gate-input').value='';
+  document.getElementById('gate-err').textContent='';
+  document.getElementById('gate-section').style.display='';
+  document.getElementById('parents-info').style.display='none';
+  renderUI();
+  showScreen('screen-parents');
+  setTimeout(function(){document.getElementById('gate-input').focus();},200);
+}
+function checkGate(){
+  var v=parseInt(document.getElementById('gate-input').value,10);
+  if(v===gateA*gateB){
+    document.getElementById('gate-section').style.display='none';
+    document.getElementById('parents-info').style.display='';
+    renderUI();
+  }else{
+    document.getElementById('gate-err').textContent=T[lang].pgErr;
+    document.getElementById('gate-input').classList.add('shake');
+    setTimeout(function(){document.getElementById('gate-input').classList.remove('shake');},400);
+    playWrong();
+  }
+}
+document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+function buildPizzaSVG(denom,filledSectors,size,clickable){
+  size=size||200;clickable=clickable||false;
+  var cx=size/2,cy=size/2,r=size/2-6;
+  var baseColor='#fde8c8',crustColor='#f2a96f',lineColor='#d97b3a';
+  var paths='',toppings='';
+  for(var i=0;i<denom;i++){
+    var a0=(i/denom)*2*Math.PI-Math.PI/2;
+    var a1=((i+1)/denom)*2*Math.PI-Math.PI/2;
+    var x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0);
+    var x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    var large=(1/denom)>0.5?1:0;
+    var isFilled=filledSectors.indexOf(i)!==-1;
+    var fill=isFilled?'#f97316':baseColor;
+    var extra=clickable?' data-idx="'+i+'" class="pizza-sector" tabindex="0" role="button" aria-pressed="'+isFilled+'" aria-label="Part '+(i+1)+'"':'';
+    if(denom===1){
+      paths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+lineColor+'" stroke-width="2"'+extra+'/>';
+    }else{
+      var d='M'+cx+','+cy+' L'+x0.toFixed(2)+','+y0.toFixed(2)+' A'+r+','+r+',0,'+large+',1,'+x1.toFixed(2)+','+y1.toFixed(2)+' Z';
+      paths+='<path d="'+d+'" fill="'+fill+'" stroke="'+lineColor+'" stroke-width="2"'+extra+'/>';
+    }
+    if(isFilled){
+      var am=a0+(a1-a0)/2,tr=r*0.55;
+      var tx=cx+tr*Math.cos(am),ty=cy+tr*Math.sin(am);
+      toppings+='<circle cx="'+tx.toFixed(1)+'" cy="'+ty.toFixed(1)+'" r="5" fill="#c0392b" opacity=".85"/>';
+      toppings+='<circle cx="'+(tx+7).toFixed(1)+'" cy="'+(ty-5).toFixed(1)+'" r="3" fill="#27ae60" opacity=".7"/>';
+    }
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg"><circle cx="'+cx+'" cy="'+cy+'" r="'+(r+4)+'" fill="'+crustColor+'" stroke="'+lineColor+'" stroke-width="2"/>'+paths+toppings+'<circle cx="'+cx+'" cy="'+cy+'" r="10" fill="'+crustColor+'" stroke="'+lineColor+'" stroke-width="1.5"/></svg>';
+}
+function buildSmallPizzaSVG(num,denom,size,color){
+  size=size||80;color=color||'#f97316';
+  var cx=size/2,cy=size/2,r=size/2-4;
+  var baseColor='#fde8c8',lineColor='#d97b3a';
+  var paths='';
+  for(var i=0;i<denom;i++){
+    var a0=(i/denom)*2*Math.PI-Math.PI/2;
+    var a1=((i+1)/denom)*2*Math.PI-Math.PI/2;
+    var x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0);
+    var x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    var large=(1/denom)>0.5?1:0;
+    var isFilled=i<num;
+    var fill=isFilled?color:baseColor;
+    if(denom===1){
+      paths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+lineColor+'" stroke-width="1.5"/>';
+    }else{
+      var d='M'+cx+','+cy+' L'+x0.toFixed(2)+','+y0.toFixed(2)+' A'+r+','+r+',0,'+large+',1,'+x1.toFixed(2)+','+y1.toFixed(2)+' Z';
+      paths+='<path d="'+d+'" fill="'+fill+'" stroke="'+lineColor+'" stroke-width="1.5"/>';
+    }
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg"><circle cx="'+cx+'" cy="'+cy+'" r="'+(r+3)+'" fill="#f2a96f" stroke="'+lineColor+'" stroke-width="1.5"/>'+paths+'<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#f2a96f" stroke="'+lineColor+'" stroke-width="1"/></svg>';
+}
+function buildCustomerSVG(idx){
+  var color=CUST_COLORS[idx%CUST_COLORS.length];
+  var smiles=['M18 28 Q24 33 30 28','M18 28 Q24 34 30 28','M19 29 Q24 34 29 29'];
+  var fd=smiles[idx%smiles.length];
+  return '<svg width="70" height="80" viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="35" cy="65" rx="22" ry="14" fill="'+color+'" opacity=".9"/><circle cx="35" cy="34" r="18" fill="#fde8c8"/><ellipse cx="35" cy="52" rx="18" ry="14" fill="'+color+'"/><circle cx="29" cy="32" r="3.5" fill="#fff"/><circle cx="41" cy="32" r="3.5" fill="#fff"/><circle cx="30" cy="32" r="2" fill="#333"/><circle cx="42" cy="32" r="2" fill="#333"/><path d="'+fd+'" stroke="#c0622a" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="24" cy="37" rx="5" ry="3.5" fill="#f9b8a0" opacity=".55"/><ellipse cx="46" cy="37" rx="5" ry="3.5" fill="#f9b8a0" opacity=".55"/></svg>';
+}
+var FRAC_N1=[{num:1,den:2},{num:1,den:3},{num:1,den:4},{num:3,den:4},{num:2,den:3},{num:2,den:4},{num:1,den:2},{num:3,den:4},{num:1,den:3},{num:2,den:3},{num:1,den:4},{num:3,den:4}];
+var FRAC_N2_PAIRS=[
+  [{num:1,den:2},{num:1,den:3}],[{num:3,den:4},{num:1,den:2}],[{num:2,den:3},{num:1,den:4}],
+  [{num:1,den:3},{num:2,den:4}],[{num:3,den:4},{num:2,den:3}],[{num:1,den:2},{num:2,den:4}],
+  [{num:1,den:4},{num:1,den:3}],[{num:2,den:3},{num:3,den:4}]
+];
+var FRAC_N3_ADDS=[
+  {a:{num:1,den:4},b:{num:1,den:4},res:{num:2,den:4}},
+  {a:{num:1,den:3},b:{num:1,den:3},res:{num:2,den:3}},
+  {a:{num:2,den:4},b:{num:1,den:4},res:{num:3,den:4}},
+  {a:{num:1,den:4},b:{num:2,den:4},res:{num:3,den:4}},
+  {a:{num:1,den:3},b:{num:2,den:3},res:{num:3,den:3}},
+  {a:{num:2,den:3},b:{num:1,den:3},res:{num:3,den:3}},
+  {a:{num:1,den:2},b:{num:1,den:2},res:{num:2,den:2}},
+  {a:{num:1,den:4},b:{num:3,den:4},res:{num:4,den:4}}
+];
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+function buildQuestions(level){
+  if(level===1){
+    var pool=shuffle(FRAC_N1).slice(0,8);
+    return pool.map(function(f){return{type:'serve',num:f.num,den:f.den};});
+  }
+  if(level===2){
+    var pool2=shuffle(FRAC_N2_PAIRS).slice(0,8);
+    return pool2.map(function(pair){
+      var s=shuffle(pair);
+      var correct=s[0].num/s[0].den>s[1].num/s[1].den?0:1;
+      return{type:'compare',fracs:s,correct:correct};
+    });
+  }
+  if(level===3){
+    var pool3=shuffle(FRAC_N3_ADDS).slice(0,8);
+    return pool3.map(function(add){
+      var gn=gcd(add.res.num,add.res.den);
+      var correct={num:add.res.num/gn,den:add.res.den/gn};
+      var wrong1={num:add.a.num,den:add.a.den};
+      var wrong2={num:add.b.num,den:add.b.den};
+      var wrong3={num:add.res.num+1,den:add.res.den};
+      var allWrong=[wrong1,wrong2,wrong3].filter(function(w){return w.num!==correct.num||w.den!==correct.den;});
+      var seen=new Set();seen.add(correct.num+'/'+correct.den);
+      var choicesRaw=[correct];
+      allWrong.forEach(function(w){
+        var k=w.num+'/'+w.den;
+        if(!seen.has(k)&&choicesRaw.length<4){seen.add(k);choicesRaw.push(w);}
+      });
+      return{type:'add',a:add.a,b:add.b,correct:correct,choices:shuffle(choicesRaw)};
+    });
+  }
+}
+function startGame(){
+  loadSave();
+  score=0;questionIndex=0;answered=false;selectedSectors=[];
+  questions=buildQuestions(currentLevel);
+  totalQ=questions.length;
+  renderUI();
+  showScreen('screen-game');
+  renderQuestion();
+}
+function loadSave(){
+  try{var d=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');currentLevel=d.level||1;if(currentLevel>3)currentLevel=3;}catch(e){currentLevel=1;}
+}
+function saveProg(){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify({level:currentLevel,savedAt:Date.now()}));}catch(e){}
+}
+function renderQuestion(){
+  answered=false;selectedSectors=[];
+  currentQ=questions[questionIndex];
+  customerIndex=(customerIndex+1)%CUST_COLORS.length;
+  var pct=Math.round((questionIndex/totalQ)*100);
+  var pb=document.getElementById('progress-bar');
+  pb.style.width=pct+'%';
+  pb.parentElement.setAttribute('aria-valuenow',pct);
+  document.getElementById('score-display').textContent=T[lang].score+' : '+score;
+  document.getElementById('level-display').textContent=T[lang].level+' '+currentLevel+' — '+T[lang].levelNames[currentLevel-1];
+  document.getElementById('customer-svg').innerHTML=buildCustomerSVG(customerIndex);
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback-area';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('choices-area').innerHTML='';
+  if(currentQ.type==='serve'){renderServe();}
+  else if(currentQ.type==='compare'){renderCompare();}
+  else{renderAdd();}
+  var hintEl=document.getElementById('hint-text');
+  if(hintEl)hintEl.textContent=currentQ.type==='serve'?T[lang].hintN1:currentQ.type==='compare'?T[lang].hintN2:T[lang].hintN3;
+}
+function renderServe(){
+  var num=currentQ.num,den=currentQ.den;
+  var names=T[lang].customerNames,pres=T[lang].orderPre,posts=T[lang].orderPost;
+  var name=names[questionIndex%names.length];
+  var pre=pres[questionIndex%pres.length];
+  var post=posts[questionIndex%posts.length];
+  document.getElementById('speech-bubble').innerHTML='<strong>'+name+' :</strong> '+pre+' <strong>'+num+'/'+den+'</strong> '+post;
+  var pw=document.getElementById('pizza-wrap');
+  pw.innerHTML=buildPizzaSVG(den,[],200,true);
+  pw.querySelectorAll('.pizza-sector').forEach(function(el){
+    el.addEventListener('click',function(){handleSectorClick(el,num,den);});
+    el.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();handleSectorClick(el,num,den);}});
+  });
+}
+function handleSectorClick(el,targetNum,den){
+  if(answered)return;
+  playClick();
+  var idx=parseInt(el.getAttribute('data-idx'));
+  var pos=selectedSectors.indexOf(idx);
+  if(pos===-1){
+    if(selectedSectors.length<targetNum){selectedSectors.push(idx);}
+    else{selectedSectors.shift();selectedSectors.push(idx);}
+  }else{selectedSectors.splice(pos,1);}
+  var pw=document.getElementById('pizza-wrap');
+  pw.innerHTML=buildPizzaSVG(den,selectedSectors,200,true);
+  pw.querySelectorAll('.pizza-sector').forEach(function(e2){
+    e2.addEventListener('click',function(){handleSectorClick(e2,targetNum,den);});
+    e2.addEventListener('keydown',function(ev){if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();handleSectorClick(e2,targetNum,den);}});
+    e2.setAttribute('aria-pressed',String(selectedSectors.indexOf(parseInt(e2.getAttribute('data-idx')))!==-1));
+  });
+  if(selectedSectors.length===targetNum){checkServe(targetNum,den);}
+}
+function checkServe(targetNum){
+  answered=true;
+  showFeedback(selectedSectors.length===targetNum);
+}
+function renderCompare(){
+  var fracs=currentQ.fracs,correct=currentQ.correct;
+  var names=T[lang].customerNames;
+  var name=names[questionIndex%names.length];
+  document.getElementById('speech-bubble').innerHTML='<strong>'+name+' :</strong> '+T[lang].compareQ;
+  document.getElementById('pizza-wrap').innerHTML='';
+  var ca=document.getElementById('choices-area');
+  ca.innerHTML='';
+  fracs.forEach(function(f,i){
+    var btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.setAttribute('aria-label',f.num+'/'+f.den);
+    var col=['#f97316','#ffd23f'][i];
+    btn.innerHTML=buildSmallPizzaSVG(f.num,f.den,90,col)+'<div class="fraction-display" style="margin-top:6px;font-size:1.4rem;font-weight:700;"><span class="frac-num" style="border-bottom:2px solid currentColor;padding-bottom:1px;">'+f.num+'</span><span class="frac-den">'+f.den+'</span></div>';
+    (function(idx){btn.onclick=function(){checkCompare(idx,correct,btn,ca);};})(i);
+    ca.appendChild(btn);
+  });
+}
+function checkCompare(chosen,correct,btn,area){
+  if(answered)return;
+  answered=true;
+  var btns=area.querySelectorAll('.choice-btn');
+  if(chosen===correct){btn.classList.add('correct');showFeedback(true);}
+  else{btn.classList.add('wrong');btns[correct].classList.add('correct');showFeedback(false);}
+}
+function renderAdd(){
+  var a=currentQ.a,b=currentQ.b,choices=currentQ.choices;
+  var names=T[lang].customerNames;
+  var name=names[questionIndex%names.length];
+  document.getElementById('speech-bubble').innerHTML='<strong>'+name+' :</strong> '+T[lang].addQ+' <strong>'+a.num+'/'+a.den+' + '+b.num+'/'+b.den+'</strong> '+T[lang].addQ2;
+  document.getElementById('pizza-wrap').innerHTML='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">'+buildSmallPizzaSVG(a.num,a.den,80,'#f97316')+'<span style="font-size:2rem;font-weight:900;color:var(--orange)">+</span>'+buildSmallPizzaSVG(b.num,b.den,80,'#ffd23f')+'</div>';
+  var ca=document.getElementById('choices-area');
+  ca.innerHTML='';
+  var correct=currentQ.correct;
+  choices.forEach(function(f){
+    var btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.setAttribute('aria-label',f.num+'/'+f.den);
+    btn.innerHTML='<div class="fraction-display"><span class="frac-num" style="font-size:1.6rem;border-bottom:2px solid currentColor;padding-bottom:2px;">'+f.num+'</span><span class="frac-den" style="font-size:1.6rem;">'+f.den+'</span></div>';
+    (function(frac){btn.onclick=function(){checkAdd(frac,correct,btn,ca);};})(f);
+    ca.appendChild(btn);
+  });
+}
+function checkAdd(chosen,correct,btn,area){
+  if(answered)return;
+  answered=true;
+  var gn=gcd(chosen.num,chosen.den),cn=gcd(correct.num,correct.den);
+  var ok=(chosen.num/gn===correct.num/cn)&&(chosen.den/gn===correct.den/cn);
+  if(ok){btn.classList.add('correct');showFeedback(true);}
+  else{
+    btn.classList.add('wrong');
+    area.querySelectorAll('.choice-btn').forEach(function(b2){
+      if(b2.getAttribute('aria-label')===correct.num+'/'+correct.den)b2.classList.add('correct');
+    });
+    showFeedback(false);
+  }
+}
+function showFeedback(ok){
+  var msgs=ok?T[lang].feedbackOk:T[lang].feedbackBad;
+  var msg=msgs[Math.floor(Math.random()*msgs.length)];
+  var fb=document.getElementById('feedback');
+  fb.textContent=msg;fb.className='feedback-area '+(ok?'ok':'bad');
+  fb.classList.add('pop');
+  document.getElementById('aria-live').textContent=msg;
+  if(ok){playSuccess();score+=10;document.getElementById('score-display').textContent=T[lang].score+' : '+score;}
+  else{playWrong();}
+  var nb=document.getElementById('btn-next');
+  nb.style.display='inline-block';nb.textContent=T[lang].btnNext;
+  setTimeout(function(){nb.focus();},50);
+}
+function nextQuestion(){
+  questionIndex++;
+  if(questionIndex>=totalQ){showSuccess();return;}
+  renderQuestion();
+}
+function showSuccess(){
+  playLevelUp();
+  var stars=score>=totalQ*10?'⭐⭐⭐':score>=totalQ*7?'⭐⭐':'⭐';
+  document.getElementById('stars-row').textContent=stars;
+  var titles=T[lang].successTitle;
+  document.getElementById('success-title').textContent=titles[Math.floor(Math.random()*titles.length)];
+  document.getElementById('success-score').textContent=T[lang].scoreLabel+' : '+score+' / '+(totalQ*10);
+  var nextBtn=document.getElementById('btn-next-level');
+  if(currentLevel>=3){
+    nextBtn.textContent=T[lang].allDone;
+    nextBtn.disabled=true;nextBtn.style.opacity='.5';
+  }else{
+    nextBtn.textContent=T[lang].btnNextLevel;
+    nextBtn.disabled=false;nextBtn.style.opacity='';
+  }
+  document.getElementById('btn-replay').textContent=T[lang].btnReplay;
+  document.getElementById('btn-home').textContent=T[lang].btnHome;
+  if(score>=totalQ*7&&currentLevel<3){currentLevel++;saveProg();}
+  showScreen('screen-success');
+  document.getElementById('stars-row').classList.add('pop');
+}
+function replayLevel(){
+  score=0;questionIndex=0;answered=false;selectedSectors=[];
+  questions=buildQuestions(currentLevel);totalQ=questions.length;
+  showScreen('screen-game');renderQuestion();
+}
+function nextLevel(){
+  if(currentLevel>3){showTitle();return;}
+  score=0;questionIndex=0;answered=false;selectedSectors=[];
+  questions=buildQuestions(currentLevel);totalQ=questions.length;
+  showScreen('screen-game');renderQuestion();
+}
+setLang(lang);loadSave();renderUI();
+</script>
+</body>
+</html>
