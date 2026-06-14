@@ -1,0 +1,76 @@
+name: build-jeux
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'temurin', java-version: '17' }
+      - uses: android-actions/setup-android@v3
+      - name: Scaffold Capacitor (assemble www + config)
+        run: node tooling/scaffold.mjs android build-jeux
+      - name: Build APK (debug)
+        run: |
+          cd build-jeux
+          npm install
+          npx cap add android
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Rename APK
+        run: cp build-jeux/android/app/build/outputs/apk/debug/app-debug.apk Jeux-PGRG-IA-Android.apk
+      - name: Publish APK to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Telechargements - Jeux educatifs PGRG
+          files: Jeux-PGRG-IA-Android.apk
+
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Scaffold Electron (assemble www + config)
+        run: node tooling/scaffold.mjs electron build-jeux
+      - name: Build desktop installer
+        run: |
+          cd build-jeux
+          npm install
+          npm run dist
+      - name: Rename desktop installer
+        shell: bash
+        run: |
+          cd build-jeux/dist
+          case "${{ matrix.os }}" in
+            windows-latest) f=$(ls *.exe 2>/dev/null | head -1); out=Jeux-PGRG-IA-Windows.exe;;
+            macos-latest)   f=$(ls *.dmg 2>/dev/null | head -1); out=Jeux-PGRG-IA-Mac.dmg;;
+            ubuntu-latest)  f=$(ls *.AppImage 2>/dev/null | head -1); out=Jeux-PGRG-IA-Linux.AppImage;;
+          esac
+          cp "$f" "$GITHUB_WORKSPACE/$out"
+      - name: Publish desktop to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Telechargements - Jeux educatifs PGRG
+          files: Jeux-PGRG-IA-*
