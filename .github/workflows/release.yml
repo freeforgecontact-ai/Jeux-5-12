@@ -1,0 +1,46 @@
+name: Construire le telechargement (ZIP hors-ligne)
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assembler le paquet jouable
+        run: |
+          set -e
+          PKG="Jeux-PGRG-IA"
+          mkdir -p "staging/$PKG" dist
+          cp -r website games brand shared "staging/$PKG"/
+          rm -rf "staging/$PKG/games/_TEMPLATE"
+          printf '%s\n' \
+            "Jeux educatifs PGRG IA - 65 jeux gratuits pour enfants 5 a 12 ans." \
+            "" \
+            ">> Ouvre le fichier  website/index.html  dans ton navigateur pour jouer." \
+            "" \
+            "100% hors-ligne - sans publicite - sans pistage - bilingue FR/EN." \
+            "Code source (open source, licence MIT): https://github.com/freeforgecontact-ai/Jeux-5-12" \
+            > "staging/$PKG/LISEZ-MOI.txt"
+          (cd staging && zip -rq "../dist/$PKG.zip" "$PKG")
+          ls -lh dist
+
+      - name: Publier / mettre a jour la Release "latest"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Telechargements - Jeux educatifs PGRG
+          body: |
+            Paquet hors-ligne des 65 jeux educatifs PGRG IA (bilingue FR/EN, sans pub, sans pistage).
+            Telecharge Jeux-PGRG-IA.zip, dezippe, puis ouvre website/index.html dans ton navigateur.
+          files: dist/Jeux-PGRG-IA.zip
