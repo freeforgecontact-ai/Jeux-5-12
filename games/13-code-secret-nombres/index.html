@@ -237,9 +237,9 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <span class="brand">PGRG IA</span>
   </div>
   <div id="topbar-right">
-    <button class="btn-lang" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
-    <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
-    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
+    <button type="button" class="btn-lang" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
+    <button type="button" class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
+    <button type="button" id="btn-mute" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
   </div>
 </div>
 <div id="live-region" aria-live="polite" aria-atomic="true"></div>
@@ -272,9 +272,9 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
   <h1 class="game-title title-font" id="t-title"></h1>
   <p class="game-subtitle" id="t-subtitle"></p>
   <br>
-  <button class="btn-primary" onclick="showScreen('screen-level')" id="t-play"></button>
+  <button type="button" class="btn-primary" onclick="showScreen('screen-level')" id="t-play"></button>
   <br><br>
-  <button class="btn-link" onclick="showParentsGate()" id="t-parents-link"></button>
+  <button type="button" class="btn-link" onclick="showParentsGate()" id="t-parents-link"></button>
 </div>
 
 <!-- PARENTS GATE -->
@@ -285,13 +285,13 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <div class="math-challenge" id="pg-challenge"></div>
     <input type="number" class="input-std" id="pg-answer" aria-label="Reponse" onkeydown="if(event.key==='Enter')checkParents()">
     <br><br>
-    <button class="btn-primary" onclick="checkParents()" id="pg-btn-check"></button>
+    <button type="button" class="btn-primary" onclick="checkParents()" id="pg-btn-check"></button>
     <div id="parents-error" role="alert"></div>
     <div id="parents-info" style="display:none;margin-top:16px;text-align:left;">
       <h3 id="pi-title"></h3>
       <p id="pi-text"></p>
       <br>
-      <button class="btn-secondary" onclick="showScreen('screen-title')" id="pi-btn-back"></button>
+      <button type="button" class="btn-secondary" onclick="showScreen('screen-title')" id="pi-btn-back"></button>
     </div>
   </div>
 </div>
@@ -321,7 +321,7 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     </div>
   </div>
   <div style="text-align:center;">
-    <button class="btn-secondary" onclick="showScreen('screen-title')" id="t-btn-back"></button>
+    <button type="button" class="btn-secondary" onclick="showScreen('screen-title')" id="t-btn-back"></button>
   </div>
 </div>
 
@@ -335,7 +335,7 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <div>
       <div class="tries-bar" id="tries-bar" aria-label="Essais"></div>
     </div>
-    <button class="btn-secondary" onclick="showScreen('screen-level')" style="padding:8px 14px;font-size:0.88rem;" id="g-btn-quit"></button>
+    <button type="button" class="btn-secondary" onclick="showScreen('screen-level')" style="padding:8px 14px;font-size:0.88rem;" id="g-btn-quit"></button>
   </div>
   <div class="legend" id="legend-box" role="complementary"></div>
   <div class="input-zone">
@@ -360,9 +360,9 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <p id="s-tries-msg" style="color:var(--slate);font-size:0.95rem;"></p>
     <div class="secret-reveal" id="s-code" aria-label="Code secret"></div>
     <div class="btn-row">
-      <button class="btn-primary" onclick="restartLevel()" id="s-btn-replay"></button>
-      <button class="btn-secondary" onclick="nextLevel()" id="s-btn-next"></button>
-      <button class="btn-secondary" onclick="showScreen('screen-level')" id="s-btn-home"></button>
+      <button type="button" class="btn-primary" onclick="restartLevel()" id="s-btn-replay"></button>
+      <button type="button" class="btn-secondary" onclick="nextLevel()" id="s-btn-next"></button>
+      <button type="button" class="btn-secondary" onclick="showScreen('screen-level')" id="s-btn-home"></button>
     </div>
   </div>
 </div>
@@ -375,8 +375,8 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <p id="f-subtitle"></p>
     <div class="secret-reveal" id="f-code" aria-label="Code secret"></div>
     <div class="btn-row">
-      <button class="btn-primary" onclick="restartLevel()" id="f-btn-retry"></button>
-      <button class="btn-secondary" onclick="showScreen('screen-level')" id="f-btn-home"></button>
+      <button type="button" class="btn-primary" onclick="restartLevel()" id="f-btn-retry"></button>
+      <button type="button" class="btn-secondary" onclick="showScreen('screen-level')" id="f-btn-home"></button>
     </div>
   </div>
 </div>
@@ -669,6 +669,7 @@ function buildGameUI(cfg){
   for(var d=cfg.min;d<=cfg.max;d++)nums.push(d);
   nums.forEach(function(n){
     var btn=document.createElement('button');
+    btn.type='button';
     btn.className='numpad-btn';
     btn.textContent=n;
     btn.setAttribute('aria-label',n.toString());
@@ -676,16 +677,19 @@ function buildGameUI(cfg){
     numpad.appendChild(btn);
   });
   var delBtn=document.createElement('button');
+  delBtn.type='button';
   delBtn.className='numpad-btn del-btn';
   delBtn.textContent='⌫';
   delBtn.setAttribute('aria-label','Effacer');
   delBtn.addEventListener('click',numpadDel);
   numpad.appendChild(delBtn);
   var okBtn=document.createElement('button');
+  okBtn.type='button';
   okBtn.className='numpad-btn ok-btn';
   okBtn.textContent='✔ OK';
   okBtn.setAttribute('aria-label','Valider');
-  okBtn.addEventListener('click',submitGuess);
+  okBtn.setAttribute('onclick','submitGuess()');
+  okBtn.addEventListener('click',function(e){e.preventDefault();submitGuess();});
   numpad.appendChild(okBtn);
   renderLegend();
   document.getElementById('history-list').innerHTML='';
@@ -755,6 +759,9 @@ function numpadDel(){
 function submitGuess(){
   if(gameOver)return;
   var cfg=LEVELS[currentLevel];
+  /* Sync currentInput from DOM inputs to capture any keyboard-typed values */
+  var allInputs=document.querySelectorAll('.digit-input');
+  for(var k=0;k<allInputs.length;k++){currentInput[k]=allInputs[k].value;}
   var guess=currentInput.slice(0,cfg.digits);
   for(var i=0;i<cfg.digits;i++){
     if(guess[i]===''||guess[i]===undefined){
@@ -764,14 +771,14 @@ function submitGuess(){
       setTimeout(function(){document.querySelectorAll('.digit-input').forEach(function(x){x.classList.remove('error');});},400);
       playSound('error');return;
     }
-    var dv=parseInt(guess[i]);
-    if(dv<cfg.min||dv>cfg.max){
+    var dv=parseInt(guess[i],10);
+    if(isNaN(dv)||dv<cfg.min||dv>cfg.max){
       document.getElementById('input-error').textContent=t('input-error-range')+cfg.max;
       playSound('error');return;
     }
   }
   document.getElementById('input-error').textContent='';
-  var guessNums=guess.map(Number);
+  var guessNums=guess.map(function(v){return parseInt(v,10);});
   attempts++;
   var clues=evaluateGuess(guessNums,secretCode);
   history.unshift({guess:guessNums,clues:clues});
@@ -784,7 +791,7 @@ function submitGuess(){
   var cc=clues.filter(function(c){return c==='correct';}).length;
   var pc=clues.filter(function(c){return c==='present';}).length;
   if(cc+pc>0)playSound('present');else playSound('absent');
-  var msg=guessNums.map(function(n,i){return n+': '+t('clue-'+clues[i]);}).join(', ');
+  var msg=guessNums.map(function(n,mi){return n+': '+t('clue-'+clues[mi]);}).join(', ');
   announce(msg);
   clearDigitInputs();
 }
@@ -797,10 +804,10 @@ function evaluateGuess(guess,secret){
   for(var i=0;i<len;i++){
     if(guess[i]===secret[i]){clues[i]='correct';usedSecret[i]=true;usedGuess[i]=true;}
   }
-  for(var i=0;i<len;i++){
-    if(usedGuess[i])continue;
+  for(var ii=0;ii<len;ii++){
+    if(usedGuess[ii])continue;
     for(var j=0;j<len;j++){
-      if(!usedSecret[j]&&guess[i]===secret[j]){clues[i]='present';usedSecret[j]=true;break;}
+      if(!usedSecret[j]&&guess[ii]===secret[j]){clues[ii]='present';usedSecret[j]=true;break;}
     }
   }
   return clues;
@@ -957,6 +964,9 @@ function announce(msg){
   el.textContent='';
   setTimeout(function(){el.textContent=msg;},50);
 }
+
+/* Expose submitGuess as explicit global for onclick attribute access */
+window.submitGuess=submitGuess;
 
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('btn-fr').classList.toggle('active',lang==='fr');

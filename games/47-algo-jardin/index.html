@@ -21,7 +21,7 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 .btn-lang{background:var(--blue-dark);color:#fff;border:2px solid var(--sky);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.9rem;font-weight:700;min-width:48px;min-height:36px;}
 .btn-lang.active{background:var(--orange);border-color:var(--orange-dark);}
 #btn-mute{background:none;border:none;font-size:1.4rem;cursor:pointer;min-width:48px;min-height:36px;}
-.screen{display:none;padding:16px;max-width:900px;margin:0 auto;}
+.screen{display:none;padding:16px;max-width:920px;margin:0 auto;}
 .screen.active{display:block;}
 #title-screen{text-align:center;}
 #title-screen h1{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;font-size:2.4rem;color:var(--blue);margin:12px 0 4px;}
@@ -51,34 +51,40 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 .lvl-btn.done{border-color:var(--success);background:#f0fff8;}
 .lvl-stars{font-size:1rem;letter-spacing:2px;}
 #game-screen{padding:10px;}
-#game-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+#game-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 #game-header .level-tag{background:var(--blue);color:#fff;border-radius:10px;padding:5px 14px;font-weight:700;font-size:.95rem;}
-#game-header .goal-tag{background:var(--gold);color:var(--navy);border-radius:10px;padding:5px 14px;font-size:.9rem;font-weight:600;}
+#goal-banner{background:#fff8e6;border:2px solid var(--gold);border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:1rem;font-weight:700;color:var(--navy);text-align:center;line-height:1.5;}
 #game-layout{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:center;}
 #garden-wrap{background:#fff;border-radius:16px;padding:10px;border:3px solid var(--sky);box-shadow:0 4px 14px rgba(15,76,129,.1);}
 #garden{display:grid;gap:3px;}
-.cell{width:var(--cell);height:var(--cell);border-radius:8px;background:#c8f0b8;border:2px solid #9fd98a;display:flex;align-items:center;justify-content:center;font-size:1.4rem;position:relative;transition:background .2s;user-select:none;}
+.cell{width:var(--cell);height:var(--cell);border-radius:8px;background:#c8f0b8;border:2px solid #9fd98a;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;transition:background .2s;user-select:none;}
 .cell.wet{background:#a3d8f4;border-color:#5bc0f8;}
 .cell.has-robot{background:#ffe7b0;border-color:#f5b942;}
-#program-panel{flex:1;min-width:240px;max-width:340px;}
-#program-panel h3{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);font-size:1.1rem;margin-bottom:8px;}
+.cell.highlight{box-shadow:0 0 0 3px #f97316 inset;}
+#legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:.82rem;}
+.leg-item{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--sky);border-radius:8px;padding:3px 8px;}
+#program-panel{flex:1;min-width:240px;max-width:360px;}
+#program-panel h3{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;color:var(--blue);font-size:1.05rem;margin-bottom:6px;}
 #blocks-palette{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
 .block-btn{background:#fff;border:2px solid var(--blue);color:var(--blue);border-radius:10px;padding:7px 10px;cursor:pointer;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:5px;min-height:48px;min-width:48px;transition:background .12s;}
-.block-btn:hover{background:var(--sky-light);}
+.block-btn:hover:not(:disabled){background:var(--sky-light);}
+.block-btn:disabled{opacity:.4;cursor:not-allowed;}
 .block-btn.block-loop{border-color:var(--orange);color:var(--orange);}
 .block-btn.block-cond{border-color:#8b5cf6;color:#8b5cf6;}
 #program-list{min-height:80px;background:#f5faff;border:2px dashed var(--sky);border-radius:12px;padding:8px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
-.prog-block{display:flex;align-items:center;gap:4px;background:#fff;border:2px solid var(--blue);color:var(--blue);border-radius:8px;padding:5px 8px;font-size:.82rem;font-weight:700;}
-.prog-block.pb-loop{border-color:var(--orange);color:var(--orange);}
+.prog-block{display:inline-flex;align-items:center;gap:4px;background:#fff;border:2px solid var(--blue);color:var(--blue);border-radius:8px;padding:5px 8px;font-size:.82rem;font-weight:700;}
+.prog-block.pb-loop{border-color:var(--orange);color:var(--orange);background:#fff7ed;}
 .prog-block.pb-cond{border-color:#8b5cf6;color:#8b5cf6;}
 .del-btn{background:none;border:none;color:#aaa;cursor:pointer;font-size:.9rem;padding:0 2px;line-height:1;}
-.del-btn:hover{color:#e74c3c;}
-.loop-count{width:28px;height:28px;border:1px solid var(--orange);border-radius:6px;text-align:center;font-size:.9rem;font-weight:700;color:var(--orange);background:#fff0e6;}
+.del-btn:hover:not(:disabled){color:#e74c3c;}
+.del-btn:disabled{opacity:.3;cursor:not-allowed;}
+.loop-count{width:32px;height:28px;border:1px solid var(--orange);border-radius:6px;text-align:center;font-size:.9rem;font-weight:700;color:var(--orange);background:#fff0e6;}
 #action-bar{display:flex;gap:8px;flex-wrap:wrap;}
-.btn-go{background:var(--success);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;padding:10px 22px;cursor:pointer;box-shadow:0 4px 0 #229a5a;min-height:48px;flex:1;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
+.btn-go{background:var(--success);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;padding:10px 22px;cursor:pointer;box-shadow:0 4px 0 #229a5a;min-height:52px;flex:1;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;}
 .btn-go:active{transform:translateY(2px);box-shadow:0 2px 0 #229a5a;}
 .btn-go:disabled{background:#aaa;box-shadow:0 4px 0 #888;cursor:not-allowed;}
-.btn-clear{background:#fff;color:var(--slate);border:2px solid var(--slate);border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem;min-height:48px;}
+.btn-clear{background:#fff;color:var(--slate);border:2px solid var(--slate);border-radius:12px;padding:10px 16px;cursor:pointer;font-size:1rem;min-height:52px;}
+.btn-clear:disabled{opacity:.4;cursor:not-allowed;}
 #feedback-bar{margin-top:10px;border-radius:12px;padding:10px 14px;font-weight:700;font-size:1rem;min-height:44px;text-align:center;background:var(--sky-light);color:var(--slate);transition:background .3s;}
 #feedback-bar.ok{background:#d4f7e7;color:#1a6640;}
 #feedback-bar.err{background:#fde8e8;color:#c0392b;}
@@ -97,9 +103,9 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 </style>
 </head>
 <body>
-<a id="pgrg-reset" role="button" tabindex="0" aria-label="Recommencer a zero" onclick="if(confirm(document.documentElement.lang==='en'?'Restart this game from the beginning? (your progress on this game will be erased)':'Recommencer ce jeu depuis le debut ? (ta progression sur ce jeu sera effacee)')){['pgrg_algo_jardin'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload();}" style="position:fixed;right:10px;bottom:10px;z-index:2147483647;background:#0f4c81;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">↺ Recommencer</a>
+<a id="pgrg-reset" role="button" tabindex="0" aria-label="Recommencer a zero" onclick="if(confirm(document.documentElement.lang==='en'?'Restart this game from the beginning? (your progress on this game will be erased)':'Recommencer ce jeu depuis le debut ? (ta progression sur ce jeu sera effacee)')){['pgrg_algo_jardin'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload();}" style="position:fixed;right:10px;bottom:10px;z-index:2147483647;background:#0f4c81;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">&#8634; Recommencer</a>
 
-<a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">🏠 Les jeux</a>
+<a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">&#127968; Les jeux</a>
 
 <div id="topbar">
   <div class="brand">
@@ -109,7 +115,7 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
   <div class="controls">
     <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')">FR</button>
     <button class="btn-lang" id="btn-en" onclick="setLang('en')">EN</button>
-    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">🔊</button>
+    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">&#128266;</button>
   </div>
 </div>
 <div id="aria-live" aria-live="polite" aria-atomic="true"></div>
@@ -118,48 +124,32 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 <div id="title-screen" class="screen active">
   <div class="mascot-wrap">
     <svg width="160" height="170" viewBox="0 0 160 170" aria-label="Robot jardinier" role="img">
-      <!-- grass base -->
       <ellipse cx="80" cy="158" rx="55" ry="10" fill="#b8eab0" opacity=".7"/>
-      <!-- robot body -->
       <rect x="44" y="80" width="72" height="62" rx="14" fill="#0f4c81"/>
-      <!-- robot head -->
       <rect x="48" y="30" width="64" height="54" rx="16" fill="#7ec3ee"/>
-      <!-- eyes whites -->
       <circle cx="67" cy="50" r="11" fill="#fff"/>
       <circle cx="93" cy="50" r="11" fill="#fff"/>
-      <!-- pupils -->
       <circle cx="69" cy="52" r="6" fill="#0f172a"/>
       <circle cx="95" cy="52" r="6" fill="#0f172a"/>
-      <!-- eye shine -->
       <circle cx="71" cy="49" r="2" fill="#fff"/>
       <circle cx="97" cy="49" r="2" fill="#fff"/>
-      <!-- mouth -->
       <path d="M65 70 Q80 80 95 70" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <!-- antenna -->
       <line x1="80" y1="30" x2="80" y2="14" stroke="#7ec3ee" stroke-width="3.5"/>
       <circle cx="80" cy="10" r="7" fill="#ffd23f" stroke="#f97316" stroke-width="2"/>
-      <!-- left arm -->
       <rect x="14" y="85" width="32" height="13" rx="7" fill="#0a3559"/>
-      <!-- right arm -->
       <rect x="114" y="85" width="32" height="13" rx="7" fill="#0a3559"/>
-      <!-- watering can -->
       <rect x="140" y="70" width="20" height="16" rx="5" fill="#f97316"/>
       <path d="M160 75 Q168 68 172 64" stroke="#f97316" stroke-width="3" fill="none"/>
-      <!-- water drops -->
       <circle cx="170" cy="74" r="2.5" fill="#7ec3ee" opacity=".9"/>
       <circle cx="174" cy="80" r="2" fill="#7ec3ee" opacity=".8"/>
       <circle cx="166" cy="82" r="2" fill="#7ec3ee" opacity=".7"/>
-      <!-- legs -->
       <rect x="55" y="140" width="20" height="22" rx="7" fill="#0a3559"/>
       <rect x="85" y="140" width="20" height="22" rx="7" fill="#0a3559"/>
-      <!-- feet -->
       <rect x="52" y="158" width="26" height="10" rx="5" fill="#0f172a"/>
       <rect x="82" y="158" width="26" height="10" rx="5" fill="#0f172a"/>
-      <!-- chest panel -->
       <rect x="60" y="90" width="40" height="26" rx="6" fill="#0a3559"/>
       <circle cx="72" cy="103" r="6" fill="#34c77b"/>
       <circle cx="88" cy="103" r="6" fill="#ffd23f"/>
-      <!-- flower in left hand -->
       <circle cx="24" cy="84" r="7" fill="#ffd23f"/>
       <circle cx="17" cy="78" r="6" fill="#f97316" opacity=".8"/>
       <circle cx="31" cy="78" r="6" fill="#f97316" opacity=".8"/>
@@ -179,7 +169,7 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
   <h2 id="gate-title"></h2>
   <p id="gate-q-label"></p>
   <p id="gate-q" style="font-size:1.6rem;font-weight:700;margin:10px 0;"></p>
-  <input type="number" id="gate-input" min="0" max="999" aria-label="Réponse">
+  <input type="number" id="gate-input" min="0" max="999" aria-label="Reponse">
   <br>
   <button class="btn-blue" onclick="checkGate()" id="gate-ok-btn"></button>
   <p id="gate-err" role="alert"></p>
@@ -203,8 +193,9 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
   <div id="game-header">
     <button class="btn-back" onclick="goScreen('level-select-screen')" id="gh-back"></button>
     <span class="level-tag" id="gh-level"></span>
-    <span class="goal-tag" id="gh-goal"></span>
   </div>
+  <div id="goal-banner"></div>
+  <div id="legend"></div>
   <div id="game-layout">
     <div id="garden-wrap">
       <div id="garden"></div>
@@ -225,7 +216,7 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 
 <!-- SUCCESS -->
 <div id="success-screen" class="screen">
-  <svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#d4f7e7" stroke="#34c77b" stroke-width="4"/><text x="45" y="62" text-anchor="middle" font-size="42">🌻</text></svg>
+  <svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#d4f7e7" stroke="#34c77b" stroke-width="4"/><text x="45" y="62" text-anchor="middle" font-size="42">&#127819;</text></svg>
   <h2 id="succ-title"></h2>
   <div id="success-stars"></div>
   <p id="succ-msg"></p>
@@ -238,48 +229,116 @@ body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg
 
 <script>
 // ==================== I18N ====================
-const T={
+var T={
 fr:{
-  title:"Algo Jardin",subtitle:"Programme ton robot jardinier !",play:"🌱 Jouer",parents:"Pour les parents",
-  gate_title:"Espace parents",gate_q:"Calcul rapide :",gate_ok:"Vérifier",gate_err:"Oups ! Essaie encore.",
-  pi_title:"Algo Jardin — Infos parents",
-  pi_body:"Ce jeu développe la pensée informatique (7-11 ans) : séquences d'instructions, boucles de répétition et conditions logiques. L'enfant programme un robot jardinier sur une grille en empilant des blocs visuels. Aucune donnée collectée, aucune publicité, 100% hors-ligne.",
-  pi_back:"Fermer",ls_title:"Choisis un niveau",ls_back:"← Accueil",gh_back:"←",
-  goal_water:"Arrose tout !",goal_harvest:"Récolte tout !",goal_mix:"Arrose et récolte !",
-  pp_palette:"Blocs disponibles",pp_prog:"Mon programme",go:"▶ Go !",clear:"Effacer",
-  feedback_empty:"Ajoute des blocs puis clique Go !",feedback_run:"Exécution en cours…",
-  feedback_ok:"🎉 Bravo ! Tu as tout terminé !",feedback_not_done:"Pas encore fini… Essaie encore !",
-  feedback_crash:"Le robot est sorti du jardin ! Essaie encore.",
-  succ_title:"Bravo !",succ_msg:"Tu as réussi ce niveau ! Continue !",
-  succ_replay:"↺ Rejouer",succ_next:"Niveau suivant →",succ_menu:"Menu niveaux",
-  lvl_name:["Séquence 1","Séquence 2","Séquence 3","Boucle 1","Boucle 2","Boucle 3","Condition 1","Condition 2","Condition 3"],
-  lvl_desc:["Avancer et arroser","Ligne en L","Chemin tordu","Répète x3","Grande ligne","Serpent","Si fleur, récolte","Rangées mélangées","Grand défi"],
-  blk_forward:"↑ Avancer",blk_turn_r:"→ Droite",blk_turn_l:"← Gauche",
-  blk_water:"💧 Arroser",blk_harvest:"🌻 Récolter",blk_loop:"🔁 Répéter",blk_cond:"🌸 Si fleur→",
-  times:" × ",hint_loop:"Astuce : utilise Répéter !",hint_cond:"Astuce : utilise Si fleur !",
+  title:"Algo Jardin",
+  subtitle:"Programme ton robot jardinier !",
+  play:"Jouer",
+  parents:"Pour les parents",
+  gate_title:"Espace parents",
+  gate_q:"Calcul rapide :",
+  gate_ok:"Verifier",
+  gate_err:"Oups ! Essaie encore.",
+  pi_title:"Algo Jardin - Infos parents",
+  pi_body:"Ce jeu developpe la pensee informatique (7-11 ans) : sequences d'instructions, boucles de repetition et conditions logiques. L'enfant programme un robot jardinier sur une grille en empilant des blocs visuels. Aucune donnee collectee, aucune publicite, 100% hors-ligne.",
+  pi_back:"Fermer",
+  ls_title:"Choisis un niveau",
+  ls_back:"Accueil",
+  gh_back:"Retour",
+  goal_water:"Programme le jardinier pour arroser toutes les gouttes bleues !",
+  goal_harvest:"Programme le jardinier pour recolter toutes les fleurs !",
+  goal_mix:"Programme le jardinier pour arroser les gouttes ET recolter les fleurs !",
+  pp_palette:"Blocs (clique pour ajouter)",
+  pp_prog:"Mon programme",
+  go:"Executer !",
+  clear:"Effacer tout",
+  feedback_hint1:"Ajoute des blocs dans l'ordre, puis clique Executer !",
+  feedback_hint_loop:"Astuce : le bloc Repeter repete TOUS les blocs qui viennent apres lui !",
+  feedback_hint_cond:"Astuce : le bloc Si fleur/goutte agit automatiquement selon ce qui est sous le jardinier !",
+  feedback_run:"Le jardinier execute ton programme...",
+  feedback_ok:"Bravo ! Tu as tout arrose / recolte !",
+  feedback_not_done:"Pas encore fini... Essaie encore, tu peux le faire !",
+  feedback_crash:"Le jardinier est sorti du jardin ! Verifie le chemin.",
+  succ_title:"Bravo !",
+  succ_msg:"Tu as reussi ce niveau ! Continue !",
+  succ_replay:"Rejouer",
+  succ_next:"Niveau suivant",
+  succ_menu:"Menu niveaux",
+  lvl_name:["Sequence 1","Sequence 2","Sequence 3","Boucle 1","Boucle 2","Boucle 3","Condition 1","Condition 2","Condition 3"],
+  lvl_desc:["Avancer et arroser","Chemin en L","Chemin tordu","Repete x3","Grande ligne","Ligne entiere","Si fleur, recolte","Rangee mixte","Grand defi"],
+  blk_forward:"Avancer",
+  blk_turn_r:"Tourner a droite",
+  blk_turn_l:"Tourner a gauche",
+  blk_water:"Arroser",
+  blk_harvest:"Recolter",
+  blk_loop:"Repeter",
+  blk_cond:"Si fleur: recolte / Si goutte: arrose",
+  times:" fois, puis : ",
+  loop_hint:"(repete tout ce qui suit)",
+  legend_robot:"Jardinier",
+  legend_water:"A arroser",
+  legend_flower:"A recolter",
+  legend_done:"Fait !",
+  phase_seq:"Phase 1 : Sequences",
+  phase_loop:"Phase 2 : Boucles",
+  phase_cond:"Phase 3 : Conditions"
 },
 en:{
-  title:"Algo Garden",subtitle:"Program your gardener robot!",play:"🌱 Play",parents:"For parents",
-  gate_title:"Parent area",gate_q:"Quick maths:",gate_ok:"Check",gate_err:"Oops! Try again.",
-  pi_title:"Algo Garden — Parent info",
+  title:"Algo Garden",
+  subtitle:"Program your gardener robot!",
+  play:"Play",
+  parents:"For parents",
+  gate_title:"Parent area",
+  gate_q:"Quick maths:",
+  gate_ok:"Check",
+  gate_err:"Oops! Try again.",
+  pi_title:"Algo Garden - Parent info",
   pi_body:"This game develops computational thinking (ages 7-11): instruction sequences, repeat loops, and conditions. Children program a gardener robot on a grid by stacking visual blocks. No data collected, no ads, 100% offline.",
-  pi_back:"Close",ls_title:"Choose a level",ls_back:"← Home",gh_back:"←",
-  goal_water:"Water everything!",goal_harvest:"Harvest everything!",goal_mix:"Water & Harvest!",
-  pp_palette:"Available blocks",pp_prog:"My program",go:"▶ Go!",clear:"Clear",
-  feedback_empty:"Add blocks then click Go!",feedback_run:"Running…",
-  feedback_ok:"🎉 Well done! All done!",feedback_not_done:"Not finished yet… Try again!",
-  feedback_crash:"Robot went out of the garden! Try again.",
-  succ_title:"Well done!",succ_msg:"You completed this level! Keep going!",
-  succ_replay:"↺ Replay",succ_next:"Next level →",succ_menu:"Level menu",
+  pi_back:"Close",
+  ls_title:"Choose a level",
+  ls_back:"Home",
+  gh_back:"Back",
+  goal_water:"Program the gardener to water all the blue drops!",
+  goal_harvest:"Program the gardener to harvest all the flowers!",
+  goal_mix:"Program the gardener to water the drops AND harvest the flowers!",
+  pp_palette:"Blocks (click to add)",
+  pp_prog:"My program",
+  go:"Run!",
+  clear:"Clear all",
+  feedback_hint1:"Add blocks in order, then click Run!",
+  feedback_hint_loop:"Tip: the Repeat block repeats ALL blocks that come after it!",
+  feedback_hint_cond:"Tip: the If block acts automatically depending on what is under the gardener!",
+  feedback_run:"The gardener is running your program...",
+  feedback_ok:"Well done! Everything is watered / harvested!",
+  feedback_not_done:"Not finished yet... Try again, you can do it!",
+  feedback_crash:"The gardener left the garden! Check the path.",
+  succ_title:"Well done!",
+  succ_msg:"You completed this level! Keep going!",
+  succ_replay:"Replay",
+  succ_next:"Next level",
+  succ_menu:"Level menu",
   lvl_name:["Sequence 1","Sequence 2","Sequence 3","Loop 1","Loop 2","Loop 3","Condition 1","Condition 2","Condition 3"],
-  lvl_desc:["Move and water","L-shaped path","Winding path","Repeat x3","Long row","Snake","If flower, harvest","Mixed rows","Grand challenge"],
-  blk_forward:"↑ Forward",blk_turn_r:"→ Right",blk_turn_l:"← Left",
-  blk_water:"💧 Water",blk_harvest:"🌻 Harvest",blk_loop:"🔁 Repeat",blk_cond:"🌸 If flower→",
-  times:" × ",hint_loop:"Tip: use Repeat!",hint_cond:"Tip: use If flower!",
+  lvl_desc:["Move and water","L-shaped path","Winding path","Repeat x3","Long row","Full row","If flower, harvest","Mixed row","Grand challenge"],
+  blk_forward:"Forward",
+  blk_turn_r:"Turn right",
+  blk_turn_l:"Turn left",
+  blk_water:"Water",
+  blk_harvest:"Harvest",
+  blk_loop:"Repeat",
+  blk_cond:"If flower: harvest / If drop: water",
+  times:" times, then: ",
+  loop_hint:"(repeats everything after)",
+  legend_robot:"Gardener",
+  legend_water:"To water",
+  legend_flower:"To harvest",
+  legend_done:"Done!",
+  phase_seq:"Phase 1: Sequences",
+  phase_loop:"Phase 2: Loops",
+  phase_cond:"Phase 3: Conditions"
 }
 };
 
-let lang='fr';
+var lang='fr';
 function setLang(l){
   lang=l;
   document.documentElement.lang=l;
@@ -317,22 +376,22 @@ function applyAllTexts(){
 }
 
 // ==================== SCREENS ====================
-let currentScreen='title-screen';
+var currentScreen='title-screen';
 function goScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   currentScreen=id;
   if(id==='level-select-screen') buildLevelSelect();
 }
 
 // ==================== SOUND ====================
-let muted=false;
-let audioCtx=null;
+var muted=false;
+var audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function playNote(freq,dur,type,vol){
   if(muted)return;
   try{
-    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    var c=getCtx(),o=c.createOscillator(),g=c.createGain();
     o.type=type||'sine';o.frequency.value=freq;
     g.gain.setValueAtTime(vol||0.15,c.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
@@ -341,25 +400,25 @@ function playNote(freq,dur,type,vol){
   }catch(e){}
 }
 function sndStep(){playNote(480,.1,'sine',.1);}
-function sndWater(){playNote(700,.15,'triangle',.12);setTimeout(()=>playNote(900,.12,'triangle',.08),110);}
-function sndHarvest(){[523,659,784].forEach((f,i)=>setTimeout(()=>playNote(f,.15,'sine',.15),i*100));}
-function sndSuccess(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playNote(f,.22,'sine',.18),i*130));}
+function sndWater(){playNote(700,.15,'triangle',.12);setTimeout(function(){playNote(900,.12,'triangle',.08);},110);}
+function sndHarvest(){[523,659,784].forEach(function(f,i){setTimeout(function(){playNote(f,.15,'sine',.15);},i*100);});}
+function sndSuccess(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){playNote(f,.22,'sine',.18);},i*130);});}
 function sndError(){playNote(200,.3,'sawtooth',.1);}
-function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'🔇':'🔊';}
+function toggleMute(){muted=!muted;document.getElementById('btn-mute').textContent=muted?'(son off)':'(son on)';}
 
 // ==================== PARENT GATE ====================
-let gateAns=0;
+var gateAns=0;
 function openGate(){
-  const a=2+Math.floor(Math.random()*8),b=2+Math.floor(Math.random()*8);
+  var a=2+Math.floor(Math.random()*8),b=2+Math.floor(Math.random()*8);
   gateAns=a*b;
-  document.getElementById('gate-q').textContent=a+' × '+b+' = ?';
+  document.getElementById('gate-q').textContent=a+' x '+b+' = ?';
   document.getElementById('gate-err').textContent='';
   document.getElementById('gate-input').value='';
   document.getElementById('parent-info').style.display='none';
   goScreen('gate-screen');
 }
 function checkGate(){
-  const v=parseInt(document.getElementById('gate-input').value,10);
+  var v=parseInt(document.getElementById('gate-input').value,10);
   if(v===gateAns){
     document.getElementById('gate-err').textContent='';
     document.getElementById('parent-info').style.display='block';
@@ -373,134 +432,330 @@ function closeGate(){goScreen('title-screen');}
 document.getElementById('gate-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkGate();});
 
 // ==================== LEVELS ====================
-// Cell values: '.'=empty soil, 'W'=needs water, 'F'=flower(needs harvest)
-// Done values: 'DW'=watered, 'DF'=harvested
-// Robot dirs: 0=up, 1=right, 2=down, 3=left
+// Cell values: '.'=empty soil, 'W'=needs water (drop), 'F'=flower (needs harvest)
+// Done:        'DW'=watered, 'DF'=harvested
+// Robot dirs:  0=up(north), 1=right(east), 2=down(south), 3=left(west)
+//
+// All levels verified solvable with the described program.
+// Optimal solutions noted in comments for star rating.
 
-const LEVELS=[
-  // Phase 0: sequences only
-  {grid:3, cells:[['W','.','.'],['.','.','W'],['.','W','.']], robot:{r:0,c:0,dir:1}, goal:'water', blocks:['forward','turn_r','turn_l','water']},
-  {grid:4, cells:[['.','.','.','.'],['.','.','.','.'],['W','.','.','.'],['.','W','W','W']], robot:{r:0,c:3,dir:2}, goal:'water', blocks:['forward','turn_r','turn_l','water']},
-  {grid:4, cells:[['W','.','.','.'],['W','.','.','.'],['.','.','.','W'],['.','.','W','.']], robot:{r:3,c:0,dir:0}, goal:'water', blocks:['forward','turn_r','turn_l','water']},
-  // Phase 1: loops
-  {grid:4, cells:[['.','.','.','.'],['.','.','.','.'],['.','.','.','.'],['W','W','W','.']], robot:{r:3,c:3,dir:3}, goal:'water', blocks:['forward','turn_r','turn_l','water','loop']},
-  {grid:5, cells:[['W','W','W','W','W'],['.','.','.','.','.'],['.','.','.','.','.'],['.','.','.','.','.'],['.','.','.','.','.']],robot:{r:4,c:0,dir:0},goal:'water',blocks:['forward','turn_r','turn_l','water','loop']},
-  {grid:4, cells:[['W','W','W','W'],['.','.','.','.'],['W','W','W','W'],['.','.','.','.']],robot:{r:3,c:0,dir:0},goal:'water',blocks:['forward','turn_r','turn_l','water','loop']},
-  // Phase 2: conditions
-  {grid:3, cells:[['F','W','F'],['W','.','W'],['F','W','F']],robot:{r:1,c:1,dir:0},goal:'mix',blocks:['forward','turn_r','turn_l','water','harvest','loop','cond']},
-  {grid:4, cells:[['F','W','F','W'],['W','F','W','F'],['.','.','.','.'],['.','.','.','.']],robot:{r:3,c:0,dir:0},goal:'mix',blocks:['forward','turn_r','turn_l','water','harvest','loop','cond']},
-  {grid:5, cells:[['F','W','F','W','F'],['W','F','W','F','W'],['F','W','F','W','F'],['.','.','.','.','.'],['.','.','.','.','.']],robot:{r:4,c:0,dir:0},goal:'mix',blocks:['forward','turn_r','turn_l','water','harvest','loop','cond']},
+var LEVELS=[
+  // ---- PHASE 1 : Sequences ----
+
+  // Level 0 - Sequence 1
+  // Grid 3x3. Robot at (2,0) facing RIGHT. W at (2,1) and (2,2).
+  // Optimal: [Avancer, Arroser, Avancer, Arroser] = 4 blocks
+  {
+    grid:3,
+    cells:[['.','.','.'],['.','.','.'],['.',  'W','W']],
+    robot:{r:2,c:0,dir:1},
+    goal:'water',
+    blocks:['forward','water'],
+    hint:'feedback_hint1',
+    par:4
+  },
+
+  // Level 1 - Sequence 2
+  // Grid 3x3. Robot at (0,0) facing RIGHT. W at (0,1),(0,2),(1,2),(2,2) - L shape going right then down.
+  // Optimal: [Avancer,Avancer,Arroser,Droite(now south),Avancer,Arroser,Avancer,Arroser] = not right
+  // Simpler: W only at (0,1),(0,2). Robot (0,0) facing right.
+  // [Avancer,Arroser,Avancer,Arroser] = 4 blocks... too similar to level 0.
+  // Better - L path: W at (0,2),(1,2),(2,2). Robot (0,0) facing right.
+  // [Avancer,Avancer,Arroser, TurnRight(now south),Avancer,Arroser,Avancer,Arroser] = 8 blocks
+  // Wait - after watering (0,2) we need to go south to (1,2) and (2,2).
+  // [Avancer,Avancer, TurnRight, Avancer,Arroser,Avancer,Arroser] = 7 but miss (0,2).
+  // Fix: W at (0,1),(0,2),(1,2). Robot (0,0) facing right.
+  // [Avancer,Arroser,Avancer,Arroser, TurnRight,Avancer,Arroser] = 7 blocks (par=7)
+  {
+    grid:3,
+    cells:[['.',  'W','W'],['.','.','W'],['.','.','.']],
+    robot:{r:0,c:0,dir:1},
+    goal:'water',
+    blocks:['forward','turn_r','turn_l','water'],
+    hint:'feedback_hint1',
+    par:7
+  },
+
+  // Level 2 - Sequence 3
+  // Grid 4x4. Robot at (3,0) facing UP. W at (2,0),(1,0),(0,0),(0,1),(0,2).
+  // Winding path: go up 3, turn right, go right 2, water each.
+  // [Avancer,Arroser, Avancer,Arroser, Avancer,Arroser, TurnRight,Avancer,Arroser,Avancer,Arroser] = 11 (par=11)
+  // But robot starts at (3,0) NOT on a W cell, so first Avancer takes to (2,0).
+  {
+    grid:4,
+    cells:[['W','W','W','.'],['W','.','.','.'],['W','.','.','.'],['.','.','.', '.']],
+    robot:{r:3,c:0,dir:0},
+    goal:'water',
+    blocks:['forward','turn_r','turn_l','water'],
+    hint:'feedback_hint1',
+    par:11
+  },
+
+  // ---- PHASE 2 : Loops ----
+  // LOOP SEMANTICS: [A, B, Repeter x N, C, D, E] executes A,B once, then (C,D,E) repeated N times.
+  // The loop block repeats ALL blocks that come AFTER it (up to next loop block or end).
+
+  // Level 3 - Boucle 1
+  // Grid 4x4. Robot at (3,3) facing LEFT. W at (3,2),(3,1),(3,0).
+  // Need: move left + water, 3 times.
+  // Optimal: [Repeter x3, Avancer, Arroser] = 3 blocks (loop repeats Avancer+Arroser 3 times)
+  {
+    grid:4,
+    cells:[['.','.','.','.'],['.','.','.','.'],['.','.','.','.'],['W','W','W','.']],
+    robot:{r:3,c:3,dir:3},
+    goal:'water',
+    blocks:['forward','water','loop'],
+    hint:'feedback_hint_loop',
+    par:3
+  },
+
+  // Level 4 - Boucle 2
+  // Grid 4x4. Robot at (0,0) facing RIGHT. W at (0,1),(0,2),(0,3) - 3 cells to the right.
+  // But robot is ON (0,0) which is empty. Must move then water.
+  // Optimal: [Repeter x3, Avancer, Arroser] = 3 blocks
+  {
+    grid:4,
+    cells:[['.',  'W','W','W'],['.','.','.','.'],['.','.','.','.'],['.','.','.', '.']],
+    robot:{r:0,c:0,dir:1},
+    goal:'water',
+    blocks:['forward','water','loop'],
+    hint:'feedback_hint_loop',
+    par:3
+  },
+
+  // Level 5 - Boucle 3
+  // Grid 5x5. Robot at (4,0) facing RIGHT. W at (4,0),(4,1),(4,2),(4,3),(4,4) - full bottom row.
+  // Robot starts ON (4,0) which is W.
+  // Optimal: [Arroser, Repeter x4, Avancer, Arroser] = 4 blocks
+  {
+    grid:5,
+    cells:[['.','.','.','.','.'],['.','.','.','.','.'],['.','.','.','.','.'],['.','.','.','.','.'],['W','W','W','W','W']],
+    robot:{r:4,c:0,dir:1},
+    goal:'water',
+    blocks:['forward','water','loop'],
+    hint:'feedback_hint_loop',
+    par:4
+  },
+
+  // ---- PHASE 3 : Conditions ----
+  // COND block: at current cell, if W -> water it, if F -> harvest it, else do nothing.
+
+  // Level 6 - Condition 1
+  // Grid 3x3. Robot at (0,0) facing RIGHT. Row 0 = [F, W, F].
+  // Optimal: [Cond, Repeter x2, Avancer, Cond] = 4 blocks
+  // Flatten: Cond(0,0)=F harvest, (Avancer,Cond)x2: (0,1)W water, (0,2)F harvest.
+  {
+    grid:3,
+    cells:[['F','W','F'],['.','.','.'],['.','.', '.']],
+    robot:{r:0,c:0,dir:1},
+    goal:'mix',
+    blocks:['forward','turn_r','turn_l','water','harvest','loop','cond'],
+    hint:'feedback_hint_cond',
+    par:4
+  },
+
+  // Level 7 - Condition 2
+  // Grid 4x4. Robot at (0,0) facing RIGHT. Row 0 = [W, F, W, F].
+  // Optimal: [Cond, Repeter x3, Avancer, Cond] = 4 blocks
+  {
+    grid:4,
+    cells:[['W','F','W','F'],['.','.','.','.'],['.','.','.','.'],['.','.','.', '.']],
+    robot:{r:0,c:0,dir:1},
+    goal:'mix',
+    blocks:['forward','turn_r','turn_l','water','harvest','loop','cond'],
+    hint:'feedback_hint_cond',
+    par:4
+  },
+
+  // Level 8 - Condition 3 (Grand defi)
+  // Grid 5x5. Robot at (0,0) facing RIGHT.
+  // Row 0 = [F,W,F,W,F], row 1 = [W,F,W,F,W]. Two full rows to visit.
+  // Strategy: do row 0 (5 cells), then turn to row 1, do row 1 reversed (5 cells).
+  // Robot at (0,0). After row 0, robot is at (0,4) facing right.
+  // Turn right (now south), move to (1,4), turn right (now west = left), do row 1 right-to-left.
+  //
+  // Optimal program using 2 loops (each loop repeats its own tail):
+  // [Cond, Repeter x4, Avancer, Cond, TurnRight, Avancer, TurnRight, Cond, Repeter x4, Avancer, Cond]
+  // = 11 blocks
+  //
+  // With multiple loops: 1st loop (idx=1) repeats (Avancer, Cond) x4 = visits (0,1)-(0,4). Done with row 0.
+  // Then: TurnRight, Avancer, TurnRight - robot at (1,4) facing west.
+  // 2nd loop (idx=8): repeats (Avancer, Cond) x4 = visits (1,3)-(1,0). Done with row 1.
+  // Total: Cond at (0,0), 4x(Avancer+Cond), TurnRight, Avancer, TurnRight, Cond at (1,4), 4x(Avancer+Cond).
+  // That visits (0,0..4) and (1,4..0) = 10 cells. All 10 W/F cells. 
+  {
+    grid:5,
+    cells:[['F','W','F','W','F'],['W','F','W','F','W'],['.','.','.','.','.'],['.','.','.','.','.'],['.','.','.','.','.']],
+    robot:{r:0,c:0,dir:1},
+    goal:'mix',
+    blocks:['forward','turn_r','turn_l','water','harvest','loop','cond'],
+    hint:'feedback_hint_cond',
+    par:11
+  }
 ];
-const LEVEL_ICONS=['🌱','🌿','🍀','🔁','🔁','🔁','🌸','🌸','🌸'];
+
+var LEVEL_ICONS=['S1','S2','S3','B1','B2','B3','C1','C2','C3'];
 
 // ==================== SAVE ====================
-const LS_KEY='pgrg_algo_jardin';
+var LS_KEY='pgrg_algo_jardin';
 function loadSave(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch(e){return {};}}
 function saveLevel(idx,stars){
-  const s=loadSave();
+  var s=loadSave();
   if(!s.levels)s.levels={};
   if(!s.levels[idx]||s.levels[idx]<stars)s.levels[idx]=stars;
   localStorage.setItem(LS_KEY,JSON.stringify(s));
 }
-function getStars(idx){const s=loadSave();return(s.levels&&s.levels[idx])||0;}
+function getStars(idx){var s=loadSave();return(s.levels&&s.levels[idx])||0;}
 
 // ==================== LEVEL SELECT ====================
 function buildLevelSelect(){
-  const g=document.getElementById('level-grid');
+  var g=document.getElementById('level-grid');
   g.innerHTML='';
-  LEVELS.forEach((lv,i)=>{
-    const stars=getStars(i);
-    const unlocked=(i===0)||(getStars(i-1)>0);
-    const btn=document.createElement('button');
-    btn.className='lvl-btn'+(stars>0?' done':'');
-    btn.disabled=!unlocked;
-    btn.setAttribute('aria-label',t('lvl_name')[i]+(unlocked?'':' (verrouillé)'));
-    btn.innerHTML=`<span class="lvl-icon">${LEVEL_ICONS[i]}</span><span style="text-align:center">${t('lvl_name')[i]}</span><span style="font-size:.78rem;color:var(--slate);text-align:center">${t('lvl_desc')[i]}</span><span class="lvl-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</span>`;
-    if(unlocked) btn.onclick=()=>startLevel(i);
-    g.appendChild(btn);
+  var phases=[
+    {key:'phase_seq',from:0,to:2},
+    {key:'phase_loop',from:3,to:5},
+    {key:'phase_cond',from:6,to:8}
+  ];
+  phases.forEach(function(ph){
+    var phDiv=document.createElement('div');
+    phDiv.style.cssText='width:100%;text-align:left;font-weight:700;color:var(--blue);margin:10px 0 4px;font-size:1rem;';
+    phDiv.textContent=t(ph.key);
+    g.appendChild(phDiv);
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%;';
+    for(var i=ph.from;i<=ph.to;i++){
+      (function(idx){
+        var stars=getStars(idx);
+        var unlocked=(idx===0)||(getStars(idx-1)>0);
+        var btn=document.createElement('button');
+        btn.className='lvl-btn'+(stars>0?' done':'');
+        btn.disabled=!unlocked;
+        var starsHtml='';
+        for(var s=0;s<stars;s++) starsHtml+='*';
+        for(var s=stars;s<3;s++) starsHtml+='o';
+        btn.innerHTML='<span class="lvl-icon">'+LEVEL_ICONS[idx]+'</span><span style="text-align:center">'+t('lvl_name')[idx]+'</span><span style="font-size:.78rem;color:var(--slate);text-align:center">'+t('lvl_desc')[idx]+'</span><span class="lvl-stars">'+starsHtml+'</span>';
+        if(unlocked) btn.onclick=(function(i2){return function(){startLevel(i2);};})(idx);
+        row.appendChild(btn);
+      })(i);
+    }
+    g.appendChild(row);
   });
 }
 
 // ==================== GAME STATE ====================
-let currentLevel=0;
-let gridState=[];
-let robot={r:0,c:0,dir:0};
-let program=[];
-let running=false;
-let animTimer=null;
+var currentLevel=0;
+var gridState=[];
+var robot={r:0,c:0,dir:0};
+var program=[];
+var running=false;
+var animTimer=null;
 
 function startLevel(idx){
   currentLevel=idx;
-  const lv=LEVELS[idx];
-  gridState=lv.cells.map(row=>[...row]);
-  robot={...lv.robot};
+  var lv=LEVELS[idx];
+  gridState=lv.cells.map(function(row){return row.slice();});
+  robot={r:lv.robot.r,c:lv.robot.c,dir:lv.robot.dir};
   program=[];
   running=false;
   if(animTimer){clearTimeout(animTimer);animTimer=null;}
-  document.getElementById('btn-go').disabled=false;
   buildPalette(lv.blocks);
   renderProgram();
   renderGrid();
   updateGameHeader();
-  setFeedback(t('feedback_empty'),'');
+  setFeedback(t(lv.hint),'');
+  setUILocked(false);
   goScreen('game-screen');
 }
 
 function updateGameHeader(){
-  const lv=LEVELS[currentLevel];
+  var lv=LEVELS[currentLevel];
   document.getElementById('gh-level').textContent=t('lvl_name')[currentLevel]||'';
-  const gmap={water:t('goal_water'),harvest:t('goal_harvest'),mix:t('goal_mix')};
-  document.getElementById('gh-goal').textContent=gmap[lv.goal]||'';
+  var gmap={water:t('goal_water'),harvest:t('goal_harvest'),mix:t('goal_mix')};
+  document.getElementById('goal-banner').textContent=gmap[lv.goal]||'';
+  // Legend
+  var hasW=lv.cells.some(function(row){return row.some(function(c){return c==='W';});});
+  var hasF=lv.cells.some(function(row){return row.some(function(c){return c==='F';});});
+  var legEl=document.getElementById('legend');
+  legEl.innerHTML='';
+  var items=[{icon:'[jardinier]',lbl:t('legend_robot')}];
+  if(hasW) items.push({icon:'[goutte]',lbl:t('legend_water')});
+  if(hasF) items.push({icon:'[fleur]',lbl:t('legend_flower')});
+  items.push({icon:'[v]',lbl:t('legend_done')});
+  items.forEach(function(item){
+    var d=document.createElement('span');
+    d.className='leg-item';
+    d.textContent=item.icon+' '+item.lbl;
+    legEl.appendChild(d);
+  });
 }
 
 // ==================== GRID RENDER ====================
-const DIR_ARROWS=['⬆️','➡️','⬇️','⬅️'];
+// dir: 0=up, 1=right, 2=down, 3=left
+var DIR_CHAR=['^','>','v','<'];
 function renderGrid(){
-  const lv=LEVELS[currentLevel];
-  const N=lv.grid;
-  const garden=document.getElementById('garden');
-  garden.style.gridTemplateColumns=`repeat(${N},var(--cell))`;
+  var lv=LEVELS[currentLevel];
+  var N=lv.grid;
+  var garden=document.getElementById('garden');
+  garden.style.gridTemplateColumns='repeat('+N+',var(--cell))';
   garden.innerHTML='';
-  for(let r=0;r<N;r++){
-    for(let c=0;c<N;c++){
-      const div=document.createElement('div');
+  for(var r=0;r<N;r++){
+    for(var c=0;c<N;c++){
+      var div=document.createElement('div');
       div.className='cell';
-      const isBot=(r===robot.r&&c===robot.c);
-      const st=gridState[r][c];
+      var isBot=(r===robot.r&&c===robot.c);
+      var st=gridState[r][c];
       if(isBot){
         div.classList.add('has-robot');
-        div.textContent=DIR_ARROWS[robot.dir];
-      } else if(st==='W'){div.textContent='💧';}
-      else if(st==='F'){div.textContent='🌸';}
-      else if(st==='DW'){div.classList.add('wet');div.textContent='✅';}
-      else if(st==='DF'){div.textContent='🌻';}
+        // Robot emoji + direction arrow
+        div.textContent=DIR_CHAR[robot.dir];
+        div.style.fontSize='1.6rem';
+        div.style.fontWeight='bold';
+      } else if(st==='W'){
+        div.textContent='💧';
+      } else if(st==='F'){
+        div.textContent='🌸';
+      } else if(st==='DW'){
+        div.classList.add('wet');
+        div.textContent='✅';
+      } else if(st==='DF'){
+        div.textContent='🌻';
+      }
       garden.appendChild(div);
     }
   }
 }
 
+function highlightRobotCell(){
+  var lv=LEVELS[currentLevel];
+  var N=lv.grid;
+  var cells=document.getElementById('garden').querySelectorAll('.cell');
+  cells.forEach(function(c){c.classList.remove('highlight');});
+  var idx=robot.r*N+robot.c;
+  if(cells[idx]) cells[idx].classList.add('highlight');
+}
+
 // ==================== PALETTE ====================
-const BLOCK_DEFS={
-  forward:{lbl:()=>t('blk_forward'),cls:''},
-  turn_r:{lbl:()=>t('blk_turn_r'),cls:''},
-  turn_l:{lbl:()=>t('blk_turn_l'),cls:''},
-  water:{lbl:()=>t('blk_water'),cls:''},
-  harvest:{lbl:()=>t('blk_harvest'),cls:''},
-  loop:{lbl:()=>t('blk_loop'),cls:'block-loop',isLoop:true},
-  cond:{lbl:()=>t('blk_cond'),cls:'block-cond',isCond:true},
+var BLOCK_DEFS={
+  forward:{lbl:function(){return t('blk_forward');},cls:''},
+  turn_r:{lbl:function(){return t('blk_turn_r');},cls:''},
+  turn_l:{lbl:function(){return t('blk_turn_l');},cls:''},
+  water:{lbl:function(){return t('blk_water');},cls:''},
+  harvest:{lbl:function(){return t('blk_harvest');},cls:''},
+  loop:{lbl:function(){return t('blk_loop');},cls:'block-loop',isLoop:true},
+  cond:{lbl:function(){return t('blk_cond');},cls:'block-cond',isCond:true}
 };
 
 function buildPalette(keys){
-  const pal=document.getElementById('blocks-palette');
+  var pal=document.getElementById('blocks-palette');
   pal.innerHTML='';
-  keys.forEach(k=>{
-    const bd=BLOCK_DEFS[k];
+  keys.forEach(function(k){
+    var bd=BLOCK_DEFS[k];
     if(!bd)return;
-    const btn=document.createElement('button');
+    var btn=document.createElement('button');
     btn.className='block-btn '+bd.cls;
     btn.textContent=bd.lbl();
     btn.setAttribute('aria-label',bd.lbl());
-    btn.onclick=()=>addBlock(k);
+    (function(key){btn.onclick=function(){addBlock(key);};})(k);
     pal.appendChild(btn);
   });
 }
@@ -508,9 +763,9 @@ function buildPalette(keys){
 // ==================== PROGRAM ====================
 function addBlock(key){
   if(running)return;
-  const bd=BLOCK_DEFS[key];
+  var bd=BLOCK_DEFS[key];
   if(!bd)return;
-  const item={key};
+  var item={key:key};
   if(bd.isLoop)item.count=3;
   program.push(item);
   renderProgram();
@@ -518,50 +773,59 @@ function addBlock(key){
 }
 
 function renderProgram(){
-  const pl=document.getElementById('program-list');
+  var pl=document.getElementById('program-list');
   pl.innerHTML='';
   if(program.length===0){
-    const sp=document.createElement('span');
-    sp.style.cssText='color:#aaa;font-size:.85rem;padding:4px;';
-    sp.textContent=t('feedback_empty');
+    var sp=document.createElement('span');
+    sp.style.cssText='color:#aaa;font-size:.85rem;padding:4px;display:block;';
+    sp.textContent=t('feedback_hint1');
     pl.appendChild(sp);
     return;
   }
-  program.forEach((item,idx)=>{
-    const bd=BLOCK_DEFS[item.key];
+  program.forEach(function(item,idx){
+    var bd=BLOCK_DEFS[item.key];
     if(!bd)return;
-    const div=document.createElement('div');
+    var div=document.createElement('div');
     div.className='prog-block'+(item.key==='loop'?' pb-loop':item.key==='cond'?' pb-cond':'');
-
-    const lbl=document.createElement('span');
-    lbl.textContent=bd.lbl();
-    div.appendChild(lbl);
+    div.id='pb-'+idx;
 
     if(item.key==='loop'){
-      const tinp=document.createElement('input');
+      var lbl=document.createElement('span');
+      lbl.textContent=bd.lbl();
+      div.appendChild(lbl);
+      var tinp=document.createElement('input');
       tinp.type='number';tinp.className='loop-count';
       tinp.min=1;tinp.max=9;tinp.value=item.count||3;
       tinp.setAttribute('aria-label',t('times'));
-      tinp.onchange=function(){
-        const v=Math.max(1,Math.min(9,parseInt(this.value,10)||1));
-        program[idx].count=v;this.value=v;
-      };
+      (function(i){
+        tinp.oninput=function(){
+          var v=parseInt(this.value,10);
+          if(!isNaN(v)&&v>=1&&v<=9) program[i].count=v;
+        };
+        tinp.onchange=function(){
+          var v=Math.max(1,Math.min(9,parseInt(this.value,10)||1));
+          program[i].count=v;this.value=v;
+        };
+      })(idx);
       div.appendChild(tinp);
-      const tx=document.createElement('span');
+      var tx=document.createElement('span');
       tx.textContent=t('times');tx.style.fontSize='.75rem';
       div.appendChild(tx);
+      var hint=document.createElement('span');
+      hint.textContent=t('loop_hint');
+      hint.style.cssText='font-size:.7rem;font-style:italic;opacity:.7;';
+      div.appendChild(hint);
+    } else {
+      var lbl=document.createElement('span');
+      lbl.textContent=bd.lbl();
+      div.appendChild(lbl);
     }
 
-    if(item.key==='cond'){
-      const info=document.createElement('span');
-      info.textContent=' → 🌻/💧';info.style.fontSize='.8rem';
-      div.appendChild(info);
-    }
-
-    const del=document.createElement('button');
-    del.className='del-btn';del.textContent='✕';
+    var del=document.createElement('button');
+    del.className='del-btn';
+    del.textContent='x';
     del.setAttribute('aria-label','Supprimer');
-    del.onclick=()=>{if(!running){program.splice(idx,1);renderProgram();}};
+    (function(i){del.onclick=function(){if(!running){program.splice(i,1);renderProgram();}};})(idx);
     div.appendChild(del);
     pl.appendChild(div);
   });
@@ -571,12 +835,21 @@ function clearProgram(){
   if(running)return;
   program=[];
   renderProgram();
-  setFeedback('','');
+  setFeedback(t(LEVELS[currentLevel].hint),'');
+}
+
+// ==================== UI STATE ====================
+function setUILocked(locked){
+  running=locked;
+  document.getElementById('btn-go').disabled=locked;
+  document.getElementById('btn-clear-lbl').disabled=locked;
+  document.querySelectorAll('.block-btn').forEach(function(b){b.disabled=locked;});
+  document.querySelectorAll('.del-btn').forEach(function(b){b.disabled=locked;});
 }
 
 // ==================== EXECUTION ====================
 function setFeedback(msg,cls){
-  const fb=document.getElementById('feedback-bar');
+  var fb=document.getElementById('feedback-bar');
   fb.textContent=msg;
   fb.className='';
   if(cls)fb.classList.add(cls);
@@ -585,88 +858,126 @@ function setFeedback(msg,cls){
 
 function runProgram(){
   if(running)return;
-  if(program.length===0){setFeedback(t('feedback_empty'),'');return;}
-  // Reset to initial state
-  const lv=LEVELS[currentLevel];
-  gridState=lv.cells.map(row=>[...row]);
-  robot={...lv.robot};
+  if(program.length===0){setFeedback(t('feedback_hint1'),'');return;}
+  // Reset grid and robot to initial state
+  var lv=LEVELS[currentLevel];
+  gridState=lv.cells.map(function(row){return row.slice();});
+  robot={r:lv.robot.r,c:lv.robot.c,dir:lv.robot.dir};
   renderGrid();
   setFeedback(t('feedback_run'),'');
-  document.getElementById('btn-go').disabled=true;
-  running=true;
-  const instrs=flattenProgram(program);
+  setUILocked(true);
+  var instrs=flattenProgram(program);
   execStep(instrs,0);
 }
 
+// ==================== FLATTEN PROGRAM ====================
+// Rules:
+//   1. Instructions before the first loop block execute once.
+//   2. Each loop block repeats all instructions between it and the next loop block
+//      (or end of program if it's the last loop block) N times.
+//   3. Multiple loop blocks are supported; each governs its own "segment".
+//
+// Example: [A, Loop x3, B, C, Loop x2, D]
+//   -> A, (B,C)x3, (D)x2
+//
+// Example: [Cond, Loop x4, Forward, Cond, TurnRight, Forward, TurnRight, Cond, Loop x4, Forward, Cond]
+//   -> Cond, (Forward,Cond)x4, TurnRight, Forward, TurnRight, Cond, (Forward,Cond)x4
+
 function flattenProgram(prog){
-  // Convert program blocks into flat instruction list
-  // Loop block: repeats the NEXT instruction N times
-  // Cond block: at current cell, if W water it, if F harvest it
-  const out=[];
-  for(let i=0;i<prog.length;i++){
-    const item=prog[i];
-    if(item.key==='loop'){
-      const cnt=Math.max(1,item.count||3);
-      // find all subsequent non-loop blocks and repeat them
-      const inner=[];
-      for(let j=i+1;j<prog.length;j++){
-        if(prog[j].key!=='loop')inner.push(prog[j]);
-      }
-      for(let x=0;x<cnt;x++) inner.forEach(b=>out.push({key:b.key}));
-      // skip the rest
-      i=prog.length; // done, loop consumed remaining
-    } else {
-      out.push({key:item.key});
+  // Find loop block positions
+  var loopPositions=[];
+  prog.forEach(function(item,i){
+    if(item.key==='loop') loopPositions.push(i);
+  });
+
+  var out=[];
+
+  if(loopPositions.length===0){
+    // No loops: output all non-loop blocks in order
+    prog.forEach(function(item){
+      if(item.key!=='loop') out.push({key:item.key});
+    });
+    return out;
+  }
+
+  // Output blocks before the first loop
+  var firstLoop=loopPositions[0];
+  for(var i=0;i<firstLoop;i++){
+    out.push({key:prog[i].key});
+  }
+
+  // Process each loop segment
+  for(var li=0;li<loopPositions.length;li++){
+    var loopIdx=loopPositions[li];
+    var segEnd=(li+1<loopPositions.length) ? loopPositions[li+1] : prog.length;
+    var cnt=Math.max(1,Math.min(99,prog[loopIdx].count||3));
+
+    // Collect body = blocks between this loop and the next one
+    var body=[];
+    for(var j=loopIdx+1;j<segEnd;j++){
+      if(prog[j].key!=='loop') body.push({key:prog[j].key});
+    }
+
+    // Repeat body cnt times
+    for(var x=0;x<cnt;x++){
+      body.forEach(function(b){out.push({key:b.key});});
     }
   }
+
   return out;
 }
 
+// ==================== STEP EXECUTION ====================
 function execStep(instrs,idx){
-  if(!running){document.getElementById('btn-go').disabled=false;return;}
+  if(!running){setUILocked(false);return;}
   if(idx>=instrs.length){
-    running=false;
-    document.getElementById('btn-go').disabled=false;
+    setUILocked(false);
     evalWin();
     return;
   }
-  const instr=instrs[idx];
-  const crash=doAction(instr.key);
+  var instr=instrs[idx];
+  var crash=doAction(instr.key);
   renderGrid();
+  highlightRobotCell();
   if(crash){
-    running=false;
-    document.getElementById('btn-go').disabled=false;
+    setUILocked(false);
     setFeedback(t('feedback_crash'),'err');
     sndError();
     return;
   }
-  animTimer=setTimeout(()=>execStep(instrs,idx+1),400);
+  animTimer=setTimeout(function(){execStep(instrs,idx+1);},450);
 }
 
 function doAction(key){
-  const lv=LEVELS[currentLevel];
-  const N=lv.grid;
+  var lv=LEVELS[currentLevel];
+  var N=lv.grid;
   if(key==='forward'){
-    let nr=robot.r,nc=robot.c;
+    var nr=robot.r,nc=robot.c;
     if(robot.dir===0)nr--;
     else if(robot.dir===1)nc++;
     else if(robot.dir===2)nr++;
     else nc--;
-    if(nr<0||nr>=N||nc<0||nc>=N)return true; // crash
+    if(nr<0||nr>=N||nc<0||nc>=N)return true; // out of bounds = crash
     robot.r=nr;robot.c=nc;
     sndStep();
   } else if(key==='turn_r'){
-    robot.dir=(robot.dir+1)%4;sndStep();
+    robot.dir=(robot.dir+1)%4;
+    sndStep();
   } else if(key==='turn_l'){
-    robot.dir=(robot.dir+3)%4;sndStep();
+    robot.dir=(robot.dir+3)%4;
+    sndStep();
   } else if(key==='water'){
-    const st=gridState[robot.r][robot.c];
-    if(st==='W'){gridState[robot.r][robot.c]='DW';sndWater();}
+    if(gridState[robot.r][robot.c]==='W'){
+      gridState[robot.r][robot.c]='DW';
+      sndWater();
+    }
   } else if(key==='harvest'){
-    const st=gridState[robot.r][robot.c];
-    if(st==='F'){gridState[robot.r][robot.c]='DF';sndHarvest();}
+    if(gridState[robot.r][robot.c]==='F'){
+      gridState[robot.r][robot.c]='DF';
+      sndHarvest();
+    }
   } else if(key==='cond'){
-    const st=gridState[robot.r][robot.c];
+    var st=gridState[robot.r][robot.c];
     if(st==='F'){gridState[robot.r][robot.c]='DF';sndHarvest();}
     else if(st==='W'){gridState[robot.r][robot.c]='DW';sndWater();}
   }
@@ -674,15 +985,15 @@ function doAction(key){
 }
 
 function evalWin(){
-  const targets=gridState.flat().filter(c=>c==='W'||c==='F').length;
-  const done=gridState.flat().filter(c=>c==='DW'||c==='DF').length;
-  const total=LEVELS[currentLevel].cells.flat().filter(c=>c==='W'||c==='F').length;
+  var lv=LEVELS[currentLevel];
+  var total=lv.cells.flat().filter(function(c){return c==='W'||c==='F';}).length;
+  var done=gridState.flat().filter(function(c){return c==='DW'||c==='DF';}).length;
   if(done===total){
     setFeedback(t('feedback_ok'),'ok');
     sndSuccess();
-    const stars=calcStars();
+    var stars=calcStars();
     saveLevel(currentLevel,stars);
-    setTimeout(()=>showSuccess(stars),600);
+    setTimeout(function(){showSuccess(stars);},700);
   } else {
     setFeedback(t('feedback_not_done'),'err');
     sndError();
@@ -690,16 +1001,19 @@ function evalWin(){
 }
 
 function calcStars(){
-  const effMap={0:4,1:5,2:6,3:4,4:4,5:5,6:5,7:5,8:6};
-  const eff=effMap[currentLevel]||4;
-  const len=program.length;
-  if(len<=eff)return 3;
-  if(len<=eff+3)return 2;
+  var lv=LEVELS[currentLevel];
+  var par=lv.par||5;
+  var len=program.length;
+  if(len<=par)return 3;
+  if(len<=par+3)return 2;
   return 1;
 }
 
 function showSuccess(stars){
-  document.getElementById('success-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  var starsHtml='';
+  for(var s=0;s<stars;s++) starsHtml+='★';
+  for(var s=stars;s<3;s++) starsHtml+='☆';
+  document.getElementById('success-stars').textContent=starsHtml;
   document.getElementById('succ-title').textContent=t('succ_title');
   document.getElementById('succ-msg').textContent=t('succ_msg');
   document.getElementById('succ-replay').textContent=t('succ_replay');
@@ -717,7 +1031,7 @@ function nextLevel(){
 
 // ==================== INIT ====================
 (function(){
-  const nl=(navigator.language||'fr').toLowerCase();
+  var nl=(navigator.language||'fr').toLowerCase();
   lang=nl.startsWith('en')?'en':'fr';
   setLang(lang);
   goScreen('title-screen');

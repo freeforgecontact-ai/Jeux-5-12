@@ -54,7 +54,7 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
 #screen-title{text-align:center;padding-top:10px;}
 .mascot-container{margin:16px auto;width:160px;}
 .game-title{font-size:2.2rem;color:var(--blue);line-height:1.1;margin:10px 0 6px;}
-.game-subtitle{font-size:1.1rem;color:var(--slate);margin-bottom:24px;}
+.game-subtitle{font-size:1.1rem;color:var(--slate);margin-bottom:20px;}
 .btn-play{
   background:var(--orange);color:#fff;border:none;border-radius:24px;
   font-size:1.4rem;font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-serif;
@@ -68,6 +68,21 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
   display:inline-block;margin-top:18px;color:var(--slate);font-size:0.9rem;
   background:none;border:none;cursor:pointer;text-decoration:underline;
 }
+.level-select-section{margin:20px auto 10px;max-width:520px;}
+.level-select-title{font-size:1rem;font-weight:700;color:var(--slate);margin-bottom:10px;}
+.level-grid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.level-select-btn{
+  background:#fff;border:3px solid #cbd5e1;border-radius:14px;
+  padding:10px 18px;font-size:1rem;font-weight:700;cursor:pointer;
+  min-height:60px;min-width:130px;transition:border-color 0.2s,background 0.2s,transform 0.1s;
+  color:var(--navy);display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.level-select-btn:hover{border-color:var(--blue);background:var(--sky-light);transform:translateY(-2px);}
+.level-select-btn.sel-active{border-color:var(--orange);background:#fff3e0;}
+.level-select-btn.sel-done{border-color:var(--success);background:#f0fdf4;}
+.level-select-btn .lsb-name{font-size:1rem;font-weight:800;}
+.level-select-btn .lsb-desc{font-size:0.75rem;color:var(--slate);font-weight:600;}
+.level-select-btn .lsb-badge{font-size:0.7rem;background:var(--gold);color:var(--navy);border-radius:8px;padding:1px 7px;font-weight:800;margin-top:2px;}
 #screen-parent{text-align:center;}
 .parent-box{
   background:#fff;border-radius:20px;padding:28px;max-width:420px;
@@ -154,6 +169,14 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
 }
 .gate-choice-btn:hover{border-color:var(--blue);background:var(--sky-light);}
 .gate-choice-btn.selected{border-color:var(--orange);background:#fff3e0;}
+.progress-row{display:flex;gap:5px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;}
+.prog-dot{
+  width:12px;height:12px;border-radius:50%;background:#cbd5e1;
+  transition:background 0.3s;flex-shrink:0;
+  border:2px solid transparent;
+}
+.prog-dot.done{background:var(--gold);}
+.prog-dot.current{background:var(--orange);border-color:var(--orange-dark);}
 #feedback-area{
   text-align:center;min-height:56px;font-size:1.1rem;font-weight:700;
   padding:8px;
@@ -174,13 +197,6 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
 }
 .btn-action:hover{transform:translateY(-1px);}
 .btn-action.secondary{background:var(--blue);box-shadow:0 4px 0 var(--blue-dark);}
-.progress-row{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
-.prog-dot{
-  width:14px;height:14px;border-radius:50%;background:#cbd5e1;
-  transition:background 0.3s;flex-shrink:0;
-}
-.prog-dot.done{background:var(--gold);}
-.prog-dot.current{background:var(--orange);}
 #aria-live{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 @keyframes pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
 .pop-anim{animation:pop 0.4s ease forwards;display:inline-block;}
@@ -192,9 +208,9 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
 </style>
 </head>
 <body>
-<a id="pgrg-reset" role="button" tabindex="0" aria-label="Recommencer a zero" onclick="if(confirm(document.documentElement.lang==='en'?'Restart this game from the beginning? (your progress on this game will be erased)':'Recommencer ce jeu depuis le debut ? (ta progression sur ce jeu sera effacee)')){['pgrg_circuit_logique'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload();}" style="position:fixed;right:10px;bottom:10px;z-index:2147483647;background:#0f4c81;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">↺ Recommencer</a>
+<a id="pgrg-reset" role="button" tabindex="0" aria-label="Recommencer a zero" onclick="if(confirm(document.documentElement.lang==='en'?'Restart this game from the beginning? (your progress on this game will be erased)':'Recommencer ce jeu depuis le debut ? (ta progression sur ce jeu sera effacee)')){['pgrg_circuit_logique'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload();}" style="position:fixed;right:10px;bottom:10px;z-index:2147483647;background:#0f4c81;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">&#x21BA; Recommencer</a>
 
-<a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">🏠 Les jeux</a>
+<a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">&#x1F3E0; Les jeux</a>
 
 <div id="topbar">
   <div id="topbar-left">
@@ -202,9 +218,9 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <span class="brand-text">PGRG IA</span>
   </div>
   <div id="topbar-right">
-    <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')" aria-label="Français">FR</button>
+    <button class="btn-lang active" id="btn-fr" onclick="setLang('fr')" aria-label="Francais">FR</button>
     <button class="btn-lang" id="btn-en" onclick="setLang('en')" aria-label="English">EN</button>
-    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">🔊</button>
+    <button id="btn-mute" onclick="toggleMute()" aria-label="Muet">&#x1F50A;</button>
   </div>
 </div>
 <div id="aria-live" aria-live="polite" aria-atomic="true"></div>
@@ -238,15 +254,21 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
   </div>
   <h1 class="game-title title-font" id="t-game-title">Circuit Logique</h1>
   <p class="game-subtitle" id="t-game-subtitle">Apprends la logique des ordinateurs !</p>
-  <button class="btn-play" onclick="startGame()" id="t-btn-play">Jouer ▶</button>
+
+  <div class="level-select-section">
+    <div class="level-select-title" id="t-choose-level">Choisis un niveau :</div>
+    <div class="level-grid" id="level-select-grid"></div>
+  </div>
+
+  <button class="btn-play" onclick="startGame()" id="t-btn-play" style="margin-top:18px;">Jouer &#x25B6;</button>
   <br>
-  <button class="btn-parents" onclick="showParentGate()" id="t-btn-parents">👩‍👦 Pour les parents</button>
+  <button class="btn-parents" onclick="showParentGate()" id="t-btn-parents">&#x1F469;&#x200D;&#x1F466; Pour les parents</button>
 </div>
 
 <div id="screen-parent" class="screen">
   <div class="parent-box">
     <h2 id="t-parent-gate-title">Espace parents</h2>
-    <p id="t-parent-gate-desc">Répondez à cette petite question pour continuer :</p>
+    <p id="t-parent-gate-desc">Repondez a cette petite question pour continuer :</p>
     <div id="parent-question"></div>
     <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px;">
       <input id="parent-input" type="number" min="0" max="999" inputmode="numeric" placeholder="?">
@@ -255,18 +277,18 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
     <div id="parent-feedback"></div>
   </div>
   <div id="parent-info-box" class="parent-info" style="display:none;">
-    <h3 id="t-parent-info-title">À propos de ce jeu</h3>
+    <h3 id="t-parent-info-title">A propos de ce jeu</h3>
     <p id="t-parent-info-text"></p>
   </div>
   <div style="text-align:center;margin-top:12px;">
-    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-parent-back">← Retour</button>
+    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-parent-back">&#x2190; Retour</button>
   </div>
 </div>
 
 <div id="screen-game" class="screen">
   <div class="game-header">
     <div class="level-badge" id="level-badge">Niveau 1</div>
-    <div class="score-display">⭐ <span id="score-val">0</span></div>
+    <div class="score-display">&#x2B50; <span id="score-val">0</span></div>
   </div>
   <div class="progress-row" id="progress-row"></div>
   <div class="objective-box" id="objective-box"></div>
@@ -278,18 +300,18 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
   <div class="gate-choice-row" id="gate-choice-row" style="display:none;"></div>
   <div id="feedback-area" aria-live="polite"></div>
   <div style="text-align:center;margin-top:8px;">
-    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-btn-home">🏠 Accueil</button>
+    <button class="btn-blue" onclick="showScreen('screen-title')" id="t-btn-home">&#x1F3E0; Accueil</button>
   </div>
 </div>
 
 <div id="screen-result" class="screen">
-  <div class="stars-row" id="result-stars">⭐⭐⭐</div>
+  <div class="stars-row" id="result-stars">&#x2B50;&#x2B50;&#x2B50;</div>
   <h2 class="result-title title-font" id="t-result-title">Bravo !</h2>
   <p class="result-sub" id="t-result-sub"></p>
   <div class="result-btns">
-    <button class="btn-action secondary" onclick="showScreen('screen-title')" id="t-result-home">🏠 Accueil</button>
-    <button class="btn-action secondary" onclick="replayLevel()" id="t-result-replay">🔄 Rejouer</button>
-    <button class="btn-action" onclick="nextLevel()" id="t-result-next">Niveau suivant →</button>
+    <button class="btn-action secondary" onclick="showScreen('screen-title')" id="t-result-home">&#x1F3E0; Accueil</button>
+    <button class="btn-action secondary" onclick="replayLevel()" id="t-result-replay">&#x1F504; Rejouer</button>
+    <button class="btn-action" onclick="nextLevel()" id="t-result-next">Niveau suivant &#x2192;</button>
   </div>
 </div>
 
@@ -297,16 +319,16 @@ h1,h2,h3,.title-font{font-family:'Fredoka','Baloo 2','Nunito',system-ui,sans-ser
 var T={
   fr:{
     gameTitle:'Circuit Logique',gameSubtitle:'Apprends la logique des ordinateurs !',
-    btnPlay:'Jouer ▶',btnParents:'👩‍👦 Pour les parents',
-    parentGateTitle:'Espace parents',parentGateDesc:'Répondez à cette petite question pour continuer :',
+    btnPlay:'Jouer ▶',btnParents:'\u{1F469}‍\u{1F466} Pour les parents',
+    parentGateTitle:'Espace parents',parentGateDesc:'Épondez à cette petite question pour continuer :',
     parentCheck:'Valider',parentBack:'← Retour',parentWrong:'Mauvaise réponse, réessayez.',
     parentInfoTitle:'À propos de ce jeu',
     parentInfoText:'Circuit Logique apprend aux enfants (10-12 ans) les bases de la logique booléenne : portes ET, OU et NON. Ces concepts sont au cœur de tous les ordinateurs. Le jeu est 100% hors-ligne, sans publicité, sans collecte de données. Progression sauvegardée localement. Aucun compte requis.',
     levelLabel:'Niveau',objectiveLabel:'Objectif :',
     switchLabel:'Interrupteur',on:'1 — ALLUMÉ',off:'0 — ÉTEINT',
-    btnHome:'🏠 Accueil',
+    btnHome:'\u{1F3E0} Accueil',
     resultTitle:'Bravo !',resultSub:'Tu as complété ce niveau !',
-    resultReplay:'🔄 Rejouer',resultNext:'Niveau suivant →',resultHome:'🏠 Accueil',
+    resultReplay:'\u{1F504} Rejouer',resultNext:'Niveau suivant →',resultHome:'\u{1F3E0} Accueil',
     feedbackCorrect:'✅ Parfait ! L\'ampoule s\'allume !',
     feedbackOff:'✅ Parfait ! L\'ampoule est éteinte !',
     feedbackWrong:'❌ Pas encore… Essaie un autre interrupteur !',
@@ -317,24 +339,30 @@ var T={
     gateANDTitle:'Porte ET (AND)',gateANDExplain:'La porte ET : la sortie est 1 seulement si LES DEUX entrées sont 1. Les deux doivent être allumés.',
     gateORTitle:'Porte OU (OR)',gateORExplain:'La porte OU : la sortie est 1 si AU MOINS UNE entrée est 1. Un seul suffit !',
     gateComboExplain:'Deux portes en série ! Applique les règles une par une.',
-    objTurnOn:'Allume l\'ampoule ! 💡',objTurnOff:'Éteins l\'ampoule ! 🔌',
-    objChooseGate:'Choisis la bonne porte logique pour allumer l\'ampoule ! 💡',
+    objTurnOn:'Allume l\'ampoule ! \u{1F4A1}',objTurnOff:'Éteins l\'ampoule ! \u{1F50C}',
+    objChooseGate:'Choisis la bonne porte logique pour allumer l\'ampoule ! \u{1F4A1}',
     chooseGate:'Quelle porte choisir ?',
     switchA:'Interrupteur A',switchB:'Interrupteur B',switchC:'Interrupteur C',
     bulbOn:'Ampoule allumée',bulbOff:'Ampoule éteinte',
+    chooseLevel:'Choisis un niveau :',
+    lvl1Name:'Niveau 1',lvl1Desc:'Porte NON',
+    lvl2Name:'Niveau 2',lvl2Desc:'Porte ET / OU',
+    lvl3Name:'Niveau 3',lvl3Desc:'Combinaisons',
+    stateOn:'allumé',stateOff:'éteint',
+    alreadyOk:'Le circuit est déjà correct ! Explore les interrupteurs.',
   },
   en:{
     gameTitle:'Logic Circuit',gameSubtitle:'Learn how computers think!',
-    btnPlay:'Play ▶',btnParents:'👩‍👦 For Parents',
+    btnPlay:'Play ▶',btnParents:'\u{1F469}‍\u{1F466} For Parents',
     parentGateTitle:'Parent Zone',parentGateDesc:'Answer this quick question to continue:',
     parentCheck:'Submit',parentBack:'← Back',parentWrong:'Wrong answer, please try again.',
     parentInfoTitle:'About this game',
     parentInfoText:'Logic Circuit teaches children (ages 10-12) the basics of Boolean logic: NOT, AND, and OR gates. These concepts power every computer and digital device. 100% offline, ad-free, no data collection. Progress saved locally. No account needed.',
     levelLabel:'Level',objectiveLabel:'Objective:',
     switchLabel:'Switch',on:'1 — ON',off:'0 — OFF',
-    btnHome:'🏠 Home',
+    btnHome:'\u{1F3E0} Home',
     resultTitle:'Well done!',resultSub:'You completed this level!',
-    resultReplay:'🔄 Replay',resultNext:'Next Level →',resultHome:'🏠 Home',
+    resultReplay:'\u{1F504} Replay',resultNext:'Next Level →',resultHome:'\u{1F3E0} Home',
     feedbackCorrect:'✅ Perfect! The bulb lights up!',
     feedbackOff:'✅ Perfect! The bulb is off!',
     feedbackWrong:'❌ Not yet… Try another switch!',
@@ -345,18 +373,28 @@ var T={
     gateANDTitle:'AND Gate',gateANDExplain:'The AND gate: output is 1 only if BOTH inputs are 1. Both must be ON.',
     gateORTitle:'OR Gate',gateORExplain:'The OR gate: output is 1 if AT LEAST ONE input is 1. Just one is enough!',
     gateComboExplain:'Two gates in a row! Apply the rules one at a time.',
-    objTurnOn:'Turn the bulb ON! 💡',objTurnOff:'Turn the bulb OFF! 🔌',
-    objChooseGate:'Choose the right logic gate to light the bulb! 💡',
+    objTurnOn:'Turn the bulb ON! \u{1F4A1}',objTurnOff:'Turn the bulb OFF! \u{1F50C}',
+    objChooseGate:'Choose the right logic gate to light the bulb! \u{1F4A1}',
     chooseGate:'Which gate?',
     switchA:'Switch A',switchB:'Switch B',switchC:'Switch C',
     bulbOn:'Bulb ON',bulbOff:'Bulb OFF',
+    chooseLevel:'Choose a level:',
+    lvl1Name:'Level 1',lvl1Desc:'NOT Gate',
+    lvl2Name:'Level 2',lvl2Desc:'AND / OR',
+    lvl3Name:'Level 3',lvl3Desc:'Combinations',
+    stateOn:'on',stateOff:'off',
+    alreadyOk:'Circuit already correct! Explore the switches.',
   }
 };
 
 var lang=(navigator.language||'fr').startsWith('fr')?'fr':'en';
 var muted=false;
 var score=0;
-var currentLevelIdx=0;
+// selectedWorld: which world the player clicked on the title screen (0/1/2)
+var selectedWorld=0;
+// currentWorld/currentPuzzle: where we currently are in the game
+var currentWorld=0;
+var currentPuzzle=0;
 var parentQ={a:0,b:0,ans:0};
 var switchStates=[];
 var currentLevel=null;
@@ -365,34 +403,119 @@ var wrongCount=0;
 var audioCtx=null;
 var LS_KEY='pgrg_circuit_logique';
 
-var LEVELS=[
-  {id:1,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:0},
-  {id:2,gateType:'NOT',mode:'switch',inputs:[0],targetOutput:1},
-  {id:3,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:1},
-  {id:4,gateType:'AND',mode:'switch',inputs:[0,0],targetOutput:1},
-  {id:5,gateType:'AND',mode:'switch',inputs:[1,0],targetOutput:1},
-  {id:6,gateType:'AND',mode:'switch',inputs:[1,1],targetOutput:0},
-  {id:7,gateType:'AND',mode:'switch',inputs:[0,1],targetOutput:1},
-  {id:8,gateType:'OR',mode:'switch',inputs:[0,0],targetOutput:1},
-  {id:9,gateType:'OR',mode:'switch',inputs:[1,0],targetOutput:0},
-  {id:10,gateType:'OR',mode:'switch',inputs:[0,1],targetOutput:1},
-  {id:11,gateType:'OR',mode:'switch',inputs:[1,1],targetOutput:1},
-  {id:12,gateType:'CHOOSE',mode:'gate',inputs:[1],targetOutput:0,choices:['NOT','AND','OR']},
-  {id:13,gateType:'CHOOSE',mode:'gate',inputs:[1,1],targetOutput:1,choices:['NOT','AND','OR']},
-  {id:14,gateType:'CHOOSE',mode:'gate',inputs:[1,0],targetOutput:1,choices:['AND','OR']},
-  {id:15,gateType:'CHOOSE',mode:'gate',inputs:[0,0],targetOutput:0,choices:['AND','OR']},
-  {id:16,gateType:'AND_NOT',mode:'switch',inputs:[1,1],targetOutput:1},
-  {id:17,gateType:'AND_NOT',mode:'switch',inputs:[0,1],targetOutput:0},
-  {id:18,gateType:'OR_NOT',mode:'switch',inputs:[0,0],targetOutput:0},
-  {id:19,gateType:'OR_NOT',mode:'switch',inputs:[1,0],targetOutput:1},
-  {id:20,gateType:'AND_OR',mode:'switch',inputs:[0,1,1],targetOutput:1},
+/*
+  3 DISTINCT WORLDS — each loads completely different circuits:
+
+  WORLD 0 - "Porte NON"
+    Single NOT gate. Player toggles ONE switch to reach target.
+    Puzzles alternate between "already satisfied" (explore) and "must act".
+    NOT(1)=0, NOT(0)=1.
+
+  WORLD 1 - "ET et OU"
+    AND and OR gates with TWO switches. Player must set correct combo.
+    AND: output=1 only if A=1 AND B=1.
+    OR: output=1 if A=1 OR B=1 (or both).
+
+  WORLD 2 - "Combinaisons"
+    Two gates chained: AND->NOT, OR->NOT, AND->OR.
+    Three switches for AND_OR. Player must reason through the chain.
+*/
+
+var WORLDS=[
+  /* WORLD 0: NOT gate only */
+  {
+    key:'NOT',
+    levels:[
+      // Puzzle 1: NOT(1)=0, target=0. Already satisfied. Player explores then re-confirms by toggling back.
+      // We make target=1 so player must flip A from 1 to 0: NOT(0)=1 ✓
+      {id:1,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:1},
+      // NOT(1)=0 ≠ 1 => player flips A to 0 => NOT(0)=1 ✓
+
+      // Puzzle 2: start A=0, target=0. NOT(0)=1≠0 => player flips A to 1 => NOT(1)=0 ✓
+      {id:2,gateType:'NOT',mode:'switch',inputs:[0],targetOutput:0},
+
+      // Puzzle 3: start A=1, target=0. NOT(1)=0 ✓ immediately. Player sees result.
+      {id:3,gateType:'NOT',mode:'switch',inputs:[1],targetOutput:0},
+
+      // Puzzle 4: start A=0, target=1. NOT(0)=1 ✓ immediately.
+      {id:4,gateType:'NOT',mode:'switch',inputs:[0],targetOutput:1},
+
+      // Puzzle 5: CHOOSE — inputs=[1], target=0. Must choose NOT (NOT(1)=0).
+      {id:5,gateType:'CHOOSE',mode:'gate',inputs:[1],targetOutput:0,choices:['NOT','AND','OR']},
+    ]
+  },
+
+  /* WORLD 1: AND and OR with 2 switches */
+  {
+    key:'AND_OR',
+    levels:[
+      // Puzzle 1: AND, A=0,B=0, target=1. AND(0,0)=0≠1. Must set both to 1.
+      {id:1,gateType:'AND',mode:'switch',inputs:[0,0],targetOutput:1},
+
+      // Puzzle 2: AND, A=1,B=1, target=0. AND(1,1)=1≠0. Must flip at least one.
+      {id:2,gateType:'AND',mode:'switch',inputs:[1,1],targetOutput:0},
+
+      // Puzzle 3: OR, A=0,B=0, target=1. OR(0,0)=0≠1. Must set at least one.
+      {id:3,gateType:'OR',mode:'switch',inputs:[0,0],targetOutput:1},
+
+      // Puzzle 4: OR, A=1,B=1, target=0. OR(1,1)=1≠0. Must set BOTH to 0.
+      {id:4,gateType:'OR',mode:'switch',inputs:[1,1],targetOutput:0},
+
+      // Puzzle 5: CHOOSE, inputs=[1,0], target=1. AND(1,0)=0✗; OR(1,0)=1✓ => answer: OR
+      {id:5,gateType:'CHOOSE',mode:'gate',inputs:[1,0],targetOutput:1,choices:['AND','OR']},
+
+      // Puzzle 6: CHOOSE, inputs=[1,1], target=1. AND(1,1)=1✓; OR(1,1)=1✓; pick AND as canonical.
+      // To make it unambiguous pick inputs=[0,1],target=1: AND(0,1)=0✗; OR(0,1)=1✓ => OR
+      {id:6,gateType:'CHOOSE',mode:'gate',inputs:[0,1],targetOutput:1,choices:['AND','OR']},
+    ]
+  },
+
+  /* WORLD 2: Chained gates */
+  {
+    key:'COMBO',
+    levels:[
+      // Puzzle 1: AND->NOT. A=0,B=0, target=0.
+      // AND(0,0)=0; NOT(0)=1 ≠ 0. => Must make AND output 1 => set A=B=1. AND(1,1)=1; NOT(1)=0 ✓
+      {id:1,gateType:'AND_NOT',mode:'switch',inputs:[0,0],targetOutput:0},
+
+      // Puzzle 2: OR->NOT. A=0,B=0, target=0.
+      // OR(0,0)=0; NOT(0)=1 ≠ 0. => Must set at least one to 1. OR(1,0)=1; NOT(1)=0 ✓
+      {id:2,gateType:'OR_NOT',mode:'switch',inputs:[0,0],targetOutput:0},
+
+      // Puzzle 3: AND->NOT. A=1,B=1, target=1.
+      // AND(1,1)=1; NOT(1)=0 ≠ 1. => Flip one to 0. AND(1,0)=0; NOT(0)=1 ✓
+      {id:3,gateType:'AND_NOT',mode:'switch',inputs:[1,1],targetOutput:1},
+
+      // Puzzle 4: OR->NOT. A=1,B=1, target=1.
+      // OR(1,1)=1; NOT(1)=0 ≠ 1. => Set both to 0. OR(0,0)=0; NOT(0)=1 ✓
+      {id:4,gateType:'OR_NOT',mode:'switch',inputs:[1,1],targetOutput:1},
+
+      // Puzzle 5: AND->OR (3 switches). A=0,B=0,C=0, target=1.
+      // AND(0,0)=0; OR(0,0)=0 ≠ 1.
+      // Solution paths: set C=1 => OR(AND(0,0),1)=OR(0,1)=1 ✓
+      //                 OR set A=B=1 => AND(1,1)=1; OR(1,0)=1 ✓
+      {id:5,gateType:'AND_OR',mode:'switch',inputs:[0,0,0],targetOutput:1},
+
+      // Puzzle 6: AND->OR. A=1,B=1,C=0, target=0.
+      // AND(1,1)=1; OR(1,0)=1 ≠ 0.
+      // Must make both AND=0 and C=0. Flip A or B => AND=0; keep C=0 => OR(0,0)=0 ✓
+      {id:6,gateType:'AND_OR',mode:'switch',inputs:[1,1,0],targetOutput:0},
+    ]
+  }
 ];
 
 function loadProgress(){
-  try{var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');if(d.score!==undefined)score=d.score;if(d.level!==undefined)currentLevelIdx=Math.min(d.level,LEVELS.length-1);}catch(e){}
+  try{
+    var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(d.score!==undefined)score=d.score;
+    if(d.world!==undefined)currentWorld=Math.min(d.world,WORLDS.length-1);
+    if(d.puzzle!==undefined)currentPuzzle=Math.min(d.puzzle,WORLDS[currentWorld].levels.length-1);
+    if(d.selectedWorld!==undefined)selectedWorld=Math.min(d.selectedWorld,WORLDS.length-1);
+    else selectedWorld=currentWorld;
+  }catch(e){}
 }
 function saveProgress(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify({score:score,level:currentLevelIdx}));}catch(e){}
+  try{localStorage.setItem(LS_KEY,JSON.stringify({score:score,world:currentWorld,puzzle:currentPuzzle,selectedWorld:selectedWorld}));}catch(e){}
 }
 
 function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
@@ -420,16 +543,44 @@ function renderUI(){
     't-btn-parents':'btnParents','t-parent-gate-title':'parentGateTitle','t-parent-gate-desc':'parentGateDesc',
     't-parent-check':'parentCheck','t-parent-back':'parentBack','t-parent-info-title':'parentInfoTitle',
     't-parent-info-text':'parentInfoText','t-btn-home':'btnHome','t-result-title':'resultTitle',
-    't-result-replay':'resultReplay','t-result-next':'resultNext','t-result-home':'resultHome'
+    't-result-replay':'resultReplay','t-result-next':'resultNext','t-result-home':'resultHome',
+    't-choose-level':'chooseLevel'
   };
   Object.keys(ids).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=tr(ids[id]);});
+  renderLevelSelector();
   if(document.getElementById('screen-game').classList.contains('active')&&currentLevel)renderLevel();
+}
+
+function renderLevelSelector(){
+  var grid=document.getElementById('level-select-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  var names=[tr('lvl1Name'),tr('lvl2Name'),tr('lvl3Name')];
+  var descs=[tr('lvl1Desc'),tr('lvl2Desc'),tr('lvl3Desc')];
+  WORLDS.forEach(function(w,i){
+    var btn=document.createElement('button');
+    var isActive=(selectedWorld===i);
+    var isDone=(i<currentWorld)||(i===currentWorld&&currentPuzzle>=WORLDS[i].levels.length);
+    btn.className='level-select-btn'+(isActive?' sel-active':'')+(isDone?' sel-done':'');
+    btn.innerHTML='<span class="lsb-name">'+names[i]+'</span><span class="lsb-desc">'+descs[i]+'</span>'+(isDone?'<span class="lsb-badge">✓ Done</span>':'');
+    btn.setAttribute('aria-label',names[i]+' — '+descs[i]);
+    btn.setAttribute('aria-pressed',isActive?'true':'false');
+    (function(wi){
+      btn.addEventListener('click',function(){
+        playClick();
+        selectedWorld=wi;
+        renderLevelSelector();
+      });
+    })(i);
+    grid.appendChild(btn);
+  });
 }
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+  if(id==='screen-title')renderLevelSelector();
 }
 
 function showParentGate(){
@@ -468,6 +619,8 @@ function evalCircuit(gateType,sw){
 }
 
 function wireColor(on){return on===1?'#34c77b':'#94a3b8';}
+function stateLabel(v){return v===1?tr('stateOn'):tr('stateOff');}
+
 function gateBox(x,y,gateType,active){
   var bg=active?'#d1fae5':'#f1f5f9';
   var border=active?'#34c77b':'#cbd5e1';
@@ -478,10 +631,6 @@ function gateBox(x,y,gateType,active){
     'OR':'<path d="M'+x+','+(y-22)+' Q'+(x+12)+','+(y-22)+' '+(x+44)+','+y+' Q'+(x+12)+','+(y+22)+' '+x+','+(y+22)+' Q'+(x+16)+','+y+' '+x+','+(y-22)+' Z" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+24)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">OR</text>'
   };
   return shapes[gateType]||'<rect x="'+x+'" y="'+(y-22)+'" width="44" height="44" rx="8" fill="'+bg+'" stroke="'+border+'" stroke-width="2.5"/><text x="'+(x+22)+'" y="'+(y+5)+'" font-size="11" text-anchor="middle" fill="'+tc+'" font-family="monospace" font-weight="bold">'+gateType+'</text>';
-}
-function gateEndX(gateType){
-  if(gateType==='NOT')return 46;
-  return 44;
 }
 
 function bulbSVG(x,y,lit){
@@ -518,7 +667,8 @@ function drawCircuit(gateType,sw,targetOutput){
     html+=gateBox(155,midY,'NOT',gOut===1);
     html+='<line x1="201" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
     html+='<text x="83" y="'+(midY-26)+'" text-anchor="middle" font-size="14" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
-    html+='<text x="83" y="'+(midY-10)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+(sw[0]===1?'allumé':'éteint')+'</text>';
+    html+='<text x="83" y="'+(midY-10)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+stateLabel(sw[0])+'</text>';
+    html+='<text x="275" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">= '+gOut+'</text>';
     html+=bulbSVG(375,midY,isLit);
   } else if(gateType==='AND'||gateType==='OR'){
     var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);
@@ -528,11 +678,12 @@ function drawCircuit(gateType,sw,targetOutput){
     html+='<line x1="70" y1="'+botY+'" x2="155" y2="'+botY+'" stroke="'+wc1+'" stroke-width="4" stroke-linecap="round"/>';
     html+='<line x1="155" y1="'+topY+'" x2="155" y2="'+botY+'" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4"/>';
     html+='<text x="58" y="'+(topY-16)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">A='+(sw[0]===1?'1':'0')+'</text>';
-    html+='<text x="58" y="'+(topY-2)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+(sw[0]===1?'allumé':'éteint')+'</text>';
+    html+='<text x="58" y="'+(topY-2)+'" text-anchor="middle" font-size="11" fill="'+(sw[0]===1?'#34c77b':'#94a3b8')+'">'+stateLabel(sw[0])+'</text>';
     html+='<text x="58" y="'+(botY+14)+'" text-anchor="middle" font-size="13" fill="#475569" font-weight="bold">B='+(sw[1]===1?'1':'0')+'</text>';
-    html+='<text x="58" y="'+(botY+28)+'" text-anchor="middle" font-size="11" fill="'+(sw[1]===1?'#34c77b':'#94a3b8')+'">'+(sw[1]===1?'allumé':'éteint')+'</text>';
+    html+='<text x="58" y="'+(botY+28)+'" text-anchor="middle" font-size="11" fill="'+(sw[1]===1?'#34c77b':'#94a3b8')+'">'+stateLabel(sw[1])+'</text>';
     html+=gateBox(155,midY,gateType,gOut===1);
     html+='<line x1="199" y1="'+midY+'" x2="340" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="275" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">= '+gOut+'</text>';
     html+=bulbSVG(375,midY,isLit);
   } else if(gateType==='CHOOSE'){
     var sw0=sw[0];var sw1=sw.length>1?sw[1]:null;
@@ -577,6 +728,7 @@ function drawCircuit(gateType,sw,targetOutput){
     html+='<text x="181" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">'+andOut+'</text>';
     html+=gateBox(198,midY,'NOT',notOut===1);
     html+='<line x1="244" y1="'+midY+'" x2="330" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="290" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">= '+notOut+'</text>';
     html+=bulbSVG(362,midY,isLit);
   } else if(gateType==='OR_NOT'){
     var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);
@@ -593,6 +745,7 @@ function drawCircuit(gateType,sw,targetOutput){
     html+='<text x="181" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">'+orOut+'</text>';
     html+=gateBox(198,midY,'NOT',notOut===1);
     html+='<line x1="244" y1="'+midY+'" x2="330" y2="'+midY+'" stroke="'+wcO+'" stroke-width="4" stroke-linecap="round"/>';
+    html+='<text x="290" y="'+(midY-14)+'" text-anchor="middle" font-size="11" fill="#475569">= '+notOut+'</text>';
     html+=bulbSVG(362,midY,isLit);
   } else if(gateType==='AND_OR'){
     var wc0=wireColor(sw[0]);var wc1=wireColor(sw[1]);var wc2=wireColor(sw[2]);
@@ -611,28 +764,46 @@ function drawCircuit(gateType,sw,targetOutput){
     html+='<text x="170" y="72" text-anchor="middle" font-size="10" fill="#475569">'+andOut+'</text>';
     html+=gateBox(200,midY,'OR',orOut===1);
     html+='<line x1="244" y1="'+midY+'" x2="315" y2="'+midY+'" stroke="'+wcO+'" stroke-width="3" stroke-linecap="round"/>';
+    html+='<text x="282" y="'+(midY-14)+'" text-anchor="middle" font-size="10" fill="#475569">= '+orOut+'</text>';
     html+=bulbSVG(348,midY,isLit);
   }
   svg.innerHTML=html;
 }
 
 function startGame(){
-  playClick();loadProgress();
+  playClick();
+  loadProgress();
+  // KEY FIX: always jump to the beginning of the selected world
+  currentWorld=selectedWorld;
+  currentPuzzle=0;
+  saveProgress();
   showScreen('screen-game');
-  loadLevel(currentLevelIdx);
+  loadPuzzle(currentWorld,currentPuzzle);
 }
 
-function loadLevel(idx){
-  if(idx>=LEVELS.length){showFinalResult();return;}
-  currentLevelIdx=idx;currentLevel=LEVELS[idx];
-  switchStates=currentLevel.inputs.slice();selectedGate=null;wrongCount=0;
+function loadPuzzle(worldIdx,puzzleIdx){
+  if(worldIdx>=WORLDS.length){showFinalResult();return;}
+  var world=WORLDS[worldIdx];
+  if(puzzleIdx>=world.levels.length){
+    worldIdx++;
+    if(worldIdx>=WORLDS.length){showFinalResult();return;}
+    puzzleIdx=0;
+  }
+  currentWorld=worldIdx;
+  currentPuzzle=puzzleIdx;
+  currentLevel=WORLDS[currentWorld].levels[currentPuzzle];
+  switchStates=currentLevel.inputs.slice();
+  selectedGate=null;
+  wrongCount=0;
   document.getElementById('score-val').textContent=score;
-  document.getElementById('level-badge').textContent=tr('levelLabel')+' '+currentLevel.id;
+  var wNames=lang==='fr'?['Niveau 1','Niveau 2','Niveau 3']:['Level 1','Level 2','Level 3'];
+  document.getElementById('level-badge').textContent=wNames[currentWorld]+' — '+currentLevel.id+'/'+WORLDS[currentWorld].levels.length;
+
   var pr=document.getElementById('progress-row');pr.innerHTML='';
-  LEVELS.forEach(function(lv,i){
+  WORLDS[currentWorld].levels.forEach(function(lv,i){
     var dot=document.createElement('div');
-    dot.className='prog-dot'+(i<idx?' done':'')+(i===idx?' current':'');
-    dot.title=tr('levelLabel')+' '+lv.id;
+    dot.className='prog-dot'+(i<currentPuzzle?' done':'')+(i===currentPuzzle?' current':'');
+    dot.title=(lang==='fr'?'Puzzle ':'Puzzle ')+lv.id;
     pr.appendChild(dot);
   });
   renderLevel();
@@ -674,8 +845,16 @@ function renderLevel(){
       (function(idx){btn.addEventListener('click',function(){toggleSwitch(idx);});})(i);
       switchRow.appendChild(btn);
     });
+    // Check if already satisfied (inform player to explore, do not auto-advance)
+    var initOut=evalCircuit(lv.gateType,switchStates);
+    if(initOut===lv.targetOutput){
+      document.getElementById('feedback-area').innerHTML='<span class="feedback-hint">💡 '+tr('alreadyOk')+'</span>';
+    } else {
+      document.getElementById('feedback-area').innerHTML='';
+    }
   } else {
     switchRow.style.display='none';
+    document.getElementById('feedback-area').innerHTML='';
   }
 
   var gateRow=document.getElementById('gate-choice-row');
@@ -696,7 +875,6 @@ function renderLevel(){
   } else {
     gateRow.style.display='none';
   }
-  document.getElementById('feedback-area').innerHTML='';
 }
 
 function toggleSwitch(idx){
@@ -727,8 +905,13 @@ function chooseGate(gate){
 
 function checkAnswer(auto){
   var lv=currentLevel;var output;
-  if(lv.mode==='gate'){if(!selectedGate)return;output=evalCircuit(selectedGate,switchStates);}
-  else{output=evalCircuit(lv.gateType,switchStates);}
+  if(lv.mode==='gate'){
+    if(!selectedGate)return;
+    // For CHOOSE mode, evaluate using the fixed inputs stored in level definition
+    output=evalCircuit(selectedGate,lv.inputs);
+  }else{
+    output=evalCircuit(lv.gateType,switchStates);
+  }
   var correct=(output===lv.targetOutput);
   var fb=document.getElementById('feedback-area');
   if(correct){
@@ -741,7 +924,7 @@ function checkAnswer(auto){
     score+=Math.max(1,3-wrongCount);
     document.getElementById('score-val').textContent=score;
     saveProgress();
-    setTimeout(function(){showLevelResult();},1500);
+    setTimeout(function(){showPuzzleResult();},1500);
   } else {
     if(!auto){
       wrongCount++;
@@ -751,17 +934,21 @@ function checkAnswer(auto){
       playError();
     } else if(wrongCount>=3){
       fb.innerHTML='<span class="feedback-hint">💡 '+tr('tryAgain')+'</span>';
+    } else {
+      // Clear the "already ok" hint when player makes a wrong toggle
+      fb.innerHTML='';
     }
   }
 }
 
-function showLevelResult(){
-  var stars=score>LEVELS.length*2?'⭐⭐⭐':score>LEVELS.length?'⭐⭐':'⭐';
+function showPuzzleResult(){
+  var total=WORLDS.reduce(function(s,w){return s+w.levels.length;},0);
+  var stars=score>total*2?'⭐⭐⭐':score>total?'⭐⭐':'⭐';
   document.getElementById('result-stars').textContent=stars;
   document.getElementById('t-result-title').textContent=tr('resultTitle');
-  document.getElementById('t-result-sub').textContent=tr('resultSub')+' — '+tr('levelLabel')+' '+currentLevel.id;
-  var nextBtn=document.getElementById('t-result-next');
-  nextBtn.style.display=currentLevelIdx<LEVELS.length-1?'inline-block':'none';
+  document.getElementById('t-result-sub').textContent=tr('resultSub')+' — Puzzle '+currentLevel.id;
+  var isLast=(currentPuzzle>=WORLDS[currentWorld].levels.length-1)&&(currentWorld>=WORLDS.length-1);
+  document.getElementById('t-result-next').style.display=isLast?'none':'inline-block';
   showScreen('screen-result');
 }
 function showFinalResult(){
@@ -773,13 +960,21 @@ function showFinalResult(){
 }
 function nextLevel(){
   playClick();
-  if(currentLevelIdx<LEVELS.length-1){currentLevelIdx++;saveProgress();showScreen('screen-game');loadLevel(currentLevelIdx);}
-  else{showFinalResult();}
+  var nextPuzzle=currentPuzzle+1;
+  var nextWorld=currentWorld;
+  if(nextPuzzle>=WORLDS[currentWorld].levels.length){nextWorld++;nextPuzzle=0;}
+  if(nextWorld>=WORLDS.length){showFinalResult();return;}
+  currentWorld=nextWorld;currentPuzzle=nextPuzzle;selectedWorld=currentWorld;
+  saveProgress();
+  showScreen('screen-game');
+  loadPuzzle(currentWorld,currentPuzzle);
 }
-function replayLevel(){playClick();showScreen('screen-game');loadLevel(currentLevelIdx);}
+function replayLevel(){playClick();showScreen('screen-game');loadPuzzle(currentWorld,currentPuzzle);}
 
 window.addEventListener('DOMContentLoaded',function(){
-  loadProgress();setLang(lang);
+  loadProgress();
+  selectedWorld=currentWorld;
+  setLang(lang);
   document.getElementById('parent-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkParent();});
 });
 </script>
