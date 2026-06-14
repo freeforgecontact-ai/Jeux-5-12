@@ -239,6 +239,8 @@
 </style>
 </head>
 <body>
+<a id="pgrg-reset" role="button" tabindex="0" aria-label="Recommencer a zero" onclick="if(confirm(document.documentElement.lang==='en'?'Restart this game from the beginning? (your progress on this game will be erased)':'Recommencer ce jeu depuis le debut ? (ta progression sur ce jeu sera effacee)')){['pgrg_memory_animaux'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload();}" style="position:fixed;right:10px;bottom:10px;z-index:2147483647;background:#0f4c81;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">↺ Recommencer</a>
+
 <a id="pgrg-home" href="../../index.html" onclick="try{if(window.history.length>1){window.history.back();return false;}}catch(e){} return true;" aria-label="Retour aux jeux" style="position:fixed;left:10px;bottom:10px;z-index:2147483647;background:#f97316;color:#fff;font-family:'Nunito',system-ui,sans-serif;font-weight:800;font-size:14px;text-decoration:none;padding:10px 14px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.3);min-height:44px;display:inline-flex;align-items:center;gap:6px">🏠 Les jeux</a>
 
 <div aria-live="polite" aria-atomic="true" id="aria-status"></div>
